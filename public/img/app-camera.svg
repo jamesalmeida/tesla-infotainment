@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Camera" transform="matrix(1,0,0,1,-35,-175)">
+        <g transform="matrix(0.863636,0,0,0.863636,8.18182,27.2727)">
+            <circle cx="60" cy="200" r="22" style="fill:none;stroke:rgb(134,139,136);stroke-width:4.63px;"/>
+        </g>
+        <circle cx="60" cy="200" r="15" style="fill:none;stroke:rgb(102,49,144);stroke-width:3.33px;"/>
+        <g transform="matrix(1.13333,0,0,1.13333,-8,-26.6667)">
+            <circle cx="60" cy="200" r="15" style="fill:none;stroke:black;stroke-width:0.71px;"/>
+        </g>
+        <circle cx="60" cy="200" r="11" style="fill:none;stroke:black;stroke-width:4.67px;"/>
+        <circle cx="60" cy="200" r="7" style="fill:rgb(59,59,56);stroke:rgb(59,59,56);stroke-width:4px;"/>
+        <g transform="matrix(0.571429,0,0,0.571429,25.7143,85.7143)">
+            <circle cx="60" cy="200" r="7" style="fill:rgb(59,59,56);stroke:rgb(82,82,82);stroke-width:7px;"/>
+        </g>
+        <g transform="matrix(1.25,0,0,1.25,-15.5,-49.25)">
+            <circle cx="64" cy="195" r="2" style="fill:rgb(251,254,249);"/>
+        </g>
+    </g>
+</svg>

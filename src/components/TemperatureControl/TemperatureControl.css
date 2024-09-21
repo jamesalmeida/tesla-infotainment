@@ -1,0 +1,23 @@
+.temperature-control {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.temperature-display {
+    /* padding: 0 12px; */
+    position: relative;
+    bottom: 3px;
+}
+
+.navIcons.arrows {
+    width: 15%;
+    opacity: 20%;
+}
+
+.navIcons.temperature-display {
+    font-size: 2em;
+}
+
+

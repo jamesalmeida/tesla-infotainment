@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Apple-Music" serif:id="Apple Music" transform="matrix(1,0,0,1,-382.872,-627.161)">
+        <g transform="matrix(1,0,0,1,-211.128,449.161)">
+            <path d="M628.621,182C631.639,182 634.533,183.199 636.667,185.333C638.801,187.467 640,190.361 640,193.379L640,212.621C640,215.639 638.801,218.533 636.667,220.667C634.533,222.801 631.639,224 628.621,224L609.379,224C606.361,224 603.467,222.801 601.333,220.667C599.199,218.533 598,215.639 598,212.621L598,193.379C598,190.361 599.199,187.467 601.333,185.333C603.467,183.199 606.361,182 609.379,182L628.621,182Z" style="fill:rgb(243,0,69);"/>
+        </g>
+        <g>
+            <circle cx="400" cy="662" r="3.5" style="fill:white;"/>
+            <g transform="matrix(1,0,0,1,14,-3)">
+                <circle cx="400" cy="662" r="3.5" style="fill:white;"/>
+            </g>
+            <g transform="matrix(1,0,0,0.976744,0,14.907)">
+                <rect x="402" y="641" width="1.5" height="21.5" style="fill:white;"/>
+            </g>
+            <g transform="matrix(1,0,0,0.930233,14,42.7209)">
+                <rect x="402" y="641" width="1.5" height="21.5" style="fill:white;"/>
+            </g>
+            <path d="M417.5,638L402,641L402,647L417.5,644L417.5,638Z" style="fill:white;"/>
+        </g>
+    </g>
+    <g id="Dashcam" transform="matrix(1,0,0,1,-220.872,-176.161)">
+        <g transform="matrix(1,0,0,1,-373.128,-1.83924)">
+            <path d="M634.532,182C635.982,182 637.373,182.576 638.398,183.602C639.424,184.627 640,186.018 640,187.468L640,218.532C640,219.982 639.424,221.373 638.398,222.398C637.373,223.424 635.982,224 634.532,224L603.468,224C602.018,224 600.627,223.424 599.602,222.398C598.576,221.373 598,219.982 598,218.532L598,187.468C598,186.018 598.576,184.627 599.602,183.602C600.627,182.576 602.018,182 603.468,182L634.532,182Z" style="fill:rgb(69,72,68);"/>
+        </g>
+        <g transform="matrix(1,0,0,1,45,1)">
+            <circle cx="214" cy="187" r="3.875" style="fill:rgb(255,7,34);stroke:rgb(212,44,62);stroke-width:1.33px;"/>
+        </g>
+        <g id="Camera" transform="matrix(0.541353,0,0,0.541353,213.391,92.8901)">
+            <g transform="matrix(0.863636,0,0,0.863636,8.18182,27.2727)">
+                <circle cx="60" cy="200" r="22" style="fill:none;stroke:rgb(134,139,136);stroke-width:8.56px;"/>
+            </g>
+            <g transform="matrix(1.00758,0,0,1.00758,-0.454545,-1.51515)">
+                <circle cx="60" cy="200" r="22" style="fill:none;stroke:black;stroke-width:2.44px;"/>
+            </g>
+            <circle cx="60" cy="200" r="15" style="fill:none;stroke:rgb(153,152,157);stroke-width:6.16px;"/>
+            <g transform="matrix(1.13333,0,0,1.13333,-8,-26.6667)">
+                <circle cx="60" cy="200" r="15" style="fill:none;stroke:black;stroke-width:1.3px;"/>
+            </g>
+            <circle cx="60" cy="200" r="11" style="fill:none;stroke:black;stroke-width:8.62px;"/>
+            <circle cx="60" cy="200" r="7" style="fill:rgb(59,59,56);stroke:rgb(59,59,56);stroke-width:7.39px;"/>
+            <g transform="matrix(0.571429,0,0,0.571429,25.7143,85.7143)">
+                <circle cx="60" cy="200" r="7" style="fill:rgb(59,59,56);stroke:rgb(82,82,82);stroke-width:8.62px;"/>
+            </g>
+            <g transform="matrix(1.25,0,0,1.25,-15.5,-49.25)">
+                <circle cx="64" cy="195" r="2" style="fill:rgb(166,175,160);"/>
+            </g>
+        </g>
+    </g>
+</svg>

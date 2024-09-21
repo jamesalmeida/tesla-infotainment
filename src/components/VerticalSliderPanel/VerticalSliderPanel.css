@@ -1,0 +1,62 @@
+.vertical-slider-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 94%;
+    background-color: rgb(226, 226, 226);
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+    /* z-index: 1000; */
+    z-index: 3;
+}
+
+.vertical-slider-panel.open {
+    transform: translateY(0);
+}
+
+.vertical-slider-panel.closing {
+    transform: translateY(100%);
+}
+
+.vertical-slider-panel.dragging {
+    transition: none;
+}
+
+.vertical-slider-panel.camera-background {
+    background-color: rgba(0, 0, 0, 0.95);
+}
+
+.vertical-slider-panel.camera-background .slider-handle {
+display: none;
+}
+
+/* .btmNavBar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px; 
+    background-color: rgba(0, 0, 0, 0.8); 
+    z-index: 1000; 
+} */
+
+.slider-content {
+    /* padding: 0px 20px; */
+    height: calc(100% - 40px);
+    /* overflow-y: auto; */
+    width: 100%;
+}
+
+.slider-handle {
+    width: 50px;
+    height: 3px;
+    background-color: #ccc;
+    border-radius: 2.5px;
+    margin: 5px auto;
+    cursor: grab;
+}
+
+.vertical-slider-panel:active .slider-handle {
+    cursor: grabbing;
+}

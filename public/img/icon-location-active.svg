@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Icons">
+        <g id="Location">
+            <path d="M21.116,31.254L25,20.384L29.326,31.236C26.453,28.961 23.719,29.013 21.116,31.254Z" style="fill:rgb(92,91,86);stroke:rgb(92,91,86);stroke-width:3.13px;"/>
+            <path d="M36.563,12.238L36.563,37.762C36.563,40.953 33.973,43.544 30.782,43.544L19.218,43.544C16.027,43.544 13.437,40.953 13.437,37.762L13.437,12.238C13.437,9.047 16.027,6.456 19.218,6.456L30.782,6.456C33.973,6.456 36.563,9.047 36.563,12.238Z" style="fill:none;stroke:rgb(92,91,86);stroke-width:3.13px;"/>
+            <path d="M27.363,11.91L22.448,11.91C22.448,11.91 22.8,6.591 17.663,6.691C17.344,6.697 30.97,6.456 30.97,6.456C30.97,6.456 26.924,6.602 27.363,11.91Z" style="fill:rgb(92,91,86);stroke:rgb(92,91,86);stroke-width:3.13px;"/>
+        </g>
+    </g>
+</svg>

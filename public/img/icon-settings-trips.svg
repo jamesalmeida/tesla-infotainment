@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Trips" transform="matrix(1,0,0,1,-0.634733,1.15287)">
+        <g id="Icons">
+            <g id="Trips1" serif:id="Trips">
+                <circle cx="8.227" cy="38.929" r="3.885" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+                <g transform="matrix(1,0,0,1,34.8159,-30.1647)">
+                    <circle cx="8.227" cy="38.929" r="3.885" style="fill:rgb(92,91,86);stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+                </g>
+                <path d="M8.227,35.045L8.227,14.354C8.227,14.354 7.298,6.524 16.131,6.524C24.964,6.524 25,14.337 25,14.337L25,35.045C25,35.045 25.878,41.248 33.954,41.248C42.031,41.248 43.004,35.045 43.004,35.045L43.004,12.605" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+            </g>
+        </g>
+    </g>
+</svg>

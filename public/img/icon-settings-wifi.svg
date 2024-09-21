@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Icons">
+        <g id="Wifi">
+            <path d="M5.947,18.626C5.947,18.626 23.283,1.31 44.373,18.274" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+            <path d="M12.785,25.539C12.785,25.539 23.23,13.541 38.108,25" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+            <path d="M18.212,32.207C18.212,32.207 24.814,26.492 31.592,32.024" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+            <g transform="matrix(3.14146,0,0,3.12988,-54.675,-82.741)">
+                <circle cx="25.447" cy="38.762" r="0.782" style="fill:rgb(92,91,86);"/>
+            </g>
+        </g>
+    </g>
+</svg>

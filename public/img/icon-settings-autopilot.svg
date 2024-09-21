@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Icons">
+    </g>
+    <g id="Autopilot">
+        <g transform="matrix(0.874371,0,0,0.874371,3.14073,3.14073)">
+            <circle cx="25" cy="25" r="22.614" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.77px;"/>
+        </g>
+        <path d="M27.379,44.002C27.379,44.002 24.368,20.558 44.662,25" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+        <g transform="matrix(-1,0,0,1,49.8895,0)">
+            <path d="M27.379,44.002C27.379,44.002 24.368,20.558 44.662,25" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+        </g>
+        <path d="M11.45,22.899L37.902,22.037C32.935,24.324 29.037,28.245 27.222,44.358L22.668,44.773C22.654,43.322 23.038,28.445 11.45,22.899Z" style="fill:rgb(92,91,86);"/>
+        <path d="M44.662,22.899C31.643,20.594 19.216,20.524 5.947,22.815" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+    </g>
+</svg>

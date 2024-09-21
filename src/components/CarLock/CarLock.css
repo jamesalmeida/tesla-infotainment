@@ -1,0 +1,26 @@
+.carLock {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .carLock svg {
+    transition: all 0.3s ease;
+  }
+  
+  .carLock .lock-shackle {
+    transform-origin: 12px 11px;
+    transition: all 0.3s ease;
+  }
+  
+  .carLock .unlocked .lock-shackle {
+    transform: rotate(-45deg) translateY(-3px);
+  }
+  
+  .carLock .locked {
+    color: #4CAF50;
+  }
+  
+  .carLock .unlocked {
+    color: #F44336;
+  }

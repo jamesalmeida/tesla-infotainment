@@ -1,0 +1,47 @@
+.volume-modal-container {
+    position: absolute;
+    bottom: 100%;
+    left: 87%;
+    transform: translateX(-50%);
+    margin-bottom: 10px;
+}
+
+.volume-modal {
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+    padding: 20px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.volume-modal.fade-out {
+    opacity: 0;
+}
+
+.audio-settings-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.audio-settings-btn img {
+    width: 20px;
+    height: 20px;
+    filter: invert(1);
+}
+
+.volume-slider {
+    width: 150px;
+}
+
+.volume-value {
+    color: white;
+    font-size: 14px;
+    min-width: 30px;
+    text-align: right;
+}

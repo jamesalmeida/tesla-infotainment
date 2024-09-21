@@ -1,0 +1,81 @@
+.user-profile-container {
+    position: relative;
+  }
+  
+  .userProfile {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  /* .profile-dropdown-header {
+    position: relative;
+    top: -20px;
+    padding: 10px;
+    background-color: #f0f0f0;
+  } */
+
+  .userProfile img {
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .profile-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 209px;
+  }
+  
+  .profile-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+  }
+
+  .profile-option span {
+    /* margin-left: 10px; */
+  }
+  
+  .profile-option:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .profile-option img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .active-profile-icon {
+    margin-left: auto;
+  }
+
+  .profile-option-icon {
+    margin-left: 10px;
+    width: 14%;
+  }
+
+  .driver-profile-settings{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    cursor: pointer;
+    border-top: 1px solid rgb(182, 182, 182);
+  }
+
+  .driver-profile-settings img {
+    width: 9%;
+  }

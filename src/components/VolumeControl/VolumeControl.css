@@ -1,0 +1,19 @@
+.volume-control {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.navIcons.arrows {
+    width: 12%;
+}
+
+.navIcons.volume-display {
+    width: 12%;
+    max-height: 38px;
+}
+
+.volume-display {
+    width: 12%;
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Speed-Limit" serif:id="Speed Limit">
+        <g transform="matrix(0.958713,0,0,1,1.03218,0)">
+            <rect x="8.335" y="2.174" width="33.329" height="45.653" style="fill:white;stroke:white;stroke-width:4.17px;"/>
+        </g>
+        <g transform="matrix(0.584979,0,0,0.584979,3.32203,-5.82093)">
+            <text x="15.884px" y="30.809px" style="font-family:'AmazonEmberDisplay-Regular', 'Amazon Ember Display', sans-serif;font-size:14.23px;">SPEED</text>
+            <g transform="matrix(14.2298,0,0,14.2298,54.8449,45.0392)">
+            </g>
+            <text x="19.356px" y="45.039px" style="font-family:'AmazonEmberDisplay-Regular', 'Amazon Ember Display', sans-serif;font-size:14.23px;">LIMIT</text>
+        </g>
+    </g>
+</svg>

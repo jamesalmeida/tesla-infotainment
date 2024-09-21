@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Icons">
+        <g id="Hamburger-Arrow" serif:id="Hamburger Arrow">
+            <path d="M9.193,40.507L41.524,40.507" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+            <g transform="matrix(1,0,0,1,0,-14)">
+                <path d="M9.193,40.507L41.524,40.507" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+            </g>
+            <g transform="matrix(1,0,0,1,0,-28)">
+                <path d="M25.359,40.507L41.524,40.507" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+            </g>
+            <path d="M9.193,8.217L9.193,17.368L16.997,12.507L9.193,8.217Z" style="fill:rgb(92,91,86);stroke:rgb(92,91,86);stroke-width:4.17px;"/>
+        </g>
+    </g>
+</svg>

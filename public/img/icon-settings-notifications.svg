@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="Notifications" transform="matrix(1.32841,0,0,1.32841,-7.92673,-4.81804)">
+        <g id="Settings-Icons" serif:id="Settings Icons">
+            <g id="Notifications1" serif:id="Notifications">
+                <path d="M11.932,35.367C19.273,24.948 11.048,6.421 25,6.387C38.496,6.354 29.963,27.079 37.642,35.367L11.932,35.367Z" style="fill:rgb(92,91,86);"/>
+                <g transform="matrix(1,0,0,1,0,-1)">
+                    <path d="M29.076,37.367C28.438,38.615 26.757,39.506 24.787,39.506C22.816,39.506 21.136,38.615 20.497,37.367L29.076,37.367Z" style="fill:rgb(92,91,86);"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

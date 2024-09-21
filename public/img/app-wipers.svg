@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Wipers" transform="matrix(1,0,0,1,58.2251,437.706)">
+        <g id="Apps">
+            <g id="Wipers1" serif:id="Wipers">
+                <g transform="matrix(1,0,0,1,-58,-437)">
+                    <path d="M18.334,30.531C17.571,30.945 16.794,31.434 16,32L10,20C18.832,12.468 28.571,10.636 40,20L33,32C30.092,29.563 26.934,28.342 23.43,28.791" style="fill:none;stroke:rgb(236,235,242);stroke-width:3.54px;"/>
+                </g>
+                <g transform="matrix(1,0,0,1,-58,-437)">
+                    <path d="M20,21L26,36" style="fill:none;stroke:rgb(236,235,242);stroke-width:3.54px;"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
