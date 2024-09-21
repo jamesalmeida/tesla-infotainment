@@ -5,20 +5,21 @@ const tracks = [
   {
     title: "#440 - Pieter Levels: Programming, Viral Al Startups, and Digital Nomad Life",
     album: "Lex Fridman Podcast",
-    art: "/audio/podcasts/lex_fridman_podcast.png",
-    audio: "/audio/podcasts/lex_fridman_440_ai_pieter_levels.mp3"
+    art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts115/v4/3e/e3/9c/3ee39c89-de08-47a6-7f3d-3849cef6d255/mza_16657851278549137484.png/600x600bb.webp",
+    // audio: "/audio/podcasts/lex_fridman_440_ai_pieter_levels.mp3"
+    audio: "https://content.blubrry.com/takeituneasy/lex_ai_pieter_levels.mp3"
   },
   {
     title: "#438 – Elon Musk: Neuralink and the Future of Humanity",
     album: "Lex Fridman Podcast",
-    art: "/audio/podcasts/lex_fridman_podcast.png",
-    audio: "/audio/podcasts/lex_fridman_438_ai_elon_musk_and_neuralink_team.mp3"
+    art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts115/v4/3e/e3/9c/3ee39c89-de08-47a6-7f3d-3849cef6d255/mza_16657851278549137484.png/600x600bb.webp",
+    audio: "https://content.blubrry.com/takeituneasy/lex_ai_elon_musk_and_neuralink_team.mp3"
   },
   {
     title: "SEP 5 - S01E77 - The Road to Autonomous Intelligence with Andrej Karpathy",
     album: "No Priors Podcast",
-    art: "/audio/podcasts/no_priors_podcast.png",
-    audio: "/audio/podcasts/no_priors_S01E77.mp3"
+    art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts122/v4/a6/4d/9c/a64d9c5a-2ca4-6a1b-3ceb-424efe00d022/mza_1247466525586262525.jpg/600x600bb.webp",
+    audio: "https://dcs-spotify.megaphone.fm/PDP5840775995.mp3?key=ddb7f40d09aa7f54678599bee8fe8735&request_event_id=db0b2f9d-9700-4f1d-9a84-163472e7824c&timetoken=1726938704_F98B8D0954A9F5A6E4C44CD6BC70A492"
   },
   // Add more tracks here
 ];
