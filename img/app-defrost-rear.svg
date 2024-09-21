@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Apps" transform="matrix(1,0,0,1,133.225,2.52889)">
+        <g id="Defrost-Rear" serif:id="Defrost Rear">
+            <g transform="matrix(1,0,0,1,-6.57,14.1877)">
+                <g transform="matrix(1,0,0,1,-132,-2)">
+                    <path d="M25,8.454C23.661,9.79 23.527,13.329 25.434,15.674C27.493,18.206 26.465,22.481 25,23.103" style="fill:none;stroke:rgb(236,235,242);stroke-width:3.13px;"/>
+                </g>
+                <g transform="matrix(1,0,0,1,-126,-2)">
+                    <path d="M25,8.454C23.661,9.79 23.527,13.329 25.434,15.674C27.493,18.206 26.465,22.481 25,23.103" style="fill:none;stroke:rgb(236,235,242);stroke-width:3.13px;"/>
+                </g>
+                <g transform="matrix(1,0,0,1,-120,-2)">
+                    <path d="M25,8.454C23.661,9.79 23.527,13.329 25.434,15.674C27.493,18.206 26.465,22.481 25,23.103" style="fill:none;stroke:rgb(236,235,242);stroke-width:3.13px;"/>
+                </g>
+            </g>
+            <g transform="matrix(0.89071,0,0,0.810164,-130.389,1.6176)">
+                <path d="M13.696,32.523C11.015,32.523 8.839,30.13 8.839,27.183L8.839,16.502C8.839,13.555 11.015,11.162 13.696,11.162L38.204,11.162C40.885,11.162 43.061,13.555 43.061,16.502L43.061,27.183C43.061,30.13 40.885,32.523 38.204,32.523" style="fill:none;stroke:rgb(236,235,242);stroke-width:3.13px;"/>
+            </g>
+        </g>
+    </g>
+</svg>

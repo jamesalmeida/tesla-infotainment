@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Icons">
+    </g>
+    <g id="Upgrades">
+        <g transform="matrix(1,0,0,1,-1.63233,1.17647)">
+            <path d="M42.808,23.368L42.808,35.505C42.808,38.854 40.088,41.574 36.739,41.574L16.526,41.574C13.176,41.574 10.457,38.854 10.457,35.505L10.457,23.368C10.457,20.018 13.176,17.299 16.526,17.299L36.739,17.299C40.088,17.299 42.808,20.018 42.808,23.368Z" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.58px;"/>
+        </g>
+        <path d="M18.891,12.367C18.891,8.996 21.629,6.259 25,6.259C28.371,6.259 31.109,8.996 31.109,12.367" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.58px;"/>
+        <path d="M31.109,12.367L31.109,21.956" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.58px;"/>
+        <path d="M18.891,12.367L18.891,21.956" style="fill:none;stroke:rgb(92,91,86);stroke-width:4.58px;"/>
+    </g>
+</svg>

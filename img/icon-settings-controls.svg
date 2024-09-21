@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g id="Icons">
+        <g id="toggle">
+            <path d="M14.431,25L35.935,25" style="fill:none;stroke:rgb(92,91,86);stroke-width:25px;"/>
+            <g transform="matrix(5.36386,0,0,4.89733,-272.844,-59.8373)">
+                <ellipse cx="57.566" cy="17.323" rx="1.841" ry="2.017" style="fill:white;"/>
+            </g>
+        </g>
+    </g>
+</svg>

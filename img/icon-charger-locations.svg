@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1.13636,0,0,1.13636,-3.40909,-3.40909)">
+        <g id="Charger-Locations" serif:id="Charger Locations">
+            <path d="M25,3C37.142,3 47,12.858 47,25C47,37.142 37.142,47 25,47C12.858,47 3,37.142 3,25C3,12.858 12.858,3 25,3ZM27.511,11.259C27.285,11.293 27.081,11.412 26.941,11.592L15.217,26.724C15.09,26.882 15.022,27.078 15.022,27.28C15.022,27.768 15.424,28.17 15.912,28.17L23.478,28.17L21.712,38.698C21.701,38.752 21.696,38.807 21.696,38.863C21.696,39.351 22.098,39.753 22.586,39.753C22.874,39.753 23.144,39.614 23.311,39.38L34.437,24.248C34.55,24.095 34.611,23.91 34.611,23.72C34.611,23.232 34.209,22.83 33.721,22.83L33.714,22.83L26.746,22.83L28.526,12.288C28.535,12.238 28.539,12.188 28.539,12.138C28.539,11.65 28.137,11.248 27.649,11.248C27.603,11.248 27.557,11.252 27.511,11.259Z" style="fill:rgb(78,78,78);"/>
+        </g>
+    </g>
+</svg>
