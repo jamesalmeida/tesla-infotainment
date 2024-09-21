@@ -1,9 +1,10 @@
 import React from 'react';
+import { getImagePath } from '../../utils/imagePath';
 
 const NavIcon = ({ icon, onClick }) => (
   <img 
     className={`navIcons ${icon}`} 
-    src={`/img/icon-${icon}.svg`} 
+    src={getImagePath(`icon-${icon}.svg`)} 
     alt={`${icon} icon`}
     onClick={onClick}
   />

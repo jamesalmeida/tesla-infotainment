@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { getImagePath } from '../../utils/imagePath';
 import './MusicPanel.css';
 
 const tracks = [
@@ -111,7 +112,7 @@ export function MusicPanel({ volume }) {
             </div>
             <div className="musicText">
                 <div className="title">{tracks[currentTrackIndex].title}</div>
-                <img className="sourceIcon" src="/img/icon-music-bluetooth.svg" alt="Bluetooth" />
+                <img className="sourceIcon" src={getImagePath("icon-music-bluetooth.svg")} alt="Bluetooth" />
                 <div className="albumTitle">{tracks[currentTrackIndex].album}</div>
             </div>
             <div className="musicProgressBar">
@@ -134,23 +135,23 @@ export function MusicPanel({ volume }) {
             </div>
             <div className="musicBtnBar">
                 <button className="musicBtn" onClick={handlePrevious}>
-                    <img className="musicIcon" src="/img/icon-music-previous.svg" alt="Previous Track" />
+                    <img className="musicIcon" src={getImagePath("icon-music-previous.svg")} alt="Previous Track" />
                 </button>
                 <button className="musicBtn" onClick={togglePlayPause}>
                     <img 
                         className="musicIcon" 
-                        src={isPlaying ? "/img/icon-music-pause.svg" : "/img/icon-music-play.svg"} 
+                        src={isPlaying ? getImagePath("icon-music-pause.svg") : getImagePath("icon-music-play.svg")} 
                         alt="Play & Pause" 
                     />
                 </button>
                 <button className="musicBtn" onClick={handleNext}>
-                    <img className="musicIcon" src="/img/icon-music-next.svg" alt="Next Track" />
+                    <img className="musicIcon" src={getImagePath("icon-music-next.svg")} alt="Next Track" />
                 </button>
                 <button className="musicBtn">
-                    <img className="musicIcon" src="/img/icon-settings.svg" alt="Settings" />
+                    <img className="musicIcon" src={getImagePath("icon-settings.svg")} alt="Settings" />
                 </button>
                 <button className="musicBtn">
-                    <img className="musicIcon" src="/img/icon-search.svg" alt="Search" />
+                    <img className="musicIcon" src={getImagePath("icon-search.svg")} alt="Search" />
                 </button>
             </div>
         </div>

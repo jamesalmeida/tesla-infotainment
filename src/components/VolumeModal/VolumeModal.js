@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { getImagePath } from '../../utils/imagePath';
 import './VolumeModal.css';
 
 const VolumeModal = ({ volume, onVolumeChange, onClose, onOpenAudioSettings }) => {
@@ -43,7 +44,7 @@ const VolumeModal = ({ volume, onVolumeChange, onClose, onOpenAudioSettings }) =
       onMouseMove={handleMouseMove}
     >
       <button className="audio-settings-btn" onClick={onOpenAudioSettings}>
-        <img src="/img/icon-settings.svg" alt="Audio Settings" />
+        <img src={getImagePath("icon-settings.svg")} alt="Audio Settings" />
       </button>
       <input
         type="range"

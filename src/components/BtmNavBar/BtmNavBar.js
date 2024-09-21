@@ -1,6 +1,7 @@
 import React from 'react';
 import TemperatureControl from '../TemperatureControl/TemperatureControl';
 import VolumeControl from '../VolumeControl/VolumeControl';
+import { getImagePath } from '../../utils/imagePath';
 import './BtmNavBar.css';
 
 const BtmNavBar = ({ 
@@ -45,7 +46,7 @@ const BtmNavBar = ({
                 <div className={`navIconWrapper car-settings`}>
                     <img 
                         className={"navIcons"} 
-                        src={`/img/icon-car-settings.svg`} 
+                        src={getImagePath(`icon-car-settings.svg`)}
                         alt={`car settings icon`}
                         onClick={() => handleNavIconClick("car-settings")}
                         onMouseDown={handleIconMouseDown}
@@ -72,7 +73,7 @@ const BtmNavBar = ({
                                 >
                                     <img 
                                         className="icon" 
-                                        src={isShelfOpen ? "/img/icon-close-shelf.svg" : "/img/icon-open-shelf.svg"} 
+                                        src={getImagePath(isShelfOpen ? "icon-close-shelf.svg" : "icon-open-shelf.svg")}
                                         alt={isShelfOpen ? "Close Menu" : "Open Menu"} 
                                     />
                                 </div>
@@ -85,7 +86,7 @@ const BtmNavBar = ({
                             >
                                 <img 
                                     className={`navIcons ${icon}`} 
-                                    src={`/img/app-${icon}.svg`} 
+                                    src={getImagePath(`app-${icon}.svg`)} 
                                     alt={`${icon} icon`}
                                     onClick={() => !isCameraForced && handleNavIconClick(icon)}
                                     onMouseDown={!isCameraForced ? handleIconMouseDown : undefined}

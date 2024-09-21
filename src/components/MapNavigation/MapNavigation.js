@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api';
+import { getImagePath } from '../../utils/imagePath';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
@@ -240,7 +241,7 @@ export function MapNavigation() {
         </div>
         <UserProfile />
         <div className="wifiStatus">
-          <img src="/img/icon-wifi.svg" alt="Wifi Status" />
+          <img src={getImagePath("icon-wifi.svg")} alt="Wifi Status" />
         </div>
         <div className="clock">
           <Clock />
@@ -249,7 +250,7 @@ export function MapNavigation() {
         <OutsideTemp />
         </div>
         <div className="airbagStatus no-select">
-          <img src="/img/icon-airbags.svg" alt="Airbag Status" />
+          <img src={getImagePath("icon-airbags.svg")} alt="Airbag Status" />
           <div className="airbagStatusText">PASSENGER AIRBAG <span className="airbagStatusOff">OFF</span></div>
         </div>
       </div>
@@ -262,7 +263,7 @@ export function MapNavigation() {
             className="custom-autocomplete-container" // Add this line
           >
             <form className="floatingBtn navBtn" onSubmit={(e) => { e.preventDefault(); }}>
-              <img className="searchIcon" src="/img/icon-search.svg" alt="Search Map" />
+              <img className="searchIcon" src={getImagePath("icon-search.svg")} alt="Search Map" />
               <input 
                 ref={inputRef}
                 placeholder="Navigate" 
@@ -272,7 +273,7 @@ export function MapNavigation() {
               />
               {inputValue && (
                 <button className="clearInput" onClick={clearInput}>
-                  <img src="/img/icon-x.svg" alt="Clear input" />
+                  <img src={getImagePath("icon-x.svg")} alt="Clear input" />
                 </button>
               )}
             </form>
@@ -290,24 +291,24 @@ export function MapNavigation() {
         )}
         <div className="floatingRightBtnsWrapper">
           <button className="floatingBtn squareBtn compassDirection" onClick={handleCompass}>
-            <img className="icon-compass" src="/img/icon-compass.svg" alt="Compass" />
+            <img className="icon-compass" src={getImagePath("icon-compass.svg")} alt="Compass" />
           </button>
           <div className="floatingRightBtnColumn">
             <button className="floatingBtn squareBtn btnGroup" onClick={toggleMapType}>
-              <img className="icon" src="/img/icon-globe.svg" alt="Map Style" />
+              <img className="icon" src={getImagePath("icon-globe.svg")} alt="Map Style" />
             </button>
             <button className="floatingBtn squareBtn btnGroup" onClick={toggleTraffic}>
-              <img className="icon" src="/img/icon-traffic.svg" alt="Toggle Traffic" />
+              <img className="icon" src={getImagePath("icon-traffic.svg")} alt="Toggle Traffic" />
             </button>
             <button className="floatingBtn squareBtn btnGroup" onClick={handleLocation}>
               {isLocating ? (
                 <LoadingSpinner />
               ) : (
-                <img className="icon" src="/img/icon-map-marker.svg" alt="Location" />
+                <img className="icon" src={getImagePath("icon-map-marker.svg")} alt="Location" />
               )}
             </button>
             <button className="floatingBtn squareBtn btnGroup" onClick={handleChargerLocations}>
-              <img className="icon" src="/img/icon-charger-locations.svg" alt="Charging Locations" />
+              <img className="icon" src={getImagePath("icon-charger-locations.svg")} alt="Charging Locations" />
             </button>
           </div>
         </div>

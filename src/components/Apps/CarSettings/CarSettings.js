@@ -13,6 +13,7 @@ import { Safety } from './components/Safety';
 import { Service } from './components/Service';
 import { Software } from './components/Software';
 import { Wifi } from './components/Wifi';
+import { getImagePath } from '../../../utils/imagePath';
 import './CarSettings.css';
 
 const topBarItems = [
@@ -49,13 +50,13 @@ export const CarSettings = () => {
     <div className="car-settings-wrapper">
       <div className="top-bar">
         <div className="top-bar-item search-bar">
-          <img src="/img/icon-search.svg" alt="Search" />
+          <img src={getImagePath("icon-search.svg")} alt="Search" />
           <input type="text" placeholder="Search settings" />
         </div>
         <UserProfile />
         {topBarItems.map((item, index) => (
           <div key={index} className="top-bar-item">
-            <img src={`/img/icon-settings-${item.icon}.svg`} alt={item.alt} />
+            <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
             {item.text && item.text}
           </div>
         ))}
@@ -68,7 +69,7 @@ export const CarSettings = () => {
               className={`left-scroll-panel-item ${activePanel === item.label ? 'active' : ''}`}
               onClick={() => setActivePanel(item.label)}
             >
-              <img src={`/img/icon-settings-${item.icon}.svg`} alt={item.alt} />
+              <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
               {item.label}
             </div>
           ))}

@@ -31,7 +31,7 @@ export const Dynamics = () => {
                 <div className='btn'>Roll</div>
                 <div className='btn'>Hold</div>
             </div>
-            <div className='label'>Maximizos range by extending regenerative braking to lower
+            <div className='description'>Maximizos range by extending regenerative braking to lower
             speeds and automatically blonde in brakes to hold the vehiole at a stop</div>
 
             <div className='gap-row'></div>

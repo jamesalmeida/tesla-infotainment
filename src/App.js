@@ -13,6 +13,7 @@ import { UserProfileProvider } from './contexts/UserProfileContext';
 import { CarLockProvider } from './contexts/CarLockContext';
 import './App.css';
 import BatteryStatus from './components/BatteryStatus/BatteryStatus';
+import { getImagePath } from './utils/imagePath';
 
 const formatAppName = (appName) => {
   return appName
@@ -157,7 +158,7 @@ function App() {
               {appsTopShelf.map((icon, index) => (
                 <div key={index} className="appShelfIcon">
                   <img  
-                    src={`/img/app-${icon}.svg`} 
+                    src={getImagePath(`app-${icon}.svg`)}
                     alt={`${icon} icon`} 
                   />
                   <div className="appShelfIconText">{formatAppName(icon)}</div>
@@ -168,7 +169,7 @@ function App() {
               {apps.map((icon, index) => (
                 <div key={index} className="appShelfIcon">
                   <img 
-                    src={`/img/app-${icon}.svg`} 
+                    src={getImagePath(`app-${icon}.svg`)} 
                     alt={`${icon} icon`} 
                   />
                   <div className="appShelfIconText">{formatAppName(icon)}</div>
