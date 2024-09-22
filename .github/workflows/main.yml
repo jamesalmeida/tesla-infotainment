@@ -14,7 +14,7 @@ jobs:
     - name: Setup Node
       uses: actions/setup-node@v2
       with:
-        node-version: '20'  # You can specify your preferred Node.js version here
+        node-version: '14'  # You can specify your preferred Node.js version here
 
     - name: Create env file
       run: |
