@@ -1,4 +1,6 @@
-# Getting Started with Create React App
+# Getting Started Tesla Infotainment
+
+Check it out here: [https://jamesalmeida.github.io/Tesla-Infotainment/](https://jamesalmeida.github.io/Tesla-Infotainment/)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -28,6 +30,10 @@ The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run deploy`
+
+To make this project work as a Github Page, I added this command to deploy to a Github Page. 
 
 ### `npm run eject`
 
