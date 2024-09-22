@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
+import { getImagePath } from '../utils/imagePath';
 
 const UserProfileContext = createContext();
 
@@ -6,7 +7,7 @@ export const UserProfileProvider = ({ children }) => {
   const [activeProfile, setActiveProfile] = useState({
     id: 1,
     name: 'James',
-    image: '/img/profile01.svg'
+    image: getImagePath("profile01.svg")
   });
 
   return (

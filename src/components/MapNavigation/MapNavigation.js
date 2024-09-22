@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api';
 import { getImagePath } from '../../utils/imagePath';
+import { GoogleMap, useJsApiLoader, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
@@ -55,7 +55,7 @@ export function MapNavigation() {
   useEffect(() => {
     if (isLoaded && window.google) {
       setMarkerIcon({
-        url: "/img/icon-car-marker.svg",
+        url: getImagePath("icon-car-marker.svg"),
         scaledSize: new window.google.maps.Size(40, 40)
       });
       setDirectionsService(new window.google.maps.DirectionsService());
@@ -345,7 +345,7 @@ export function MapNavigation() {
               <Marker
                 position={searchResult}
                 icon={{
-                  url: "/img/icon-search-result.svg",
+                  url: getImagePath("icon-search-result.svg"),
                   scaledSize: new window.google.maps.Size(40, 40)
                 }}
               />
@@ -367,7 +367,7 @@ export function MapNavigation() {
                 key={index}
                 position={charger.geometry.location}
                 icon={{
-                  url: "/img/icon-charger.svg",
+                  url: getImagePath("icon-charger.svg"),
                   scaledSize: new window.google.maps.Size(30, 30)
                 }}
               />
