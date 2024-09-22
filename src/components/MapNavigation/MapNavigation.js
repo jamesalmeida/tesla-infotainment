@@ -345,7 +345,7 @@ export function MapNavigation() {
               <Marker
                 position={searchResult}
                 icon={{
-                  url: getImagePath("icon-search-result.svg"),
+                  url: getImagePath("icon-map-marker.svg"), // Image for Map Navigation search result
                   scaledSize: new window.google.maps.Size(40, 40)
                 }}
               />
