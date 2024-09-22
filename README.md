@@ -35,3 +35,8 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 To make this project work as a Github Page, I added this command to deploy to a Github Page. 
 
+
+### Thanks
+
+Want to thank [Ameer Studio](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f) for the 3D model of the Tesla Model 3.
+
