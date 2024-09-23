@@ -38,5 +38,6 @@ To make this project work as a Github Page, I added this command to deploy to a 
 
 ### Thanks
 
-Want to thank [Ameer Studio](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f) for the 3D model of the Tesla Model 3.
+- Want to thank Ameer Studio for the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f).
+- Also thanks to Vasilj Miloevi for the [loading screen circle animations](https://codepen.io/eboye/pen/ANPxVX)
 
