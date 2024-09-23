@@ -1,19 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import VerticalSliderPanel from './components/VerticalSliderPanel/VerticalSliderPanel';
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import { VehicleModel } from './components/VehicleModel/VehicleModel';
-import { MusicPanel } from './components/MusicPanel/MusicPanel';
-import { MapNavigation } from './components/MapNavigation/MapNavigation';
-import { Modal } from './components/Modal/Modal';
-import CarLock from './components/CarLock/CarLock';
-import BtmNavBar from './components/BtmNavBar/BtmNavBar';
-import VolumeControl from './components/VolumeControl/VolumeControl';
-import TemperatureControl from './components/TemperatureControl/TemperatureControl';
+import { getImagePath } from './utils/imagePath';
 import { UserProfileProvider } from './contexts/UserProfileContext';
 import { CarLockProvider } from './contexts/CarLockContext';
-import './App.css';
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { MapNavigation } from './components/MapNavigation/MapNavigation';
+import { MusicPanel } from './components/MusicPanel/MusicPanel';
+import { Modal } from './components/Modal/Modal';
+import VerticalSliderPanel from './components/VerticalSliderPanel/VerticalSliderPanel';
+import BtmNavBar from './components/BtmNavBar/BtmNavBar';
+import CarLock from './components/CarLock/CarLock';
+import VolumeControl from './components/VolumeControl/VolumeControl';
+import TemperatureControl from './components/TemperatureControl/TemperatureControl';
 import BatteryStatus from './components/BatteryStatus/BatteryStatus';
-import { getImagePath } from './utils/imagePath';
+import './App.css';
 
 const formatAppName = (appName) => {
   return appName
@@ -23,6 +24,7 @@ const formatAppName = (appName) => {
 };
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [activeNavIcon, setActiveNavIcon] = useState(null);
   const [temperature, setTemperature] = useState(70);
@@ -209,83 +211,129 @@ function App() {
     setActiveNavIcon('car-settings');
     setIsSliderOpen(true);
   };
+  
+  const appContentRef = useRef(null);
+
+  useEffect(() => {
+    const checkIfLoaded = () => {
+      if (appContentRef.current) {
+        const images = Array.from(appContentRef.current.querySelectorAll('img'));
+        console.log(`Checking ${images.length} images`);
+        
+        const allLoaded = images.every((img) => {
+          const isLoaded = img.complete && img.naturalHeight !== 0;
+          if (!isLoaded) {
+            console.log(`Image not loaded: ${img.src}`);
+          }
+          return isLoaded;
+        });
+
+        if (allLoaded) {
+          console.log('All images loaded, waiting 5 seconds before hiding loading screen');
+          setTimeout(() => {
+            console.log('5 seconds passed, setting isLoading to false');
+            setIsLoading(false);
+          }, 3000);
+        } else {
+          console.log('Not all images loaded, checking again in 100ms');
+          setTimeout(checkIfLoaded, 100);
+        }
+      } else {
+        console.log('appContentRef.current is null, checking again in 100ms');
+        setTimeout(checkIfLoaded, 100);
+      }
+    };
+
+    checkIfLoaded();
+
+    // Fallback timer to ensure loading screen doesn't stay indefinitely
+    const fallbackTimer = setTimeout(() => {
+      console.log('Fallback timer triggered, forcing isLoading to false');
+      setIsLoading(false);
+    }, 15000); // 15 seconds fallback (5 seconds delay + 10 seconds original fallback)
+
+    return () => clearTimeout(fallbackTimer);
+  }, []);
 
   return (
     <CarLockProvider>
       <UserProfileProvider>
-        <div id="displayBezel">
-          <PanelGroup autoSaveId="example" direction="horizontal" className="horizontalPanelGroup">
-            <Panel 
-              defaultSize={DEFAULT_LEFT_PANEL_SIZE}
+        {isLoading && <LoadingScreen />}
+        <div id="displayBezel" ref={appContentRef} style={{display: isLoading ? 'none' : 'block'}}>
+          <div className="displayWrapper">
+            <PanelGroup autoSaveId="example" direction="horizontal" className="horizontalPanelGroup">
+              <Panel 
+                defaultSize={DEFAULT_LEFT_PANEL_SIZE}
               minSize={DEFAULT_LEFT_PANEL_SIZE}
               maxSize={100}
               className="leftPanel"
               ref={leftPanelRef}
               onResize={handleLeftPanelResize}
+              >
+                <div className="carStatusIcons">
+                  <div className="gearSelect no-select">
+                    {['P', 'R', 'N', 'D'].map((gear) => (
+                      <span
+                        key={gear}
+                        className={`gearSelectIcon ${activeGear === gear ? 'active' : ''}`}
+                        onClick={() => handleGearSelect(gear)}
+                      >
+                        {gear}
+                      </span>
+                    ))}
+                  </div>
+                  <BatteryStatus />
+                </div>
+                <div className="carModelStatus">
+                  <div className="toggleFrunk no-select" onClick={handleToggleFrunk}>
+                    {rotateToFrunk ? 'Close' : 'Open'}<br /><span className="frunk">Frunk</span>
+                  </div>
+                  <div className="toggleTrunk no-select" onClick={handleToggleTrunk}>
+                    {rotateToTrunk ? 'Close' : 'Open'}<br /><span className="trunk">Trunk</span>
+                  </div>
+                  <div className="toggleLocks"><CarLock /></div>
+                </div>
+                <VehicleModel rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} />
+                <MusicPanel volume={volume} />
+              </Panel>
+              {isPanelResizable && (
+                <PanelResizeHandle className="panelResizeHandle" />
+              )}
+              <Panel 
+                defaultSize={67}
+                minSize={0}
+                maxSize={isPanelResizable ? 67 : 100 - DEFAULT_LEFT_PANEL_SIZE}
+                className="rightPanel"
+                id="rightPanel"
+              >
+                <MapNavigation/>
+                <VerticalSliderPanel 
+                  isOpen={isSliderOpen} 
+                  activeIcon={activeNavIcon}
+                  onClose={handleSliderClose}
+                  isCameraForced={isCameraForced}
+                />
+              </Panel>
+            </PanelGroup>
+            <BtmNavBar 
+              handleNavIconClick={handleNavIconClick}
+              temperature={temperature}
+              setTemperature={setTemperature}
+              volume={volume}
+              setVolume={setVolume}
+              activeNavIcon={activeNavIcon}
+              isShelfOpen={isShelfOpen}
+              isCameraForced={isCameraForced}
+            />
+            <Modal 
+              isVisible={activeModal !== null}
+              onClose={handleModalClose}
+              modalType={activeModal}
             >
-              <div className="carStatusIcons">
-                <div className="gearSelect no-select">
-                  {['P', 'R', 'N', 'D'].map((gear) => (
-                    <span
-                      key={gear}
-                      className={`gearSelectIcon ${activeGear === gear ? 'active' : ''}`}
-                      onClick={() => handleGearSelect(gear)}
-                    >
-                      {gear}
-                    </span>
-                  ))}
-                </div>
-                <BatteryStatus />
-              </div>
-              <div className="carModelStatus">
-                <div className="toggleFrunk no-select" onClick={handleToggleFrunk}>
-                  {rotateToFrunk ? 'Close' : 'Open'}<br /><span className="frunk">Frunk</span>
-                </div>
-                <div className="toggleTrunk no-select" onClick={handleToggleTrunk}>
-                  {rotateToTrunk ? 'Close' : 'Open'}<br /><span className="trunk">Trunk</span>
-                </div>
-                <div className="toggleLocks"><CarLock /></div>
-              </div>
-              <VehicleModel rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} />
-              <MusicPanel volume={volume} />
-            </Panel>
-            {isPanelResizable && (
-              <PanelResizeHandle className="panelResizeHandle" />
-            )}
-            <Panel 
-              defaultSize={67}
-              minSize={0}
-              maxSize={isPanelResizable ? 67 : 100 - DEFAULT_LEFT_PANEL_SIZE}
-              className="rightPanel"
-              id="rightPanel"
-            >
-              <MapNavigation/>
-              <VerticalSliderPanel 
-                isOpen={isSliderOpen} 
-                activeIcon={activeNavIcon}
-                onClose={handleSliderClose}
-                isCameraForced={isCameraForced}
-              />
-            </Panel>
-          </PanelGroup>
-          <BtmNavBar 
-            handleNavIconClick={handleNavIconClick}
-            temperature={temperature}
-            setTemperature={setTemperature}
-            volume={volume}
-            setVolume={setVolume}
-            activeNavIcon={activeNavIcon}
-            isShelfOpen={isShelfOpen}
-            isCameraForced={isCameraForced}
-          />
-          <Modal 
-            isVisible={activeModal !== null}
-            onClose={handleModalClose}
-            modalType={activeModal}
-          >
-            {renderModalContent()}
-          </Modal>
-        </div>
+              {renderModalContent()}
+            </Modal>
+          </div>
+          </div>
       </UserProfileProvider>
     </CarLockProvider>
   );
