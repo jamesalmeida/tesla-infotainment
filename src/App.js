@@ -231,7 +231,7 @@ function App() {
         if (allLoaded) {
           console.log('All images loaded, waiting 5 seconds before hiding loading screen');
           setTimeout(() => {
-            console.log('5 seconds passed, setting isLoading to false');
+            console.log('3 seconds passed, setting isLoading to false');
             setIsLoading(false);
           }, 3000);
         } else {

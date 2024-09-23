@@ -1,9 +1,5 @@
 .loading-screen {
     position: relative;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 9999999999;
     border-radius: 3.5% / 5%;
     border: 2px solid grey;
     background-color: #000000;
