@@ -1,6 +1,6 @@
 # Getting Started Tesla Infotainment
 
-Check it out here: [https://jamesalmeida.github.io/Tesla-Infotainment/](https://jamesalmeida.github.io/Tesla-Infotainment/)
+Check it out here: [https://jamesalmeida.github.io/tesla-infotainment/](https://jamesalmeida.github.io/tesla-infotainment/)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
