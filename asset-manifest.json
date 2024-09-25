@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "https://jamesalmeida.github.io/Tesla-Infotainment/static/css/main.a08bf635.css",
-    "main.js": "https://jamesalmeida.github.io/Tesla-Infotainment/static/js/main.d1e424d8.js",
+    "main.js": "https://jamesalmeida.github.io/Tesla-Infotainment/static/js/main.0e9f7399.js",
     "static/js/453.4979c5b0.chunk.js": "https://jamesalmeida.github.io/Tesla-Infotainment/static/js/453.4979c5b0.chunk.js",
     "index.html": "https://jamesalmeida.github.io/Tesla-Infotainment/index.html",
     "main.a08bf635.css.map": "https://jamesalmeida.github.io/Tesla-Infotainment/static/css/main.a08bf635.css.map",
-    "main.d1e424d8.js.map": "https://jamesalmeida.github.io/Tesla-Infotainment/static/js/main.d1e424d8.js.map",
+    "main.0e9f7399.js.map": "https://jamesalmeida.github.io/Tesla-Infotainment/static/js/main.0e9f7399.js.map",
     "453.4979c5b0.chunk.js.map": "https://jamesalmeida.github.io/Tesla-Infotainment/static/js/453.4979c5b0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a08bf635.css",
-    "static/js/main.d1e424d8.js"
+    "static/js/main.0e9f7399.js"
   ]
 }
