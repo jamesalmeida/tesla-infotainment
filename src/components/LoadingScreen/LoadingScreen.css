@@ -24,21 +24,41 @@
   }
   
   .tesla-logo {
-    width: 9%;
+    width: 10%;
     height: auto;
-    position: relative;
-    top: 7px;
+    position: absolute;
+    /* top: 35px; */
+    animation: spinY 3s infinite linear;
+    transform-style: preserve-3d;
+  }
+
+  .loading-text {
+    margin-top: 26%;
+    margin-left: 20px;
+    color: #d0d0d0;
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .dots {
+    display: inline-block;
+    width: 20px;  /* Adjust as needed */
+    text-align: left;
   }
 
 
 /* Loading Circles */
-.circle-container{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.circle-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.circle{
+
+.circle {
     width: 180px;
     height: 180px;
     border: 10px inset rgb(170, 170, 170, 0.1);
@@ -55,7 +75,7 @@
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 
-.circle-small{
+.circle-small {
     width: 150px;
     height: 150px;
     border: 6px outset rgb(150, 150, 150, 0.1);
@@ -72,7 +92,7 @@
     box-shadow: 0 0 5px rgba(0,0,0,0.1);
 }
 
-.circle-big{
+.circle-big {
     width: 210px;
     height: 210px;
     border: 4px dotted rgb(96, 96, 96, 0.1);
@@ -88,7 +108,7 @@
     animation: rotate-rev 10s infinite linear;
 }
 
-.circle-inner{
+.circle-inner {
     width: 80px;
     height: 80px;
     background-color: rgb(51, 51, 51, 0.1);
@@ -106,7 +126,7 @@
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 
-.circle-inner-inner{
+.circle-inner-inner {
     width: 100px;
     height: 100px;
     background-color: rgb(36, 36, 36, 0.1);
@@ -123,46 +143,45 @@
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 
-
 /*==============ANIMATIONS=================*/
 
 /*==============ROTATE=====================*/
 
-@-moz-keyframes rotate{
+@-moz-keyframes rotate {
   0% {-moz-transform: rotate(0deg);}
   100% {-moz-transform: rotate(360deg);}
 }
 
-@-webkit-keyframes rotate{
+@-webkit-keyframes rotate {
 	0% {-webkit-transform: rotate(0deg);}
 	100% {-webkit-transform: rotate(360deg);}
 }
 
-@keyframes rotate{
+@keyframes rotate {
 	0% {transform: rotate(0deg);}
 	100% {transform: rotate(360deg);}
 }
 
 /*==============ROTATE-REV=================*/
 
-@-moz-keyframes rotate-rev{
+@-moz-keyframes rotate-rev {
 	0% {-moz-transform: rotate(0deg);}
 	100% {-moz-transform: rotate(-360deg);}
 }
 
-@-webkit-keyframes rotate-rev{
+@-webkit-keyframes rotate-rev {
 	0% {-webkit-transform: rotate(0deg);}
 	100% {-webkit-transform: rotate(-360deg);}
 }
 
-@keyframes rotate-rev{
+@keyframes rotate-rev {
 	0% {transform: rotate(0deg);}
 	100% {transform: rotate(-360deg);}
 }
 
 /*==============PULSE======================*/
 
-@-moz-keyframes pulse{
+@-moz-keyframes pulse {
 	0% {
         -moz-transform: scale(0.1);
         opacity: 0.2;
@@ -177,7 +196,7 @@
     }
 }
 
-@-webkit-keyframes pulse{
+@-webkit-keyframes pulse {
 	0% {
         -webkit-transform: scale(0.1);
         opacity: 0.2;
@@ -186,13 +205,13 @@
         -webkit-transform: scale(1);
         opacity: 0.8;
     }
-    100% {
+     100% {
         -webkit-transform: scale(0.1);
         opacity: 0.2;
     }
 }
 
-@keyframes pulse{
+@keyframes pulse {
 	0% {
         transform: scale(0.1);
         opacity: 0.2;
@@ -206,3 +225,15 @@
         opacity: 0.2;
     }
 }
+
+/*==============SPIN-Y=====================*/
+
+@keyframes spinY {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
