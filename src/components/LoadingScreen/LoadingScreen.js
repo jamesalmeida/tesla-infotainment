@@ -1,5 +1,5 @@
 import React from 'react';
-import { getImagePath } from '../../utils/imagePath';
+import { getImagePath } from '../../utils/assetPaths';
 import './LoadingScreen.css';
 
 const LoadingScreen = () => {

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getImagePath } from '../../utils/imagePath';
+import { getImagePath } from '../../utils/assetPaths';
 import VolumeModal from '../VolumeModal/VolumeModal';
 import './VolumeControl.css';
 

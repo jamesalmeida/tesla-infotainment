@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useUserProfile } from '../../contexts/UserProfileContext';
-import { getImagePath } from '../../utils/imagePath';
+import { getImagePath } from '../../utils/assetPaths';
 import './UserProfile.css';
 
 const profiles = [

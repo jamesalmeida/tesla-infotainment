@@ -1,7 +1,7 @@
 import React from 'react';
 import TemperatureControl from '../TemperatureControl/TemperatureControl';
 import VolumeControl from '../VolumeControl/VolumeControl';
-import { getImagePath } from '../../utils/imagePath';
+import { getImagePath } from '../../utils/assetPaths';
 import './BtmNavBar.css';
 
 const BtmNavBar = ({ 

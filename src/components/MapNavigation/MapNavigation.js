@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { getImagePath } from '../../utils/imagePath';
+import { getImagePath } from '../../utils/assetPaths';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';

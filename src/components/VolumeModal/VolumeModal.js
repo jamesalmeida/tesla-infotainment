@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { getImagePath } from '../../utils/imagePath';
+import { getImagePath } from '../../utils/assetPaths';
 import './VolumeModal.css';
 
 const VolumeModal = ({ volume, onVolumeChange, onClose, onOpenAudioSettings }) => {

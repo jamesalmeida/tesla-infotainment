@@ -13,7 +13,7 @@ import { Safety } from './components/Safety';
 import { Service } from './components/Service';
 import { Software } from './components/Software';
 import { Wifi } from './components/Wifi';
-import { getImagePath } from '../../../utils/imagePath';
+import { getImagePath } from '../../../utils/assetPaths';
 import './CarSettings.css';
 
 const topBarItems = [

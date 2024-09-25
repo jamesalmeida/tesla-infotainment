@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import { VehicleModel } from './components/VehicleModel/VehicleModel';
-import { getImagePath } from './utils/imagePath';
+import { getImagePath } from './utils/assetPaths';
 import { UserProfileProvider } from './contexts/UserProfileContext';
 import { CarLockProvider } from './contexts/CarLockContext';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";

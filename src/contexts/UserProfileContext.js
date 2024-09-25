@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
-import { getImagePath } from '../utils/imagePath';
+import { getImagePath } from '../utils/assetPaths';
 
 const UserProfileContext = createContext();
 

@@ -2,7 +2,7 @@
   "name": "tesla-ui",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://jamesalmeida.github.io/Tesla-Infotainment",
+  "homepage": "https://jamesalmeida.github.io/tesla-infotainment",
   "dependencies": {
     "@mui/material": "^5.16.7",
     "@react-google-maps/api": "^2.19.3",

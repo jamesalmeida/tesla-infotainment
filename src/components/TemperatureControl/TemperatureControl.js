@@ -1,5 +1,5 @@
 import React from 'react';
-import { getImagePath } from '../../utils/imagePath';
+import { getImagePath } from '../../utils/assetPaths';
 import './TemperatureControl.css';
 
 const TemperatureControl = ({ temperature, onIncrement, onDecrement }) => (

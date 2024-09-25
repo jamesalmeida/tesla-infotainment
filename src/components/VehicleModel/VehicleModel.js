@@ -3,13 +3,15 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stage, useGLTF, OrbitControls } from "@react-three/drei";
 import * as THREE from 'three';
 import { useSpring, a } from '@react-spring/three';
+import { getCarModelPath } from '../../utils/assetPaths';
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 function Model({ rotateToFrunk, rotateToTrunk, ...props }) {
-  const { scene } = useGLTF("car-models/tesla-model-3-2018.glb");
+  const modelPath = getCarModelPath('tesla-model-3-2018.glb');
+  const { scene } = useGLTF(modelPath);
   const modelRef = useRef();
   const frunkRef = useRef();
   const trunkRef = useRef();
