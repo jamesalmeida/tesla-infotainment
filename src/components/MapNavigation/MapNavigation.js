@@ -25,7 +25,8 @@ const customMapStyles = [
 ];
 
 const API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-const MAP_ID = process.env.REACT_APP_GOOGLE_MAPS_MAP_ID;
+// const MAP_ID = process.env.REACT_APP_GOOGLE_MAPS_MAP_ID; // This wasn't working, so hardcoding for now
+const MAP_ID = '2d1b7cd2cf277f7';
 
 // Define libraries array outside of the component
 const libraries = ['places'];
