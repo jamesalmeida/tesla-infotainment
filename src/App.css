@@ -161,10 +161,12 @@
 
 .toggleLocks {
   position: relative;
-  left: 40%;
+  left: 34%;
   top: -50%;
   z-index: 2;
-  width: 25px;
+  width: 40px;
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 .carModelWrapper {

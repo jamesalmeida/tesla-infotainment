@@ -1,26 +1,34 @@
 .carLock {
     cursor: pointer;
-    width: 24px;
+    width: 40px;
     height: 24px;
-  }
-  
-  .carLock svg {
-    transition: all 0.3s ease;
-  }
-  
-  .carLock .lock-shackle {
-    transform-origin: 12px 11px;
-    transition: all 0.3s ease;
-  }
-  
-  .carLock .unlocked .lock-shackle {
-    transform: rotate(-45deg) translateY(-3px);
-  }
-  
-  .carLock .locked {
-    color: #4CAF50;
-  }
-  
-  .carLock .unlocked {
-    color: #F44336;
-  }
+    text-align: right;
+}
+
+.carLock svg {
+    transition: all 0.5s ease;
+}
+
+.carLock .lock-shackle {
+    transform-origin: 2px 12px; /* Left side pivot point */
+    transition: all 0.5s ease;
+    fill: none;
+    stroke: #343434;
+    stroke-width: 2;
+}
+
+.carLock .lock-body {
+    fill: #343434;
+}
+
+.carLock .unlocked .lock-shackle {
+    transform: translateX(10px) rotateY(-180deg); /* Adjusted transformation */
+}
+
+.carLock .locked {
+    color: #343434;
+}
+
+.carLock .unlocked {
+    color: #343434;
+}

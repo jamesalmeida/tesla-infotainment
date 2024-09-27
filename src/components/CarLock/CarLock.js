@@ -8,7 +8,7 @@ const CarLock = () => {
   return (
     <div className="carLock" onClick={toggleLock}>
       <svg
-        width="24"
+        width="40"
         height="24"
         viewBox="0 0 24 24"
         fill="none"
