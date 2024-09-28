@@ -8,7 +8,6 @@ const loadingMessages = [
   "Calibrating autopilot",
   "Syncing with Starlink",
   "Booting up neural lace",
-  "Initializing singularity",
   "Don't panic",
   "Constructing additional pylons",
   "Proving P=NP",
@@ -17,17 +16,17 @@ const loadingMessages = [
   "(Insert quarter)",
   "Counting backwards from Infinity",
   "I'm sorry Dave, I'm afraid I can't do that.",
-  "Stay awhile and listen",
+  "Stay awhile... and listen",
   "Computing the secret to life, the universe, and everything",
   "Downloading your daily traffic jam",
   "Calculating the nearest charging station to Mars",
   "Spooling up the hyperdrive",
   "Synchronizing with the mothership",
-  "Turning on the wipers for any sarcasm",
+  "Turning on the wipers sarcasm",
   "Putting the 'auto' in autopilot",
   "Mining Dogecoin",
   "Ensuring zero emissions and maximum fun",
-  "Teaching Grok to grok your driving habits",
+  "Groking your prefered routes",
 ];
 
 const LoadingScreen = () => {
