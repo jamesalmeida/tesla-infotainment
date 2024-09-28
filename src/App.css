@@ -262,9 +262,32 @@
   -ms-user-select: none;
 }
 
+.small-screen-message {
+  display: none;
+}
+
+.small-screen-message span {
+  font-size: 12px;
+}
+
 /* Add this media query at the end of the file */
 @media screen and (max-width: 768px) {
   #root {
     padding: 10px;
   }
+
+  .small-screen-message {
+    /* position: absolute; */
+    /* bottom: 20px; */
+    /* left: 0; */
+    /* right: 0; */
+    display: block;
+    text-align: center;
+    color: #d0d0d0;
+    font-size: 16px;
+    font-style: italic;
+    /* padding: 10px; */
+    /* background-color: rgba(0, 0, 0, 0.7); */
+  }
 }
+

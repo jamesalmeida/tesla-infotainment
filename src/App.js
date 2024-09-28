@@ -333,7 +333,8 @@ function App() {
               {renderModalContent()}
             </Modal>
           </div>
-          </div>
+        </div>
+        <footer className="small-screen-message">Best viewed on a larger screen.<br /><span>(At least until I finish the mobile styles.)</span></footer>
       </UserProfileProvider>
     </CarLockProvider>
   );
