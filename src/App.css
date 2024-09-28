@@ -7,6 +7,8 @@
     "wdth" 100;
 } */
 
+/* html, body { width:100%;  overflow-x: hidden; } */
+
 #root {
   height: calc(100vh - 60px);
   background: #4e4e4e;
@@ -275,7 +277,7 @@
   #root {
     padding: 10px;
   }
-
+  
   .small-screen-message {
     /* position: absolute; */
     /* bottom: 20px; */
@@ -290,4 +292,22 @@
     /* background-color: rgba(0, 0, 0, 0.7); */
   }
 }
+
+/* Media query for mobile devices in landscape mode */
+@media only screen and (max-device-width: 896px) and (orientation: landscape) {
+  #root {
+    height: 100vh;
+    padding: 10px;
+  }
+
+  #displayBezel {
+    padding: 2%;
+    max-height: 280px;
+    max-width: 420px;
+    margin: 0 auto 20px;
+    border-radius: 3.5% / 5%;
+  }
+
+}
+
 
