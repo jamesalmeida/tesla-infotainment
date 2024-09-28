@@ -16,53 +16,13 @@
 
 .btmNavItems {
     color: white;
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 8% 19% 48% 25%;
+    /* grid-gap: 10px; */
     align-items: center;
     height: 100%;
     text-align: center;
-}
-
-.dockApps {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-}
-
-.navIcons {
-    height: 45%;
-    width: 45%;
-    transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out;
-}
-
-.navIcons:hover {
-    transform: scale(1.05);
-}
-
-.navIcons:active {
-    transform: scale(0.95);
-    filter: brightness(0.9);
-}
-
-.navIcons.settings {
-    padding-left: 20px;
-}
-
-.navIcons.volUp {
-    padding-right: 15px;
-}
-
-.car-settings {
-width:18%;
-}
-
-.volume-control .volume-display {
-    padding: 0 12px;
+    /* padding: 0 20px; */
 }
 
 .navIconWrapper {
@@ -87,6 +47,49 @@ width:18%;
 
 .navIconWrapper.disabled img {
     filter: grayscale(100%);
+}
+.dockApps {
+    display: flex;
+    flex-direction: row;
+    /* justify-content: space-between; */
+    justify-self: center;
+    align-items: center;
+    /* height: 100%; */
+    /* width: 100%; */
+}
+
+.navIcons {
+    /* height: 45%; */
+    width: 45%;
+    /* width: 40px; */
+    padding: 0 15px;
+    transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out;
+}
+
+.navIcons:hover {
+    transform: scale(1.05);
+}
+
+.navIcons:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
+}
+
+.navIcons.settings {
+    padding-left: 20px;
+}
+
+.navIcons.volUp {
+    padding-right: 15px;
+}
+
+.car-settings {
+    /* width: 18%; */
+    justify-self: start;
+}
+
+.volume-control .volume-display {
+    padding: 0 12px;
 }
 
 .floatingBtn.squareBtn.active {
