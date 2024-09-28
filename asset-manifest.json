@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "https://jamesalmeida.github.io/tesla-infotainment/static/css/main.87a30263.css",
-    "main.js": "https://jamesalmeida.github.io/tesla-infotainment/static/js/main.21181692.js",
+    "main.css": "https://jamesalmeida.github.io/tesla-infotainment/static/css/main.3aef6a7b.css",
+    "main.js": "https://jamesalmeida.github.io/tesla-infotainment/static/js/main.2ebeab7a.js",
     "static/js/453.4979c5b0.chunk.js": "https://jamesalmeida.github.io/tesla-infotainment/static/js/453.4979c5b0.chunk.js",
     "index.html": "https://jamesalmeida.github.io/tesla-infotainment/index.html",
-    "main.87a30263.css.map": "https://jamesalmeida.github.io/tesla-infotainment/static/css/main.87a30263.css.map",
-    "main.21181692.js.map": "https://jamesalmeida.github.io/tesla-infotainment/static/js/main.21181692.js.map",
+    "main.3aef6a7b.css.map": "https://jamesalmeida.github.io/tesla-infotainment/static/css/main.3aef6a7b.css.map",
+    "main.2ebeab7a.js.map": "https://jamesalmeida.github.io/tesla-infotainment/static/js/main.2ebeab7a.js.map",
     "453.4979c5b0.chunk.js.map": "https://jamesalmeida.github.io/tesla-infotainment/static/js/453.4979c5b0.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.87a30263.css",
-    "static/js/main.21181692.js"
+    "static/css/main.3aef6a7b.css",
+    "static/js/main.2ebeab7a.js"
   ]
 }
