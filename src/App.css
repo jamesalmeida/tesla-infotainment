@@ -27,6 +27,9 @@
   /* border-radius: 35px; */
   border: 2px solid grey;
   position: relative;
+  -webkit-box-shadow: 0 5.5px 15px 3px rgba(0, 0, 0, 0.26);
+  -moz-box-shadow: 0 5.5px 15px 3px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 5.5px 15px 3px rgba(0, 0, 0, 0.26);
 }
 
 .displayWrapper {
@@ -257,4 +260,11 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+}
+
+/* Add this media query at the end of the file */
+@media screen and (max-width: 768px) {
+  #root {
+    padding: 10px;
+  }
 }
