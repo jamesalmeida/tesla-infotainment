@@ -19,7 +19,7 @@ const loadingMessages = [
   "Stay awhile... and listen",
   "Computing the secret to life, the universe, and everything",
   "Downloading your daily traffic jam",
-  "Calculating the nearest charging station to Mars",
+  "Calculating optimal Hohmann transfer orbit to Mars",
   "Spooling up the hyperdrive",
   "Synchronizing with the mothership",
   "Turning on the wipers sarcasm",
