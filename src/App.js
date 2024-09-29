@@ -258,9 +258,14 @@ function App() {
     return () => clearTimeout(fallbackTimer);
   }, []);
 
-  // Add this new useEffect for keyboard shortcuts
+  // For keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // Check if the active element is an input field
+      if (event.target.tagName.toLowerCase() === 'input') {
+        return; // Exit the function if we're typing in an input field
+      }
+  
       switch (event.key.toUpperCase()) {
         case 'F':
           handleToggleFrunk();
@@ -272,9 +277,9 @@ function App() {
           break;
       }
     };
-
+  
     window.addEventListener('keydown', handleKeyDown);
-
+  
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };

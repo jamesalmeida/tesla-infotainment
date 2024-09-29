@@ -4,14 +4,19 @@ import './GearSelect.css';
 function GearSelect({ activeGear, onGearSelect }) {
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // Check if the active element is an input field
+      if (event.target.tagName.toLowerCase() === 'input') {
+        return; // Exit the function if we're typing in an input field
+      }
+  
       const gear = event.key.toUpperCase();
       if (['P', 'R', 'N', 'D'].includes(gear)) {
         onGearSelect(gear);
       }
     };
-
+  
     window.addEventListener('keydown', handleKeyDown);
-
+  
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
