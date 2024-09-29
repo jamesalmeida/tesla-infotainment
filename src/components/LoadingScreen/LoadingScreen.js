@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
+import { useDots } from '../../utils/dots';
 import './LoadingScreen.css';
 
 const loadingMessages = [
@@ -15,7 +16,6 @@ const loadingMessages = [
   "Follow the white rabbit",
   "(Insert quarter)",
   "Counting backwards from Infinity",
-  "I'm sorry Dave, I'm afraid I can't do that.",
   "Stay awhile... and listen",
   "Computing the secret to life, the universe, and everything",
   "Downloading your daily traffic jam",
@@ -31,20 +31,11 @@ const loadingMessages = [
 
 const LoadingScreen = () => {
   const [loadingText, setLoadingText] = useState('');
-  const [dots, setDots] = useState('');
+  const dots = useDots();
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * loadingMessages.length);
     setLoadingText(loadingMessages[randomIndex]);
-
-    const dotInterval = setInterval(() => {
-      setDots(prevDots => {
-        if (prevDots.length >= 3) return '';
-        return prevDots + '.';
-      });
-    }, 500);
-
-    return () => clearInterval(dotInterval);
   }, []);
 
   return (
@@ -58,7 +49,7 @@ const LoadingScreen = () => {
           <div className="circle-inner"></div>
         </div>
         <img src={getImagePath('logo-grey.svg')} alt="Tesla Logo" className="tesla-logo spinning" />
-        <p className="loading-text">{loadingText}<span className="dots">{dots}</span></p>
+        <p className="loading-text">{loadingText}{dots}</p>
       </div>
     </div>
   );

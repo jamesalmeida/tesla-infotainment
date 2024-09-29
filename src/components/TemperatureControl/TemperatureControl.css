@@ -14,10 +14,23 @@
 .navIcons.arrows {
     width: 15%;
     opacity: 20%;
+    padding: 0px;
 }
 
 .navIcons.temperature-display {
-    font-size: 2em;
+    font-size: 28px;
+    padding: 0px;
+    max-width: 70px;
 }
 
+@media only screen and (max-device-width: 896px) and (orientation: landscape) {
+    .navIcons.temperature-display {
+        font-size: 20px;
+        max-width: 40px;
+        padding-top: 4px;
+    }
 
+    .navIcons.arrows {
+        width: 25px !important;
+    }
+}

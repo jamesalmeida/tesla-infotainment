@@ -14,6 +14,7 @@ import CarLock from './components/CarLock/CarLock';
 import VolumeControl from './components/VolumeControl/VolumeControl';
 import TemperatureControl from './components/TemperatureControl/TemperatureControl';
 import BatteryStatus from './components/BatteryStatus/BatteryStatus';
+import { useDots } from './utils/dots';
 import './App.css';
 
 const formatAppName = (appName) => {
@@ -38,6 +39,7 @@ function App() {
   const [isCameraForced, setIsCameraForced] = useState(false);
   const [isPanelResizable, setIsPanelResizable] = useState(false);
   const DEFAULT_LEFT_PANEL_SIZE = 40;
+  const dots = useDots();
 
   const appsTopShelf = [
     'wipers',
@@ -264,11 +266,11 @@ function App() {
             <PanelGroup autoSaveId="example" direction="horizontal" className="horizontalPanelGroup">
               <Panel 
                 defaultSize={DEFAULT_LEFT_PANEL_SIZE}
-              minSize={DEFAULT_LEFT_PANEL_SIZE}
-              maxSize={100}
-              className="leftPanel"
-              ref={leftPanelRef}
-              onResize={handleLeftPanelResize}
+                minSize={DEFAULT_LEFT_PANEL_SIZE}
+                maxSize={100}
+                className="leftPanel"
+                ref={leftPanelRef}
+                onResize={handleLeftPanelResize}
               >
                 <div className="carStatusIcons">
                   <div className="gearSelect no-select">
@@ -288,10 +290,11 @@ function App() {
                   <div className="toggleFrunk no-select" onClick={handleToggleFrunk}>
                     {rotateToFrunk ? 'Close' : 'Open'}<br /><span className="frunk">Frunk</span>
                   </div>
+                  <div className="toggleLocks"><CarLock /></div>
                   <div className="toggleTrunk no-select" onClick={handleToggleTrunk}>
                     {rotateToTrunk ? 'Close' : 'Open'}<br /><span className="trunk">Trunk</span>
                   </div>
-                  <div className="toggleLocks"><CarLock /></div>
+                  
                 </div>
                 <VehicleModel rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} />
                 <MusicPanel volume={volume} />
@@ -334,7 +337,12 @@ function App() {
             </Modal>
           </div>
         </div>
-        <footer className="small-screen-message">Best viewed on a larger screen.<br /><span>(At least until I finish the mobile styles.)</span></footer>
+        <div className="small-screen-message">
+          I'm sorry Dave, I'm afraid I can't do that{dots}<br />
+          Best viewed on a larger screen.<br />
+          <span>At least until I tweak the mobile styles.<br />
+          For now, try turning your phone sideways.</span>
+        </div>
       </UserProfileProvider>
     </CarLockProvider>
   );

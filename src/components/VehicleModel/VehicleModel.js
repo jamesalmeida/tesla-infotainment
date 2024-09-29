@@ -221,7 +221,7 @@ export function VehicleModel({ rotateToFrunk, rotateToTrunk }) {
         far: 1000
       }} 
       style={{"position": "relative"}}
-      className="carModel"
+      className="carModelWrapper"
     >
       <color attach="background" args={["#f1f1f1"]} />
       <Stage environment={"warehouse"}>

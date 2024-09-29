@@ -249,3 +249,14 @@ input:focus {
 .gmnoprint div {
     background: none !important;
 }
+
+/* Media query for mobile devices in landscape mode */
+@media only screen and (max-device-width: 896px) and (orientation: landscape) {
+    .navBtn input {
+        max-width: 138px;
+        margin-left: 0px;
+    }
+    .searchIcon {
+        margin-left: 5px;
+    }
+}

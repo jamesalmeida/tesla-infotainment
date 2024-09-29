@@ -167,15 +167,11 @@
 .toggleLocks {
   position: relative;
   left: 34%;
-  top: -50%;
+  /* top: -50%; */
   z-index: 2;
   width: 40px;
   display: flex;
   flex-direction: row-reverse;
-}
-
-.carModelWrapper {
-  position: absolute;
 }
 
 .temperature {
@@ -266,30 +262,30 @@
 
 .small-screen-message {
   display: none;
+  text-align: center;
+  color: #d0d0d0;
+  font-size: 20px;
+  position: relative; /* Add this */
 }
 
 .small-screen-message span {
-  font-size: 12px;
+  font-size: 14px;
+  font-style: italic;
+  display: block;
+  line-height: 14px;
+  padding-top: 7px;
 }
 
-/* Add this media query at the end of the file */
+
+/* For smaller screens but larger than mobile */
 @media screen and (max-width: 768px) {
   #root {
-    padding: 5px;
+    padding: 120px 5px;
+    height: 100dvh;
   }
   
   .small-screen-message {
-    /* position: absolute; */
-    /* bottom: 20px; */
-    /* left: 0; */
-    /* right: 0; */
     display: block;
-    text-align: center;
-    color: #d0d0d0;
-    font-size: 16px;
-    font-style: italic;
-    /* padding: 10px; */
-    /* background-color: rgba(0, 0, 0, 0.7); */
   }
 }
 
@@ -320,7 +316,38 @@
 
   .horizontalPanelGroup {
     border-radius: 0px !important;
+    height: 82% !important;
   } 
+
+  .carModelWrapper {
+    height: 60% !important;
+    width: auto !important;
+  }
+
+  .carModelStatus {
+    position: absolute;
+    top: 44px;
+    left: 49px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carStatusIcons {
+    padding: 0.5% 1% 0.5% 10%;
+  }
+
+  .toggleLocks {
+    top: -26px;
+  }
+
+  .musicPanel {
+    height: 30% !important;
+    max-width: 322px !important;
+    position: relative;
+    left: -2px;
+  }
 }
 
 
