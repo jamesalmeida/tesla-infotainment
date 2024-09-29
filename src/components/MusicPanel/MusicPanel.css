@@ -39,7 +39,7 @@
     grid-template-rows: 50% 50%;
     grid-column: 2 / 3;
     grid-row: 1 / 2;
-    padding: 10px 15px;
+    padding: 6px;
     align-content: center;
     justify-content: start;
     align-items: center;
@@ -55,7 +55,8 @@
     white-space: nowrap;
     color: #505050;
     /* font-size: 18px; */
-    font-size: 0.1em;
+    /* font-size: 0.1em; */
+    font-size: 14px;
     /* -webkit-box-shadow: inset -20px 0px 23px -9px rgba(255,255,255,0.81);
     -moz-box-shadow: inset -20px 0px 23px -9px rgba(255,255,255,0.81);
     box-shadow: inset -20px 0px 23px -9px rgba(255,255,255,0.81); */
@@ -64,7 +65,8 @@
 .sourceIcon {
     grid-column: 1 / 2;
     grid-row: 2 / 3;
-    height: 65%;
+    height: auto;
+    width: 18px;
 }
 
 
@@ -72,8 +74,7 @@
     grid-column: 2 / 3;
     grid-row: 2 / 3;
     color: #9c9c9c;
-    /* font-size: 14px; */
-    font-size: .8em;
+    font-size: 14px;
 }
 
 .musicProgressBar {
@@ -151,16 +152,39 @@
     color: #777;
     text-align: right;
     margin-top: 5px;
+    position: relative;
+    bottom: 6px;
+    right: 3px;
+    display: none;
 }
 
 @media screen and (max-width: 768px) {
-    /* .musicIcon {
+    .musicPanel {
+        height: 62%;
+    }
+    .musicIcon {
         width: 17px;
-    } */
+    }
+    .sourceIcon {
+        width: 10px;
+    }
+    .title {
+        font-size: 10px;
+    }
+    .albumTitle {
+        font-size: 10px;
+    }
+
 }
 
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
     .musicIcon {
         width: 17px;
+    }
+    .sourceIcon {
+        width: 10px;
+    }
+    .albumTitle {
+        /* font-size: 14px; */
     }
 }
