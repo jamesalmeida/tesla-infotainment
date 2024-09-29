@@ -243,7 +243,7 @@
 .customizeBtn {
   position: absolute;
   top: -53px;
-  right: calc(50vh - 70%);
+  right: calc(50% - 66px);
   z-index: 10;
   background-color: black;
   padding: 10px 30px;
