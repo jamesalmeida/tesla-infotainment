@@ -358,8 +358,8 @@ function App() {
         <div className="small-screen-message">
           I'm sorry Dave, I'm afraid I can't do that{dots}<br />
           Best viewed on a larger screen.<br />
-          <span>At least until I tweak the mobile styles.<br />
-          For now, try turning your phone sideways.</span>
+          <span>For now, try turning your phone sideways.<br />
+          At least until I tweak the mobile styles.</span>
         </div>
       </UserProfileProvider>
     </CarLockProvider>
