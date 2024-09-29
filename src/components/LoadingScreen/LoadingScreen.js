@@ -22,7 +22,7 @@ const loadingMessages = [
   "Calculating optimal Hohmann transfer orbit to Mars",
   "Spooling up the hyperdrive",
   "Synchronizing with the mothership",
-  "Turning on the wipers sarcasm",
+  "Turning on the wipers for sarcasm",
   "Putting the 'auto' in autopilot",
   "Mining Dogecoin",
   "Ensuring zero emissions and maximum fun",
