@@ -275,7 +275,7 @@
 /* Add this media query at the end of the file */
 @media screen and (max-width: 768px) {
   #root {
-    padding: 10px;
+    padding: 5px;
   }
   
   .small-screen-message {
@@ -296,18 +296,31 @@
 /* Media query for mobile devices in landscape mode */
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
   #root {
-    height: 100vh;
-    padding: 10px;
+    height: 100dvh;
+    padding: 0px;
+    width: 100dvw;
   }
 
   #displayBezel {
-    padding: 2%;
-    max-height: 280px;
-    max-width: 420px;
-    margin: 0 auto 20px;
-    border-radius: 3.5% / 5%;
+    aspect-ratio: unset !important;
+    background-color: none !important;
+    border: none !important;
+    border-radius: none !important;
+    box-shadow: none !important;
+    margin: 0px !important;
+    max-height: unset !important;
+    max-width: unset !important;
+    padding: 0px !important;
+    /* position: relative; */
   }
 
+  .displayWrapper {
+    height: 100dvh;
+  }
+
+  .horizontalPanelGroup {
+    border-radius: 0px !important;
+  } 
 }
 
 
