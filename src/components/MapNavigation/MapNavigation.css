@@ -213,6 +213,7 @@ input:focus {
 .wifiStatus {
     width: 3%;
     margin-right: 10px;
+    margin-left: 10px;
 }
 
 .airbagStatus {
