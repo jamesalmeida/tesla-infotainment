@@ -69,6 +69,7 @@
   flex-direction: column;
   z-index: 4;
   box-shadow: 2px 1px 10px 0px #aaaaaa;
+  transition: width 0.3s ease-out;
 }
 
 .panelResizeHandle {
