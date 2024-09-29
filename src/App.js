@@ -14,6 +14,7 @@ import CarLock from './components/CarLock/CarLock';
 import VolumeControl from './components/VolumeControl/VolumeControl';
 import TemperatureControl from './components/TemperatureControl/TemperatureControl';
 import BatteryStatus from './components/BatteryStatus/BatteryStatus';
+import GearSelect from './components/GearSelect/GearSelect';
 import { useDots } from './utils/dots';
 import './App.css';
 
@@ -257,6 +258,28 @@ function App() {
     return () => clearTimeout(fallbackTimer);
   }, []);
 
+  // Add this new useEffect for keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      switch (event.key.toUpperCase()) {
+        case 'F':
+          handleToggleFrunk();
+          break;
+        case 'T':
+          handleToggleTrunk();
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);  // Empty dependency array means this effect runs once on mount
+
   return (
     <CarLockProvider>
       <UserProfileProvider>
@@ -273,17 +296,7 @@ function App() {
                 onResize={handleLeftPanelResize}
               >
                 <div className="carStatusIcons">
-                  <div className="gearSelect no-select">
-                    {['P', 'R', 'N', 'D'].map((gear) => (
-                      <span
-                        key={gear}
-                        className={`gearSelectIcon ${activeGear === gear ? 'active' : ''}`}
-                        onClick={() => handleGearSelect(gear)}
-                      >
-                        {gear}
-                      </span>
-                    ))}
-                  </div>
+                  <GearSelect activeGear={activeGear} onGearSelect={handleGearSelect} />
                   <BatteryStatus />
                 </div>
                 <div className="carModelStatus">

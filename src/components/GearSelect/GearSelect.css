@@ -1,0 +1,21 @@
+.gearSelect {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .gearSelectIcon {
+    color: #4e4e4e;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .gearSelectIcon:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .gearSelectIcon.active {
+    color: #000000;
+    font-weight: 800;
+    transform: scale(0.95);
+  }
