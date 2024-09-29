@@ -18,7 +18,7 @@ const VolumeModal = ({ volume, onVolumeChange, onClose, onOpenAudioSettings }) =
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    timeoutRef.current = setTimeout(startFadeOut, 1500);
+    timeoutRef.current = setTimeout(startFadeOut, 3000);
   };
 
   const startFadeOut = () => {

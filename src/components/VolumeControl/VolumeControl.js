@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import VolumeModal from '../VolumeModal/VolumeModal';
 import './VolumeControl.css';
@@ -19,16 +19,19 @@ const VolumeControl = ({ volume, onVolumeChange, onOpenAudioSettings }) => {
     onVolumeChange(newVolume);
   };
 
+  const adjustVolume = (increment) => {
+    const newVolume = Math.max(0, Math.min(100, volume + increment));
+    handleVolumeChange(newVolume);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="volume-control" ref={volumeControlRef}>
       <img 
         className={`navIcons arrows`}
         src={getImagePath("icon-vol-down.svg")} 
         alt="Decrease volume" 
-        onClick={() => {
-          handleVolumeChange(Math.max(0, volume - 1));
-          setIsModalOpen(true);
-        }}
+        onClick={() => adjustVolume(-10)}
       />
       <img 
         className={`navIcons volume-display`}
@@ -40,10 +43,7 @@ const VolumeControl = ({ volume, onVolumeChange, onOpenAudioSettings }) => {
         className={`navIcons arrows`}
         src={getImagePath("icon-vol-up.svg")} 
         alt="Increase volume" 
-        onClick={() => {
-          handleVolumeChange(Math.min(100, volume + 1));
-          setIsModalOpen(true);
-        }}
+        onClick={() => adjustVolume(10)}
       />
       {isModalOpen && (
         <div className="volume-modal-container">

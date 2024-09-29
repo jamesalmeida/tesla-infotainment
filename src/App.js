@@ -183,17 +183,6 @@ function App() {
             </div>
           </div>
         );
-      case 'volume':
-        return (
-          <div>
-            <h2>Volume Control</h2>
-            <VolumeControl
-              volume={volume}
-              onIncrement={() => setVolume(prev => Math.min(prev + 1, 100))}
-              onDecrement={() => setVolume(prev => Math.max(prev - 1, 0))}
-            />
-          </div>
-        );
       case 'temperature':
         return (
           <div>
@@ -208,11 +197,6 @@ function App() {
       default:
         return null;
     }
-  };
-
-  const handleOpenAudioSettings = () => {
-    setActiveNavIcon('car-settings');
-    setIsSliderOpen(true);
   };
   
   const appContentRef = useRef(null);
