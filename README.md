@@ -28,7 +28,10 @@ To run the project locally:
    npm install
    ```
 
-3. Start the development server:
+3. Use the `.env.template` to create your own `.env` file. Add your API key for [Google Maps](https://cloud.google.com/maps-platform) and also a mapID for the maps styles to match Tesla's car maps. You can use mine (it's in the template) or create your own.
+
+
+4. Start the development server:
    ```
    npm start
    ```
@@ -46,7 +49,7 @@ npm run build
 This command builds the app for production to the `build` folder, optimizing the build for the best performance.
 
 ### `npm run deploy`
-To make this project work as a Github Page, I added this command to deploy to a Github Page. 
+To make this project work as a Github Page, I added this command to deploy to a Github Page. You'll want to add the `PUBLIC_URL` to your `.env` file to point to your Github Pages URL.
 
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
