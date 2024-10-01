@@ -50,11 +50,11 @@ export function MusicPanel({ volume }) {
     useEffect(() => {
         audioRef.current.src = tracks[currentTrackIndex].audio;
         if (isPlaying) {
-            audioRef.current.currentTime = currentTimeRef.current;
             audioRef.current.play().catch(error => console.error("Playback failed:", error));
         } else {
             audioRef.current.pause();
         }
+        audioRef.current.currentTime = currentTimeRef.current;
     }, [currentTrackIndex, isPlaying]);
 
     useEffect(() => {
