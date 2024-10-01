@@ -4,6 +4,8 @@ Experience a simulated Tesla infotainment system in your browser!
 
 [Live Demo](https://jamesalmeida.github.io/tesla-infotainment/)
 
+![App Preview](public/app-preview.png)
+
 ## Features to try out
 
 - Realistic 3D model of Tesla Model Y. Try opening the trunk and frunk!
