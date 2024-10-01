@@ -1,40 +1,55 @@
-# Getting Started Tesla Infotainment
+# Tesla Infotainment Simulator
 
-Check it out here: [https://jamesalmeida.github.io/tesla-infotainment/](https://jamesalmeida.github.io/tesla-infotainment/)
+Experience a simulated Tesla infotainment system in your browser!
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[Live Demo](https://jamesalmeida.github.io/tesla-infotainment/)
 
-## Available Scripts
+## Features to try out
 
-In the project directory, you can run:
+- Realistic 3D model of Tesla Model Y. Try opening the trunk and frunk!
+- Interactive infotainment system simulation. Play a podcast, adjust the volume, etc.
+- Put the car in reverse and see what's behind you!
+- Try navigating on the map and turning on traffic.
+- Responsive design for various screen sizes. Works best on desktop but try it out on your phone in landscape mode too. 
+- Adding features periodically. Leave a feature request in the issues section ^_^
 
-### `npm start`
+## Quick Start
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+To run the project locally:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. Clone the repository:
+   ```
+   git clone https://github.com/jamesalmeida/tesla-infotainment.git
+   cd tesla-infotainment
+   ```
 
-### `npm test`
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. Start the development server:
+   ```
+   npm start
+   ```
 
-### `npm run build`
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Build for Production
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+To create a production-ready build:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+npm run build
+```
+
+This command builds the app for production to the `build` folder, optimizing the build for the best performance.
 
 ### `npm run deploy`
-
 To make this project work as a Github Page, I added this command to deploy to a Github Page. 
 
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ### Thanks
 
