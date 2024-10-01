@@ -66,9 +66,9 @@ export function MusicPanel({ volume }) {
         setCurrentTime(currentTimeRef.current);
     };
 
-    const togglePlayPause = () => {
-        setIsPlaying(!isPlaying);
-    };
+    const togglePlayPause = useCallback(() => {
+        setIsPlaying(prevIsPlaying => !prevIsPlaying);
+    }, []);
 
     const handlePrevious = () => {
         const now = Date.now();
@@ -104,6 +104,35 @@ export function MusicPanel({ volume }) {
             handleProgressBarClick(event);
         }
     }, [handleProgressBarClick]);
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.shiftKey) {
+                switch (event.key) {
+                    case ' ':
+                        event.preventDefault();
+                        togglePlayPause();
+                        break;
+                    case 'ArrowRight':
+                        event.preventDefault();
+                        handleNext();
+                        break;
+                    case 'ArrowLeft':
+                        event.preventDefault();
+                        handlePrevious();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [togglePlayPause, handleNext, handlePrevious]);
 
     return (
         <div className="musicPanel">

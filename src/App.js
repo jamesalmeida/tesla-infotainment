@@ -249,21 +249,30 @@ function App() {
       if (event.target.tagName.toLowerCase() === 'input') {
         return; // Exit the function if we're typing in an input field
       }
-  
-      switch (event.key.toUpperCase()) {
-        case 'F':
-          handleToggleFrunk();
-          break;
-        case 'T':
-          handleToggleTrunk();
-          break;
-        default:
-          break;
+
+      if (event.shiftKey) {
+        switch (event.key.toUpperCase()) {
+          case 'F':
+            handleToggleFrunk();
+            break;
+          case 'T':
+            handleToggleTrunk();
+            break;
+          case 'M':
+            event.preventDefault(); // Prevent 'M' from being typed
+            const navigateToInput = document.getElementById('navigateTo');
+            if (navigateToInput) {
+              navigateToInput.focus();
+            }
+            break;
+          default:
+            break;
+        }
       }
     };
-  
+
     window.addEventListener('keydown', handleKeyDown);
-  
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };

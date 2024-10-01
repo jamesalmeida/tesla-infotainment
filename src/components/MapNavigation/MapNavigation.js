@@ -271,6 +271,7 @@ export function MapNavigation() {
                 name="NavigateTo"
                 defaultValue={inputValue}
                 onChange={handleInputChange}
+                id="navigateTo"
               />
               {inputValue && (
                 <button className="clearInput" onClick={clearInput}>

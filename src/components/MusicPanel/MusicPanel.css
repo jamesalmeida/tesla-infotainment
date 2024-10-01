@@ -113,6 +113,14 @@
     border-radius: 12px;
 }
 
+.musicBtn:focus {
+    outline: none;
+}
+
+.musicBtn::-moz-focus-inner {
+    border: 0;
+}
+
 .musicIcon {
     /* height: 45%; */
     height: 20px;
@@ -188,3 +196,4 @@
         /* font-size: 14px; */
     }
 }
+
