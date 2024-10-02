@@ -9,11 +9,15 @@ function GearSelect({ activeGear, onGearSelect }) {
         return; // Exit the function if we're typing in an input field
       }
 
-      if (event.shiftKey) {
-        const gear = event.key.toUpperCase();
-        if (['P', 'R', 'N', 'D'].includes(gear)) {
-          onGearSelect(gear);
-        }
+      const gearMap = {
+        '1': 'P',
+        '2': 'R',
+        '3': 'N',
+        '4': 'D'
+      };
+
+      if (gearMap[event.key]) {
+        onGearSelect(gearMap[event.key]);
       }
     };
 
