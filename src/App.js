@@ -43,6 +43,7 @@ function App() {
   const dots = useDots();
   const [leftTurnSignal, setLeftTurnSignal] = useState(false);
   const [rightTurnSignal, setRightTurnSignal] = useState(false);
+  const [isRearViewCameraActive, setIsRearViewCameraActive] = useState(false);
 
   const appsTopShelf = [
     'wipers',
@@ -264,6 +265,22 @@ function App() {
             event.preventDefault();
             setRightTurnSignal(prev => !prev);
             setLeftTurnSignal(false);
+            break;
+          case 'C':
+            console.log('Rear View Camera toggled');
+            event.preventDefault();
+            setIsRearViewCameraActive(prev => {
+              const newState = !prev;
+              console.log(`Rear View Camera is now ${newState ? 'active' : 'inactive'}`);
+              if (newState) {
+                setActiveNavIcon('camera');
+                setIsSliderOpen(true);
+              } else {
+                setActiveNavIcon(null);
+                setIsSliderOpen(false);
+              }
+              return newState;
+            });
             break;
           case 'H':
             console.log('Hazard lights toggled');
