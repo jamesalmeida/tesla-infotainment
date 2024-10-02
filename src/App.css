@@ -376,6 +376,10 @@
     width: 100dvw;
   }
 
+  .small-screen-message {
+    display: none;
+  }
+
   #displayBezel {
     aspect-ratio: unset !important;
     background-color: none !important;
