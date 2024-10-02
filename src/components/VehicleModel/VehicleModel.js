@@ -4,12 +4,13 @@ import { Stage, useGLTF, OrbitControls } from "@react-three/drei";
 import * as THREE from 'three';
 import { useSpring, a } from '@react-spring/three';
 import { getCarModelPath } from '../../utils/assetPaths';
+import './VehicleModel.css';
 
 function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-function Model({ rotateToFrunk, rotateToTrunk, ...props }) {
+function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
   const modelPath = getCarModelPath('tesla-model-3-2018.glb');
   const { scene } = useGLTF(modelPath);
   const modelRef = useRef();
@@ -26,6 +27,7 @@ function Model({ rotateToFrunk, rotateToTrunk, ...props }) {
   const animationProgressRef = useRef(0);
   const isAnimatingRef = useRef(false);
   const defaultRotation = Math.PI;
+  const [isDriving, setIsDriving] = useState(false);
 
   useEffect(() => {
     const frunkPart = scene.getObjectByName("bonnet_dummy");
@@ -56,7 +58,10 @@ function Model({ rotateToFrunk, rotateToTrunk, ...props }) {
     setFrunkStartAngle(frunkRef.current ? frunkRef.current.rotation.x : 0);
     setTrunkStartAngle(trunkRef.current ? trunkRef.current.rotation.x : 0);
 
-    if (rotateToFrunk) {
+    if (activeGear === 'D') {
+      setTargetRotation(Math.PI / 4.3); // 90 degrees clockwise
+      setIsDriving(true);
+    } else if (rotateToFrunk) {
       setFrunkTargetAngle(Math.PI / 6); // Open the frunk to 30 degrees
       setTrunkTargetAngle(0); // Close the trunk
       // No rotation for frunk
@@ -69,10 +74,11 @@ function Model({ rotateToFrunk, rotateToTrunk, ...props }) {
       setTargetRotation(defaultRotation); // Reset to default position
       setFrunkTargetAngle(0); // Close the frunk
       setTrunkTargetAngle(0); // Close the trunk
+      setIsDriving(false);
     }
     animationProgressRef.current = 0;
     isAnimatingRef.current = true;
-  }, [rotateToFrunk, rotateToTrunk]);
+  }, [rotateToFrunk, rotateToTrunk, activeGear]);
 
   useFrame((state, delta) => {
     if (isAnimatingRef.current) {
@@ -200,10 +206,10 @@ function ControlledOrbitControls() {
   );
 }
 
-export function VehicleModel({ rotateToFrunk, rotateToTrunk }) {
+export function VehicleModel({ rotateToFrunk, rotateToTrunk, activeGear }) {
   const distance = 5;
   const horizontalAngle = Math.PI / 4; // 45 degrees
-  const verticalAngle = Math.PI / 5.14; // Approximately 35 degrees
+  const verticalAngle = activeGear === 'D' ? Math.PI / 3 : Math.PI / 5.14; // Increased angle for 'D' mode
 
   const cameraPosition = [
     distance * Math.cos(horizontalAngle) * Math.cos(verticalAngle),
@@ -225,7 +231,7 @@ export function VehicleModel({ rotateToFrunk, rotateToTrunk }) {
     >
       <color attach="background" args={["#f1f1f1"]} />
       <Stage environment={"warehouse"}>
-        <Model scale={0.01} rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} />
+        <Model scale={0.01} rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} activeGear={activeGear} />
       </Stage>
       <ControlledOrbitControls />
     </Canvas>

@@ -294,10 +294,19 @@ function App() {
                 onResize={handleLeftPanelResize}
               >
                 <div className="carStatusIcons">
-                  <GearSelect activeGear={activeGear} onGearSelect={handleGearSelect} />
-                  <BatteryStatus />
+                  <div className="topBarCarStatusIcons">
+                    <GearSelect activeGear={activeGear} onGearSelect={handleGearSelect} />
+                    <BatteryStatus />
+                  </div>
+                  <div className={`drivingGearIcons ${activeGear === 'D' ? 'fade-in' : 'fade-out'}`}>
+                    {/* Add additional icons here when in 'D' mode */}
+                    <div className="speedometer">0<br /><span>MPH</span></div>
+                    <div className="turnSignal">TURN L</div>
+                    <div className="turnSignal">TURN R</div>
+                    <div className="speedLimit">SPEED<br/>LIMIT<br/><span>30</span></div>
+                  </div>
                 </div>
-                <div className="carModelStatus">
+                <div className={`carModelStatus ${activeGear === 'D' ? 'fade-out' : 'fade-in'}`}>
                   <div className="toggleFrunk no-select" onClick={handleToggleFrunk}>
                     {rotateToFrunk ? 'Close' : 'Open'}<br /><span className="frunk">Frunk</span>
                   </div>
@@ -305,9 +314,8 @@ function App() {
                   <div className="toggleTrunk no-select" onClick={handleToggleTrunk}>
                     {rotateToTrunk ? 'Close' : 'Open'}<br /><span className="trunk">Trunk</span>
                   </div>
-                  
                 </div>
-                <VehicleModel rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} />
+                <VehicleModel rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} activeGear={activeGear} />
                 <MusicPanel volume={volume} />
               </Panel>
               {isPanelResizable && (
