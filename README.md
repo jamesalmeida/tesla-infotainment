@@ -1,4 +1,4 @@
-# Tesla Infotainment Simulator
+# Tesla Infotainment Simulator (WIP)
 
 Experience a simulated Tesla infotainment system in your browser!
 
