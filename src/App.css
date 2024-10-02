@@ -143,18 +143,17 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   margin-top: 10px;
-  opacity: 0;
   max-height: 75px;
   text-align: center;
 }
 
-.drivingGearIcons.fade-out {
+.drivingGearIcons .fade-out {
   opacity: 0;
   transition: opacity 0.5s ease-out;
   pointer-events: none;
 }
 
-.drivingGearIcons.fade-in {
+.drivingGearIcons .fade-in {
   opacity: 100;
   transition: opacity 0.5s ease-out;
   pointer-events: none;
@@ -198,6 +197,31 @@
   position: relative;
   bottom: 38px;
   right: -4px;
+}
+
+.turnSignal {
+  opacity: 0;
+  transition: opacity 0.1s ease-in-out;
+}
+
+.turnSignal.active {
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+  0%, 100% {
+    opacity: 1;
+  }
+}
+
+.turnSignal img {
+  width: 40px;
+  position: relative;
+  top: 15px;
+  /* opacity: 0; */
 }
 
 .speedLimit {

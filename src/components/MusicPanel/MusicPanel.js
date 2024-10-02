@@ -113,11 +113,11 @@ export function MusicPanel({ volume }) {
                         event.preventDefault();
                         togglePlayPause();
                         break;
-                    case 'ArrowRight':
+                    case '>':
                         event.preventDefault();
                         handleNext();
                         break;
-                    case 'ArrowLeft':
+                    case '<':
                         event.preventDefault();
                         handlePrevious();
                         break;

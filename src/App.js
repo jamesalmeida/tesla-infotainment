@@ -41,6 +41,8 @@ function App() {
   const [isPanelResizable, setIsPanelResizable] = useState(false);
   const DEFAULT_LEFT_PANEL_SIZE = 40;
   const dots = useDots();
+  const [leftTurnSignal, setLeftTurnSignal] = useState(false);
+  const [rightTurnSignal, setRightTurnSignal] = useState(false);
 
   const appsTopShelf = [
     'wipers',
@@ -245,20 +247,40 @@ function App() {
   // For keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // Check if the active element is an input field
       if (event.target.tagName.toLowerCase() === 'input') {
-        return; // Exit the function if we're typing in an input field
+        return;
       }
 
       if (event.shiftKey) {
-        switch (event.key.toUpperCase()) {
+        switch (event.key) {
+          case 'ArrowLeft':
+            console.log('Left turn signal toggled');
+            event.preventDefault();
+            setLeftTurnSignal(prev => !prev);
+            setRightTurnSignal(false);
+            break;
+          case 'ArrowRight':
+            console.log('Right turn signal toggled');
+            event.preventDefault();
+            setRightTurnSignal(prev => !prev);
+            setLeftTurnSignal(false);
+            break;
+          case 'H':
+            console.log('Hazard lights toggled');
+            event.preventDefault();
+            setLeftTurnSignal(prev => !prev || !rightTurnSignal);
+            setRightTurnSignal(prev => !prev || !leftTurnSignal);
+            break;
           case 'F':
+            console.log('Frunk toggled');
             handleToggleFrunk();
             break;
           case 'T':
+            console.log('Trunk toggled');
             handleToggleTrunk();
             break;
           case 'M':
+            console.log('Focus on Navigate Input');
             event.preventDefault(); // Prevent 'M' from being typed
             const navigateToInput = document.getElementById('navigateTo');
             if (navigateToInput) {
@@ -276,7 +298,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);  // Empty dependency array means this effect runs once on mount
+  }, [leftTurnSignal, rightTurnSignal]);  // Add dependencies
 
   return (
     <CarLockProvider>
@@ -298,12 +320,18 @@ function App() {
                     <GearSelect activeGear={activeGear} onGearSelect={handleGearSelect} />
                     <BatteryStatus />
                   </div>
-                  <div className={`drivingGearIcons ${activeGear === 'D' ? 'fade-in' : 'fade-out'}`}>
-                    {/* Add additional icons here when in 'D' mode */}
-                    <div className="speedometer">0<br /><span>MPH</span></div>
-                    <div className="turnSignal">TURN L</div>
-                    <div className="turnSignal">TURN R</div>
-                    <div className="speedLimit">SPEED<br/>LIMIT<br/><span>30</span></div>
+                  <div className={`drivingGearIcons`}>
+                    <div className={`speedometer ${activeGear === 'D' ? 'fade-in' : 'fade-out'}`}>
+                      0<br />
+                      <span>MPH</span>
+                    </div>
+                    <div className={`turnSignal ${leftTurnSignal ? 'active' : ''}`} style={{opacity: leftTurnSignal ? 1 : 0}}>
+                      <img src={getImagePath('icon-turn-left.svg')} alt="Turn Signal Left" />
+                    </div>
+                    <div className={`turnSignal ${rightTurnSignal ? 'active' : ''}`} style={{opacity: rightTurnSignal ? 1 : 0}}>
+                      <img src={getImagePath('icon-turn-right.svg')} alt="Turn Signal Right" />
+                    </div>
+                    <div className={`speedLimit ${activeGear === 'D' ? 'fade-in' : 'fade-out'}`}>SPEED<br/>LIMIT<br/><span>30</span></div>
                   </div>
                 </div>
                 <div className={`carModelStatus ${activeGear === 'D' ? 'fade-out' : 'fade-in'}`}>
