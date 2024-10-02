@@ -15,6 +15,26 @@ Experience a simulated Tesla infotainment system in your browser!
 - Responsive design for various screen sizes. Works best on desktop but try it out on your phone in landscape mode too. 
 - Adding features periodically. Leave a feature request in the issues section ^_^
 
+## Keyboard Shortcuts
+- Shift + Left Arrow: Toggle left turn signal
+- Shift + Right Arrow: Toggle right turn signal
+- Shift + H: Toggle hazard lights
+- Shift + F: Toggle frunk (front trunk)
+- Shift + T: Toggle trunk
+- Shift + M: Focus on Navigate Input
+- Shift + C: Backup Camera
+
+### Gear Selection
+- P: Park
+- R: Reverse
+- N: Neutral
+- D: Drive
+
+### Music Controls
+- Space: Play/Pause
+- Shift + <: Previous track
+- Shift + >: Next track
+
 ## Quick Start
 
 To run the project locally:
