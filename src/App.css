@@ -7,13 +7,15 @@
     "wdth" 100;
 } */
 
-/* html, body { width:100%;  overflow-x: hidden; } */
+html, body { width:100%;  overflow: hidden; }
 
 #root {
   height: calc(100vh - 60px);
   background: #4e4e4e;
   padding: 30px;
   caret-color: rgb(0 157 255);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #displayBezel {
