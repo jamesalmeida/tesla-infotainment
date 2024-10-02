@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="100%" height="100%" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
-    <g id="Turn-Signal-Right" serif:id="Turn Signal Right" transform="matrix(1,0,0,1,-0.126682,0)">
-        <g transform="matrix(6.12323e-17,1,-0.722663,4.42504e-17,48.8993,-2.1411e-15)">
-            <path d="M25,4.227L44.343,42.912L5.657,42.912L25,4.227Z" style="fill:rgb(46,255,23);stroke:rgb(46,255,23);stroke-width:4.17px;"/>
-        </g>
-        <rect x="4.409" y="19.18" width="17.592" height="11.64" style="fill:rgb(46,255,23);stroke:rgb(46,255,23);stroke-width:4.17px;"/>
+    <g transform="matrix(1.00315,0,0,1.00979,-0.816532,0.168638)">
+        <path d="M17.702,31.423L3.546,31.423L3.546,15.8L17.702,15.8L17.702,2.105L47.925,24.591L17.702,47.076L17.702,31.423Z" style="fill:rgb(0,197,0);stroke:rgb(0,197,0);stroke-width:4.17px;"/>
     </g>
 </svg>
