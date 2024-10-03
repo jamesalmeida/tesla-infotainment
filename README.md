@@ -10,9 +10,10 @@ Experience a simulated Tesla infotainment system in your browser!
 
 - Realistic 3D model of Tesla Model Y. Try opening the trunk and frunk!
 - Interactive infotainment system simulation. Play a podcast, adjust the volume, etc.
-- Put the car in reverse and see what's behind you!
-- Try navigating on the map and turning on traffic.
-- Responsive design for various screen sizes. Works best on desktop but try it out on your phone in landscape mode too. 
+- Put the car in reverse (Click the R) and see what's behind you!
+- Try searching on the map. Turn on traffic or different map styles.
+- Check out the keyboard shortcuts below for more controls.
+- Working on more responsive design for various screen sizes. Works best on desktop but you can try it out on your phone in landscape mode too. 
 - Adding features periodically. Leave a feature request in the issues section ^_^
 
 ## Keyboard Shortcuts
@@ -78,7 +79,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ### Thanks
 
-- Want to thank Ameer Studio for the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f).
-- Also thanks to Vasilj Miloevi for the [loading screen circle animations](https://codepen.io/eboye/pen/ANPxVX)
-- Thanks to [Patrick Stillhart](https://codepen.io/arcs) for sharing the [OutRun video game on Codepen](https://codepen.io/arcs/pen/aGzNKY) that inspired me to refactor it work in this project.
+- Want to thank Ameer Studio for sharing the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f) I'm using in the simulator.
+- Also thanks to Vasilj Miloevi for the [loading screen circle animations](https://codepen.io/eboye/pen/ANPxVX) that I used for the loading screen.
+- Thanks to Patrick Stillhart for sharing the [OutRun video game on Codepen](https://codepen.io/arcs/pen/aGzNKY) that I refactored to work inside of the Arcade in this project.
 
