@@ -79,3 +79,13 @@
   .driver-profile-settings img {
     width: 9%;
   }
+
+  @media (max-width: 768px) {
+    .userProfile img {
+      height: 14px;
+      margin-right: 4px;
+    }
+    .userProfile span { 
+      /* font-size: 10px; */
+    }
+  }

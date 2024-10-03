@@ -23,6 +23,12 @@
     max-width: 70px;
 }
 
+@media (max-width: 768px) {
+    .navIcons.temperature-display {
+        font-size: 15px;
+    }
+}
+
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
     .navIcons.temperature-display {
         font-size: 20px;

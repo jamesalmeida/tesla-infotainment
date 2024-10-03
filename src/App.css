@@ -368,10 +368,31 @@ html, body { width:100%;  overflow: hidden; }
   .small-screen-message {
     display: block;
   }
+
+  .batteryStatus span {
+    padding-right: 0px;
+  }
+  
+  .topBarCarStatusIcons {
+    font-size: 12px;
+  }
+
+  .carModelStatus{
+    top: -65%;
+    left: 1%;
+  }
+  .navBtn input {
+    font-size: 10px;
+  }
 }
 
 /* Media query for mobile devices in landscape mode */
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
+  body {
+    /* margin-left: 30px; */
+    /* background-color: #000000; */
+  }
+
   #root {
     height: 100dvh;
     padding: 0px;

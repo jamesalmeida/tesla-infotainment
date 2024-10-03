@@ -252,7 +252,7 @@ export function MapNavigation() {
         </div>
         <div className="airbagStatus no-select">
           <img src={getImagePath("icon-airbags.svg")} alt="Airbag Status" />
-          <div className="airbagStatusText">PASSENGER AIRBAG <span className="airbagStatusOff">OFF</span></div>
+          <div className="airbagStatusText">PASSENGER AIRBAG&nbsp;<span className="airbagStatusOff">OFF</span></div>
         </div>
       </div>
       <div className="mapOverlayWrapper">
@@ -261,7 +261,7 @@ export function MapNavigation() {
             onLoad={onAutocompleteLoad}
             onPlaceChanged={onPlaceChanged}
             options={{ fields: ['place_id', 'geometry', 'name', 'formatted_address'] }}
-            className="custom-autocomplete-container" // Add this line
+            className="custom-autocomplete-container"
           >
             <form className="floatingBtn navBtn" onSubmit={(e) => { e.preventDefault(); }}>
               <img className="searchIcon" src={getImagePath("icon-search.svg")} alt="Search Map" />

@@ -32,3 +32,10 @@
 .carLock .unlocked {
     color: #343434;
 }
+
+@media (max-width: 768px) {
+    .carLock {
+        width: 20px;
+    height: 12px;
+    }
+}

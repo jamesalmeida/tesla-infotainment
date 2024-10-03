@@ -251,6 +251,29 @@ input:focus {
     background: none !important;
 }
 
+@media (max-width: 768px) {
+    .topMenuBar {
+        font-size: 9px;
+    }
+    .airbagStatusText{
+        width: auto;
+        font-size: 3px;
+    }
+    .airbagStatus img {
+        width: auto;
+        height: 6px;
+        margin-right: 2px;
+    }
+    .wifiStatus {
+        width: 15px;
+        margin-right: 4px;
+        margin-left: 4px;
+    }
+    .floatingBtn .icon {
+        /* width: 15px; */
+    }
+}
+
 /* Media query for mobile devices in landscape mode */
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
     .navBtn input {
