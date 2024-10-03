@@ -8,6 +8,7 @@ import './Arcade.css';
 export const Arcade = () => {
   const games = [
     { name: 'Outrun', boxArt: 'outrun.jpg', description: '(Keyboard required) Race against time and other cars to complete the course before time runs out! Thanks to Patrick Stillhart for sharing this on Codepen. Link in the README.' },
+    { name: 'DOOM', boxArt: 'doom.jpg', description: 'Coming Soon? Can it run DOOM? W\'ll see if I can get it to work. (づ￣ ³￣)づ' },
     { name: 'Asteroids', boxArt: 'asteroids.jpg', description: 'Coming Soon! Asteroids is a space combat game where you navigate a spaceship and destroy asteroids and enemy ships.' },
     { name: 'Centipede', boxArt: 'centipede.jpg', description: 'Coming Soon! Centipede is a shooter game where you control a centipede and shoot at enemies and avoid their attacks.' },
     { name: 'Missile Command', boxArt: 'missile-command.jpg', description: 'Coming Soon! Missile Command is a classic arcade game where you control a missile defense system and shoot at incoming missiles.' },
