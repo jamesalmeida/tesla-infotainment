@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import { GoogleMap, useJsApiLoader, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api';
 import CarLock from '../CarLock/CarLock';
@@ -14,15 +14,15 @@ const containerStyle = {
   height: '100%'
 };
 
-const customMapStyles = [
-  {
-    featureType: "all",
-    elementType: "labels",
-    stylers: [
-      { visibility: "off" }
-    ]
-  }
-];
+// const customMapStyles = [
+//   {
+//     featureType: "all",
+//     elementType: "labels",
+//     stylers: [
+//       { visibility: "off" }
+//     ]
+//   }
+// ];
 
 const API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 // const MAP_ID = process.env.REACT_APP_GOOGLE_MAPS_MAP_ID; // This wasn't working, so hardcoding for now
@@ -47,11 +47,14 @@ export function MapNavigation() {
   const inputRef = useRef(null);  // New ref for the input element
   const [inputValue, setInputValue] = useState('');  // New state for input value
 
-  const { isLoaded } = useJsApiLoader({
+  // Memoize the loader options
+  const loaderOptions = useMemo(() => ({
     id: 'google-map-script',
     googleMapsApiKey: API_KEY,
-    libraries: libraries // Use the constant libraries array
-  });
+    libraries: libraries,
+  }), []);
+
+  const { isLoaded } = useJsApiLoader(loaderOptions);
 
   useEffect(() => {
     if (isLoaded && window.google) {
@@ -328,7 +331,7 @@ export function MapNavigation() {
               mapTypeId: mapType,
               disableDefaultUI: true,
               gestureHandling: 'greedy',
-              styles: customMapStyles,
+              // styles: customMapStyles,
               zoomControl: false,
               mapTypeControl: false,
               scaleControl: false,
