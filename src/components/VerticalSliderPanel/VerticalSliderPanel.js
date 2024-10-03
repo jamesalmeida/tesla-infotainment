@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './VerticalSliderPanel.css';
-import { BackupCam } from '../Apps/BackupCam/BackupCam';
-import { CarSettings } from '../Apps/CarSettings/CarSettings';
-import { Calendar } from '../Apps/Calendar/Calendar';
-import { Dashcam } from '../Apps/Dashcam/Dashcam';
-import { Bluetooth } from '../Apps/Bluetooth/Bluetooth';
 import { AppleMusic } from '../Apps/AppleMusic/AppleMusic';
+import { Arcade } from '../Apps/Arcade/Arcade';
+import { BackupCam } from '../Apps/BackupCam/BackupCam';
+import { Bluetooth } from '../Apps/Bluetooth/Bluetooth';
+import { Calendar } from '../Apps/Calendar/Calendar';
+import { CarSettings } from '../Apps/CarSettings/CarSettings';
+import { Dashcam } from '../Apps/Dashcam/Dashcam';
 import { Podcasts } from '../Apps/Podcasts/Podcasts';
+import { Toybox } from '../Apps/Toybox/Toybox';
 
 const VerticalSliderPanel = ({ isOpen, activeIcon, onClose, isCameraForced }) => {
     const [isDragging, setIsDragging] = useState(false);
@@ -74,10 +76,12 @@ const VerticalSliderPanel = ({ isOpen, activeIcon, onClose, isCameraForced }) =>
         switch (activeIcon) {
             case 'apple-music':
                 return <AppleMusic />;
+            case 'arcade':
+                return <Arcade />;
             case 'bluetooth':
                 return <Bluetooth />;
-            case 'calendar':
-                return <Calendar />;
+            // case 'calendar':
+            //     return <Calendar />;
             case 'camera':
                 return <BackupCam />;
             case 'car-settings':
@@ -86,6 +90,8 @@ const VerticalSliderPanel = ({ isOpen, activeIcon, onClose, isCameraForced }) =>
                 return <Dashcam />;
             case 'podcasts':
                 return <Podcasts />;
+            case 'toybox':
+                return <Toybox />;
             default:
                 return null;
         }

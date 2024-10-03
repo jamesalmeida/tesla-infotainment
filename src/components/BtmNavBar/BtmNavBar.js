@@ -16,7 +16,10 @@ const BtmNavBar = ({
 }) => {
     const dockApps = [
         'camera',
-        'calendar',
+        // 'calendar',
+        // 'toybox',
+        // 'theater',
+        'arcade',
         'bluetooth',
         'apple-music',
         'dashcam',
