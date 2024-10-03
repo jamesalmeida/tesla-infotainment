@@ -80,4 +80,5 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 - Want to thank Ameer Studio for the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f).
 - Also thanks to Vasilj Miloevi for the [loading screen circle animations](https://codepen.io/eboye/pen/ANPxVX)
+- Thanks to [Patrick Stillhart](https://codepen.io/arcs) for sharing the [OutRun video game on Codepen](https://codepen.io/arcs/pen/aGzNKY) that inspired me to refactor it work in this project.
 

@@ -333,14 +333,6 @@ html, body { width:100%;  overflow: hidden; }
   font-weight: 600;
 }
 
-/* UTIL CSS */
-.no-select { 
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
 .small-screen-message {
   display: none;
   text-align: center;
@@ -471,3 +463,20 @@ html, body { width:100%;  overflow: hidden; }
 }
 
 
+
+/* -------------------- UTILITY CSS -------------------- */
+
+.no-select { 
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.ctaBtn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+  transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out;
+}
+
+/* -------------------- UTILITY CSS END -------------------- */

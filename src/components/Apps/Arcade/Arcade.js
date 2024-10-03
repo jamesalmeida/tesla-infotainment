@@ -7,10 +7,10 @@ import './Arcade.css';
 
 export const Arcade = () => {
   const games = [
-    { name: 'Outrun', image: 'outrun.jpg' },
-    { name: 'Asteroids', image: 'asteroids.jpg' },
-    { name: 'Centipede', image: 'centipede.jpg' },
-    { name: 'Missile Command', image: 'missile-command.jpg' },
+    { name: 'Outrun', image: 'outrun.jpg', description: '(Keyboard required) Race against time and other cars to complete the course before time runs out! Thanks to Patrick Stillhart for sharing this on Codepen. Link in the README.' },
+    { name: 'Asteroids', image: 'asteroids.jpg', description: 'Coming Soon! Asteroids is a space combat game where you navigate a spaceship and destroy asteroids and enemy ships.' },
+    { name: 'Centipede', image: 'centipede.jpg', description: 'Coming Soon! Centipede is a shooter game where you control a centipede and shoot at enemies and avoid their attacks.' },
+    { name: 'Missile Command', image: 'missile-command.jpg', description: 'Coming Soon! Missile Command is a classic arcade game where you control a missile defense system and shoot at incoming missiles.' },
   ];
 
   const [activeGame, setActiveGame] = useState(games[0].name);
@@ -72,11 +72,14 @@ export const Arcade = () => {
                 alt={activeGame}
               />
               <div className="gradient"></div>
-              <div className="btnAndTitle">
-                <button className="play-button" onClick={handlePlayClick}>
+              <div className="activeGameBannerOverlay">
+                <div className="play-button ctaBtn" onClick={handlePlayClick}>
                   Play Game
-                </button>
-              <div className="gameTitle">{activeGame}</div>
+                </div>
+                <div className="gameInfo">
+                  <div className="gameTitle">{activeGame}</div>
+                  <div className="gameDescription">{games.find(game => game.name === activeGame).description}</div>
+                </div>
               </div>
             </div>
             <div className="game-carousel">
