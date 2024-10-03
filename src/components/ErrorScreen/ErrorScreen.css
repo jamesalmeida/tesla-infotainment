@@ -96,6 +96,7 @@
     background-image: -moz-linear-gradient(#adadad, #999999, #828282);
     background-image: -o-linear-gradient(#adadad, #999999, #828282);
     background-image: linear-gradient(#adadad, #999999, #828282);
+    border-radius: 6px;
 }
   
 .hal-eye {
