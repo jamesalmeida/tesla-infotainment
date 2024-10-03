@@ -6,7 +6,7 @@ export const Toybox = () => {
     <div className="toyboxWrapper">
       <h2>Toybox</h2>
       <p>Coming Soon...</p>
-      {/* Add your component-specific content here */}
+      {/* Add component-specific content here */}
     </div>
   );
 };

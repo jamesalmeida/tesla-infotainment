@@ -28,7 +28,6 @@
   width: 10%;
   height: auto;
   position: absolute;
-  /* top: 35px; */
   animation: spinY 3s infinite linear;
   transform-style: preserve-3d;
 }
@@ -43,7 +42,7 @@
 
 .dots {
   display: inline-block;
-  width: 20px;  /* Adjust as needed */
+  width: 20px;
   text-align: left;
 }
 

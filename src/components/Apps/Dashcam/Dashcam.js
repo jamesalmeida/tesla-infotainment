@@ -26,7 +26,7 @@ export function Dashcam() {
     };
 
     // YouTube video ID
-    const videoId = '5gFR3sMWSO0'; // Replace with your desired video ID
+    const videoId = '5gFR3sMWSO0'; // Video ID for speicific video to play on load.
 
     return (
         <div className="dashcam-container">

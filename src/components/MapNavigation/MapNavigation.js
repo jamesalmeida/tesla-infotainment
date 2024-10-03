@@ -7,28 +7,16 @@ import OutsideTemp from '../OutsideTemp/OutsideTemp';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import UserProfile from '../UserProfile/UserProfile';
 import './MapNavigation.css';
-import './MapNavigationAutocomplete.css'; // Add this new import
+import './MapNavigationAutocomplete.css';
 
 const containerStyle = {
   width: '100%',
   height: '100%'
 };
 
-// const customMapStyles = [
-//   {
-//     featureType: "all",
-//     elementType: "labels",
-//     stylers: [
-//       { visibility: "off" }
-//     ]
-//   }
-// ];
-
 const API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-// const MAP_ID = process.env.REACT_APP_GOOGLE_MAPS_MAP_ID; // This wasn't working, so hardcoding for now
 const MAP_ID = '2d1b7cd2cf277f7';
 
-// Define libraries array outside of the component
 const libraries = ['places'];
 
 export function MapNavigation() {
@@ -47,7 +35,7 @@ export function MapNavigation() {
   const inputRef = useRef(null);  // New ref for the input element
   const [inputValue, setInputValue] = useState('');  // New state for input value
 
-  // Memoize the loader options
+  // Memoize the loader options so it doesn't re-create on every render
   const loaderOptions = useMemo(() => ({
     id: 'google-map-script',
     googleMapsApiKey: API_KEY,
@@ -331,7 +319,6 @@ export function MapNavigation() {
               mapTypeId: mapType,
               disableDefaultUI: true,
               gestureHandling: 'greedy',
-              // styles: customMapStyles,
               zoomControl: false,
               mapTypeControl: false,
               scaleControl: false,

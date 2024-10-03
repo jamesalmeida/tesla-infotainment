@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const dotsContainerStyle = {
   display: 'inline-block',
-  width: '15px', // Adjust as needed
+  width: '15px',
   textAlign: 'left',
   fontFamily: 'monospace'
 };

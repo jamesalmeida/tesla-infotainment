@@ -11,15 +11,14 @@
     z-index: 1000;
   }
   
-  .modal-content {}
+  /* .modal-content {} */
   
   .modal-close {
     margin-top: 20px;
   }
   
-  /* Styles for different modal types */
+  /* Styles specific to app shelf */
   .modal-content.app-shelf {
-    /* Styles specific to app shelf */
     width: 40%;
     background-color: black;
     color: white;

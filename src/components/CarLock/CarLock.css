@@ -22,7 +22,7 @@
 }
 
 .carLock .unlocked .lock-shackle {
-    transform: translateX(10px) rotateY(-180deg); /* Adjusted transformation */
+    transform: translateX(10px) rotateY(-180deg);
 }
 
 .carLock .locked {

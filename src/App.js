@@ -315,8 +315,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [leftTurnSignal, rightTurnSignal]);  // Add dependencies
-
+  }, [leftTurnSignal, rightTurnSignal]);
   return (
     <CarLockProvider>
       <UserProfileProvider>

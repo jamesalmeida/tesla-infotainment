@@ -8,7 +8,7 @@ export const ShelfModal = ({ isVisible, onClose }) => {
     <div className="shelf-modal-overlay">
       <div className="shelf-modal">
         <h2>App Shelf</h2>
-        {/* Add your shelf content here */}
+        {/* Add shelf content here */}
         <button onClick={onClose}>Close</button>
       </div>
     </div>

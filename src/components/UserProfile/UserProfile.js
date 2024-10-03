@@ -31,7 +31,6 @@ const UserProfile = () => {
       </div>
       {isDropdownOpen && (
         <div className="profile-dropdown">
-          {/* <div className="profile-dropdown-header"></div> */}
           {profiles.map((profile) => (
             <div
               key={profile.id}

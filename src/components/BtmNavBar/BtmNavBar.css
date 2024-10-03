@@ -3,8 +3,6 @@
     position: relative;
     height: 13%;
     width: 100%;
-    /* height: calc(10vh - 1px); */
-    /* width: calc(100vw - 64px); */
     /* need to account for the 1px border in the width and height */
     border-left: 1px solid #343434;
     border-right: 1px solid #343434;
@@ -18,11 +16,9 @@
     color: white;
     display: grid;
     grid-template-columns: 8% 19% 48% 25%;
-    /* grid-gap: 10px; */
     align-items: center;
     height: 100%;
     text-align: center;
-    /* padding: 0 20px; */
 }
 
 .navIconWrapper {
@@ -51,17 +47,13 @@
 .dockApps {
     display: flex;
     flex-direction: row;
-    /* justify-content: space-between; */
     justify-self: center;
     align-items: center;
-    /* height: 100%; */
-    /* width: 100%; */
 }
 
 .navIcons {
     height: 45%;
     width: 45%;
-    /* width: 40px; */
     padding: 0 15px;
     transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out;
 }
@@ -84,7 +76,6 @@
 }
 
 .car-settings {
-    /* width: 18%; */
     justify-self: start;
 }
 

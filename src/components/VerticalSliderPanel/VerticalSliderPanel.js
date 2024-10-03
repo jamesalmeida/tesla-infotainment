@@ -80,8 +80,8 @@ const VerticalSliderPanel = ({ isOpen, activeIcon, onClose, isCameraForced }) =>
                 return <Arcade />;
             case 'bluetooth':
                 return <Bluetooth />;
-            // case 'calendar':
-            //     return <Calendar />;
+            case 'calendar':
+                return <Calendar />;
             case 'camera':
                 return <BackupCam />;
             case 'car-settings':
