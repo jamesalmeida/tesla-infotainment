@@ -15,6 +15,7 @@ import VolumeControl from './components/VolumeControl/VolumeControl';
 import TemperatureControl from './components/TemperatureControl/TemperatureControl';
 import BatteryStatus from './components/BatteryStatus/BatteryStatus';
 import GearSelect from './components/GearSelect/GearSelect';
+import ErrorScreen from './components/ErrorScreen/ErrorScreen';
 import { useDots } from './utils/dots';
 import './App.css';
 
@@ -322,6 +323,8 @@ function App() {
         {isLoading && <LoadingScreen />}
         <div id="displayBezel" ref={appContentRef} style={{display: isLoading ? 'none' : 'block'}}>
           <div className="displayWrapper">
+          {/* <div className="screenTooSmallError">I'm sorry Dave, I'm afraid I can't do that{dots}</div> */}
+            <ErrorScreen />
             <PanelGroup autoSaveId="example" direction="horizontal" className="horizontalPanelGroup">
               <Panel 
                 defaultSize={DEFAULT_LEFT_PANEL_SIZE}
@@ -401,7 +404,6 @@ function App() {
           </div>
         </div>
         <div className="small-screen-message">
-          I'm sorry Dave, I'm afraid I can't do that{dots}<br />
           Best viewed on a larger screen.<br />
           <span>For now, try turning your phone sideways.<br />
           At least until I tweak the mobile styles.</span>

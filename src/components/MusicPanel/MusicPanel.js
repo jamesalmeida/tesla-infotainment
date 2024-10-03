@@ -155,7 +155,7 @@ export function MusicPanel({ volume }) {
                         className="progressForeground" 
                         style={{width: `${(currentTime / duration) * 100}%`}}
                     >
-                        <div className="progressIndicator"></div>
+                        <div className="progressIndicator ctaBtn"></div>
                     </div>
                 </div>
                 <div className="timeCode">
@@ -164,23 +164,23 @@ export function MusicPanel({ volume }) {
             </div>
             <div className="musicBtnBar">
                 <button className="musicBtn" onClick={handlePrevious}>
-                    <img className="musicIcon" src={getImagePath("icon-music-previous.svg")} alt="Previous Track" />
+                    <img className="musicIcon ctaBtn" src={getImagePath("icon-music-previous.svg")} alt="Previous Track" />
                 </button>
                 <button className="musicBtn" onClick={togglePlayPause}>
                     <img 
-                        className="musicIcon" 
+                        className="musicIcon ctaBtn" 
                         src={isPlaying ? getImagePath("icon-music-pause.svg") : getImagePath("icon-music-play.svg")} 
                         alt="Play & Pause" 
                     />
                 </button>
                 <button className="musicBtn" onClick={handleNext}>
-                    <img className="musicIcon" src={getImagePath("icon-music-next.svg")} alt="Next Track" />
+                    <img className="musicIcon ctaBtn" src={getImagePath("icon-music-next.svg")} alt="Next Track" />
                 </button>
                 <button className="musicBtn">
-                    <img className="musicIcon" src={getImagePath("icon-settings.svg")} alt="Settings" />
+                    <img className="musicIcon ctaBtn" src={getImagePath("icon-settings.svg")} alt="Settings" />
                 </button>
                 <button className="musicBtn">
-                    <img className="musicIcon" src={getImagePath("icon-search.svg")} alt="Search" />
+                    <img className="musicIcon ctaBtn" src={getImagePath("icon-search.svg")} alt="Search" />
                 </button>
             </div>
         </div>
