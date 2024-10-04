@@ -44,7 +44,7 @@
 
 .activeGameBannerOverlay {
     position: absolute;
-    top: 74%;
+    bottom: 3%;
     left: 3%;
     display: flex;
     flex-direction: row;
@@ -67,7 +67,7 @@
     font-size: 30px;
     font-weight: 700;
     color: white;
-    padding: 4px 10px 0px 11px;
+    padding: 0px 10px;
 }
 
 .gameDescription{
