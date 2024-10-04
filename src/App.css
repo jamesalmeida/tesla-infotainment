@@ -125,6 +125,7 @@ html, body { width:100%;  overflow: hidden; }
   margin-top: 10px;
   max-height: 75px;
   text-align: center;
+  z-index: 3;
 }
 
 .drivingGearIcons .fade-out {
@@ -140,12 +141,14 @@ html, body { width:100%;  overflow: hidden; }
 }
 
 .carModelStatus {
-  position: relative;
-  top: 0%;
+  display: flex;
+  position: absolute;
+  top: 14%;
   z-index: 2;
   left: 10%;
   font-size: 0.7rem;
-  color:#4e4e4e;
+  color: #4e4e4e;
+  z-index: 4;
 }
 
 .carModelStatus.fade-out {
