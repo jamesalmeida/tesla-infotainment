@@ -189,11 +189,18 @@ input:focus {
     font-size: 1em;
     font-weight: 600;
     color: #4e4e4e;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.1), rgb(255 255 255 / 1));
 }
 
 .carLockWrapper {
     margin-right: 10px;
 }
+
+.carLockWrapper .carLock {
+    width: 30px;
+    height: 20px;
+}
+
 
 .wifiStatus {
     width: 3%;

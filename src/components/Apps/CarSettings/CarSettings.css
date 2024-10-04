@@ -1,7 +1,7 @@
 .car-settings-wrapper {
     display: flex;
     flex-direction: column;
-    height: calc(100% + 28px);
+    height: 100%;
     color: gray;
     font-size: .8rem;
     width: 100%;
@@ -49,16 +49,23 @@
     background-color: rgb(226, 226, 226);
 }
 
+.top-bar-right-icons {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-right: 13px;
+}
+
 .left-scroll-panel {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: calc(100% - 21px);
     grid-column: 1 / 2;
     grid-row: 1 / 2;
     overflow: auto;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
-    padding-top: 20px;
+    padding-top: 15px;
     padding-right: 15px;
 }
 
@@ -179,12 +186,14 @@
     border-bottom: 1px solid grey;
 }
 
-.flex-row div:first-child {
+.flex-row div:first-child,
+.row-5 div:last-child {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
 
 .flex-row div:last-child,
+.row-1 > div:nth-child(4),
 .auto-lights-btn {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
@@ -200,6 +209,14 @@
     border: 1px solid gray;
 }
 
+.row-5 {
+    margin-bottom: 20px;
+}
+
+.flex-column div:first-child {
+    border-bottom-left-radius: 0px;
+}
+
 .auto-high-beams-btn {
     width: 20%;
     margin-left: 4%;
@@ -207,7 +224,12 @@
 }
 
 .row-2 div {
-    padding: 8% 0%;
+    padding: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+    flex-direction: column;
 }
 
 #wipers-on-off-btn,
@@ -267,3 +289,96 @@
     flex: 1;
 }
 
+.btn.active {
+    background-color: #007bff;
+;
+    color: white;
+  }
+  
+  .red-dot {
+    display: inline-block;
+    margin-left: 5px;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+  }
+  
+  .child-lock-popup {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    gap: 10px;
+    /* justify-content: space-around; */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid;
+    /* Additional styling as needed */
+  }
+
+  .subtext {
+    font-size: 8px;
+    /* border-top-right-radius: none !important; */
+    /* border-bottom-right-radius: none !important; */
+  }
+  
+  .car-wash-mode-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    /* Additional styling for overlay effect */
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .adjustment-modal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .adjustment-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  
+  .adjustment-btn {
+    padding: 10px;
+    font-size: 18px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .adjustment-btn:nth-child(1) { grid-column: 2; }
+  .adjustment-btn:nth-child(2) { grid-column: 2; }
+  .adjustment-btn:nth-child(3) { grid-column: 1; grid-row: 2; }
+  .adjustment-btn:nth-child(4) { grid-column: 3; grid-row: 2; }
+  
+  .close-btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }

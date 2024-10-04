@@ -19,7 +19,7 @@ const MAP_ID = '2d1b7cd2cf277f7';
 
 const libraries = ['places'];
 
-export function MapNavigation() {
+export function MapNavigation({ onWifiClick }) {
   const [center, setCenter] = useState({ lat: 33.9210278, lng: -118.33005555555555 }); // Default location
   const [mapType, setMapType] = useState('roadmap');
   const [trafficLayer, setTrafficLayer] = useState(null);
@@ -233,7 +233,7 @@ export function MapNavigation() {
         </div>
         <UserProfile />
         <div className="wifiStatus">
-          <img src={getImagePath("icon-wifi.svg")} alt="Wifi Status" />
+          <img src={getImagePath("icon-wifi.svg")} alt="Wifi Status" onClick={onWifiClick} />
         </div>
         <div className="clock">
           <Clock />

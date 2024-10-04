@@ -45,6 +45,7 @@ function App() {
   const [leftTurnSignal, setLeftTurnSignal] = useState(false);
   const [rightTurnSignal, setRightTurnSignal] = useState(false);
   const [isRearViewCameraActive, setIsRearViewCameraActive] = useState(false);
+  const [isWifiMenuOpen, setIsWifiMenuOpen] = useState(false);
 
   const appsTopShelf = [
     'wipers',
@@ -317,6 +318,12 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [leftTurnSignal, rightTurnSignal]);
+
+  const handleWifiClick = () => {
+    setIsWifiMenuOpen(true);
+    setActiveNavIcon('car-settings');
+  };
+
   return (
     <CarLockProvider>
       <UserProfileProvider>
@@ -375,7 +382,7 @@ function App() {
                 className="rightPanel"
                 id="rightPanel"
               >
-                <MapNavigation/>
+                <MapNavigation onWifiClick={handleWifiClick} />
                 <VerticalSliderPanel 
                   isOpen={isSliderOpen} 
                   activeIcon={activeNavIcon}

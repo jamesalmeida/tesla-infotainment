@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserProfile from '../../UserProfile/UserProfile';
 import { Controls } from './components/Controls';
 import { Dynamics } from './components/Dynamics';
@@ -39,11 +39,22 @@ const leftPanelItems = [
   { icon: 'wifi', alt: 'Wifi', label: 'Wifi' },
 ];
 
-export const CarSettings = () => {
+export const CarSettings = ({ isWifiMenuOpen, setIsWifiMenuOpen }) => {
   const [activePanel, setActivePanel] = useState('Controls');
+
+  useEffect(() => {
+    if (isWifiMenuOpen) {
+      setActivePanel('Wifi');
+      setIsWifiMenuOpen(false);
+    }
+  }, [isWifiMenuOpen, setIsWifiMenuOpen]);
 
   const getButtonClassName = (button) => {
     return `button ${button.toLowerCase().replace(/\s+/g, '-')}`;
+  };
+
+  const handleWifiClick = () => {
+    setActivePanel('Wifi');
   };
 
   return (
@@ -53,13 +64,19 @@ export const CarSettings = () => {
           <img src={getImagePath("icon-search.svg")} alt="Search" />
           <input type="text" placeholder="Search settings" />
         </div>
-        <UserProfile />
-        {topBarItems.map((item, index) => (
-          <div key={index} className="top-bar-item">
-            <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
-            {item.text && item.text}
-          </div>
-        ))}
+        <div className="top-bar-right-icons">
+          <UserProfile />
+          {topBarItems.map((item, index) => (
+            <div 
+              key={index} 
+              className="top-bar-item"
+              onClick={item.icon === 'wifi' ? handleWifiClick : undefined}
+            >
+              <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
+              {item.text && item.text}
+            </div>
+          ))}
+        </div>
       </div>
       <div className="car-settings-panel">
         <div className="left-scroll-panel">
