@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/tesla-infotainment/static/css/main.1d3c7903.css",
-    "main.js": "/tesla-infotainment/static/js/main.666ee18c.js",
+    "main.css": "/tesla-infotainment/static/css/main.aa69baf7.css",
+    "main.js": "/tesla-infotainment/static/js/main.081a946a.js",
     "static/js/453.4979c5b0.chunk.js": "/tesla-infotainment/static/js/453.4979c5b0.chunk.js",
     "index.html": "/tesla-infotainment/index.html",
-    "main.1d3c7903.css.map": "/tesla-infotainment/static/css/main.1d3c7903.css.map",
-    "main.666ee18c.js.map": "/tesla-infotainment/static/js/main.666ee18c.js.map",
+    "main.aa69baf7.css.map": "/tesla-infotainment/static/css/main.aa69baf7.css.map",
+    "main.081a946a.js.map": "/tesla-infotainment/static/js/main.081a946a.js.map",
     "453.4979c5b0.chunk.js.map": "/tesla-infotainment/static/js/453.4979c5b0.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.1d3c7903.css",
-    "static/js/main.666ee18c.js"
+    "static/css/main.aa69baf7.css",
+    "static/js/main.081a946a.js"
   ]
 }
