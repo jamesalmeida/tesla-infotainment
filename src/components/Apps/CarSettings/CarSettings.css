@@ -59,6 +59,7 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
     padding-top: 20px;
+    padding-right: 15px;
 }
 
 .left-scroll-panel::-webkit-scrollbar,
@@ -94,7 +95,7 @@
 .settings-right-panel {
     /* padding: 20px; */
     width: 100%;
-    padding: 3% 5%;
+    padding: 3% 5% 0% 0%;
     overflow: auto;
     box-sizing: border-box;
 }
