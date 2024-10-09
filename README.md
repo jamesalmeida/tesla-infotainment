@@ -1,5 +1,4 @@
 # Tesla Infotainment Simulator (WIP)
-
 Experience a simulated Tesla infotainment system in your browser!
 
 [Live Demo](https://jamesalmeida.github.io/tesla-infotainment/)
@@ -7,7 +6,6 @@ Experience a simulated Tesla infotainment system in your browser!
 ![App Preview](public/app-preview.png)
 
 ## Features to try out
-
 - Realistic 3D model of Tesla Model Y. Try opening the trunk and frunk!
 - Interactive infotainment system simulation. Play a podcast, adjust the volume, etc.
 - Put the car in reverse (Click the R) and see what's behind you!
@@ -37,7 +35,6 @@ Experience a simulated Tesla infotainment system in your browser!
 - Shift + >: Next track
 
 ## Quick Start
-
 To run the project locally:
 
 1. Clone the repository:
@@ -62,7 +59,6 @@ To run the project locally:
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Build for Production
-
 To create a production-ready build:
 
 ```
@@ -78,7 +74,6 @@ To make this project work as a Github Page, I added this command to deploy to a 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ### Thanks
-
 - Want to thank Ameer Studio for sharing the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f) I'm using in the simulator.
 - Also thanks to Vasilj Miloevi for the [loading screen circle animations](https://codepen.io/eboye/pen/ANPxVX) that I used for the loading screen.
 - Thanks to Patrick Stillhart for sharing the [OutRun video game on Codepen](https://codepen.io/arcs/pen/aGzNKY) that I refactored to work inside of the Arcade in this project.
