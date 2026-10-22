@@ -1,8 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import App from './App';
+import BatteryStatus from './components/BatteryStatus/BatteryStatus';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+test('shows the starting battery percentage', () => {
+  render(<BatteryStatus />);
+  expect(screen.getByText('69%')).toBeInTheDocument();
 });
