@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Set this to your default branch
+  pull_request:
 
 permissions:
   contents: read
@@ -19,7 +20,7 @@ jobs:
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
-        node-version: '20'  # Using the latest LTS version of Node.js
+        node-version: '24'  # Active LTS; Node.js 20 is end-of-life and unpatched
 
     - name: Create env file
       run: |
@@ -27,6 +28,9 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+
+    - name: Test
+      run: npm test -- --watchAll=false
 
     - name: Build
       run: CI=false npm run build
@@ -37,6 +41,7 @@ jobs:
         path: ./build
 
   deploy:
+    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
