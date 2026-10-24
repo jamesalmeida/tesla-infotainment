@@ -43,9 +43,9 @@ To run the project locally:
    cd tesla-infotainment
    ```
 
-2. Install dependencies:
+2. Install dependencies with [pnpm](https://pnpm.io/) (run `corepack enable` once to get the version pinned in `package.json`):
    ```
-   npm install
+   pnpm install
    ```
 
 3. Use the `.env.template` to create your own `.env` file. Add your API key for [Google Maps](https://cloud.google.com/maps-platform) and also a mapID for the maps styles to match Tesla's car maps. You can use mine (it's in the template) or create your own.
@@ -53,25 +53,34 @@ To run the project locally:
 
 4. Start the development server:
    ```
-   npm start
+   pnpm dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000/tesla-infotainment/](http://localhost:3000/tesla-infotainment/) in your browser.
 
 ## Build for Production
 To create a production-ready build:
 
 ```
-npm run build
+pnpm build
 ```
 
 This command builds the app for production to the `build` folder, optimizing the build for the best performance.
 
-### `npm run deploy`
-To make this project work as a Github Page, I added this command to deploy to a Github Page. You'll want to add the `PUBLIC_URL` to your `.env` file to point to your Github Pages URL.
+## Linting
+To check the code for problems:
+
+```
+pnpm lint
+```
+
+Use `pnpm lint:fix` to apply the automatically fixable ones.
+
+### `pnpm run deploy`
+To make this project work as a Github Page, I added this command to deploy to a Github Page. The GitHub Pages base path is configured in `vite.config.mjs`.
 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is built with [Vite](https://vite.dev/).
 
 ### Thanks
 - Want to thank Ameer Studio for sharing the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f) I'm using in the simulator.

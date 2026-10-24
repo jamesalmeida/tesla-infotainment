@@ -14,10 +14,6 @@
     transform: translateY(0);
 }
 
-.vertical-slider-panel.closing {
-    transform: translateY(100%);
-}
-
 .vertical-slider-panel.dragging {
     transition: none;
 }

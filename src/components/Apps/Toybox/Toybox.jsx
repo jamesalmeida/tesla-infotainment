@@ -1,0 +1,11 @@
+import './Toybox.css';
+
+export const Toybox = () => {
+  return (
+    <div className="toyboxWrapper">
+      <h2>Toybox</h2>
+      <p>Coming Soon...</p>
+      {/* Add component-specific content here */}
+    </div>
+  );
+};
