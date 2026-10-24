@@ -22,18 +22,24 @@ jobs:
       with:
         node-version: '24'  # Active LTS; Node.js 20 is end-of-life and unpatched
 
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4  # Version comes from packageManager in package.json
+
     - name: Create env file
       run: |
-        echo "REACT_APP_GOOGLE_MAPS_API_KEY=${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}" >> .env
+        echo "VITE_GOOGLE_MAPS_API_KEY=${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}" >> .env
 
     - name: Install dependencies
-      run: npm install
+      run: pnpm install --frozen-lockfile
+
+    - name: Lint
+      run: pnpm run lint
 
     - name: Test
-      run: npm test -- --watchAll=false
+      run: pnpm test
 
     - name: Build
-      run: CI=false npm run build
+      run: pnpm run build
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
