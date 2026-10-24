@@ -15,7 +15,8 @@ const containerStyle = {
 };
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const MAP_ID = '2d1b7cd2cf277f7';
+// Fall back to the original Tesla-style map ID when the env var is unset.
+const MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '2d1b7cd2cf277f7';
 
 const libraries = ['places'];
 

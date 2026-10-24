@@ -28,6 +28,7 @@ jobs:
     - name: Create env file
       run: |
         echo "VITE_GOOGLE_MAPS_API_KEY=${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}" >> .env
+        echo "VITE_GOOGLE_MAPS_MAP_ID=${{ vars.VITE_GOOGLE_MAPS_MAP_ID }}" >> .env
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
