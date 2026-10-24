@@ -26,3 +26,9 @@ if (!global.matchMedia) {
     dispatchEvent: () => false,
   });
 }
+
+// jsdom does not implement media playback; MusicPanel calls these on mount.
+if (typeof HTMLMediaElement !== 'undefined') {
+  HTMLMediaElement.prototype.pause = () => {};
+  HTMLMediaElement.prototype.play = () => Promise.resolve();
+}
