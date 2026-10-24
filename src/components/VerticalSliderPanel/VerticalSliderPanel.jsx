@@ -31,6 +31,7 @@ const VerticalSliderPanel = ({ isOpen, activeIcon, onClose, isWifiMenuOpen, setI
         if (isOpen) {
             setIsDragging(true);
             setStartY(clientY);
+            setCurrentY(0);
         }
     };
 
@@ -46,9 +47,8 @@ const VerticalSliderPanel = ({ isOpen, activeIcon, onClose, isWifiMenuOpen, setI
             setIsDragging(false);
             if (currentY > 50) { // If dragged down more than 50px
                 onClose(); // Trigger closing animation
-            } else {
-                setCurrentY(0);
             }
+            setCurrentY(0);
         }
     };
 

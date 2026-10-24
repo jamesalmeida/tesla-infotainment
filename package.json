@@ -15,8 +15,7 @@
     "react-resizable-panels": "^4.14.8",
     "react-webcam": "^7.2.0",
     "react-youtube": "^10.1.0",
-    "three": "^0.167.1",
-    "web-vitals": "^6.2.3"
+    "three": "^0.167.1"
   },
   "scripts": {
     "dev": "vite",
@@ -26,20 +25,8 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "predeploy": "npm run build",
+    "predeploy": "pnpm run build",
     "deploy": "gh-pages -d build"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

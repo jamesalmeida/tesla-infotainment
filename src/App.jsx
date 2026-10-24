@@ -41,7 +41,6 @@ function App() {
   const DEFAULT_LEFT_PANEL_SIZE = 40;
   const [leftTurnSignal, setLeftTurnSignal] = useState(false);
   const [rightTurnSignal, setRightTurnSignal] = useState(false);
-  const [, setIsRearViewCameraActive] = useState(false);
   const [isWifiMenuOpen, setIsWifiMenuOpen] = useState(false);
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: 'tesla-panels',
@@ -93,7 +92,9 @@ function App() {
     } else if (isSliderOpen && activeNavIcon === iconName && !isCameraForced) {
       setIsSliderOpen(false);
       setActiveNavIcon(null);
+      setIsWifiMenuOpen(false);
     } else if (!isCameraForced || iconName === 'camera') {
+      setIsWifiMenuOpen(false);
       setActiveNavIcon(iconName);
       setIsSliderOpen(true);
     }
@@ -111,6 +112,7 @@ function App() {
     if (!isCameraForced) {
       setIsSliderOpen(false);
       setActiveNavIcon(null);
+      setIsWifiMenuOpen(false);
     }
   };
 
@@ -272,18 +274,13 @@ function App() {
           case 'C':
             console.log('Rear View Camera toggled');
             event.preventDefault();
-            setIsRearViewCameraActive(prev => {
-              const newState = !prev;
-              console.log(`Rear View Camera is now ${newState ? 'active' : 'inactive'}`);
-              if (newState) {
-                setActiveNavIcon('camera');
-                setIsSliderOpen(true);
-              } else {
-                setActiveNavIcon(null);
-                setIsSliderOpen(false);
-              }
-              return newState;
-            });
+            if (isSliderOpen && activeNavIcon === 'camera') {
+              setActiveNavIcon(null);
+              setIsSliderOpen(false);
+            } else {
+              setActiveNavIcon('camera');
+              setIsSliderOpen(true);
+            }
             break;
           case 'H':
             console.log('Hazard lights toggled');
@@ -319,11 +316,13 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [leftTurnSignal, rightTurnSignal]);
+  }, [leftTurnSignal, rightTurnSignal, isSliderOpen, activeNavIcon]);
 
   const handleWifiClick = () => {
+    if (isCameraForced) return;
     setIsWifiMenuOpen(true);
     setActiveNavIcon('car-settings');
+    setIsSliderOpen(true);
   };
 
   return (

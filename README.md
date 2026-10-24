@@ -43,9 +43,9 @@ To run the project locally:
    cd tesla-infotainment
    ```
 
-2. Install dependencies:
+2. Install dependencies with [pnpm](https://pnpm.io/) (run `corepack enable` once to get the version pinned in `package.json`):
    ```
-   npm install
+   pnpm install
    ```
 
 3. Use the `.env.template` to create your own `.env` file. Add your API key for [Google Maps](https://cloud.google.com/maps-platform) and also a mapID for the maps styles to match Tesla's car maps. You can use mine (it's in the template) or create your own.
@@ -53,7 +53,7 @@ To run the project locally:
 
 4. Start the development server:
    ```
-   npm run dev
+   pnpm dev
    ```
 
 4. Open [http://localhost:3000/tesla-infotainment/](http://localhost:3000/tesla-infotainment/) in your browser.
@@ -62,7 +62,7 @@ To run the project locally:
 To create a production-ready build:
 
 ```
-npm run build
+pnpm build
 ```
 
 This command builds the app for production to the `build` folder, optimizing the build for the best performance.
@@ -71,12 +71,12 @@ This command builds the app for production to the `build` folder, optimizing the
 To check the code for problems:
 
 ```
-npm run lint
+pnpm lint
 ```
 
-Use `npm run lint:fix` to apply the automatically fixable ones.
+Use `pnpm lint:fix` to apply the automatically fixable ones.
 
-### `npm run deploy`
+### `pnpm run deploy`
 To make this project work as a Github Page, I added this command to deploy to a Github Page. The GitHub Pages base path is configured in `vite.config.mjs`.
 
 

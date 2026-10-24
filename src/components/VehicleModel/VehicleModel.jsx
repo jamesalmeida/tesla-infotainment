@@ -27,7 +27,6 @@ function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
   const animationProgressRef = useRef(0);
   const isAnimatingRef = useRef(false);
   const defaultRotation = Math.PI;
-  const [, setIsDriving] = useState(false);
 
   useEffect(() => {
     const frunkPart = scene.getObjectByName("bonnet_dummy");
@@ -60,7 +59,6 @@ function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
 
     if (activeGear === 'D') {
       setTargetRotation(Math.PI / 4.3); // 90 degrees clockwise
-      setIsDriving(true);
     } else if (rotateToFrunk) {
       setFrunkTargetAngle(Math.PI / 6); // Open the frunk to 30 degrees
       setTrunkTargetAngle(0); // Close the trunk
@@ -74,7 +72,6 @@ function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
       setTargetRotation(defaultRotation); // Reset to default position
       setFrunkTargetAngle(0); // Close the frunk
       setTrunkTargetAngle(0); // Close the trunk
-      setIsDriving(false);
     }
     animationProgressRef.current = 0;
     isAnimatingRef.current = true;
