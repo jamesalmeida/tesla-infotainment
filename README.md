@@ -56,7 +56,7 @@ To run the project locally:
    pnpm dev
    ```
 
-4. Open [http://localhost:3000/tesla-infotainment/](http://localhost:3000/tesla-infotainment/) in your browser.
+5. Open [http://localhost:3000/tesla-infotainment/](http://localhost:3000/tesla-infotainment/) in your browser.
 
 ## Build for Production
 To create a production-ready build:
@@ -75,6 +75,15 @@ pnpm lint
 ```
 
 Use `pnpm lint:fix` to apply the automatically fixable ones.
+
+## Tests
+The UI-flow tests run with Vitest in a jsdom environment:
+
+```
+pnpm test
+```
+
+Use `pnpm test:watch` while developing.
 
 ### `pnpm run deploy`
 To make this project work as a Github Page, I added this command to deploy to a Github Page. The GitHub Pages base path is configured in `vite.config.mjs`.
