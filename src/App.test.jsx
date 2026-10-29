@@ -54,15 +54,19 @@ const renderApp = () => {
   });
 };
 
+// Slide-up apps are lazy-loaded chunks; let the import resolve before checking their content.
+const waitForLazyApp = () => act(() => vi.dynamicImportSettled());
+
 test('renders the infotainment display', () => {
   renderApp();
   expect(document.getElementById('displayBezel')).toBeInTheDocument();
 });
 
-test('bottom bar icon opens the slide-up panel and clicking it again closes it', () => {
+test('bottom bar icon opens the slide-up panel and clicking it again closes it', async () => {
   renderApp();
 
   fireEvent.click(navIcon('bluetooth'));
+  await waitForLazyApp();
   expect(panelIsOpen()).toBe(true);
   expect(screen.getByText('Bluetooth')).toBeInTheDocument();
 
@@ -70,10 +74,11 @@ test('bottom bar icon opens the slide-up panel and clicking it again closes it',
   expect(panelIsOpen()).toBe(false);
 });
 
-test('map wifi icon opens Settings on Wifi, and reopening returns to Controls', () => {
+test('map wifi icon opens Settings on Wifi, and reopening returns to Controls', async () => {
   renderApp();
 
   fireEvent.click(screen.getByAltText('Wifi Status'));
+  await waitForLazyApp();
   expect(panelIsOpen()).toBe(true);
   expect(activeSettingsPanel()).toBe('Wifi');
 
@@ -82,6 +87,7 @@ test('map wifi icon opens Settings on Wifi, and reopening returns to Controls', 
   expect(panelIsOpen()).toBe(false);
 
   fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
   expect(panelIsOpen()).toBe(true);
   expect(activeSettingsPanel()).toBe('Controls');
 });

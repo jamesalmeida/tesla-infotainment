@@ -1,6 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { lazy, Suspense, useState, useRef, useEffect } from 'react';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
-import { VehicleModel } from './components/VehicleModel/VehicleModel';
 import { getImagePath } from './utils/assetPaths';
 import { UserProfileProvider } from './contexts/UserProfileContext';
 import { CarLockProvider } from './contexts/CarLockContext';
@@ -16,6 +15,13 @@ import BatteryStatus from './components/BatteryStatus/BatteryStatus';
 import GearSelect from './components/GearSelect/GearSelect';
 import ErrorScreen from './components/ErrorScreen/ErrorScreen';
 import './App.css';
+
+// three.js and react-three-fiber are most of the bundle; the loading screen covers the wait.
+const VehicleModel = lazy(() =>
+  import('./components/VehicleModel/VehicleModel').then((module) => ({
+    default: module.VehicleModel,
+  })),
+);
 
 const formatAppName = (appName) => {
   return appName
@@ -390,11 +396,13 @@ function App() {
                     <span className="trunk">Trunk</span>
                   </div>
                 </div>
-                <VehicleModel
-                  rotateToFrunk={rotateToFrunk}
-                  rotateToTrunk={rotateToTrunk}
-                  activeGear={activeGear}
-                />
+                <Suspense fallback={null}>
+                  <VehicleModel
+                    rotateToFrunk={rotateToFrunk}
+                    rotateToTrunk={rotateToTrunk}
+                    activeGear={activeGear}
+                  />
+                </Suspense>
                 <MusicPanel volume={volume} />
               </Panel>
               {isPanelResizable && <Separator className="panelResizeHandle" />}

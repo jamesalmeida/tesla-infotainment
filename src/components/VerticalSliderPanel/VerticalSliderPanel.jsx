@@ -1,14 +1,19 @@
-import { useState, useRef } from 'react';
+import { lazy, Suspense, useState, useRef } from 'react';
+import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import './VerticalSliderPanel.css';
-import { AppleMusic } from '../Apps/AppleMusic/AppleMusic';
-import { Arcade } from '../Apps/Arcade/Arcade';
-import { BackupCam } from '../Apps/BackupCam/BackupCam';
-import { Bluetooth } from '../Apps/Bluetooth/Bluetooth';
-import { Calendar } from '../Apps/Calendar/Calendar';
-import { CarSettings } from '../Apps/CarSettings/CarSettings';
-import { Dashcam } from '../Apps/Dashcam/Dashcam';
-import { Podcasts } from '../Apps/Podcasts/Podcasts';
-import { Toybox } from '../Apps/Toybox/Toybox';
+
+// Each app is its own chunk, downloaded the first time it is opened.
+const lazyNamed = (load, name) => lazy(() => load().then((module) => ({ default: module[name] })));
+
+const AppleMusic = lazyNamed(() => import('../Apps/AppleMusic/AppleMusic'), 'AppleMusic');
+const Arcade = lazyNamed(() => import('../Apps/Arcade/Arcade'), 'Arcade');
+const BackupCam = lazyNamed(() => import('../Apps/BackupCam/BackupCam'), 'BackupCam');
+const Bluetooth = lazyNamed(() => import('../Apps/Bluetooth/Bluetooth'), 'Bluetooth');
+const Calendar = lazyNamed(() => import('../Apps/Calendar/Calendar'), 'Calendar');
+const CarSettings = lazyNamed(() => import('../Apps/CarSettings/CarSettings'), 'CarSettings');
+const Dashcam = lazyNamed(() => import('../Apps/Dashcam/Dashcam'), 'Dashcam');
+const Podcasts = lazyNamed(() => import('../Apps/Podcasts/Podcasts'), 'Podcasts');
+const Toybox = lazyNamed(() => import('../Apps/Toybox/Toybox'), 'Toybox');
 
 const VerticalSliderPanel = ({
   isOpen,
@@ -102,7 +107,9 @@ const VerticalSliderPanel = ({
       onMouseLeave={handleEnd}
     >
       <div className="slider-handle"></div>
-      <div className="slider-content">{renderContent()}</div>
+      <div className="slider-content">
+        <Suspense fallback={<LoadingSpinner />}>{renderContent()}</Suspense>
+      </div>
       {/* {!isCameraForced && <button onClick={handleClose}>Close</button>} */}
     </div>
   );
