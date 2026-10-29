@@ -112,6 +112,19 @@ Every push to `main` is linted, tested, built and deployed to GitHub Pages by `.
 
 This project is built with [Vite](https://vite.dev/).
 
+## 3D model
+
+The car model in `public/car-models/` is compressed with [glTF Transform](https://gltf-transform.dev/) (meshopt geometry, WebP textures), which drei's `useGLTF` decodes out of the box. To compress a new or updated model:
+
+```
+npx @gltf-transform/cli optimize input.glb output.glb \
+  --compress meshopt --texture-compress webp \
+  --flatten false --join false --instance false \
+  --simplify false --palette false --prune-solid-textures false
+```
+
+The `false` flags keep the node names and hierarchy that `VehicleModel.jsx` looks up (`bonnet_dummy`, `boot_dummy`, `door_*_dummy`) and keep the glass textures intact.
+
 ### Thanks
 
 - Want to thank Ameer Studio for sharing the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f) I'm using in the simulator.
