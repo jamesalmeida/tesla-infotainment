@@ -1,19 +1,21 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { getImagePath } from '../../utils/assetPaths';
+import { useState, useRef, useEffect } from 'react';
 import {
-  GoogleMap,
-  useJsApiLoader,
-  Marker,
-  Autocomplete,
-  DirectionsRenderer,
-} from '@react-google-maps/api';
+  APIProvider,
+  AdvancedMarker,
+  Map,
+  Pin,
+  Polyline,
+  useMap,
+  useMapsLibrary,
+} from '@vis.gl/react-google-maps';
+import { getImagePath } from '../../utils/assetPaths';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import UserProfile from '../UserProfile/UserProfile';
+import { PlaceSearch } from './PlaceSearch';
 import './MapNavigation.css';
-import './MapNavigationAutocomplete.css';
 
 const containerStyle = {
   width: '100%',
@@ -24,106 +26,52 @@ const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 // Fall back to the original Tesla-style map ID when the env var is unset.
 const MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '2d1b7cd2cf277f7';
 
-const libraries = ['places'];
+const DEFAULT_CENTER = { lat: 33.9210278, lng: -118.33005555555555 };
+const CHARGER_SEARCH_RADIUS_METERS = 5000;
+
+function MarkerIcon({ name, size }) {
+  return <img src={getImagePath(name)} width={size} height={size} alt="" />;
+}
 
 export function MapNavigation({ onWifiClick }) {
-  const [center, setCenter] = useState({ lat: 33.9210278, lng: -118.33005555555555 }); // Default location
+  return (
+    <APIProvider apiKey={API_KEY}>
+      <MapNavigationContent onWifiClick={onWifiClick} />
+    </APIProvider>
+  );
+}
+
+function MapNavigationContent({ onWifiClick }) {
+  const map = useMap();
+  const placesLibrary = useMapsLibrary('places');
+  const routesLibrary = useMapsLibrary('routes');
+  const [center, setCenter] = useState(DEFAULT_CENTER);
   const [mapType, setMapType] = useState('roadmap');
   const trafficLayerRef = useRef(null);
   const [isLocating, setIsLocating] = useState(false);
   const [chargers, setChargers] = useState([]);
+  const [query, setQuery] = useState('');
   const [searchResult, setSearchResult] = useState(null);
-  const [autocomplete, setAutocomplete] = useState(null);
-  const mapRef = useRef(null);
-  const [directions, setDirections] = useState(null);
+  const [routePath, setRoutePath] = useState(null);
   const [isNavigating, setIsNavigating] = useState(false);
-  const inputRef = useRef(null); // New ref for the input element
-  const [inputValue, setInputValue] = useState(''); // New state for input value
 
-  // Memoize the loader options so it doesn't re-create on every render
-  const loaderOptions = useMemo(
-    () => ({
-      id: 'google-map-script',
-      googleMapsApiKey: API_KEY,
-      libraries: libraries,
-    }),
-    [],
-  );
-
-  const { isLoaded } = useJsApiLoader(loaderOptions);
-
-  // These depend only on the Maps API being loaded, so derive them instead of
-  // storing them in state from an effect.
-  const markerIcon = useMemo(() => {
-    if (!isLoaded || !window.google) return null;
-    return {
-      url: getImagePath('icon-car-marker.svg'),
-      scaledSize: new window.google.maps.Size(40, 40),
-    };
-  }, [isLoaded]);
-
-  const directionsService = useMemo(() => {
-    if (!isLoaded || !window.google) return null;
-    return new window.google.maps.DirectionsService();
-  }, [isLoaded]);
-
-  const onLoad = useCallback(function callback(map) {
-    mapRef.current = map;
-  }, []);
-
-  const onAutocompleteLoad = (autocomplete) => {
-    setAutocomplete(autocomplete);
-  };
-
-  const onPlaceChanged = () => {
-    if (autocomplete !== null) {
-      const place = autocomplete.getPlace();
-      if (place.geometry) {
-        const newSearchResult = {
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-        };
-        setSearchResult(newSearchResult);
-
-        // Prioritize name, then formatted_address, then construct from address_components
-        let newValue = place.name;
-        if (!newValue && place.formatted_address) {
-          newValue = place.formatted_address;
-        } else if (!newValue && place.address_components) {
-          newValue = place.address_components.map((component) => component.long_name).join(', ');
-        }
-
-        setInputValue(newValue);
-        if (inputRef.current) {
-          inputRef.current.value = newValue;
-        }
-        if (mapRef.current) {
-          mapRef.current.panTo(newSearchResult);
-          mapRef.current.setZoom(16);
-        }
-      }
+  const handlePlaceSelect = ({ name, location }) => {
+    setQuery(name);
+    setSearchResult(location);
+    if (map) {
+      map.panTo(location);
+      map.setZoom(16);
     }
   };
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-  };
-
-  const clearInput = () => {
-    setInputValue('');
+  const clearSearch = () => {
+    setQuery('');
     setSearchResult(null);
-    if (inputRef.current) {
-      inputRef.current.value = '';
-    }
   };
-
-  const onUnmount = useCallback(function callback(_map) {
-    mapRef.current = null;
-  }, []);
 
   const handleCompass = () => {
-    if (mapRef.current) {
-      mapRef.current.setHeading(0);
+    if (map) {
+      map.setHeading(0);
     }
   };
 
@@ -132,7 +80,7 @@ export function MapNavigation({ onWifiClick }) {
   };
 
   const toggleTraffic = () => {
-    if (mapRef.current) {
+    if (map) {
       if (trafficLayerRef.current) {
         trafficLayerRef.current.setMap(null);
         trafficLayerRef.current = null;
@@ -141,20 +89,20 @@ export function MapNavigation({ onWifiClick }) {
           setMapType('roadmap');
         }
         const newTrafficLayer = new window.google.maps.TrafficLayer();
-        newTrafficLayer.setMap(mapRef.current);
+        newTrafficLayer.setMap(map);
         trafficLayerRef.current = newTrafficLayer;
       }
     }
   };
 
   useEffect(() => {
-    if (mapRef.current && mapType === 'roadmap' && trafficLayerRef.current) {
+    if (map && mapType === 'roadmap' && trafficLayerRef.current) {
       trafficLayerRef.current.setMap(null);
       const newTrafficLayer = new window.google.maps.TrafficLayer();
-      newTrafficLayer.setMap(mapRef.current);
+      newTrafficLayer.setMap(map);
       trafficLayerRef.current = newTrafficLayer;
     }
-  }, [mapType]);
+  }, [map, mapType]);
 
   const handleLocation = () => {
     if (navigator.geolocation) {
@@ -166,9 +114,9 @@ export function MapNavigation({ onWifiClick }) {
             lng: position.coords.longitude,
           };
           setCenter(pos);
-          if (mapRef.current) {
-            mapRef.current.panTo(pos);
-            mapRef.current.setZoom(16);
+          if (map) {
+            map.panTo(pos);
+            map.setZoom(16);
           }
           setIsLocating(false); // Stop loading
         },
@@ -183,57 +131,54 @@ export function MapNavigation({ onWifiClick }) {
     }
   };
 
-  const handleChargerLocations = () => {
-    if (mapRef.current) {
-      const service = new window.google.maps.places.PlacesService(mapRef.current);
-      const request = {
-        location: center,
-        radius: '5000',
-        type: ['electric_vehicle_charging_station'],
-      };
-
-      service.nearbySearch(request, (results, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-          setChargers(results);
-        }
+  const handleChargerLocations = async () => {
+    if (!placesLibrary) return;
+    try {
+      const { places } = await placesLibrary.Place.searchNearby({
+        fields: ['id', 'location'],
+        locationRestriction: { center, radius: CHARGER_SEARCH_RADIUS_METERS },
+        includedPrimaryTypes: ['electric_vehicle_charging_station'],
+        maxResultCount: 20,
       });
+      setChargers(places);
+    } catch (error) {
+      console.error('Error fetching charger locations', error);
     }
   };
 
-  const calculateRoute = () => {
-    if (directionsService && searchResult) {
-      directionsService.route(
-        {
-          origin: center,
-          destination: searchResult,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-        },
-        (result, status) => {
-          if (status === window.google.maps.DirectionsStatus.OK) {
-            setDirections(result);
-            setIsNavigating(true);
-          } else {
-            console.error(`error fetching directions ${result}`);
-          }
-        },
-      );
+  const calculateRoute = async () => {
+    if (!routesLibrary || !searchResult) return;
+    try {
+      const { routes } = await routesLibrary.Route.computeRoutes({
+        origin: center,
+        destination: searchResult,
+        travelMode: 'DRIVING',
+        fields: ['path', 'viewport'],
+      });
+      const route = routes?.[0];
+      if (!route?.path) {
+        console.error('No route found');
+        return;
+      }
+      setRoutePath(route.path.map(({ lat, lng }) => ({ lat, lng })));
+      setIsNavigating(true);
+      if (map && route.viewport) {
+        map.fitBounds(route.viewport);
+      }
+    } catch (error) {
+      console.error('Error fetching directions', error);
     }
   };
 
   const endNavigation = () => {
     setIsNavigating(false);
-    setSearchResult(null);
-    setDirections(null);
-
-    // Clear the input field
-    if (inputRef.current) {
-      inputRef.current.value = '';
-    }
+    setRoutePath(null);
+    clearSearch();
 
     // Center the map on the current location
-    if (mapRef.current) {
-      mapRef.current.panTo(center);
-      mapRef.current.setZoom(16);
+    if (map) {
+      map.panTo(center);
+      map.setZoom(16);
     }
   };
 
@@ -261,36 +206,14 @@ export function MapNavigation({ onWifiClick }) {
         </div>
       </div>
       <div className="mapOverlayWrapper">
-        {isLoaded && (
-          <Autocomplete
-            onLoad={onAutocompleteLoad}
-            onPlaceChanged={onPlaceChanged}
-            options={{ fields: ['place_id', 'geometry', 'name', 'formatted_address'] }}
-            className="custom-autocomplete-container"
-          >
-            <form
-              className="floatingBtn navBtn"
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <img className="searchIcon" src={getImagePath('icon-search.svg')} alt="Search Map" />
-              <input
-                ref={inputRef}
-                placeholder="Navigate"
-                name="NavigateTo"
-                defaultValue={inputValue}
-                onChange={handleInputChange}
-                id="navigateTo"
-              />
-              {inputValue && (
-                <button className="clearInput" onClick={clearInput}>
-                  <img src={getImagePath('icon-x.svg')} alt="Clear input" />
-                </button>
-              )}
-            </form>
-          </Autocomplete>
-        )}
+        <PlaceSearch
+          placesLibrary={placesLibrary}
+          query={query}
+          onQueryChange={setQuery}
+          onSelect={handlePlaceSelect}
+          onClear={clearSearch}
+          locationBias={center}
+        />
         {searchResult && !isNavigating && (
           <button className="floatingBtn navigateBtn" onClick={calculateRoute}>
             Navigate
@@ -330,62 +253,30 @@ export function MapNavigation({ onWifiClick }) {
         </div>
       </div>
       <div className="mapBackground">
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={16}
-            onLoad={onLoad}
-            onUnmount={onUnmount}
-            options={{
-              mapId: MAP_ID,
-              mapTypeId: mapType,
-              disableDefaultUI: true,
-              gestureHandling: 'greedy',
-              zoomControl: false,
-              mapTypeControl: false,
-              scaleControl: false,
-              streetViewControl: false,
-              rotateControl: false,
-              fullscreenControl: false,
-            }}
-          >
-            {markerIcon && <Marker position={center} icon={markerIcon} />}
-            {searchResult && !isNavigating && (
-              <Marker
-                position={searchResult}
-                icon={{
-                  url: getImagePath('icon-map-marker.svg'), // Image for Map Navigation search result
-                  scaledSize: new window.google.maps.Size(40, 40),
-                }}
-              />
-            )}
-            {directions && (
-              <DirectionsRenderer
-                directions={directions}
-                options={{
-                  suppressMarkers: true,
-                  polylineOptions: {
-                    strokeColor: '#1976D2',
-                    strokeWeight: 5,
-                  },
-                }}
-              />
-            )}
-            {chargers.map((charger, index) => (
-              <Marker
-                key={index}
-                position={charger.geometry.location}
-                icon={{
-                  url: getImagePath('icon-charger.svg'),
-                  scaledSize: new window.google.maps.Size(30, 30),
-                }}
-              />
-            ))}
-          </GoogleMap>
-        ) : (
-          <></>
-        )}
+        <Map
+          style={containerStyle}
+          defaultCenter={DEFAULT_CENTER}
+          defaultZoom={16}
+          mapId={MAP_ID}
+          mapTypeId={mapType}
+          disableDefaultUI
+          gestureHandling="greedy"
+        >
+          <AdvancedMarker position={center}>
+            <MarkerIcon name="icon-car-marker.svg" size={40} />
+          </AdvancedMarker>
+          {searchResult && !isNavigating && (
+            <AdvancedMarker position={searchResult}>
+              <MarkerIcon name="icon-map-marker.svg" size={40} />
+            </AdvancedMarker>
+          )}
+          {routePath && <Polyline path={routePath} strokeColor="#1976D2" strokeWeight={5} />}
+          {chargers.map((charger) => (
+            <AdvancedMarker key={charger.id} position={charger.location}>
+              <Pin background="#e31937" borderColor="#a8102a" glyphColor="#ffffff" />
+            </AdvancedMarker>
+          ))}
+        </Map>
       </div>
     </div>
   );

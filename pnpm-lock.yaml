@@ -11,9 +11,6 @@ importers:
 
   .:
     dependencies:
-      '@react-google-maps/api':
-        specifier: ^2.19.3
-        version: 2.20.8(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@react-spring/three':
         specifier: ^10.1.2
         version: 10.1.2(@react-three/fiber@9.8.2(@types/react@18.3.4)(immer@9.0.21)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(three@0.186.1))(react@19.3.1)(three@0.186.1)
@@ -23,6 +20,9 @@ importers:
       '@react-three/fiber':
         specifier: ^9.8.2
         version: 9.8.2(@types/react@18.3.4)(immer@9.0.21)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(three@0.186.1)
+      '@vis.gl/react-google-maps':
+        specifier: ^1.10.1
+        version: 1.10.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -273,11 +273,8 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@googlemaps/js-api-loader@1.16.8':
-    resolution: {integrity: sha512-CROqqwfKotdO6EBjZO/gQGVTbeDps5V7Mt9+8+5Q+jTg5CRMi3Ii/L9PmV3USROrt2uWxtGzJHORmByxyo9pSQ==}
-
-  '@googlemaps/markerclusterer@2.5.3':
-    resolution: {integrity: sha512-x7lX0R5yYOoiNectr10wLgCBasNcXFHiADIBdmn7jQllF2B5ENQw5XtZK+hIw4xnV0Df0xhN4LN98XqA5jaiOw==}
+  '@googlemaps/js-api-loader@2.1.3':
+    resolution: {integrity: sha512-1t6umwRufEGzIPjHPjPeuuY1dCal0zU2bZeomkf4OA0MprFdlKCnXY3zeFkzDaCvKjwbFubeapm61P5+EbrAoA==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -348,18 +345,6 @@ packages:
 
   '@oxc-project/types@0.155.0':
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
-
-  '@react-google-maps/api@2.20.8':
-    resolution: {integrity: sha512-wtLYFtCGXK3qbIz1H5to3JxbosPnKsvjDKhqGylXUb859EskhzR7OpuNt0LqdLarXUtZCJTKzPn3BNaekNIahg==}
-    peerDependencies:
-      react: ^16.8 || ^17 || ^18 || ^19
-      react-dom: ^16.8 || ^17 || ^18 || ^19
-
-  '@react-google-maps/infobox@2.20.0':
-    resolution: {integrity: sha512-03PJHjohhaVLkX6+NHhlr8CIlvUxWaXhryqDjyaZ8iIqqix/nV8GFdz9O3m5OsjtxtNho09F/15j14yV0nuyLQ==}
-
-  '@react-google-maps/marker-clusterer@2.20.0':
-    resolution: {integrity: sha512-tieX9Va5w1yP88vMgfH1pHTacDQ9TgDTjox3tLlisKDXRQWdjw+QeVVghhf5XqqIxXHgPdcGwBvKY6UP+SIvLw==}
 
   '@react-spring/animated@10.1.2':
     resolution: {integrity: sha512-yAsQ/bbp6+vko7WNCI1M00c6KLE9XKTGCrgRhQqS4JcK3oF5qBV4rHYrQEprvEvYXxt+1H5FsLS2eVValEPfFw==}
@@ -577,8 +562,8 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
-  '@types/google.maps@3.58.1':
-    resolution: {integrity: sha512-X9QTSvGJ0nCfMzYOnaVs/k6/4L+7F5uCS+4iUmkLEls6J9S/Phv+m/i3mDeyc49ZBgwab3EFO1HEoBY7k98EGQ==}
+  '@types/google.maps@3.66.9':
+    resolution: {integrity: sha512-6OmfZjuSMDG5oTzW6f2JM1by1rUrdCMBxtru2OJXfX44N3DqQSh8lEgwZbrHjoswYiapRf30vUCHjTs9sKDJdQ==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -616,6 +601,12 @@ packages:
     resolution: {integrity: sha512-Yy19y6O2GJq8f7CHf7L0nxL8bf4PZCPaVOCgJrusOeFHY1LvHgYXnmnXg6N5iwAnbgbZCDjo60SiM6IPJi9C5g==}
     peerDependencies:
       react: '>= 16.8.0'
+
+  '@vis.gl/react-google-maps@1.10.1':
+    resolution: {integrity: sha512-2a6Bv04WcJIVN7IIjqygzVrmWKIgTXn/lmMdjeRWbKxX5FV6/Y3LhFScGJAKfAKqoAYIG6s31CWebhFUQdmBsw==}
+    peerDependencies:
+      react: '>=16.8.0 || ^19.0 || ^19.0.0-rc'
+      react-dom: '>=16.8.0 || ^19.0 || ^19.0.0-rc'
 
   '@vitejs/plugin-react@6.1.2':
     resolution: {integrity: sha512-fhJNGUdscQa4HkI0xFxwonWyhnVReCPDbXI7FH7jmzpnVCrFQI7PRrhWecO263610vOrs9tr2Y4xcf8uAdFxbw==}
@@ -887,6 +878,10 @@ packages:
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
+  fast-equals@6.2.1:
+    resolution: {integrity: sha512-s7KFkLPAAbIDGTh+nVYhjTiwKGvgMXAUG5vwzg8vQKj7NSRZ4eEGExBQ4rq9V90fTYVWd1cb/Wr4ffCNBmLQMQ==}
+    engines: {node: '>=6.0.0'}
+
   fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
 
@@ -989,9 +984,6 @@ packages:
     resolution: {integrity: sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg==}
     engines: {node: '>=8'}
 
-  invariant@2.2.4:
-    resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
-
   is-extglob@2.1.1:
     resolution: {integrity: sha512-SbKbANkN603Vi4jEZv49LeVJMn4yGwsbzZworEoyEiutsN3nJYdbO36zfhGJ6QEDpOZIFkDtnq5JRxmvl3jsoQ==}
     engines: {node: '>=0.10.0'}
@@ -1045,9 +1037,6 @@ packages:
     resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
     engines: {node: '>=6'}
     hasBin: true
-
-  kdbush@4.1.0:
-    resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
 
   keyv@5.6.0:
     resolution: {integrity: sha512-CYDD3SOtsHtyXeEORYRx2qBtpDJFjRTGXUtmNEMGyzYOKj1TE3tycdlho7kA1Ufx9OYWZzg52QFBGALTirzDSw==}
@@ -1376,9 +1365,6 @@ packages:
   strip-indent@3.0.0:
     resolution: {integrity: sha512-laJTa3Jb+VQpaC6DseHhF7dXVqHTfJPCRDaEbid/drOhgitgYku/letMUqOXFoWV0zIIUbjpdH2t+tYj4bQMRQ==}
     engines: {node: '>=8'}
-
-  supercluster@8.0.1:
-    resolution: {integrity: sha512-IiOea5kJ9iqzD2t7QJq/cREyLHTtSmUT6gQsweojg9WH2sYJqZK9SswTu6jrscO6D1G5v5vYZ9ru/eq85lXeZQ==}
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -1875,12 +1861,9 @@ snapshots:
 
   '@exodus/bytes@1.16.0': {}
 
-  '@googlemaps/js-api-loader@1.16.8': {}
-
-  '@googlemaps/markerclusterer@2.5.3':
+  '@googlemaps/js-api-loader@2.1.3':
     dependencies:
-      fast-deep-equal: 3.1.3
-      supercluster: 8.0.1
+      '@types/google.maps': 3.66.9
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -1949,21 +1932,6 @@ snapshots:
       three: 0.186.1
 
   '@oxc-project/types@0.155.0': {}
-
-  '@react-google-maps/api@2.20.8(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
-    dependencies:
-      '@googlemaps/js-api-loader': 1.16.8
-      '@googlemaps/markerclusterer': 2.5.3
-      '@react-google-maps/infobox': 2.20.0
-      '@react-google-maps/marker-clusterer': 2.20.0
-      '@types/google.maps': 3.58.1
-      invariant: 2.2.4
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
-
-  '@react-google-maps/infobox@2.20.0': {}
-
-  '@react-google-maps/marker-clusterer@2.20.0': {}
 
   '@react-spring/animated@10.1.2(react@19.3.1)':
     dependencies:
@@ -2150,7 +2118,7 @@ snapshots:
 
   '@types/estree@1.0.9': {}
 
-  '@types/google.maps@3.58.1': {}
+  '@types/google.maps@3.66.9': {}
 
   '@types/json-schema@7.0.15': {}
 
@@ -2190,6 +2158,14 @@ snapshots:
     dependencies:
       '@use-gesture/core': 10.3.1
       react: 19.3.1
+
+  '@vis.gl/react-google-maps@1.10.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@googlemaps/js-api-loader': 2.1.3
+      '@types/google.maps': 3.66.9
+      fast-equals: 6.2.1
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
 
   '@vitejs/plugin-react@6.1.2(vite@8.3.5(jiti@1.21.6)(terser@5.31.6)(yaml@2.5.0))':
     dependencies:
@@ -2446,6 +2422,8 @@ snapshots:
 
   fast-deep-equal@3.1.3: {}
 
+  fast-equals@6.2.1: {}
+
   fast-json-stable-stringify@2.1.0: {}
 
   fast-levenshtein@2.0.6: {}
@@ -2525,10 +2503,6 @@ snapshots:
 
   indent-string@4.0.0: {}
 
-  invariant@2.2.4:
-    dependencies:
-      loose-envify: 1.4.0
-
   is-extglob@2.1.1: {}
 
   is-glob@4.0.3:
@@ -2585,8 +2559,6 @@ snapshots:
   json-stable-stringify-without-jsonify@1.0.1: {}
 
   json5@2.2.3: {}
-
-  kdbush@4.1.0: {}
 
   keyv@5.6.0:
     dependencies:
@@ -2873,10 +2845,6 @@ snapshots:
   strip-indent@3.0.0:
     dependencies:
       min-indent: 1.0.1
-
-  supercluster@8.0.1:
-    dependencies:
-      kdbush: 4.1.0
 
   supports-color@5.5.0:
     dependencies:
