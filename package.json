@@ -20,15 +20,15 @@
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.3",
-    "@react-spring/three": "^9.7.4",
-    "@react-three/drei": "^9.111.2",
-    "@react-three/fiber": "^8.17.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "@react-spring/three": "^10.1.2",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "react-resizable-panels": "^4.14.8",
     "react-webcam": "^7.2.0",
     "react-youtube": "^10.1.0",
-    "three": "^0.167.1"
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -43,5 +43,10 @@
     "prettier": "3.9.10",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "use-sync-external-store": "^1.5.0"
+    }
   }
 }
