@@ -4,13 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # A dependency joins the first group it matches, so the React/3D group
+    # comes first: those packages must move together, and three's 0.x
+    # releases count as "minor" bumps even when they break things.
     groups:
-      # One PR a week for everything that should not break anything.
-      minor-and-patch:
-        update-types:
-          - minor
-          - patch
-      # Packages that have to move together get their own PR for major bumps.
       react:
         patterns:
           - react
@@ -18,8 +15,11 @@ updates:
           - '@react-three/*'
           - '@react-spring/*'
           - three
+      # One PR a week for everything that should not break anything.
+      minor-and-patch:
         update-types:
-          - major
+          - minor
+          - patch
     open-pull-requests-limit: 5
 
   - package-ecosystem: github-actions
