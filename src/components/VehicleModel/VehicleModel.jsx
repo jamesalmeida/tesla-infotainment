@@ -10,8 +10,12 @@ function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+const modelPath = getCarModelPath('tesla-model-3-2018.glb');
+
+// Start downloading the model while the loading screen is up, not when the canvas mounts.
+useGLTF.preload(modelPath);
+
 function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
-  const modelPath = getCarModelPath('tesla-model-3-2018.glb');
   const { scene } = useGLTF(modelPath);
   const modelRef = useRef();
   const frunkRef = useRef();
