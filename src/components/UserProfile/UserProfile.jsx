@@ -4,10 +4,10 @@ import { getImagePath } from '../../utils/assetPaths';
 import './UserProfile.css';
 
 const profiles = [
-  { id: 1, name: 'James', image: getImagePath("profile01.svg") },
-  { id: 2, name: 'Lauren', image: getImagePath("icon-profile-default.svg") },
-  { id: 3, name: 'Guest', image: getImagePath("icon-profile-default.svg") },
-  { id: 4, name: 'Valet', image: getImagePath("icon-valet.svg") },
+  { id: 1, name: 'James', image: getImagePath('profile01.svg') },
+  { id: 2, name: 'Lauren', image: getImagePath('icon-profile-default.svg') },
+  { id: 3, name: 'Guest', image: getImagePath('icon-profile-default.svg') },
+  { id: 4, name: 'Valet', image: getImagePath('icon-valet.svg') },
 ];
 
 const UserProfile = () => {
@@ -37,11 +37,15 @@ const UserProfile = () => {
               className="profile-option"
               onClick={() => handleProfileSelect(profile)}
             >
-              <img className="profile-option-icon" src={profile.image} alt={`${profile.name}'s Profile`} />
+              <img
+                className="profile-option-icon"
+                src={profile.image}
+                alt={`${profile.name}'s Profile`}
+              />
               <span>{profile.name}</span>
               {profile.id === activeProfile.id && (
                 <img
-                  src={getImagePath("icon-green-check.svg")}
+                  src={getImagePath('icon-green-check.svg')}
                   alt="Active Profile"
                   className="active-profile-icon"
                 />
@@ -50,7 +54,7 @@ const UserProfile = () => {
           ))}
           <div className="driver-profile-settings">
             Driver Profile Settings
-            <img src={getImagePath("icon-gear.svg")} alt="Driver Profile Settings" />
+            <img src={getImagePath('icon-gear.svg')} alt="Driver Profile Settings" />
           </div>
         </div>
       )}

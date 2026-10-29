@@ -4,7 +4,7 @@ import { VehicleModel } from './components/VehicleModel/VehicleModel';
 import { getImagePath } from './utils/assetPaths';
 import { UserProfileProvider } from './contexts/UserProfileContext';
 import { CarLockProvider } from './contexts/CarLockContext';
-import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels";
+import { Group, Panel, Separator, useDefaultLayout } from 'react-resizable-panels';
 import { MapNavigation } from './components/MapNavigation/MapNavigation';
 import { MusicPanel } from './components/MusicPanel/MusicPanel';
 import { Modal } from './components/Modal/Modal';
@@ -20,7 +20,7 @@ import './App.css';
 const formatAppName = (appName) => {
   return appName
     .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 };
 
@@ -100,7 +100,7 @@ function App() {
     }
 
     if (leftPanelRef.current && leftPanelRef.current.getSize().asPercentage > 33) {
-      leftPanelRef.current.resize("33%");
+      leftPanelRef.current.resize('33%');
     }
   };
 
@@ -123,12 +123,12 @@ function App() {
   };
 
   const handleToggleFrunk = () => {
-    setRotateToFrunk(prev => !prev);
+    setRotateToFrunk((prev) => !prev);
     setRotateToTrunk(false); // Ensure trunk is closed when toggling frunk
   };
 
   const handleToggleTrunk = () => {
-    setRotateToTrunk(prev => !prev);
+    setRotateToTrunk((prev) => !prev);
     setRotateToFrunk(false); // Ensure frunk is closed when toggling trunk
   };
 
@@ -160,7 +160,6 @@ function App() {
     }
   }, [activeGear]);
 
-
   const renderModalContent = () => {
     switch (activeModal) {
       case 'app-shelf':
@@ -170,10 +169,7 @@ function App() {
             <div className="appTopShelf">
               {appsTopShelf.map((icon, index) => (
                 <div key={index} className="appShelfIcon">
-                  <img  
-                    src={getImagePath(`app-${icon}.svg`)}
-                    alt={`${icon} icon`} 
-                  />
+                  <img src={getImagePath(`app-${icon}.svg`)} alt={`${icon} icon`} />
                   <div className="appShelfIconText">{formatAppName(icon)}</div>
                 </div>
               ))}
@@ -181,10 +177,7 @@ function App() {
             <div className="appShelf">
               {apps.map((icon, index) => (
                 <div key={index} className="appShelfIcon">
-                  <img 
-                    src={getImagePath(`app-${icon}.svg`)} 
-                    alt={`${icon} icon`} 
-                  />
+                  <img src={getImagePath(`app-${icon}.svg`)} alt={`${icon} icon`} />
                   <div className="appShelfIconText">{formatAppName(icon)}</div>
                 </div>
               ))}
@@ -197,8 +190,8 @@ function App() {
             <h2>Temperature Control</h2>
             <TemperatureControl
               temperature={temperature}
-              onIncrement={() => setTemperature(prev => Math.min(prev + 1, 90))}
-              onDecrement={() => setTemperature(prev => Math.max(prev - 1, 60))}
+              onIncrement={() => setTemperature((prev) => Math.min(prev + 1, 90))}
+              onDecrement={() => setTemperature((prev) => Math.max(prev - 1, 60))}
             />
           </div>
         );
@@ -206,7 +199,7 @@ function App() {
         return null;
     }
   };
-  
+
   const appContentRef = useRef(null);
 
   useEffect(() => {
@@ -214,7 +207,7 @@ function App() {
       if (appContentRef.current) {
         const images = Array.from(appContentRef.current.querySelectorAll('img'));
         console.log(`Checking ${images.length} images`);
-        
+
         const allLoaded = images.every((img) => {
           const isLoaded = img.complete && img.naturalHeight !== 0;
           if (!isLoaded) {
@@ -262,13 +255,13 @@ function App() {
           case 'ArrowLeft':
             console.log('Left turn signal toggled');
             event.preventDefault();
-            setLeftTurnSignal(prev => !prev);
+            setLeftTurnSignal((prev) => !prev);
             setRightTurnSignal(false);
             break;
           case 'ArrowRight':
             console.log('Right turn signal toggled');
             event.preventDefault();
-            setRightTurnSignal(prev => !prev);
+            setRightTurnSignal((prev) => !prev);
             setLeftTurnSignal(false);
             break;
           case 'C':
@@ -285,8 +278,8 @@ function App() {
           case 'H':
             console.log('Hazard lights toggled');
             event.preventDefault();
-            setLeftTurnSignal(prev => !prev || !rightTurnSignal);
-            setRightTurnSignal(prev => !prev || !leftTurnSignal);
+            setLeftTurnSignal((prev) => !prev || !rightTurnSignal);
+            setRightTurnSignal((prev) => !prev || !leftTurnSignal);
             break;
           case 'F':
             console.log('Frunk toggled');
@@ -329,9 +322,13 @@ function App() {
     <CarLockProvider>
       <UserProfileProvider>
         {isLoading && <LoadingScreen />}
-        <div id="displayBezel" ref={appContentRef} style={{display: isLoading ? 'none' : 'block'}}>
+        <div
+          id="displayBezel"
+          ref={appContentRef}
+          style={{ display: isLoading ? 'none' : 'block' }}
+        >
           <div className="displayWrapper">
-          {/* <div className="screenTooSmallError">I'm sorry Dave, I'm afraid I can't do that{dots}</div> */}
+            {/* <div className="screenTooSmallError">I'm sorry Dave, I'm afraid I can't do that{dots}</div> */}
             <ErrorScreen />
             <Group
               defaultLayout={defaultLayout}
@@ -339,7 +336,7 @@ function App() {
               orientation="horizontal"
               className="horizontalPanelGroup"
             >
-              <Panel 
+              <Panel
                 defaultSize={`${DEFAULT_LEFT_PANEL_SIZE}%`}
                 minSize={`${DEFAULT_LEFT_PANEL_SIZE}%`}
                 maxSize="100%"
@@ -357,40 +354,60 @@ function App() {
                       0<br />
                       <span>MPH</span>
                     </div>
-                    <div className={`turnSignal ${leftTurnSignal ? 'active' : ''}`} style={{opacity: leftTurnSignal ? 1 : 0}}>
+                    <div
+                      className={`turnSignal ${leftTurnSignal ? 'active' : ''}`}
+                      style={{ opacity: leftTurnSignal ? 1 : 0 }}
+                    >
                       <img src={getImagePath('icon-turn-left.svg')} alt="Turn Signal Left" />
                     </div>
-                    <div className={`turnSignal ${rightTurnSignal ? 'active' : ''}`} style={{opacity: rightTurnSignal ? 1 : 0}}>
+                    <div
+                      className={`turnSignal ${rightTurnSignal ? 'active' : ''}`}
+                      style={{ opacity: rightTurnSignal ? 1 : 0 }}
+                    >
                       <img src={getImagePath('icon-turn-right.svg')} alt="Turn Signal Right" />
                     </div>
-                    <div className={`speedLimit ${activeGear === 'D' ? 'fade-in' : 'fade-out'}`}>SPEED<br/>LIMIT<br/><span>30</span></div>
+                    <div className={`speedLimit ${activeGear === 'D' ? 'fade-in' : 'fade-out'}`}>
+                      SPEED
+                      <br />
+                      LIMIT
+                      <br />
+                      <span>30</span>
+                    </div>
                   </div>
                 </div>
                 <div className={`carModelStatus ${activeGear === 'D' ? 'fade-out' : 'fade-in'}`}>
                   <div className="toggleFrunk no-select" onClick={handleToggleFrunk}>
-                    {rotateToFrunk ? 'Close' : 'Open'}<br /><span className="frunk">Frunk</span>
+                    {rotateToFrunk ? 'Close' : 'Open'}
+                    <br />
+                    <span className="frunk">Frunk</span>
                   </div>
-                  <div className="toggleLocks"><CarLock /></div>
+                  <div className="toggleLocks">
+                    <CarLock />
+                  </div>
                   <div className="toggleTrunk no-select" onClick={handleToggleTrunk}>
-                    {rotateToTrunk ? 'Close' : 'Open'}<br /><span className="trunk">Trunk</span>
+                    {rotateToTrunk ? 'Close' : 'Open'}
+                    <br />
+                    <span className="trunk">Trunk</span>
                   </div>
                 </div>
-                <VehicleModel rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} activeGear={activeGear} />
+                <VehicleModel
+                  rotateToFrunk={rotateToFrunk}
+                  rotateToTrunk={rotateToTrunk}
+                  activeGear={activeGear}
+                />
                 <MusicPanel volume={volume} />
               </Panel>
-              {isPanelResizable && (
-                <Separator className="panelResizeHandle" />
-              )}
-              <Panel 
+              {isPanelResizable && <Separator className="panelResizeHandle" />}
+              <Panel
                 defaultSize="67%"
                 minSize="0%"
-                maxSize={isPanelResizable ? "67%" : `${100 - DEFAULT_LEFT_PANEL_SIZE}%`}
+                maxSize={isPanelResizable ? '67%' : `${100 - DEFAULT_LEFT_PANEL_SIZE}%`}
                 className="rightPanel"
                 id="rightPanel"
               >
                 <MapNavigation onWifiClick={handleWifiClick} />
-                <VerticalSliderPanel 
-                  isOpen={isSliderOpen} 
+                <VerticalSliderPanel
+                  isOpen={isSliderOpen}
                   activeIcon={activeNavIcon}
                   onClose={handleSliderClose}
                   isWifiMenuOpen={isWifiMenuOpen}
@@ -398,7 +415,7 @@ function App() {
                 />
               </Panel>
             </Group>
-            <BtmNavBar 
+            <BtmNavBar
               handleNavIconClick={handleNavIconClick}
               temperature={temperature}
               setTemperature={setTemperature}
@@ -408,7 +425,7 @@ function App() {
               isShelfOpen={isShelfOpen}
               isCameraForced={isCameraForced}
             />
-            <Modal 
+            <Modal
               isVisible={activeModal !== null}
               onClose={handleModalClose}
               modalType={activeModal}
@@ -418,9 +435,13 @@ function App() {
           </div>
         </div>
         <div className="small-screen-message">
-          Best viewed on a larger screen.<br />
-          <span>For now, try turning your phone sideways.<br />
-          At least until I tweak the mobile styles.</span>
+          Best viewed on a larger screen.
+          <br />
+          <span>
+            For now, try turning your phone sideways.
+            <br />
+            At least until I tweak the mobile styles.
+          </span>
         </div>
       </UserProfileProvider>
     </CarLockProvider>

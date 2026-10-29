@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Stage, useGLTF, OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Stage, useGLTF, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSpring, a } from '@react-spring/three';
 import { getCarModelPath } from '../../utils/assetPaths';
@@ -29,18 +29,18 @@ function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
   const defaultRotation = Math.PI;
 
   useEffect(() => {
-    const frunkPart = scene.getObjectByName("bonnet_dummy");
-    const trunkPart = scene.getObjectByName("boot_dummy");
+    const frunkPart = scene.getObjectByName('bonnet_dummy');
+    const trunkPart = scene.getObjectByName('boot_dummy');
     if (frunkPart) frunkRef.current = frunkPart;
     if (trunkPart) trunkRef.current = trunkPart;
 
     // Find and set up door parts
-    const doorNames = ["door_lf_dummy", "door_lr_dummy", "door_rf_dummy", "door_rr_dummy"];
-    doorNames.forEach(doorName => {
+    const doorNames = ['door_lf_dummy', 'door_lr_dummy', 'door_rf_dummy', 'door_rr_dummy'];
+    doorNames.forEach((doorName) => {
       const doorPart = scene.getObjectByName(doorName);
       if (doorPart) {
         doorRefs.current[doorName] = doorPart;
-        setDoorStates(prev => ({ ...prev, [doorName]: { isOpen: false, angle: 0 } }));
+        setDoorStates((prev) => ({ ...prev, [doorName]: { isOpen: false, angle: 0 } }));
       }
     });
 
@@ -86,7 +86,7 @@ function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
       }
 
       const easedProgress = easeInOutCubic(animationProgressRef.current);
-      
+
       // Only rotate for trunk or reset
       if (rotateToTrunk || (!rotateToFrunk && !rotateToTrunk)) {
         const newRotation = THREE.MathUtils.lerp(startRotation, targetRotation, easedProgress);
@@ -95,13 +95,21 @@ function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
 
       // Animate the frunk
       if (frunkRef.current) {
-        const newFrunkAngle = THREE.MathUtils.lerp(frunkStartAngle, frunkTargetAngle, easedProgress);
+        const newFrunkAngle = THREE.MathUtils.lerp(
+          frunkStartAngle,
+          frunkTargetAngle,
+          easedProgress,
+        );
         frunkRef.current.rotation.x = newFrunkAngle;
       }
 
       // Animate the trunk
       if (trunkRef.current) {
-        const newTrunkAngle = THREE.MathUtils.lerp(trunkStartAngle, trunkTargetAngle, easedProgress);
+        const newTrunkAngle = THREE.MathUtils.lerp(
+          trunkStartAngle,
+          trunkTargetAngle,
+          easedProgress,
+        );
         trunkRef.current.rotation.x = newTrunkAngle;
       }
 
@@ -111,9 +119,9 @@ function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
           const targetAngle = doorState.isOpen ? Math.PI / 2 : 0;
           const newAngle = THREE.MathUtils.lerp(doorState.angle, targetAngle, easedProgress);
           doorRefs.current[doorName].rotation.y = newAngle;
-          setDoorStates(prev => ({
+          setDoorStates((prev) => ({
             ...prev,
-            [doorName]: { ...prev[doorName], angle: newAngle }
+            [doorName]: { ...prev[doorName], angle: newAngle },
           }));
         }
       });
@@ -125,9 +133,9 @@ function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }) {
     const clickedMesh = event.object;
     if (clickedMesh.userData.clickable) {
       const doorName = clickedMesh.name;
-      setDoorStates(prev => ({
+      setDoorStates((prev) => ({
         ...prev,
-        [doorName]: { ...prev[doorName], isOpen: !prev[doorName].isOpen }
+        [doorName]: { ...prev[doorName], isOpen: !prev[doorName].isOpen },
       }));
       animationProgressRef.current = 0;
       isAnimatingRef.current = true;
@@ -145,9 +153,9 @@ function ControlledOrbitControls() {
   const { camera, gl } = useThree();
   const controlsRef = useRef();
   const [isInteracting, setIsInteracting] = useState(false);
-  
+
   // Adjust the default rotation to be 200 degrees clockwise
-  const defaultRotation = Math.PI + ((200 * Math.PI) / 170);
+  const defaultRotation = Math.PI + (200 * Math.PI) / 170;
 
   const [springProps, setSpring] = useSpring(() => ({
     rotation: defaultRotation,
@@ -160,7 +168,7 @@ function ControlledOrbitControls() {
       controlsRef.current.update();
 
       const controls = controlsRef.current;
-      
+
       const onStart = () => setIsInteracting(true);
       const onEnd = () => {
         setIsInteracting(false);
@@ -211,26 +219,31 @@ export function VehicleModel({ rotateToFrunk, rotateToTrunk, activeGear }) {
   const cameraPosition = [
     distance * Math.cos(horizontalAngle) * Math.cos(verticalAngle),
     distance * Math.sin(verticalAngle),
-    distance * Math.sin(horizontalAngle) * Math.cos(verticalAngle)
+    distance * Math.sin(horizontalAngle) * Math.cos(verticalAngle),
   ];
 
   return (
-    <Canvas 
-      dpr={[1,2]}  
-      camera={{ 
+    <Canvas
+      dpr={[1, 2]}
+      camera={{
         fov: 40,
         position: cameraPosition,
         near: 0.1,
-        far: 1000
-      }} 
-      style={{"position": "relative"}}
+        far: 1000,
+      }}
+      style={{ position: 'relative' }}
       className="carModelWrapper"
     >
-      <color attach="background" args={["#f1f1f1"]} />
-      <Stage environment={"warehouse"}>
-        <Model scale={0.01} rotateToFrunk={rotateToFrunk} rotateToTrunk={rotateToTrunk} activeGear={activeGear} />
+      <color attach="background" args={['#f1f1f1']} />
+      <Stage environment={'warehouse'}>
+        <Model
+          scale={0.01}
+          rotateToFrunk={rotateToFrunk}
+          rotateToTrunk={rotateToTrunk}
+          activeGear={activeGear}
+        />
       </Stage>
       <ControlledOrbitControls />
     </Canvas>
-  )
+  );
 }

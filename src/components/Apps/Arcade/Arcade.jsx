@@ -7,11 +7,35 @@ import './Arcade.css';
 
 export const Arcade = () => {
   const games = [
-    { name: 'Outrun', boxArt: 'outrun.jpg', description: '(Keyboard required) Race against time and other cars to complete the course before time runs out! Thanks to Patrick Stillhart for sharing this on Codepen. Link in the README.' },
-    { name: 'DOOM', boxArt: 'doom.jpg', description: 'Can it run DOOM? Coming soon, if I can get it to work.' },
-    { name: 'Asteroids', boxArt: 'asteroids.jpg', description: 'Coming Soon! Asteroids is a space combat game where you navigate a spaceship and destroy asteroids and enemy ships.' },
-    { name: 'Centipede', boxArt: 'centipede.jpg', description: 'Coming Soon! Centipede is a shooter game where you control a centipede and shoot at enemies and avoid their attacks.' },
-    { name: 'Missile Command', boxArt: 'missile-command.jpg', description: 'Coming Soon! Missile Command is a classic arcade game where you control a missile defense system and shoot at incoming missiles.' },
+    {
+      name: 'Outrun',
+      boxArt: 'outrun.jpg',
+      description:
+        '(Keyboard required) Race against time and other cars to complete the course before time runs out! Thanks to Patrick Stillhart for sharing this on Codepen. Link in the README.',
+    },
+    {
+      name: 'DOOM',
+      boxArt: 'doom.jpg',
+      description: 'Can it run DOOM? Coming soon, if I can get it to work.',
+    },
+    {
+      name: 'Asteroids',
+      boxArt: 'asteroids.jpg',
+      description:
+        'Coming Soon! Asteroids is a space combat game where you navigate a spaceship and destroy asteroids and enemy ships.',
+    },
+    {
+      name: 'Centipede',
+      boxArt: 'centipede.jpg',
+      description:
+        'Coming Soon! Centipede is a shooter game where you control a centipede and shoot at enemies and avoid their attacks.',
+    },
+    {
+      name: 'Missile Command',
+      boxArt: 'missile-command.jpg',
+      description:
+        'Coming Soon! Missile Command is a classic arcade game where you control a missile defense system and shoot at incoming missiles.',
+    },
   ];
 
   const [activeGame, setActiveGame] = useState(games[0].name);
@@ -64,12 +88,14 @@ export const Arcade = () => {
         </div>
       </div>
 
-      {activeTab === 'Arcade' && (
-        !showGame ? (
+      {activeTab === 'Arcade' &&
+        (!showGame ? (
           <>
             <div className="main-game-banner">
               <img
-                src={getImagePath(`games/${activeGame.toLowerCase().replace(/\s+/g, '-')}-banner.jpg`)}
+                src={getImagePath(
+                  `games/${activeGame.toLowerCase().replace(/\s+/g, '-')}-banner.jpg`,
+                )}
                 alt={activeGame}
               />
               <div className="gradient"></div>
@@ -79,7 +105,9 @@ export const Arcade = () => {
                 </div>
                 <div className="gameInfo">
                   {/* <div className="gameTitle">{activeGame}</div> */}
-                  <div className="gameDescription">{games.find(game => game.name === activeGame).description}</div>
+                  <div className="gameDescription">
+                    {games.find((game) => game.name === activeGame).description}
+                  </div>
                 </div>
               </div>
             </div>
@@ -100,16 +128,11 @@ export const Arcade = () => {
             {currentGame === 'Outrun' && <Outrun onClose={closeGame} />}
             {/* Add other game components here when they're available */}
           </div>
-        )
-      )}
+        ))}
 
-      {activeTab === 'Theater' && (
-        <Theater />
-      )}
+      {activeTab === 'Theater' && <Theater />}
 
-      {activeTab === 'Toybox' && (
-        <Toybox />
-      )}
+      {activeTab === 'Toybox' && <Toybox />}
     </div>
   );
 };

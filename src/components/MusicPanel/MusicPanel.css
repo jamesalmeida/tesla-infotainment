@@ -1,178 +1,176 @@
 .musicPanel {
-    font-family: 'Open Sans';
-    font-weight: 600;
-    display: grid;
-    grid-template-columns: 15% 1fr;
-    grid-template-rows: 50% 2px calc(50% - 2px);
-    background-color: white;
-    height: 40%;
-    width: 96%;
-    max-width: 569px;
-    margin: 0px auto 10px;
-    border-radius: 5px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
-    overflow: hidden;
+  font-family: 'Open Sans';
+  font-weight: 600;
+  display: grid;
+  grid-template-columns: 15% 1fr;
+  grid-template-rows: 50% 2px calc(50% - 2px);
+  background-color: white;
+  height: 40%;
+  width: 96%;
+  max-width: 569px;
+  margin: 0px auto 10px;
+  border-radius: 5px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  overflow: hidden;
 }
 .albumArt {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3;
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
 }
 
 .albumArt img {
-    height: 100%;
-    width: 100%;
-    max-width: 62px;
-    border-top-left-radius: 5px;
+  height: 100%;
+  width: 100%;
+  max-width: 62px;
+  border-top-left-radius: 5px;
 }
 
 .musicText {
-    display: grid;
-    grid-template-columns: 5% 93%;
-    grid-template-rows: 50% 50%;
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
-    padding: 6px;
-    align-content: center;
-    justify-content: start;
-    align-items: center;
-    justify-items: start;
+  display: grid;
+  grid-template-columns: 5% 93%;
+  grid-template-rows: 50% 50%;
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  padding: 6px;
+  align-content: center;
+  justify-content: start;
+  align-items: center;
+  justify-items: start;
 }
 
 .title {
-    text-overflow: clip;
-    grid-column: 1 / 3;
-    grid-row: 1 / 2;
-    overflow-y: scroll;
-    white-space: nowrap;
-    color: #505050;
-    font-size: 14px;
+  text-overflow: clip;
+  grid-column: 1 / 3;
+  grid-row: 1 / 2;
+  overflow-y: scroll;
+  white-space: nowrap;
+  color: #505050;
+  font-size: 14px;
 }
 
 .sourceIcon {
-    grid-column: 1 / 2;
-    grid-row: 2 / 3;
-    height: auto;
-    width: 18px;
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+  height: auto;
+  width: 18px;
 }
 
-
-.albumTitle{
-    grid-column: 2 / 3;
-    grid-row: 2 / 3;
-    color: #9c9c9c;
-    font-size: 14px;
+.albumTitle {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+  color: #9c9c9c;
+  font-size: 14px;
 }
 
 .musicProgressBar {
-    grid-column: 1 / 3;
-    grid-row: 2 / 3;
-    background-color: rgb(200, 200, 200);
+  grid-column: 1 / 3;
+  grid-row: 2 / 3;
+  background-color: rgb(200, 200, 200);
 }
 
 .musicProgressIndicator {
-    position: relative;
-    top: -14px;
-    left: 90px;
-    width: 30px;
+  position: relative;
+  top: -14px;
+  left: 90px;
+  width: 30px;
 }
 
 .musicBtnBar {
-    grid-column: 1 / 3;
-    grid-row: 3 / 4;
-    display: flex;
-    justify-content: space-between;
-
+  grid-column: 1 / 3;
+  grid-row: 3 / 4;
+  display: flex;
+  justify-content: space-between;
 }
 
 .musicBtn {
-    font-size: 16px;
-    font-weight: bold;
-    color: #a1a1a1;
-    height: auto;
-    width: 100%;
-    background-color: rgb(255, 255, 255, 90%);
-    border: none;  
-    border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #a1a1a1;
+  height: auto;
+  width: 100%;
+  background-color: rgb(255, 255, 255, 90%);
+  border: none;
+  border-radius: 12px;
 }
 
 .musicBtn:focus {
-    outline: none;
+  outline: none;
 }
 
 .musicBtn::-moz-focus-inner {
-    border: 0;
+  border: 0;
 }
 
 .musicIcon {
-    height: 20px;
+  height: 20px;
 }
 
 .musicProgressBar {
-    width: 100%;
-    margin-bottom: 10px;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .progressBackground {
-    width: 100%;
-    height: 2px;
-    background-color: #ddd;
-    border-radius: 2px;
+  width: 100%;
+  height: 2px;
+  background-color: #ddd;
+  border-radius: 2px;
 }
 
 .progressForeground {
-    height: 100%;
-    background-color: #4e4e4e;
-    border-radius: 2px;
-    position: relative;
+  height: 100%;
+  background-color: #4e4e4e;
+  border-radius: 2px;
+  position: relative;
 }
 
 .progressIndicator {
-    width: 10px;
-    height: 10px;
-    background-color: #4e4e4e;
-    border-radius: 50%;
-    position: absolute;
-    right: -6px;
-    top: -5px;
+  width: 10px;
+  height: 10px;
+  background-color: #4e4e4e;
+  border-radius: 50%;
+  position: absolute;
+  right: -6px;
+  top: -5px;
 }
 
 .timeCode {
-    font-size: 12px;
-    color: #777;
-    text-align: right;
-    margin-top: 5px;
-    position: relative;
-    bottom: 6px;
-    right: 3px;
-    display: none;
+  font-size: 12px;
+  color: #777;
+  text-align: right;
+  margin-top: 5px;
+  position: relative;
+  bottom: 6px;
+  right: 3px;
+  display: none;
 }
 
 @media screen and (max-width: 768px) {
-    .musicPanel {
-        height: 62%;
-    }
-    .musicIcon {
-        width: 17px;
-    }
-    .sourceIcon {
-        width: 10px;
-    }
-    .title {
-        font-size: 10px;
-    }
-    .albumTitle {
-        font-size: 10px;
-    }
-
+  .musicPanel {
+    height: 62%;
+  }
+  .musicIcon {
+    width: 17px;
+  }
+  .sourceIcon {
+    width: 10px;
+  }
+  .title {
+    font-size: 10px;
+  }
+  .albumTitle {
+    font-size: 10px;
+  }
 }
 
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
-    .musicIcon {
-        width: 17px;
-    }
-    .sourceIcon {
-        width: 10px;
-    }
-    /* .albumTitle {} */
+  .musicIcon {
+    width: 17px;
+  }
+  .sourceIcon {
+    width: 10px;
+  }
+  /* .albumTitle {} */
 }
-

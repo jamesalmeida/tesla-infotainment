@@ -1,100 +1,102 @@
 .btmNavBar {
-    background-color: black;
-    position: relative;
-    height: 13%;
-    width: 100%;
-    /* need to account for the 1px border in the width and height */
-    border-left: 1px solid #343434;
-    border-right: 1px solid #343434;
-    border-bottom: 1px solid #343434;
-    border-radius: 0 0 15px 15px;
-    z-index: 99999999;
-    max-width: 1329px; /* to maintain aspect ratio */
+  background-color: black;
+  position: relative;
+  height: 13%;
+  width: 100%;
+  /* need to account for the 1px border in the width and height */
+  border-left: 1px solid #343434;
+  border-right: 1px solid #343434;
+  border-bottom: 1px solid #343434;
+  border-radius: 0 0 15px 15px;
+  z-index: 99999999;
+  max-width: 1329px; /* to maintain aspect ratio */
 }
 
 .btmNavItems {
-    color: white;
-    display: grid;
-    grid-template-columns: 8% 19% 48% 25%;
-    align-items: center;
-    height: 100%;
-    text-align: center;
+  color: white;
+  display: grid;
+  grid-template-columns: 8% 19% 48% 25%;
+  align-items: center;
+  height: 100%;
+  text-align: center;
 }
 
 .navIconWrapper {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
 .navIconWrapper.active::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 32%;
-    width: 35%;
-    height: 2px;
-    background-color: #888;
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 32%;
+  width: 35%;
+  height: 2px;
+  background-color: #888;
 }
 
 .navIconWrapper.disabled {
-    opacity: 0.5;
-    pointer-events: none;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .navIconWrapper.disabled img {
-    filter: grayscale(100%);
+  filter: grayscale(100%);
 }
 .dockApps {
-    display: flex;
-    flex-direction: row;
-    justify-self: center;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-self: center;
+  align-items: center;
 }
 
 .navIcons {
-    height: 45%;
-    width: 45%;
-    padding: 0 15px;
-    transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out;
+  height: 45%;
+  width: 45%;
+  padding: 0 15px;
+  transition:
+    transform 0.1s ease-in-out,
+    filter 0.1s ease-in-out;
 }
 
 .navIcons:hover {
-    transform: scale(1.05);
+  transform: scale(1.05);
 }
 
 .navIcons:active {
-    transform: scale(0.95);
-    filter: brightness(0.9);
+  transform: scale(0.95);
+  filter: brightness(0.9);
 }
 
 .navIcons.settings {
-    padding-left: 20px;
+  padding-left: 20px;
 }
 
 .navIcons.volUp {
-    padding-right: 15px;
+  padding-right: 15px;
 }
 
 .car-settings {
-    justify-self: start;
+  justify-self: start;
 }
 
 .volume-control .volume-display {
-    padding: 0 12px;
+  padding: 0 12px;
 }
 
 .floatingBtn.squareBtn.active {
-    background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 @media screen and (max-width: 768px) {
-    .btmNavBar {
-        border-radius: 0 0 6px 6px;
-    }
+  .btmNavBar {
+    border-radius: 0 0 6px 6px;
+  }
 }
 
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
-    .btmNavBar {
-        height: 18%;
-    }
+  .btmNavBar {
+    height: 18%;
+  }
 }

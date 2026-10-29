@@ -5,13 +5,7 @@ import VolumeControl from './VolumeControl';
 const modal = () => document.querySelector('.volume-modal');
 
 const renderVolumeControl = () =>
-  render(
-    <VolumeControl
-      volume={50}
-      onVolumeChange={vi.fn()}
-      onOpenAudioSettings={vi.fn()}
-    />
-  );
+  render(<VolumeControl volume={50} onVolumeChange={vi.fn()} onOpenAudioSettings={vi.fn()} />);
 
 beforeEach(() => {
   vi.useFakeTimers();

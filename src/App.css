@@ -1,4 +1,8 @@
-html, body { width:100%;  overflow: hidden; }
+html,
+body {
+  width: 100%;
+  overflow: hidden;
+}
 
 #root {
   height: calc(100vh - 60px);
@@ -35,12 +39,11 @@ html, body { width:100%;  overflow: hidden; }
 .App {
   text-align: center;
   margin: 0;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-optical-sizing: auto;
   font-weight: 800;
   font-style: normal;
-  font-variation-settings:
-    "wdth" 100;
+  font-variation-settings: 'wdth' 100;
 }
 
 .horizontalPanelGroup {
@@ -68,7 +71,7 @@ html, body { width:100%;  overflow: hidden; }
 }
 
 .panelResizeHandle::before {
-  content: "";
+  content: '';
   display: inline-block;
   position: relative;
   border-radius: 5px;
@@ -195,7 +198,8 @@ html, body { width:100%;  overflow: hidden; }
   50% {
     opacity: 0;
   }
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
 }
@@ -241,7 +245,8 @@ html, body { width:100%;  overflow: hidden; }
   width: 50px;
 }
 
-.frunk, .trunk {
+.frunk,
+.trunk {
   font-size: 1rem;
   font-weight: 600;
   color: black;
@@ -342,7 +347,6 @@ html, body { width:100%;  overflow: hidden; }
   padding-top: 7px;
 }
 
-
 /* -------------------- MEDIA QUERIES -------------------- */
 
 @media screen and (max-width: 768px) {
@@ -364,12 +368,12 @@ html, body { width:100%;  overflow: hidden; }
   .batteryStatus span {
     padding-right: 0px;
   }
-  
+
   .topBarCarStatusIcons {
     font-size: 12px;
   }
 
-  .carModelStatus{
+  .carModelStatus {
     top: -65%;
     left: 1%;
   }
@@ -411,7 +415,7 @@ html, body { width:100%;  overflow: hidden; }
   .horizontalPanelGroup {
     border-radius: 0px !important;
     height: 82% !important;
-  } 
+  }
 
   .carModelWrapper {
     height: 60% !important;
@@ -438,13 +442,12 @@ html, body { width:100%;  overflow: hidden; }
     font-size: 60px;
     line-height: 45px;
   }
-  
+
   .speedometer span {
     font-size: 15px;
     bottom: 30px;
     right: -3px;
   }
-  
 
   .toggleLocks {
     top: -26px;
@@ -460,7 +463,7 @@ html, body { width:100%;  overflow: hidden; }
 
 /* -------------------- UTILITY CSS -------------------- */
 
-.no-select { 
+.no-select {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -475,7 +478,9 @@ html, body { width:100%;  overflow: hidden; }
 .ctaBtn:hover {
   transform: scale(1.05);
   filter: brightness(1.1);
-  transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out;
+  transition:
+    transform 0.1s ease-in-out,
+    filter 0.1s ease-in-out;
 }
 
 /* -------------------- UTILITY CSS END -------------------- */

@@ -170,16 +170,10 @@ export const Controls = () => {
       {/* Row 4 */}
       <div className="flex-row row-4">
         <div className="flex-column">
-          <div
-            className="btn"
-            onClick={openMirrorsModal}
-          >
+          <div className="btn" onClick={openMirrorsModal}>
             Mirrors
           </div>
-          <div
-            className="btn"
-            onClick={openSteeringModal}
-          >
+          <div className="btn" onClick={openSteeringModal}>
             Steering
           </div>
         </div>
@@ -201,10 +195,7 @@ export const Controls = () => {
         </div>
         <div className="gap-column"></div>
         <div className="flex-column">
-          <div
-            className="btn"
-            onClick={() => setShowCarWashMode(true)}
-          >
+          <div className="btn" onClick={() => setShowCarWashMode(true)}>
             Car Wash
           </div>
           <div

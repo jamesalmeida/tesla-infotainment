@@ -121,7 +121,7 @@ export const Outrun = ({ onClose }) => {
     project(camX, camY, camZ) {
       this.scale = camD / (this.z - camZ);
       this.X = (1 + this.scale * (this.x - camX)) * halfWidth;
-      this.Y = Math.ceil((1 - this.scale * (this.y - camY)) * height / 2);
+      this.Y = Math.ceil(((1 - this.scale * (this.y - camY)) * height) / 2);
       this.W = this.scale * roadW * halfWidth;
     }
 
@@ -138,8 +138,7 @@ export const Outrun = ({ onClose }) => {
       destX += destW * offset;
       destY += destH * -1;
 
-      let obj =
-        layer instanceof Element ? layer : this.elements[layer + 6];
+      let obj = layer instanceof Element ? layer : this.elements[layer + 6];
       obj.style.background = `url('${sprite.src}') no-repeat`;
       obj.style.backgroundSize = `${destW}px ${destH}px`;
       obj.style.left = destX + `px`;
@@ -218,7 +217,7 @@ export const Outrun = ({ onClose }) => {
             _self.files[key] = beatportBuffer;
             callback(key);
           },
-          function () {}
+          function () {},
         );
       };
       request.send();
@@ -263,15 +262,7 @@ export const Outrun = ({ onClose }) => {
 
   // game
   const inGameRef = useRef(false);
-  let start,
-    playerX,
-    speed,
-    scoreVal,
-    pos,
-    cloudOffset,
-    sectionProg,
-    mapIndex,
-    countDown;
+  let start, playerX, speed, scoreVal, pos, cloudOffset, sectionProg, mapIndex, countDown;
   let lines = [];
   let cars = [];
 
@@ -440,13 +431,7 @@ export const Outrun = ({ onClose }) => {
   // ------------------------------------------------------------
 
   function update(step) {
-    if (
-      !heroRef.current ||
-      !roadRef.current ||
-      !cloudRef.current ||
-      !audioRef.current
-    )
-      return; // Ensure refs are valid
+    if (!heroRef.current || !roadRef.current || !cloudRef.current || !audioRef.current) return; // Ensure refs are valid
 
     // prepare this iteration
     pos += speed;
@@ -526,7 +511,7 @@ export const Outrun = ({ onClose }) => {
       let cT = new Date(timestamp() - start);
       lapRef.current.innerText = `${cT.getMinutes()}'${padNumber(
         cT.getSeconds(),
-        2
+        2,
       )}"${padNumber(cT.getMilliseconds(), 3)}`;
     }
 
@@ -583,7 +568,8 @@ export const Outrun = ({ onClose }) => {
 
       if (l.special) l.drawSprite(level, 0, l.special, l.special.offset || 0);
 
-      for (let car of cars) if ((car.pos | 0) === n % N) l.drawSprite(level, car.element, car.type, car.lane);
+      for (let car of cars)
+        if ((car.pos | 0) === n % N) l.drawSprite(level, car.element, car.type, car.lane);
 
       // update road
 
@@ -606,7 +592,7 @@ export const Outrun = ({ onClose }) => {
         halfWidth + 2,
         width / 4,
         l.Y,
-        halfWidth
+        halfWidth,
       );
       drawQuad(
         l.elements[1],
@@ -617,7 +603,7 @@ export const Outrun = ({ onClose }) => {
         halfWidth + 2,
         (width / 4) * 3,
         l.Y,
-        halfWidth
+        halfWidth,
       );
 
       drawQuad(l.elements[2], level, rumble, p.X, p.Y, p.W * 1.15, l.X, l.Y, l.W * 1.15);
@@ -633,19 +619,9 @@ export const Outrun = ({ onClose }) => {
           p.W * 0.4,
           l.X,
           l.Y,
-          l.W * 0.4
+          l.W * 0.4,
         );
-        drawQuad(
-          l.elements[5],
-          level,
-          tar,
-          p.X,
-          p.Y,
-          p.W * 0.35,
-          l.X,
-          l.Y,
-          l.W * 0.35
-        );
+        drawQuad(l.elements[5], level, tar, p.X, p.Y, p.W * 0.35, l.X, l.Y, l.W * 0.35);
       }
     }
   }
@@ -689,7 +665,7 @@ export const Outrun = ({ onClose }) => {
       highscoreRef.current.children[i].innerHTML = `${padNumber(
         i + 1,
         2,
-        '&nbsp;'
+        '&nbsp;',
       )}. ${highscores[i]}`;
     }
   }
@@ -718,7 +694,7 @@ export const Outrun = ({ onClose }) => {
 
     // Load audio files
     Object.keys(ASSETS.AUDIO).forEach((key) =>
-      audioRef.current.load(ASSETS.AUDIO[key], key, (_) => 0)
+      audioRef.current.load(ASSETS.AUDIO[key], key, (_) => 0),
     );
 
     cars.push(new Car(0, ASSETS.IMAGE.CAR, LANE.C));

@@ -15,37 +15,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: .node-version
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
 
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4  # Version comes from packageManager in package.json
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # Version comes from packageManager in package.json
 
-    - name: Create env file
-      run: |
-        echo "VITE_GOOGLE_MAPS_API_KEY=${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}" >> .env
-        echo "VITE_GOOGLE_MAPS_MAP_ID=${{ vars.VITE_GOOGLE_MAPS_MAP_ID }}" >> .env
+      - name: Create env file
+        run: |
+          echo "VITE_GOOGLE_MAPS_API_KEY=${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}" >> .env
+          echo "VITE_GOOGLE_MAPS_MAP_ID=${{ vars.VITE_GOOGLE_MAPS_MAP_ID }}" >> .env
 
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-    - name: Lint
-      run: pnpm run lint
+      - name: Check formatting
+        run: pnpm run format:check
 
-    - name: Test
-      run: pnpm test
+      - name: Lint
+        run: pnpm run lint
 
-    - name: Build
-      run: pnpm run build
+      - name: Test
+        run: pnpm test
 
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: ./dist
+      - name: Build
+        run: pnpm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
 
   deploy:
     if: github.event_name == 'push'

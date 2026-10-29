@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # One PR a week for everything that should not break anything.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+      # Packages that have to move together get their own PR for major bumps.
+      react:
+        patterns:
+          - react
+          - react-dom
+          - '@react-three/*'
+          - '@react-spring/*'
+          - three
+        update-types:
+          - major
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - '*'

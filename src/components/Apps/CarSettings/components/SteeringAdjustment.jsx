@@ -1,4 +1,3 @@
-
 export const SteeringAdjustment = ({ onClose }) => {
   return (
     <div className="adjustment-modal">
@@ -9,7 +8,9 @@ export const SteeringAdjustment = ({ onClose }) => {
         <button className="adjustment-btn">←</button>
         <button className="adjustment-btn">→</button>
       </div>
-      <button className="close-btn" onClick={onClose}>Close</button>
+      <button className="close-btn" onClick={onClose}>
+        Close
+      </button>
     </div>
   );
 };

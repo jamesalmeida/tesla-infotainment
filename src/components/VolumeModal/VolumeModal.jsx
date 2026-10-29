@@ -41,13 +41,13 @@ const VolumeModal = ({ volume, onVolumeChange, onClose, onOpenAudioSettings }) =
   };
 
   return (
-    <div 
-      className={`volume-modal ${isFading ? 'fade-out' : ''}`} 
-      ref={modalRef} 
+    <div
+      className={`volume-modal ${isFading ? 'fade-out' : ''}`}
+      ref={modalRef}
       onMouseMove={handleMouseMove}
     >
       <button className="audio-settings-btn" onClick={onOpenAudioSettings}>
-        <img src={getImagePath("icon-settings.svg")} alt="Audio Settings" />
+        <img src={getImagePath('icon-settings.svg')} alt="Audio Settings" />
       </button>
       <input
         type="range"

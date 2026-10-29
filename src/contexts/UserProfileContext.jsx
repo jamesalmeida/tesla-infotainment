@@ -7,7 +7,7 @@ export const UserProfileProvider = ({ children }) => {
   const [activeProfile, setActiveProfile] = useState({
     id: 1,
     name: 'James',
-    image: getImagePath("profile01.svg")
+    image: getImagePath('profile01.svg'),
   });
 
   return (
