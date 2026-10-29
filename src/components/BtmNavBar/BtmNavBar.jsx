@@ -1,18 +1,19 @@
 import TemperatureControl from '../TemperatureControl/TemperatureControl';
 import VolumeControl from '../VolumeControl/VolumeControl';
 import { getImagePath } from '../../utils/assetPaths';
+import { useCarActions, useCarState } from '../../state/CarStateContext';
 import './BtmNavBar.css';
 
-const BtmNavBar = ({
-  handleNavIconClick,
-  temperature,
-  setTemperature,
-  volume,
-  setVolume,
-  activeNavIcon,
-  isShelfOpen,
-  isCameraForced,
-}) => {
+const BtmNavBar = () => {
+  const {
+    temperature,
+    volume,
+    activeApp: activeNavIcon,
+    isShelfOpen,
+    isCameraForced,
+  } = useCarState();
+  const { toggleApp, toggleShelf, stepTemperature, setVolume } = useCarActions();
+
   const dockApps = [
     'camera',
     // 'calendar',
@@ -34,12 +35,8 @@ const BtmNavBar = ({
     event.currentTarget.classList.remove('active');
   };
 
-  const toggleShelf = () => {
-    handleNavIconClick('open-shelf');
-  };
-
   const handleOpenAudioSettings = () => {
-    handleNavIconClick('car-settings');
+    toggleApp('car-settings');
   };
 
   return (
@@ -50,7 +47,7 @@ const BtmNavBar = ({
             className={'navIcons'}
             src={getImagePath(`icon-car-settings.svg`)}
             alt={`car settings icon`}
-            onClick={() => handleNavIconClick('car-settings')}
+            onClick={() => toggleApp('car-settings')}
             onMouseDown={handleIconMouseDown}
             onMouseUp={handleIconMouseUp}
             onMouseLeave={handleIconMouseUp}
@@ -58,8 +55,8 @@ const BtmNavBar = ({
         </div>
         <TemperatureControl
           temperature={temperature}
-          onIncrement={() => setTemperature((prev) => Math.min(prev + 1, 90))}
-          onDecrement={() => setTemperature((prev) => Math.max(prev - 1, 60))}
+          onIncrement={() => stepTemperature(1)}
+          onDecrement={() => stepTemperature(-1)}
         />
         <div className="dockApps">
           {dockApps.map((icon, index) => {
@@ -90,7 +87,7 @@ const BtmNavBar = ({
                     className={`navIcons ${icon}`}
                     src={getImagePath(`app-${icon}.svg`)}
                     alt={`${icon} icon`}
-                    onClick={() => !isCameraForced && handleNavIconClick(icon)}
+                    onClick={() => !isCameraForced && toggleApp(icon)}
                     onMouseDown={!isCameraForced ? handleIconMouseDown : undefined}
                     onMouseUp={!isCameraForced ? handleIconMouseUp : undefined}
                     onMouseLeave={!isCameraForced ? handleIconMouseUp : undefined}

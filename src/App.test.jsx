@@ -35,8 +35,6 @@ const cameraIsActive = () =>
 
 beforeEach(() => {
   vi.useFakeTimers();
-  // The loading screen logs its image checks every 100ms.
-  vi.spyOn(console, 'log').mockImplementation(() => {});
 });
 
 afterEach(() => {
