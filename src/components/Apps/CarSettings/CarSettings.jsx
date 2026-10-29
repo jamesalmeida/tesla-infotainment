@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import UserProfile from '../../UserProfile/UserProfile';
+import { useCarActions, useCarState } from '../../../state/CarStateContext';
 import { Controls } from './components/Controls';
 import { Dynamics } from './components/Dynamics';
 import { Charging } from './components/Charging';
@@ -39,7 +40,9 @@ const leftPanelItems = [
   { icon: 'wifi', alt: 'Wifi', label: 'Wifi' },
 ];
 
-export const CarSettings = ({ isWifiMenuOpen, setIsWifiMenuOpen }) => {
+export const CarSettings = () => {
+  const { isWifiMenuOpen } = useCarState();
+  const { leaveWifiSettings } = useCarActions();
   const [selectedPanel, setSelectedPanel] = useState('Controls');
 
   // Opening Settings from the map's wifi icon jumps straight to the Wifi panel.
@@ -47,7 +50,7 @@ export const CarSettings = ({ isWifiMenuOpen, setIsWifiMenuOpen }) => {
 
   const selectPanel = (panel) => {
     setSelectedPanel(panel);
-    if (isWifiMenuOpen) setIsWifiMenuOpen(false);
+    if (isWifiMenuOpen) leaveWifiSettings();
   };
 
   const handleWifiClick = () => {
