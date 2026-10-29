@@ -43,7 +43,7 @@ To run the project locally:
    cd tesla-infotainment
    ```
 
-2. Install dependencies with [pnpm](https://pnpm.io/) (run `corepack enable` once to get the version pinned in `package.json`):
+2. Use Node.js 24 or newer (the version is pinned in `.node-version`), then install dependencies with [pnpm](https://pnpm.io/). The pnpm version is pinned in `package.json`; `npm install -g corepack && corepack enable` picks it up automatically (Node.js 25+ no longer bundles corepack):
    ```
    pnpm install
    ```
@@ -65,7 +65,7 @@ To create a production-ready build:
 pnpm build
 ```
 
-This command builds the app for production to the `build` folder, optimizing the build for the best performance.
+This command builds the app for production to the `dist` folder, optimizing the build for the best performance.
 
 ## Linting
 To check the code for problems:
@@ -85,8 +85,8 @@ pnpm test
 
 Use `pnpm test:watch` while developing.
 
-### `pnpm run deploy`
-To make this project work as a Github Page, I added this command to deploy to a Github Page. The GitHub Pages base path is configured in `vite.config.mjs`.
+## Deployment
+Every push to `main` is linted, tested, built and deployed to GitHub Pages by `.github/workflows/main.yml`. The GitHub Pages base path is configured in `vite.config.mjs`.
 
 
 This project is built with [Vite](https://vite.dev/).
