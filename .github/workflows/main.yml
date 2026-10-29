@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # Set this to your default branch
+      - main
   pull_request:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
-        node-version: '24'  # Active LTS; Node.js 20 is end-of-life and unpatched
+        node-version-file: .node-version
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v4  # Version comes from packageManager in package.json
@@ -45,7 +45,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: ./build
+        path: ./dist
 
   deploy:
     if: github.event_name == 'push'
