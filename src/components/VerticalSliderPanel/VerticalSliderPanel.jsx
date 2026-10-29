@@ -15,13 +15,7 @@ const Dashcam = lazyNamed(() => import('../Apps/Dashcam/Dashcam'), 'Dashcam');
 const Podcasts = lazyNamed(() => import('../Apps/Podcasts/Podcasts'), 'Podcasts');
 const Toybox = lazyNamed(() => import('../Apps/Toybox/Toybox'), 'Toybox');
 
-const VerticalSliderPanel = ({
-  isOpen,
-  activeIcon,
-  onClose,
-  isWifiMenuOpen,
-  setIsWifiMenuOpen,
-}) => {
+const VerticalSliderPanel = ({ isOpen, activeIcon, onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
   const [currentY, setCurrentY] = useState(0);
@@ -77,9 +71,7 @@ const VerticalSliderPanel = ({
       case 'camera':
         return <BackupCam />;
       case 'car-settings':
-        return (
-          <CarSettings isWifiMenuOpen={isWifiMenuOpen} setIsWifiMenuOpen={setIsWifiMenuOpen} />
-        );
+        return <CarSettings />;
       case 'dashcam':
         return <Dashcam />;
       case 'podcasts':

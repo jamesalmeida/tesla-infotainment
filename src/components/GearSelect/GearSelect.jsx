@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
+import { useCarActions, useCarState } from '../../state/CarStateContext';
 import './GearSelect.css';
 
-function GearSelect({ activeGear, onGearSelect }) {
+function GearSelect() {
+  const { gear: activeGear } = useCarState();
+  const { selectGear: onGearSelect } = useCarActions();
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       // Check if the active element is an input field
