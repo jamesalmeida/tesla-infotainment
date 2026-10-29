@@ -25,10 +25,10 @@
     "@react-three/fiber": "^8.17.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-resizable-panels": "^4.14.8",
+    "react-resizable-panels": "^4.15.0",
     "react-webcam": "^7.2.0",
     "react-youtube": "^10.1.0",
-    "three": "^0.167.1"
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
