@@ -4,7 +4,7 @@ const dotsContainerStyle = {
   display: 'inline-block',
   width: '15px',
   textAlign: 'left',
-  fontFamily: 'monospace'
+  fontFamily: 'monospace',
 };
 
 export const useDots = () => {
@@ -12,7 +12,7 @@ export const useDots = () => {
 
   useEffect(() => {
     const dotInterval = setInterval(() => {
-      setDots(prevDots => {
+      setDots((prevDots) => {
         if (prevDots.length >= 3) return '';
         return prevDots + '.';
       });

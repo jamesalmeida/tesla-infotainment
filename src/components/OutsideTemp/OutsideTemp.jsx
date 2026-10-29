@@ -16,19 +16,22 @@ const OutsideTemp = () => {
   };
 
   useEffect(() => {
-    fetchTemperature().then(temp => setTemperature(temp));
+    fetchTemperature().then((temp) => setTemperature(temp));
 
     // Refresh temperature every 5 minutes
-    const intervalId = setInterval(() => {
-      fetchTemperature().then(temp => setTemperature(temp));
-    }, 5 * 60 * 1000);
+    const intervalId = setInterval(
+      () => {
+        fetchTemperature().then((temp) => setTemperature(temp));
+      },
+      5 * 60 * 1000,
+    );
 
     return () => clearInterval(intervalId);
   }, []);
 
   // For demonstration: allow manual temperature update
   const handleTempClick = () => {
-    fetchTemperature().then(temp => setTemperature(temp));
+    fetchTemperature().then((temp) => setTemperature(temp));
   };
 
   if (temperature === null) {

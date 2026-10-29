@@ -1,90 +1,92 @@
 .MapNavigation {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
 }
 
 .mapOverlayWrapper {
-    z-index: 2;
-    padding-left: 2%;
+  z-index: 2;
+  padding-left: 2%;
 }
 
 .mapBackground {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .mapBackground div {
-    border: none!important;
+  border: none !important;
 }
 
 .carMarker {
-    width: 30px;
-    height: 30px;
-    @media (max-width: 1000px) {
-        width: 20px;
-        height: 20px;
-    }
-    @media (max-width: 650px) {
-        width: 10px;
-        height: 10px;
-    }       
+  width: 30px;
+  height: 30px;
+  @media (max-width: 1000px) {
+    width: 20px;
+    height: 20px;
+  }
+  @media (max-width: 650px) {
+    width: 10px;
+    height: 10px;
+  }
 }
 
 .floatingBtn {
-    font-size: 16px;
-    font-weight: bold;
-    color: #a1a1a1;
-    height: auto;
-    width: 35%;
-    padding: 10px 10px;
-    background-color: rgb(250, 250, 250, 90%);
-    border: none;
-    border-radius: 10px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #a1a1a1;
+  height: auto;
+  width: 35%;
+  padding: 10px 10px;
+  background-color: rgb(250, 250, 250, 90%);
+  border: none;
+  border-radius: 10px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
 }
 
 .floatingBtn .icon {
-    width: 50%;
+  width: 50%;
 }
 
 .navBtn {
-    padding: 2%;
-    display: flex;
-    position: relative;
+  padding: 2%;
+  display: flex;
+  position: relative;
 }
 
 .navBtn input {
-    border: none;
-    margin-left: 3%;
-    font-size: 1em;
-    font-weight: 400;
-    color: #4e4e4e;
-    background-color: transparent;
+  border: none;
+  margin-left: 3%;
+  font-size: 1em;
+  font-weight: 400;
+  color: #4e4e4e;
+  background-color: transparent;
 }
 
 input:focus {
-    outline: none;
+  outline: none;
 }
 
 .searchIcon {
-    width: 8%;
-    margin-left: 5%;
+  width: 8%;
+  margin-left: 5%;
 }
 
 .navigateBtn {
-    position: absolute;
-    background-color: #1976D2;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
+  position: absolute;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
 .navigateBtn,
 .endNavigateBtn {
@@ -98,13 +100,13 @@ input:focus {
 }
 
 .navigateBtn {
-  background-color: #1976D2;
+  background-color: #1976d2;
   color: white;
   border: none;
 }
 
 .endNavigateBtn {
-  background-color: #D32F2F;
+  background-color: #d32f2f;
   color: white;
   border: none;
 }
@@ -115,162 +117,165 @@ input:focus {
 }
 
 .clearInput {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .clearInput img {
-    width: 16px;
-    height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .floatingRightBtnsWrapper {
-    display: flex;
-    flex-direction: column;
-    width: 8%;
-    position: absolute;
-    right: 2.2%;
-    top: 6%;
+  display: flex;
+  flex-direction: column;
+  width: 8%;
+  position: absolute;
+  right: 2.2%;
+  top: 6%;
 }
 
 .floatingRightBtnColumn {
-    margin-top: 22%;
-    background-color: rgb(250, 250, 250, 90%);
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
-    border-radius: 10px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-content: center;
-    justify-content: space-around;
-    align-items: center;
-    padding: 15% 0%;
+  margin-top: 22%;
+  background-color: rgb(250, 250, 250, 90%);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: space-around;
+  align-items: center;
+  padding: 15% 0%;
 }
 
 .floatingBtn.squareBtn.compassDirection {
-    background-color: rgb(250, 250, 250, 90%);
+  background-color: rgb(250, 250, 250, 90%);
 }
 
 .floatingBtn.squareBtn {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 .squareBtn {
-    height: auto;
-    width: 100%;
+  height: auto;
+  width: 100%;
 }
 
 .icon {
-    width: 30px;
+  width: 30px;
 }
 
 .icon-compass {
-    width: 89%;
+  width: 89%;
 }
 
 .btnGroup {
-    border-radius: 0px !important;
-    box-shadow: none;
+  border-radius: 0px !important;
+  box-shadow: none;
 }
 
 .topMenuBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 3px 10px;
-    background-color: rgba(0, 0, 0, 0);
-    z-index: 3;
-    font-size: 1em;
-    font-weight: 600;
-    color: #4e4e4e;
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.1), rgb(255 255 255 / 1));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 10px;
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 3;
+  font-size: 1em;
+  font-weight: 600;
+  color: #4e4e4e;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.1), rgb(255 255 255 / 1));
 }
 
 .carLockWrapper {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 .carLockWrapper .carLock {
-    width: 30px;
-    height: 20px;
+  width: 30px;
+  height: 20px;
 }
 
-
 .wifiStatus {
-    width: 3%;
-    margin-right: 10px;
-    margin-left: 10px;
+  width: 3%;
+  margin-right: 10px;
+  margin-left: 10px;
 }
 
 .airbagStatus {
-    margin-left: auto;
-    background-color: rgb(250, 250, 250, 80%);
-    padding: 2px 5px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: row;
-    align-items: left;
+  margin-left: auto;
+  background-color: rgb(250, 250, 250, 80%);
+  padding: 2px 5px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: left;
 }
 
 .airbagStatus img {
-    width: auto;
-    height: 20px;
-    margin-right: 4px;
+  width: auto;
+  height: 20px;
+  margin-right: 4px;
 }
 
 .airbagStatusText {
-    font-size: .1em;
-    font-weight: 600;
-    color: #4e4e4e;
-    width: 62px;
+  font-size: 0.1em;
+  font-weight: 600;
+  color: #4e4e4e;
+  width: 62px;
 }
 
 .airbagStatusOff {
-    color: #E69F59;
+  color: #e69f59;
 }
 
 /* Hide Google Maps extraneous elements */
-.gmnoprint a, .gmnoprint span, .gm-style-cc {
-    display: none;
+.gmnoprint a,
+.gmnoprint span,
+.gm-style-cc {
+  display: none;
 }
 .gmnoprint div {
-    background: none !important;
+  background: none !important;
 }
 
 @media (max-width: 768px) {
-    .topMenuBar {
-        font-size: 9px;
-    }
-    .airbagStatusText{
-        width: auto;
-        font-size: 3px;
-    }
-    .airbagStatus img {
-        width: auto;
-        height: 6px;
-        margin-right: 2px;
-    }
-    .wifiStatus {
-        width: 15px;
-        margin-right: 4px;
-        margin-left: 4px;
-    }
-    /* .floatingBtn .icon {} */
+  .topMenuBar {
+    font-size: 9px;
+  }
+  .airbagStatusText {
+    width: auto;
+    font-size: 3px;
+  }
+  .airbagStatus img {
+    width: auto;
+    height: 6px;
+    margin-right: 2px;
+  }
+  .wifiStatus {
+    width: 15px;
+    margin-right: 4px;
+    margin-left: 4px;
+  }
+  /* .floatingBtn .icon {} */
 }
 
 /* Media query for mobile devices in landscape mode */
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
-    .navBtn input {
-        max-width: 138px;
-        margin-left: 0px;
-    }
-    .searchIcon {
-        margin-left: 5px;
-    }
+  .navBtn input {
+    max-width: 138px;
+    margin-left: 0px;
+  }
+  .searchIcon {
+    margin-left: 5px;
+  }
 }

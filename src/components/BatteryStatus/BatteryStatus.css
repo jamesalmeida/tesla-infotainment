@@ -1,5 +1,5 @@
 .battery-fill-animate {
-    transition: width 0.3s ease-in-out;
-  }
-  
-  /* .batteryStatus {} */
+  transition: width 0.3s ease-in-out;
+}
+
+/* .batteryStatus {} */

@@ -1,6 +1,12 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
-import { GoogleMap, useJsApiLoader, Marker, Autocomplete, DirectionsRenderer } from '@react-google-maps/api';
+import {
+  GoogleMap,
+  useJsApiLoader,
+  Marker,
+  Autocomplete,
+  DirectionsRenderer,
+} from '@react-google-maps/api';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
@@ -11,7 +17,7 @@ import './MapNavigationAutocomplete.css';
 
 const containerStyle = {
   width: '100%',
-  height: '100%'
+  height: '100%',
 };
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -31,15 +37,18 @@ export function MapNavigation({ onWifiClick }) {
   const mapRef = useRef(null);
   const [directions, setDirections] = useState(null);
   const [isNavigating, setIsNavigating] = useState(false);
-  const inputRef = useRef(null);  // New ref for the input element
-  const [inputValue, setInputValue] = useState('');  // New state for input value
+  const inputRef = useRef(null); // New ref for the input element
+  const [inputValue, setInputValue] = useState(''); // New state for input value
 
   // Memoize the loader options so it doesn't re-create on every render
-  const loaderOptions = useMemo(() => ({
-    id: 'google-map-script',
-    googleMapsApiKey: API_KEY,
-    libraries: libraries,
-  }), []);
+  const loaderOptions = useMemo(
+    () => ({
+      id: 'google-map-script',
+      googleMapsApiKey: API_KEY,
+      libraries: libraries,
+    }),
+    [],
+  );
 
   const { isLoaded } = useJsApiLoader(loaderOptions);
 
@@ -48,7 +57,7 @@ export function MapNavigation({ onWifiClick }) {
   const markerIcon = useMemo(() => {
     if (!isLoaded || !window.google) return null;
     return {
-      url: getImagePath("icon-car-marker.svg"),
+      url: getImagePath('icon-car-marker.svg'),
       scaledSize: new window.google.maps.Size(40, 40),
     };
   }, [isLoaded]);
@@ -75,15 +84,13 @@ export function MapNavigation({ onWifiClick }) {
           lng: place.geometry.location.lng(),
         };
         setSearchResult(newSearchResult);
-        
+
         // Prioritize name, then formatted_address, then construct from address_components
         let newValue = place.name;
         if (!newValue && place.formatted_address) {
           newValue = place.formatted_address;
         } else if (!newValue && place.address_components) {
-          newValue = place.address_components
-            .map(component => component.long_name)
-            .join(', ');
+          newValue = place.address_components.map((component) => component.long_name).join(', ');
         }
 
         setInputValue(newValue);
@@ -121,7 +128,7 @@ export function MapNavigation({ onWifiClick }) {
   };
 
   const toggleMapType = () => {
-    setMapType(prevType => prevType === 'roadmap' ? 'satellite' : 'roadmap');
+    setMapType((prevType) => (prevType === 'roadmap' ? 'satellite' : 'roadmap'));
   };
 
   const toggleTraffic = () => {
@@ -151,7 +158,7 @@ export function MapNavigation({ onWifiClick }) {
 
   const handleLocation = () => {
     if (navigator.geolocation) {
-      setIsLocating(true);  // Start loading
+      setIsLocating(true); // Start loading
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const pos = {
@@ -163,13 +170,13 @@ export function MapNavigation({ onWifiClick }) {
             mapRef.current.panTo(pos);
             mapRef.current.setZoom(16);
           }
-          setIsLocating(false);  // Stop loading
+          setIsLocating(false); // Stop loading
         },
         () => {
-          console.log("Error: The Geolocation service failed.");
-          setIsLocating(false);  // Stop loading even if there's an error
+          console.log('Error: The Geolocation service failed.');
+          setIsLocating(false); // Stop loading even if there's an error
         },
-        { timeout: 10000 }  // Set a timeout of 10 seconds
+        { timeout: 10000 }, // Set a timeout of 10 seconds
       );
     } else {
       console.log("Error: Your browser doesn't support geolocation.");
@@ -182,7 +189,7 @@ export function MapNavigation({ onWifiClick }) {
       const request = {
         location: center,
         radius: '5000',
-        type: ['electric_vehicle_charging_station']
+        type: ['electric_vehicle_charging_station'],
       };
 
       service.nearbySearch(request, (results, status) => {
@@ -208,7 +215,7 @@ export function MapNavigation({ onWifiClick }) {
           } else {
             console.error(`error fetching directions ${result}`);
           }
-        }
+        },
       );
     }
   };
@@ -217,12 +224,12 @@ export function MapNavigation({ onWifiClick }) {
     setIsNavigating(false);
     setSearchResult(null);
     setDirections(null);
-    
+
     // Clear the input field
     if (inputRef.current) {
       inputRef.current.value = '';
     }
-    
+
     // Center the map on the current location
     if (mapRef.current) {
       mapRef.current.panTo(center);
@@ -238,17 +245,19 @@ export function MapNavigation({ onWifiClick }) {
         </div>
         <UserProfile />
         <div className="wifiStatus">
-          <img src={getImagePath("icon-wifi.svg")} alt="Wifi Status" onClick={onWifiClick} />
+          <img src={getImagePath('icon-wifi.svg')} alt="Wifi Status" onClick={onWifiClick} />
         </div>
         <div className="clock">
           <Clock />
         </div>
         <div className="outsideTemp">
-        <OutsideTemp />
+          <OutsideTemp />
         </div>
         <div className="airbagStatus no-select">
-          <img src={getImagePath("icon-airbags.svg")} alt="Airbag Status" />
-          <div className="airbagStatusText">PASSENGER AIRBAG&nbsp;<span className="airbagStatusOff">OFF</span></div>
+          <img src={getImagePath('icon-airbags.svg')} alt="Airbag Status" />
+          <div className="airbagStatusText">
+            PASSENGER AIRBAG&nbsp;<span className="airbagStatusOff">OFF</span>
+          </div>
         </div>
       </div>
       <div className="mapOverlayWrapper">
@@ -259,11 +268,16 @@ export function MapNavigation({ onWifiClick }) {
             options={{ fields: ['place_id', 'geometry', 'name', 'formatted_address'] }}
             className="custom-autocomplete-container"
           >
-            <form className="floatingBtn navBtn" onSubmit={(e) => { e.preventDefault(); }}>
-              <img className="searchIcon" src={getImagePath("icon-search.svg")} alt="Search Map" />
-              <input 
+            <form
+              className="floatingBtn navBtn"
+              onSubmit={(e) => {
+                e.preventDefault();
+              }}
+            >
+              <img className="searchIcon" src={getImagePath('icon-search.svg')} alt="Search Map" />
+              <input
                 ref={inputRef}
-                placeholder="Navigate" 
+                placeholder="Navigate"
                 name="NavigateTo"
                 defaultValue={inputValue}
                 onChange={handleInputChange}
@@ -271,7 +285,7 @@ export function MapNavigation({ onWifiClick }) {
               />
               {inputValue && (
                 <button className="clearInput" onClick={clearInput}>
-                  <img src={getImagePath("icon-x.svg")} alt="Clear input" />
+                  <img src={getImagePath('icon-x.svg')} alt="Clear input" />
                 </button>
               )}
             </form>
@@ -289,24 +303,28 @@ export function MapNavigation({ onWifiClick }) {
         )}
         <div className="floatingRightBtnsWrapper">
           <button className="floatingBtn squareBtn compassDirection" onClick={handleCompass}>
-            <img className="icon-compass" src={getImagePath("icon-compass.svg")} alt="Compass" />
+            <img className="icon-compass" src={getImagePath('icon-compass.svg')} alt="Compass" />
           </button>
           <div className="floatingRightBtnColumn">
             <button className="floatingBtn squareBtn btnGroup" onClick={toggleMapType}>
-              <img className="icon" src={getImagePath("icon-globe.svg")} alt="Map Style" />
+              <img className="icon" src={getImagePath('icon-globe.svg')} alt="Map Style" />
             </button>
             <button className="floatingBtn squareBtn btnGroup" onClick={toggleTraffic}>
-              <img className="icon" src={getImagePath("icon-traffic.svg")} alt="Toggle Traffic" />
+              <img className="icon" src={getImagePath('icon-traffic.svg')} alt="Toggle Traffic" />
             </button>
             <button className="floatingBtn squareBtn btnGroup" onClick={handleLocation}>
               {isLocating ? (
                 <LoadingSpinner />
               ) : (
-                <img className="icon" src={getImagePath("icon-map-marker.svg")} alt="Location" />
+                <img className="icon" src={getImagePath('icon-map-marker.svg')} alt="Location" />
               )}
             </button>
             <button className="floatingBtn squareBtn btnGroup" onClick={handleChargerLocations}>
-              <img className="icon" src={getImagePath("icon-charger-locations.svg")} alt="Charging Locations" />
+              <img
+                className="icon"
+                src={getImagePath('icon-charger-locations.svg')}
+                alt="Charging Locations"
+              />
             </button>
           </div>
         </div>
@@ -329,21 +347,16 @@ export function MapNavigation({ onWifiClick }) {
               scaleControl: false,
               streetViewControl: false,
               rotateControl: false,
-              fullscreenControl: false
+              fullscreenControl: false,
             }}
           >
-            {markerIcon && (
-              <Marker
-                position={center}
-                icon={markerIcon}
-              />
-            )}
+            {markerIcon && <Marker position={center} icon={markerIcon} />}
             {searchResult && !isNavigating && (
               <Marker
                 position={searchResult}
                 icon={{
-                  url: getImagePath("icon-map-marker.svg"), // Image for Map Navigation search result
-                  scaledSize: new window.google.maps.Size(40, 40)
+                  url: getImagePath('icon-map-marker.svg'), // Image for Map Navigation search result
+                  scaledSize: new window.google.maps.Size(40, 40),
                 }}
               />
             )}
@@ -353,7 +366,7 @@ export function MapNavigation({ onWifiClick }) {
                 options={{
                   suppressMarkers: true,
                   polylineOptions: {
-                    strokeColor: "#1976D2",
+                    strokeColor: '#1976D2',
                     strokeWeight: 5,
                   },
                 }}
@@ -364,13 +377,15 @@ export function MapNavigation({ onWifiClick }) {
                 key={index}
                 position={charger.geometry.location}
                 icon={{
-                  url: getImagePath("icon-charger.svg"),
-                  scaledSize: new window.google.maps.Size(30, 30)
+                  url: getImagePath('icon-charger.svg'),
+                  scaledSize: new window.google.maps.Size(30, 30),
                 }}
               />
             ))}
           </GoogleMap>
-        ) : <></>}
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );

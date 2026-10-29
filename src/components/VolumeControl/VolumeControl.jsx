@@ -27,22 +27,22 @@ const VolumeControl = ({ volume, onVolumeChange, onOpenAudioSettings }) => {
 
   return (
     <div className="volume-control" ref={volumeControlRef}>
-      <img 
+      <img
         className={`navIcons arrows`}
-        src={getImagePath("icon-vol-down.svg")} 
-        alt="Decrease volume" 
+        src={getImagePath('icon-vol-down.svg')}
+        alt="Decrease volume"
         onClick={() => adjustVolume(-10)}
       />
-      <img 
+      <img
         className={`navIcons volume-display`}
-        src={getImagePath("icon-volume.svg")} 
-        alt="Volume" 
+        src={getImagePath('icon-volume.svg')}
+        alt="Volume"
         onClick={handleVolumeClick}
       />
-      <img 
+      <img
         className={`navIcons arrows`}
-        src={getImagePath("icon-vol-up.svg")} 
-        alt="Increase volume" 
+        src={getImagePath('icon-vol-up.svg')}
+        alt="Increase volume"
         onClick={() => adjustVolume(10)}
       />
       {isModalOpen && (

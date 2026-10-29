@@ -26,11 +26,8 @@ const panel = () => document.querySelector('.vertical-slider-panel');
 const panelIsOpen = () => Boolean(panel()?.className.includes('open'));
 const navIcon = (name) => screen.getByAltText(`${name} icon`);
 const gearIcon = (gear) =>
-  [...document.querySelectorAll('.gearSelectIcon')].find(
-    (el) => el.textContent.trim() === gear
-  );
-const activeGear = () =>
-  document.querySelector('.gearSelectIcon.active')?.textContent.trim();
+  [...document.querySelectorAll('.gearSelectIcon')].find((el) => el.textContent.trim() === gear);
+const activeGear = () => document.querySelector('.gearSelectIcon.active')?.textContent.trim();
 const activeSettingsPanel = () =>
   document.querySelector('.left-scroll-panel-item.active')?.textContent.trim();
 const cameraIsActive = () =>

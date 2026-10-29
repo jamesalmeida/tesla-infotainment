@@ -12,14 +12,14 @@ function GearSelect({ activeGear, onGearSelect }) {
       // Both the 1-4 keys and the gear letters (as documented) select a gear.
       const key = event.key.toUpperCase();
       const gearMap = {
-        '1': 'P',
-        '2': 'R',
-        '3': 'N',
-        '4': 'D',
-        'P': 'P',
-        'R': 'R',
-        'N': 'N',
-        'D': 'D',
+        1: 'P',
+        2: 'R',
+        3: 'N',
+        4: 'D',
+        P: 'P',
+        R: 'R',
+        N: 'N',
+        D: 'D',
       };
 
       if (gearMap[key]) {

@@ -10,9 +10,7 @@ export const CarLockProvider = ({ children }) => {
   };
 
   return (
-    <CarLockContext.Provider value={{ isLocked, toggleLock }}>
-      {children}
-    </CarLockContext.Provider>
+    <CarLockContext.Provider value={{ isLocked, toggleLock }}>{children}</CarLockContext.Provider>
   );
 };
 

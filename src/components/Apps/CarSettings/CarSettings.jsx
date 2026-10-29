@@ -58,14 +58,14 @@ export const CarSettings = ({ isWifiMenuOpen, setIsWifiMenuOpen }) => {
     <div className="car-settings-wrapper">
       <div className="top-bar">
         <div className="top-bar-item search-bar">
-          <img src={getImagePath("icon-search.svg")} alt="Search" />
+          <img src={getImagePath('icon-search.svg')} alt="Search" />
           <input type="text" placeholder="Search settings" />
         </div>
         <div className="top-bar-right-icons">
           <UserProfile />
           {topBarItems.map((item, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="top-bar-item"
               onClick={item.icon === 'wifi' ? handleWifiClick : undefined}
             >
@@ -79,7 +79,7 @@ export const CarSettings = ({ isWifiMenuOpen, setIsWifiMenuOpen }) => {
         <div className="left-scroll-panel">
           {leftPanelItems.map((item, index) => (
             <div
-               key={index}
+              key={index}
               className={`left-scroll-panel-item ${activePanel === item.label ? 'active' : ''}`}
               onClick={() => selectPanel(item.label)}
             >
