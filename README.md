@@ -86,6 +86,14 @@ pnpm lint
 
 Use `pnpm lint:fix` to apply the automatically fixable ones.
 
+## Type checking
+
+The app is written in TypeScript (strict mode). To type-check it without building:
+
+```
+pnpm typecheck
+```
+
 ## Formatting
 
 Code is formatted with [Prettier](https://prettier.io/), and CI fails on unformatted files:
@@ -108,7 +116,7 @@ Use `pnpm test:watch` while developing.
 
 ## Deployment
 
-Every push to `main` is linted, tested, built and deployed to GitHub Pages by `.github/workflows/main.yml`. The GitHub Pages base path is configured in `vite.config.mjs`.
+Every push to `main` is linted, type-checked, tested, built and deployed to GitHub Pages by `.github/workflows/main.yml`. The GitHub Pages base path is configured in `vite.config.mjs`.
 
 This project is built with [Vite](https://vite.dev/).
 
@@ -123,7 +131,7 @@ npx @gltf-transform/cli optimize input.glb output.glb \
   --simplify false --palette false --prune-solid-textures false
 ```
 
-The `false` flags keep the node names and hierarchy that `VehicleModel.jsx` looks up (`bonnet_dummy`, `boot_dummy`, `door_*_dummy`) and keep the glass textures intact.
+The `false` flags keep the node names and hierarchy that `VehicleModel.tsx` looks up (`bonnet_dummy`, `boot_dummy`, `door_*_dummy`) and keep the glass textures intact.
 
 ### Thanks
 
