@@ -1,0 +1,23 @@
+/* Moved from App.css. */
+.batteryStatus {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.batteryStatus span {
+  padding-right: 4px;
+}
+
+.battery-fill-animate {
+  transition: width 0.3s ease-in-out;
+}
+
+@media screen and (max-width: 768px) {
+  .batteryStatus span {
+    padding-right: 0px;
+  }
+}

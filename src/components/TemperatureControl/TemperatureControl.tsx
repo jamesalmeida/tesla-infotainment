@@ -1,5 +1,5 @@
 import { getImagePath } from '../../utils/assetPaths';
-import './TemperatureControl.css';
+import styles from './TemperatureControl.module.css';
 
 interface TemperatureControlProps {
   temperature: number;
@@ -8,14 +8,14 @@ interface TemperatureControlProps {
 }
 
 const TemperatureControl = ({ temperature, onIncrement, onDecrement }: TemperatureControlProps) => (
-  <div className="temperature-control">
+  <div className={styles['temperature-control']}>
     <img
       className={`navIcons arrows`}
       src={getImagePath('icon-temp-down.svg')}
       alt="Decrease temperature"
       onClick={onDecrement}
     />
-    <span className="navIcons temperature-display no-select">{temperature}</span>
+    <span className={`navIcons ${styles['temperature-display']} no-select`}>{temperature}</span>
     <img
       className={`navIcons arrows`}
       src={getImagePath('icon-temp-up.svg')}

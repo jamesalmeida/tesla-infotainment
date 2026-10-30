@@ -70,13 +70,6 @@
   background-color: rgb(200, 200, 200);
 }
 
-.musicProgressIndicator {
-  position: relative;
-  top: -14px;
-  left: 90px;
-  width: 30px;
-}
-
 .musicBtnBar {
   grid-column: 1 / 3;
   grid-row: 3 / 4;
@@ -173,4 +166,12 @@
     width: 10px;
   }
   /* .albumTitle {} */
+
+  /* Moved from App.css. */
+  .musicPanel {
+    height: 30% !important;
+    max-width: 322px !important;
+    position: relative;
+    left: -2px;
+  }
 }

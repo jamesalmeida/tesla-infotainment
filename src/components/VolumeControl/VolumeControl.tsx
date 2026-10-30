@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import VolumeModal from '../VolumeModal/VolumeModal';
-import './VolumeControl.css';
+import styles from './VolumeControl.module.css';
 
 interface VolumeControlProps {
   volume: number;
@@ -32,7 +32,7 @@ const VolumeControl = ({ volume, onVolumeChange, onOpenAudioSettings }: VolumeCo
   };
 
   return (
-    <div className="volume-control" ref={volumeControlRef}>
+    <div className={styles['volume-control']} ref={volumeControlRef}>
       <img
         className={`navIcons arrows`}
         src={getImagePath('icon-vol-down.svg')}
@@ -40,7 +40,7 @@ const VolumeControl = ({ volume, onVolumeChange, onOpenAudioSettings }: VolumeCo
         onClick={() => adjustVolume(-10)}
       />
       <img
-        className={`navIcons volume-display`}
+        className={`navIcons ${styles['volume-display']}`}
         src={getImagePath('icon-volume.svg')}
         alt="Volume"
         onClick={handleVolumeClick}
@@ -52,7 +52,7 @@ const VolumeControl = ({ volume, onVolumeChange, onOpenAudioSettings }: VolumeCo
         onClick={() => adjustVolume(10)}
       />
       {isModalOpen && (
-        <div className="volume-modal-container">
+        <div className={styles['volume-modal-container']}>
           <VolumeModal
             volume={volume}
             onVolumeChange={handleVolumeChange}

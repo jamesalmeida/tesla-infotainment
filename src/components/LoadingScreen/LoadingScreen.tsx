@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import { useDots } from '../../utils/dots';
-import './LoadingScreen.css';
+import styles from './LoadingScreen.module.css';
 
 const loadingMessages = [
   'Charging flux capacitor',
@@ -36,17 +36,21 @@ const LoadingScreen = () => {
   const dots = useDots();
 
   return (
-    <div className="loading-screen">
-      <div className="displayInsideBezel">
-        <div className="circle-container">
-          <div className="circle"></div>
-          <div className="circle-small"></div>
-          <div className="circle-big"></div>
-          <div className="circle-inner-inner"></div>
-          <div className="circle-inner"></div>
+    <div className={styles['loading-screen']}>
+      <div className={styles.displayInsideBezel}>
+        <div className={styles['circle-container']}>
+          <div className={styles.circle}></div>
+          <div className={styles['circle-small']}></div>
+          <div className={styles['circle-big']}></div>
+          <div className={styles['circle-inner-inner']}></div>
+          <div className={styles['circle-inner']}></div>
         </div>
-        <img src={getImagePath('logo-grey.svg')} alt="Tesla Logo" className="tesla-logo spinning" />
-        <p className="loading-text">
+        <img
+          src={getImagePath('logo-grey.svg')}
+          alt="Tesla Logo"
+          className={`${styles['tesla-logo']} spinning`}
+        />
+        <p className={styles['loading-text']}>
           {loadingText}
           {dots}
         </p>

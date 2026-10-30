@@ -1,0 +1,100 @@
+.placeSearch {
+  position: relative;
+}
+
+/* Matches the look of Google's legacy autocomplete dropdown that it replaces. */
+.placeSuggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 35%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.placeSuggestion {
+  padding: 10px;
+  font-size: 14px;
+  color: #999;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.placeSuggestion + .placeSuggestion {
+  border-top: 1px solid #e6e6e6;
+}
+
+.placeSuggestion:hover,
+.placeSuggestion.highlighted {
+  background-color: #f0f0f0;
+}
+
+.placeSuggestionMain {
+  margin-right: 6px;
+  color: #333;
+  font-weight: bold;
+}
+
+/* The search box below moved from MapNavigation.css (and App.css for the small-screen font size). */
+.navBtn {
+  padding: 2%;
+  display: flex;
+  position: relative;
+}
+
+.navBtn input {
+  border: none;
+  margin-left: 3%;
+  font-size: 1em;
+  font-weight: 400;
+  color: #4e4e4e;
+  background-color: transparent;
+}
+
+.searchIcon {
+  width: 8%;
+  margin-left: 5%;
+}
+
+.clearInput {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.clearInput img {
+  width: 16px;
+  height: 16px;
+}
+
+@media screen and (max-width: 768px) {
+  .navBtn input {
+    font-size: 10px;
+  }
+}
+
+/* Media query for mobile devices in landscape mode */
+@media only screen and (max-device-width: 896px) and (orientation: landscape) {
+  .navBtn input {
+    max-width: 138px;
+    margin-left: 0px;
+  }
+  .searchIcon {
+    margin-left: 5px;
+  }
+}

@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { useSpring, a } from '@react-spring/three';
 import { getCarModelPath } from '../../utils/assetPaths';
 import type { Gear } from '../../state/carState';
-import './VehicleModel.css';
+import styles from './VehicleModel.module.css';
 
 interface VehicleModelProps {
   rotateToFrunk: boolean;
@@ -255,7 +255,7 @@ export function VehicleModel({ rotateToFrunk, rotateToTrunk, activeGear }: Vehic
         far: 1000,
       }}
       style={{ position: 'relative' }}
-      className="carModelWrapper"
+      className={styles.carModelWrapper}
     >
       <color attach="background" args={['#f1f1f1']} />
       <Stage environment={'warehouse'}>

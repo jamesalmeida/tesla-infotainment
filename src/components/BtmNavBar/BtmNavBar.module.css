@@ -1,3 +1,4 @@
+/* `.navIconWrapper`, `.navIcons` and `.icon` are global utilities (src/styles/utilities.css). */
 .btmNavBar {
   background-color: black;
   position: relative;
@@ -21,29 +22,6 @@
   text-align: center;
 }
 
-.navIconWrapper {
-  position: relative;
-  display: inline-block;
-}
-
-.navIconWrapper.active::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  left: 32%;
-  width: 35%;
-  height: 2px;
-  background-color: #888;
-}
-
-.navIconWrapper.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.navIconWrapper.disabled img {
-  filter: grayscale(100%);
-}
 .dockApps {
   display: flex;
   flex-direction: row;
@@ -51,42 +29,8 @@
   align-items: center;
 }
 
-.navIcons {
-  height: 45%;
-  width: 45%;
-  padding: 0 15px;
-  transition:
-    transform 0.1s ease-in-out,
-    filter 0.1s ease-in-out;
-}
-
-.navIcons:hover {
-  transform: scale(1.05);
-}
-
-.navIcons:active {
-  transform: scale(0.95);
-  filter: brightness(0.9);
-}
-
-.navIcons.settings {
-  padding-left: 20px;
-}
-
-.navIcons.volUp {
-  padding-right: 15px;
-}
-
 .car-settings {
   justify-self: start;
-}
-
-.volume-control .volume-display {
-  padding: 0 12px;
-}
-
-.floatingBtn.squareBtn.active {
-  background-color: rgba(255, 255, 255, 0.2);
 }
 
 @media screen and (max-width: 768px) {

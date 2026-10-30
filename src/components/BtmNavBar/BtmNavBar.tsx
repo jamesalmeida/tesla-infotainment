@@ -4,7 +4,7 @@ import VolumeControl from '../VolumeControl/VolumeControl';
 import { getImagePath } from '../../utils/assetPaths';
 import { useCarActions, useCarState } from '../../state/CarStateContext';
 import type { AppId } from '../../state/carState';
-import './BtmNavBar.css';
+import styles from './BtmNavBar.module.css';
 
 const BtmNavBar = () => {
   const {
@@ -42,9 +42,9 @@ const BtmNavBar = () => {
   };
 
   return (
-    <div className="btmNavBar">
-      <div className="btmNavItems no-select">
-        <div className={`navIconWrapper car-settings`}>
+    <div className={styles.btmNavBar}>
+      <div className={`${styles.btmNavItems} no-select`}>
+        <div className={`navIconWrapper ${styles['car-settings']}`}>
           <img
             className={'navIcons'}
             src={getImagePath(`icon-car-settings.svg`)}
@@ -60,7 +60,7 @@ const BtmNavBar = () => {
           onIncrement={() => stepTemperature(1)}
           onDecrement={() => stepTemperature(-1)}
         />
-        <div className="dockApps">
+        <div className={styles.dockApps}>
           {dockApps.map((icon, index) => {
             if (icon === 'open-shelf') {
               return (

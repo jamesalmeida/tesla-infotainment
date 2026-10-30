@@ -11,12 +11,6 @@
   z-index: 1000;
 }
 
-/* .modal-content {} */
-
-.modal-close {
-  margin-top: 20px;
-}
-
 /* Styles specific to app shelf */
 .modal-content.app-shelf {
   width: 40%;
@@ -28,43 +22,14 @@
   text-align: center;
 }
 
-.modal-content.volume {
-  /* Styles specific to volume modal */
-}
-
-.modal-content.temperature {
-  /* Styles specific to temperature modal */
-}
-
-.modal-overlay.app-shelf {
-  /* Styles specific to app shelf */
-  /* border-radius: 1.5% / 3%; */
-}
-
-.modal-overlay.volume {
-  /* Styles specific to volume modal */
-}
-
 @media screen and (max-width: 768px) {
   .modal-content.app-shelf {
     width: 70%;
-  }
-  .appShelfIcon {
-    width: 40px;
-  }
-  .appTopShelf {
-    padding: none !important;
   }
 }
 
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
   .modal-content.app-shelf {
     width: 70%;
-  }
-  .appShelfIcon {
-    width: 40px;
-  }
-  .appTopShelf {
-    padding: none !important;
   }
 }

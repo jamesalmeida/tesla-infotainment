@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, type MouseEvent } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
-import './MusicPanel.css';
+import styles from './MusicPanel.module.css';
 
 const tracks = [
   {
@@ -141,70 +141,74 @@ export function MusicPanel({ volume }: { volume: number }) {
   }, [togglePlayPause, handleNext, handlePrevious]);
 
   return (
-    <div className="musicPanel">
-      <div className="albumArt">
+    <div className={styles.musicPanel}>
+      <div className={styles.albumArt}>
         <img alt="" src={tracks[currentTrackIndex].art} />
       </div>
-      <div className="musicText">
-        <div className="title">{tracks[currentTrackIndex].title}</div>
+      <div className={styles.musicText}>
+        <div className={styles.title}>{tracks[currentTrackIndex].title}</div>
         <img
-          className="sourceIcon"
+          className={styles.sourceIcon}
           src={getImagePath('icon-music-bluetooth.svg')}
           alt="Bluetooth"
         />
-        <div className="albumTitle">{tracks[currentTrackIndex].album}</div>
+        <div className={styles.albumTitle}>{tracks[currentTrackIndex].album}</div>
       </div>
-      <div className="musicProgressBar">
+      <div className={styles.musicProgressBar}>
         <div
-          className="progressBackground"
+          className={styles.progressBackground}
           ref={progressBarRef}
           onClick={handleProgressBarClick}
           onMouseMove={handleProgressBarDrag}
         >
           <div
-            className="progressForeground"
+            className={styles.progressForeground}
             style={{ width: `${(currentTime / duration) * 100}%` }}
           >
-            <div className="progressIndicator ctaBtn"></div>
+            <div className={`${styles.progressIndicator} ctaBtn`}></div>
           </div>
         </div>
-        <div className="timeCode">
+        <div className={styles.timeCode}>
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
-      <div className="musicBtnBar">
-        <button className="musicBtn" onClick={handlePrevious}>
+      <div className={styles.musicBtnBar}>
+        <button className={styles.musicBtn} onClick={handlePrevious}>
           <img
-            className="musicIcon ctaBtn"
+            className={`${styles.musicIcon} ctaBtn`}
             src={getImagePath('icon-music-previous.svg')}
             alt="Previous Track"
           />
         </button>
-        <button className="musicBtn" onClick={togglePlayPause}>
+        <button className={styles.musicBtn} onClick={togglePlayPause}>
           <img
-            className="musicIcon ctaBtn"
+            className={`${styles.musicIcon} ctaBtn`}
             src={
               isPlaying ? getImagePath('icon-music-pause.svg') : getImagePath('icon-music-play.svg')
             }
             alt="Play & Pause"
           />
         </button>
-        <button className="musicBtn" onClick={handleNext}>
+        <button className={styles.musicBtn} onClick={handleNext}>
           <img
-            className="musicIcon ctaBtn"
+            className={`${styles.musicIcon} ctaBtn`}
             src={getImagePath('icon-music-next.svg')}
             alt="Next Track"
           />
         </button>
-        <button className="musicBtn">
+        <button className={styles.musicBtn}>
           <img
-            className="musicIcon ctaBtn"
+            className={`${styles.musicIcon} ctaBtn`}
             src={getImagePath('icon-settings.svg')}
             alt="Settings"
           />
         </button>
-        <button className="musicBtn">
-          <img className="musicIcon ctaBtn" src={getImagePath('icon-search.svg')} alt="Search" />
+        <button className={styles.musicBtn}>
+          <img
+            className={`${styles.musicIcon} ctaBtn`}
+            src={getImagePath('icon-search.svg')}
+            alt="Search"
+          />
         </button>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './OutsideTemp.css';
+import styles from './OutsideTemp.module.css';
 
 const OutsideTemp = () => {
   const [temperature, setTemperature] = useState<number | null>(null);
@@ -35,7 +35,7 @@ const OutsideTemp = () => {
   };
 
   if (temperature === null) {
-    return <div className="outsideTemp">Loading...</div>;
+    return <div className={styles.outsideTemp}>Loading...</div>;
   }
 
   return (

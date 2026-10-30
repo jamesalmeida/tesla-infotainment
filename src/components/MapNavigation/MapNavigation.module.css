@@ -1,3 +1,8 @@
+/*
+ * `.floatingBtn`, `.squareBtn`, `.btnGroup` and `.icon` are global utilities
+ * (src/styles/utilities.css). The search box styles (`.navBtn`, `.searchIcon`,
+ * `.clearInput`) moved to PlaceSearch.module.css, which renders them.
+ */
 .MapNavigation {
   display: flex;
   flex-direction: column;
@@ -22,60 +27,8 @@
   border: none !important;
 }
 
-.carMarker {
-  width: 30px;
-  height: 30px;
-  @media (max-width: 1000px) {
-    width: 20px;
-    height: 20px;
-  }
-  @media (max-width: 650px) {
-    width: 10px;
-    height: 10px;
-  }
-}
-
-.floatingBtn {
-  font-size: 16px;
-  font-weight: bold;
-  color: #a1a1a1;
-  height: auto;
-  width: 35%;
-  padding: 10px 10px;
-  background-color: rgb(250, 250, 250, 90%);
-  border: none;
-  border-radius: 10px;
-  box-shadow:
-    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
-    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
-}
-
-.floatingBtn .icon {
-  width: 50%;
-}
-
-.navBtn {
-  padding: 2%;
-  display: flex;
-  position: relative;
-}
-
-.navBtn input {
-  border: none;
-  margin-left: 3%;
-  font-size: 1em;
-  font-weight: 400;
-  color: #4e4e4e;
-  background-color: transparent;
-}
-
 input:focus {
   outline: none;
-}
-
-.searchIcon {
-  width: 8%;
-  margin-left: 5%;
 }
 
 .navigateBtn {
@@ -116,22 +69,6 @@ input:focus {
   opacity: 0.8;
 }
 
-.clearInput {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.clearInput img {
-  width: 16px;
-  height: 16px;
-}
-
 .floatingRightBtnsWrapper {
   display: flex;
   flex-direction: column;
@@ -157,30 +94,12 @@ input:focus {
   padding: 15% 0%;
 }
 
-.floatingBtn.squareBtn.compassDirection {
+:global(.floatingBtn):global(.squareBtn).compassDirection {
   background-color: rgb(250, 250, 250, 90%);
-}
-
-.floatingBtn.squareBtn {
-  background-color: transparent;
-}
-
-.squareBtn {
-  height: auto;
-  width: 100%;
-}
-
-.icon {
-  width: 30px;
 }
 
 .icon-compass {
   width: 89%;
-}
-
-.btnGroup {
-  border-radius: 0px !important;
-  box-shadow: none;
 }
 
 .topMenuBar {
@@ -200,7 +119,8 @@ input:focus {
   margin-right: 10px;
 }
 
-.carLockWrapper .carLock {
+/* <CarLock>'s root element. Was `.carLockWrapper .carLock`; this keeps it more specific than `.carLock`. */
+.carLockWrapper > div {
   width: 30px;
   height: 20px;
 }
@@ -209,6 +129,12 @@ input:focus {
   width: 3%;
   margin-right: 10px;
   margin-left: 10px;
+}
+
+/* The wrapper around <OutsideTemp>. Was styled by OutsideTemp.css as a global class. */
+.outsideTemp {
+  cursor: pointer;
+  padding-left: 10px;
 }
 
 .airbagStatus {
@@ -239,12 +165,12 @@ input:focus {
 }
 
 /* Hide Google Maps extraneous elements */
-.gmnoprint a,
-.gmnoprint span,
-.gm-style-cc {
+:global(.gmnoprint) a,
+:global(.gmnoprint) span,
+:global(.gm-style-cc) {
   display: none;
 }
-.gmnoprint div {
+:global(.gmnoprint) div {
   background: none !important;
 }
 
@@ -267,15 +193,4 @@ input:focus {
     margin-left: 4px;
   }
   /* .floatingBtn .icon {} */
-}
-
-/* Media query for mobile devices in landscape mode */
-@media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  .navBtn input {
-    max-width: 138px;
-    margin-left: 0px;
-  }
-  .searchIcon {
-    margin-left: 5px;
-  }
 }

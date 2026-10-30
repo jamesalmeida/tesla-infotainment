@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import './Clock.css';
 
 const Clock = () => {
   const [time, setTime] = useState(new Date());
