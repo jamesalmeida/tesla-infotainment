@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import CarWashMode from './CarWashMode/CarWashMode';
-import '../CarSettings.css'; // Make sure to create and import corresponding CSS
+import styles from '../CarSettings.module.css';
 import { MirrorsAdjustment } from './MirrorsAdjustment';
 import { SteeringAdjustment } from './SteeringAdjustment';
 
@@ -75,45 +75,45 @@ export const Controls = () => {
   const closeSteeringModal = () => setShowSteeringModal(false);
 
   return (
-    <div className="buttons-container">
+    <div className={styles['buttons-container']}>
       {/* Row 1 */}
-      <div className="flex-row row-1">
+      <div className={`${styles['flex-row']} ${styles['row-1']}`}>
         {['Off', 'Parking', 'On', 'Auto'].map((mode) => (
           <div
             key={mode}
-            className={`btn ${selectedLightMode === mode ? 'active' : ''}`}
+            className={`${styles.btn} ${selectedLightMode === mode ? styles.active : ''}`}
             onClick={() => setSelectedLightMode(mode)}
           >
             {mode}
           </div>
         ))}
         <div
-          className={`btn auto-high-beams-btn ${highBeamsOn ? 'active' : ''}`}
+          className={`${styles.btn} ${styles['auto-high-beams-btn']} ${highBeamsOn ? styles.active : ''}`}
           onClick={() => setHighBeamsOn(!highBeamsOn)}
         >
           High Beams
         </div>
       </div>
 
-      <div className="gap-row"></div>
+      <div className={styles['gap-row']}></div>
 
       {/* Row 2 */}
-      <div className="flex-row row-2">
+      <div className={`${styles['flex-row']} ${styles['row-2']}`}>
         <div
-          className={`btn ${foldMirrorsOn ? 'active' : ''}`}
+          className={`${styles.btn} ${foldMirrorsOn ? styles.active : ''}`}
           onClick={() => setFoldMirrorsOn(!foldMirrorsOn)}
         >
           Fold Mirrors
         </div>
         <div
-          className={`btn ${childLockOption !== 'Off' ? 'active' : ''}`}
+          className={`${styles.btn} ${childLockOption !== 'Off' ? styles.active : ''}`}
           onClick={() => setShowChildLockPopup(!showChildLockPopup)}
         >
           Child Lock
-          {childLockOption !== 'Off' && <span className="subtext">{childLockOption}</span>}
+          {childLockOption !== 'Off' && <span className={styles.subtext}>{childLockOption}</span>}
         </div>
         <div
-          className={`btn ${windowLockOn ? 'active' : ''}`}
+          className={`${styles.btn} ${windowLockOn ? styles.active : ''}`}
           onClick={() => setWindowLockOn(!windowLockOn)}
         >
           Window Lock
@@ -122,11 +122,11 @@ export const Controls = () => {
 
       {/* Child Lock Popup */}
       {showChildLockPopup && (
-        <div className="child-lock-popup">
+        <div className={styles['child-lock-popup']}>
           {['Off', 'Left', 'Right', 'Both'].map((option) => (
             <div
               key={option}
-              className={`btn ${childLockOption === option ? 'active' : ''}`}
+              className={`${styles.btn} ${childLockOption === option ? styles.active : ''}`}
               onClick={() => {
                 setChildLockOption(option);
                 setShowChildLockPopup(false);
@@ -138,18 +138,18 @@ export const Controls = () => {
         </div>
       )}
 
-      <div className="gap-row"></div>
+      <div className={styles['gap-row']}></div>
 
       {/* Row 3 */}
-      <div className="flex-row row-3">
+      <div className={`${styles['flex-row']} ${styles['row-3']}`}>
         <div
-          className={`btn ${wipersMode === 'Off' ? 'active' : ''}`}
+          className={`${styles.btn} ${wipersMode === 'Off' ? styles.active : ''}`}
           onClick={() => handleWiperModeChange('Off')}
         >
           Off
         </div>
         <div
-          className={`btn ${wipersMode === 'Auto' ? 'active' : ''}`}
+          className={`${styles.btn} ${wipersMode === 'Auto' ? styles.active : ''}`}
           onClick={() => handleWiperModeChange('Auto')}
         >
           Auto
@@ -157,7 +157,7 @@ export const Controls = () => {
         {['I', 'II', 'III', 'IIII'].map((speed) => (
           <div
             key={speed}
-            className={`btn ${wipersMode === 'On' && wiperSpeed === speed ? 'active' : ''}`}
+            className={`${styles.btn} ${wipersMode === 'On' && wiperSpeed === speed ? styles.active : ''}`}
             onClick={() => handleWiperSpeedChange(speed)}
           >
             {speed}
@@ -165,41 +165,41 @@ export const Controls = () => {
         ))}
       </div>
 
-      <div className="gap-row"></div>
+      <div className={styles['gap-row']}></div>
 
       {/* Row 4 */}
-      <div className="flex-row row-4">
-        <div className="flex-column">
-          <div className="btn" onClick={openMirrorsModal}>
+      <div className={`${styles['flex-row']} ${styles['row-4']}`}>
+        <div className={styles['flex-column']}>
+          <div className={styles.btn} onClick={openMirrorsModal}>
             Mirrors
           </div>
-          <div className="btn" onClick={openSteeringModal}>
+          <div className={styles.btn} onClick={openSteeringModal}>
             Steering
           </div>
         </div>
-        <div className="gap-column"></div>
-        <div className="flex-column">
+        <div className={styles['gap-column']}></div>
+        <div className={styles['flex-column']}>
           <div
-            className={`btn ${dashcamOn ? 'active' : ''}`}
+            className={`${styles.btn} ${dashcamOn ? styles.active : ''}`}
             onClick={() => setDashcamOn(!dashcamOn)}
           >
             Dashcam
           </div>
           <div
-            className={`btn ${sentryModeOn ? 'active' : ''}`}
+            className={`${styles.btn} ${sentryModeOn ? styles.active : ''}`}
             onClick={() => setSentryModeOn(!sentryModeOn)}
           >
             Sentry
-            {sentryModeOn && <span className="red-dot"></span>}
+            {sentryModeOn && <span className={styles['red-dot']}></span>}
           </div>
         </div>
-        <div className="gap-column"></div>
-        <div className="flex-column">
-          <div className="btn" onClick={() => setShowCarWashMode(true)}>
+        <div className={styles['gap-column']}></div>
+        <div className={styles['flex-column']}>
+          <div className={styles.btn} onClick={() => setShowCarWashMode(true)}>
             Car Wash
           </div>
           <div
-            className={`btn ${gloveBoxClicked ? 'active' : ''}`}
+            className={`${styles.btn} ${gloveBoxClicked ? styles.active : ''}`}
             onClick={() => setGloveBoxClicked(true)}
           >
             Glovebox
@@ -209,16 +209,16 @@ export const Controls = () => {
 
       {/* Car Wash Mode Panel */}
       {showCarWashMode && (
-        <div className="car-wash-mode-popup">
+        <div className={styles['car-wash-mode-popup']}>
           <CarWashMode onClose={() => setShowCarWashMode(false)} />
         </div>
       )}
 
-      <div className="gap-row"></div>
+      <div className={styles['gap-row']}></div>
 
       {/* Row 5 */}
-      <div className="flex-row row-5">
-        <div className="brightness-slider">
+      <div className={`${styles['flex-row']} ${styles['row-5']}`}>
+        <div className={styles['brightness-slider']}>
           <input
             type="range"
             min="0"
@@ -229,7 +229,7 @@ export const Controls = () => {
           />
         </div>
         <div
-          className={`btn brightness-auto-btn ${autoBrightnessOn ? 'active' : ''}`}
+          className={`${styles.btn} ${styles['brightness-auto-btn']} ${autoBrightnessOn ? styles.active : ''}`}
           onClick={() => {
             setAutoBrightnessOn(!autoBrightnessOn);
             if (!autoBrightnessOn) {
@@ -242,12 +242,12 @@ export const Controls = () => {
       </div>
 
       {showMirrorsModal && (
-        <div className="modal">
+        <div className={styles.modal}>
           <MirrorsAdjustment onClose={closeMirrorsModal} />
         </div>
       )}
       {showSteeringModal && (
-        <div className="modal">
+        <div className={styles.modal}>
           <SteeringAdjustment onClose={closeSteeringModal} />
         </div>
       )}

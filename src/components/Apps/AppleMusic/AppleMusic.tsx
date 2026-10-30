@@ -1,5 +1,3 @@
-import './AppleMusic.css';
-
 export const AppleMusic = () => {
   return (
     <div className="apple-music">

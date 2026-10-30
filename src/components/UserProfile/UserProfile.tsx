@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useUserProfile, type Profile } from '../../contexts/UserProfileContext';
 import { getImagePath } from '../../utils/assetPaths';
-import './UserProfile.css';
+import styles from './UserProfile.module.css';
 
 const profiles: Profile[] = [
   { id: 1, name: 'James', image: getImagePath('profile01.svg') },
@@ -24,21 +24,21 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="user-profile-container">
-      <div className="userProfile no-select" onClick={handleProfileClick}>
+    <div className={styles['user-profile-container']}>
+      <div className={`${styles.userProfile} no-select`} onClick={handleProfileClick}>
         <img src={activeProfile.image} alt={`${activeProfile.name}'s Profile`} />
         <span>{activeProfile.name}</span>
       </div>
       {isDropdownOpen && (
-        <div className="profile-dropdown">
+        <div className={styles['profile-dropdown']}>
           {profiles.map((profile) => (
             <div
               key={profile.id}
-              className="profile-option"
+              className={styles['profile-option']}
               onClick={() => handleProfileSelect(profile)}
             >
               <img
-                className="profile-option-icon"
+                className={styles['profile-option-icon']}
                 src={profile.image}
                 alt={`${profile.name}'s Profile`}
               />
@@ -47,12 +47,12 @@ const UserProfile = () => {
                 <img
                   src={getImagePath('icon-green-check.svg')}
                   alt="Active Profile"
-                  className="active-profile-icon"
+                  className={styles['active-profile-icon']}
                 />
               )}
             </div>
           ))}
-          <div className="driver-profile-settings">
+          <div className={styles['driver-profile-settings']}>
             Driver Profile Settings
             <img src={getImagePath('icon-gear.svg')} alt="Driver Profile Settings" />
           </div>

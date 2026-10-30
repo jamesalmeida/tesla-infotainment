@@ -1,5 +1,3 @@
-import './Bluetooth.css';
-
 export const Bluetooth = () => {
   return (
     <div className="bluetooth">

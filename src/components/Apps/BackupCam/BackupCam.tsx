@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import Webcam from 'react-webcam';
-import './BackupCam.css';
+import styles from './BackupCam.module.css';
 
 const videoConstraints = {
   width: { min: 720 },
@@ -15,8 +15,8 @@ export function BackupCam() {
   }, []);
 
   return (
-    <div className="cameraWrapper">
-      {isLoading && <div className="loadingPlaceholder">Loading camera...</div>}
+    <div className={styles.cameraWrapper}>
+      {isLoading && <div className={styles.loadingPlaceholder}>Loading camera...</div>}
       <Webcam
         videoConstraints={videoConstraints}
         width={720}

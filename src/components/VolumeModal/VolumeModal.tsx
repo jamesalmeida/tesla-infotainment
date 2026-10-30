@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
-import './VolumeModal.css';
+import styles from './VolumeModal.module.css';
 
 interface VolumeModalProps {
   volume: number;
@@ -54,11 +54,11 @@ const VolumeModal = ({
 
   return (
     <div
-      className={`volume-modal ${isFading ? 'fade-out' : ''}`}
+      className={`${styles['volume-modal']} ${isFading ? styles['fade-out'] : ''}`}
       ref={modalRef}
       onMouseMove={handleMouseMove}
     >
-      <button className="audio-settings-btn" onClick={onOpenAudioSettings}>
+      <button className={styles['audio-settings-btn']} onClick={onOpenAudioSettings}>
         <img src={getImagePath('icon-settings.svg')} alt="Audio Settings" />
       </button>
       <input
@@ -67,7 +67,7 @@ const VolumeModal = ({
         max="100"
         value={volume}
         onChange={handleVolumeChange}
-        className="volume-slider"
+        className={styles['volume-slider']}
       />
       {/* <div className="volume-value">{volume}</div> */}
     </div>

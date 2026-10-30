@@ -1,0 +1,129 @@
+/*
+ * Global utility classes shared across unrelated components. These stay global
+ * (not CSS Modules) and are imported once from main.tsx, before any component styles,
+ * so component modules can still override them at equal specificity.
+ */
+
+/* -------------------- Text selection -------------------- */
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* -------------------- Call-to-action hover -------------------- */
+
+.ctaBtn {
+  cursor: pointer;
+  box-sizing: content-box;
+}
+
+.ctaBtn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+  transition:
+    transform 0.1s ease-in-out,
+    filter 0.1s ease-in-out;
+}
+
+/* -------------------- Floating map buttons -------------------- */
+
+.floatingBtn {
+  font-size: 16px;
+  font-weight: bold;
+  color: #a1a1a1;
+  height: auto;
+  width: 35%;
+  padding: 10px 10px;
+  background-color: rgb(250, 250, 250, 90%);
+  border: none;
+  border-radius: 10px;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.floatingBtn .icon {
+  width: 50%;
+}
+
+.floatingBtn.squareBtn {
+  background-color: transparent;
+}
+
+.squareBtn {
+  height: auto;
+  width: 100%;
+}
+
+.icon {
+  width: 30px;
+}
+
+.btnGroup {
+  border-radius: 0px !important;
+  box-shadow: none;
+}
+
+/* -------------------- Bottom bar nav icons -------------------- */
+
+.navIconWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.navIconWrapper.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 32%;
+  width: 35%;
+  height: 2px;
+  background-color: #888;
+}
+
+.navIconWrapper.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.navIconWrapper.disabled img {
+  filter: grayscale(100%);
+}
+
+.navIcons {
+  height: 45%;
+  width: 45%;
+  padding: 0 15px;
+  transition:
+    transform 0.1s ease-in-out,
+    filter 0.1s ease-in-out;
+}
+
+.navIcons:hover {
+  transform: scale(1.05);
+}
+
+.navIcons:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
+}
+
+/*
+ * Up/down arrows of the temperature and volume controls. Merged from two global rules
+ * in TemperatureControl.css (width 15%, opacity, padding) and VolumeControl.css
+ * (width 12%), which both applied to both controls; the later 12% width won.
+ */
+.navIcons.arrows {
+  width: 12%;
+  opacity: 20%;
+  padding: 0px;
+}
+
+@media only screen and (max-device-width: 896px) and (orientation: landscape) {
+  .navIcons.arrows {
+    width: 25px !important;
+  }
+}

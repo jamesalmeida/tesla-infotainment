@@ -36,16 +36,6 @@ body {
   max-height: 680px;
 }
 
-.App {
-  text-align: center;
-  margin: 0;
-  font-family: 'Open Sans', sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 800;
-  font-style: normal;
-  font-variation-settings: 'wdth' 100;
-}
-
 .horizontalPanelGroup {
   height: 87% !important;
   border-radius: 1.5% / 3%;
@@ -107,19 +97,6 @@ body {
   align-content: center;
   justify-content: space-between;
   align-items: center;
-}
-
-.batteryStatus {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.batteryStatus span {
-  padding-right: 4px;
 }
 
 .drivingGearIcons {
@@ -261,62 +238,6 @@ body {
   flex-direction: row-reverse;
 }
 
-.temperature {
-  font-size: 42px;
-  font-weight: 400;
-}
-
-.appShelfContainer {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  font-size: 0.5em;
-}
-
-.appTopShelf {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-evenly;
-  align-items: center;
-  border-bottom: 1px solid grey;
-  padding: 10px;
-}
-
-.appShelf {
-  border-radius: 10px;
-  padding: 10px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-evenly;
-  align-items: stretch;
-}
-
-.appShelfIcon {
-  padding: 5px;
-  width: 13%;
-}
-
-.appShelfIcon img {
-  width: 50%;
-}
-
-.customizeBtn {
-  position: absolute;
-  top: -53px;
-  right: calc(50% - 66px);
-  z-index: 10;
-  background-color: black;
-  padding: 10px 30px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
 /* .screenTooSmallError {
   display: none;
   position: absolute;
@@ -355,18 +276,8 @@ body {
     height: 100dvh;
   }
 
-  .screenTooSmallError {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .small-screen-message {
     display: block;
-  }
-
-  .batteryStatus span {
-    padding-right: 0px;
   }
 
   .topBarCarStatusIcons {
@@ -376,9 +287,6 @@ body {
   .carModelStatus {
     top: -65%;
     left: 1%;
-  }
-  .navBtn input {
-    font-size: 10px;
   }
 }
 
@@ -417,13 +325,6 @@ body {
     height: 82% !important;
   }
 
-  .carModelWrapper {
-    height: 60% !important;
-    width: auto !important;
-    bottom: 30px;
-    z-index: -1;
-  }
-
   .carModelStatus {
     position: absolute;
     top: 20%;
@@ -452,35 +353,4 @@ body {
   .toggleLocks {
     top: -26px;
   }
-
-  .musicPanel {
-    height: 30% !important;
-    max-width: 322px !important;
-    position: relative;
-    left: -2px;
-  }
 }
-
-/* -------------------- UTILITY CSS -------------------- */
-
-.no-select {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-.ctaBtn {
-  cursor: pointer;
-  box-sizing: content-box;
-}
-
-.ctaBtn:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
-  transition:
-    transform 0.1s ease-in-out,
-    filter 0.1s ease-in-out;
-}
-
-/* -------------------- UTILITY CSS END -------------------- */

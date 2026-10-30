@@ -1,0 +1,31 @@
+/* `.navIcons` and `.navIcons.arrows` are global utilities (src/styles/utilities.css). */
+
+/* Moved from VolumeModal.css: this wrapper is rendered here, around <VolumeModal>. */
+.volume-modal-container {
+  position: absolute;
+  bottom: 100%;
+  left: 87%;
+  transform: translateX(-50%);
+  margin-bottom: 10px;
+}
+
+.volume-control {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+:global(.navIcons).volume-display {
+  width: 12%;
+  max-height: 38px;
+}
+
+.volume-display {
+  width: 12%;
+}
+
+/* Moved from BtmNavBar.css. */
+.volume-control .volume-display {
+  padding: 0 12px;
+}

@@ -3,7 +3,7 @@ import { getImagePath } from '../../../utils/assetPaths';
 import { Theater } from '../Theater/Theater';
 import { Toybox } from '../Toybox/Toybox';
 import { Outrun } from './Games/Outrun/Outrun';
-import './Arcade.css';
+import styles from './Arcade.module.css';
 
 export const Arcade = () => {
   const games = [
@@ -66,22 +66,22 @@ export const Arcade = () => {
   };
 
   return (
-    <div className="arcadeWrapper">
-      <div className="arcade-header">
+    <div className={styles.arcadeWrapper}>
+      <div className={styles['arcade-header']}>
         <div
-          className={activeTab === 'Theater' ? 'active' : ''}
+          className={activeTab === 'Theater' ? styles.active : ''}
           onClick={() => handleTabClick('Theater')}
         >
           Theater
         </div>
         <div
-          className={activeTab === 'Arcade' ? 'active' : ''}
+          className={activeTab === 'Arcade' ? styles.active : ''}
           onClick={() => handleTabClick('Arcade')}
         >
           Arcade
         </div>
         <div
-          className={activeTab === 'Toybox' ? 'active' : ''}
+          className={activeTab === 'Toybox' ? styles.active : ''}
           onClick={() => handleTabClick('Toybox')}
         >
           Toybox
@@ -91,40 +91,40 @@ export const Arcade = () => {
       {activeTab === 'Arcade' &&
         (!showGame ? (
           <>
-            <div className="main-game-banner">
+            <div className={styles['main-game-banner']}>
               <img
                 src={getImagePath(
                   `games/${activeGame.toLowerCase().replace(/\s+/g, '-')}-banner.jpg`,
                 )}
                 alt={activeGame}
               />
-              <div className="gradient"></div>
-              <div className="activeGameBannerOverlay">
-                <div className="play-button ctaBtn" onClick={handlePlayClick}>
+              <div className={styles.gradient}></div>
+              <div className={styles.activeGameBannerOverlay}>
+                <div className={`${styles['play-button']} ctaBtn`} onClick={handlePlayClick}>
                   Play Game
                 </div>
-                <div className="gameInfo">
+                <div className={styles.gameInfo}>
                   {/* <div className="gameTitle">{activeGame}</div> */}
-                  <div className="gameDescription">
+                  <div className={styles.gameDescription}>
                     {games.find((game) => game.name === activeGame)?.description}
                   </div>
                 </div>
               </div>
             </div>
-            <div className="game-carousel">
+            <div className={styles['game-carousel']}>
               {games.map((game) => (
                 <img
                   key={game.name}
                   src={getImagePath(`games/${game.boxArt}`)}
                   alt={game.name}
                   onClick={() => handleGameClick(game.name)}
-                  className={activeGame === game.name ? 'active' : ''}
+                  className={activeGame === game.name ? styles.active : ''}
                 />
               ))}
             </div>
           </>
         ) : (
-          <div className="game-container">
+          <div className={styles['game-container']}>
             {currentGame === 'Outrun' && <Outrun onClose={closeGame} />}
             {/* Add other game components here when they're available */}
           </div>

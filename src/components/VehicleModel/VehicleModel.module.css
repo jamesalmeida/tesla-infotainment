@@ -1,0 +1,19 @@
+/*
+ * Moved from App.css. It stays above the base rule on purpose: App.css used to load
+ * before this lazy chunk's CSS, so the base `bottom: 40px` below kept winning over the
+ * landscape `bottom: 30px`.
+ */
+@media only screen and (max-device-width: 896px) and (orientation: landscape) {
+  .carModelWrapper {
+    height: 60% !important;
+    width: auto !important;
+    bottom: 30px;
+    z-index: -1;
+  }
+}
+
+.carModelWrapper {
+  bottom: 40px;
+  /* overflow: visible !important; */
+  /* z-index: -1; */
+}

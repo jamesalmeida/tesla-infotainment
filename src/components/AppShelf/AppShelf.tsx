@@ -1,4 +1,5 @@
 import { getImagePath } from '../../utils/assetPaths';
+import styles from './AppShelf.module.css';
 
 const topShelfApps = [
   'wipers',
@@ -42,7 +43,7 @@ const formatAppName = (appName: string) =>
 
 function ShelfIcon({ app }: { app: string }) {
   return (
-    <div className="appShelfIcon">
+    <div className={styles.appShelfIcon}>
       <img src={getImagePath(`app-${app}.svg`)} alt={`${app} icon`} />
       <div className="appShelfIconText">{formatAppName(app)}</div>
     </div>
@@ -51,14 +52,14 @@ function ShelfIcon({ app }: { app: string }) {
 
 export function AppShelf() {
   return (
-    <div className="appShelfContainer">
-      <div className="customizeBtn">Customize</div>
-      <div className="appTopShelf">
+    <div className={styles.appShelfContainer}>
+      <div className={styles.customizeBtn}>Customize</div>
+      <div className={styles.appTopShelf}>
         {topShelfApps.map((app) => (
           <ShelfIcon key={app} app={app} />
         ))}
       </div>
-      <div className="appShelf">
+      <div className={styles.appShelf}>
         {shelfApps.map((app) => (
           <ShelfIcon key={app} app={app} />
         ))}

@@ -15,7 +15,7 @@ import { Service } from './components/Service';
 import { Software } from './components/Software';
 import { Wifi } from './components/Wifi';
 import { getImagePath } from '../../../utils/assetPaths';
-import './CarSettings.css';
+import styles from './CarSettings.module.css';
 
 interface TopBarItem {
   icon: string;
@@ -64,18 +64,18 @@ export const CarSettings = () => {
   };
 
   return (
-    <div className="car-settings-wrapper">
-      <div className="top-bar">
-        <div className="top-bar-item search-bar">
+    <div className={styles['car-settings-wrapper']}>
+      <div className={styles['top-bar']}>
+        <div className={`${styles['top-bar-item']} ${styles['search-bar']}`}>
           <img src={getImagePath('icon-search.svg')} alt="Search" />
           <input type="text" placeholder="Search settings" />
         </div>
-        <div className="top-bar-right-icons">
+        <div className={styles['top-bar-right-icons']}>
           <UserProfile />
           {topBarItems.map((item, index) => (
             <div
               key={index}
-              className="top-bar-item"
+              className={styles['top-bar-item']}
               onClick={item.icon === 'wifi' ? handleWifiClick : undefined}
             >
               <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
@@ -84,12 +84,12 @@ export const CarSettings = () => {
           ))}
         </div>
       </div>
-      <div className="car-settings-panel">
-        <div className="left-scroll-panel">
+      <div className={styles['car-settings-panel']}>
+        <div className={styles['left-scroll-panel']}>
           {leftPanelItems.map((item, index) => (
             <div
               key={index}
-              className={`left-scroll-panel-item ${activePanel === item.label ? 'active' : ''}`}
+              className={`${styles['left-scroll-panel-item']} ${activePanel === item.label ? styles.active : ''}`}
               onClick={() => selectPanel(item.label)}
             >
               <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
@@ -97,8 +97,8 @@ export const CarSettings = () => {
             </div>
           ))}
         </div>
-        <div className="settings-right-panel">
-          <div className={`buttons-grid ${activePanel.toLowerCase()}`}>
+        <div className={styles['settings-right-panel']}>
+          <div className={`${styles['buttons-grid']} ${activePanel.toLowerCase()}`}>
             {activePanel === 'Controls' && <Controls />}
             {activePanel === 'Dynamics' && <Dynamics />}
             {activePanel === 'Charging' && <Charging />}

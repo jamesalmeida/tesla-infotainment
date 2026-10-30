@@ -1,5 +1,5 @@
 import YouTube from 'react-youtube';
-import './Dashcam.css';
+import styles from './Dashcam.module.css';
 
 export function Dashcam() {
   // YouTube video options
@@ -28,9 +28,9 @@ export function Dashcam() {
   const videoId = '5gFR3sMWSO0'; // Video ID for speicific video to play on load.
 
   return (
-    <div className="dashcam-container">
+    <div className={styles['dashcam-container']}>
       <h2>Dashcam Footage</h2>
-      <YouTube className="dashcam-video" videoId={videoId} opts={opts} />
+      <YouTube className={styles['dashcam-video']} videoId={videoId} opts={opts} />
     </div>
   );
 }

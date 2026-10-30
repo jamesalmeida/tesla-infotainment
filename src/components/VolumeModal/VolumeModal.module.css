@@ -1,11 +1,3 @@
-.volume-modal-container {
-  position: absolute;
-  bottom: 100%;
-  left: 87%;
-  transform: translateX(-50%);
-  margin-bottom: 10px;
-}
-
 .volume-modal {
   background-color: rgba(255, 255, 255, 1);
   border-radius: 10px;
@@ -39,11 +31,4 @@
 
 .volume-slider {
   width: 150px;
-}
-
-.volume-value {
-  color: white;
-  font-size: 14px;
-  min-width: 30px;
-  text-align: right;
 }

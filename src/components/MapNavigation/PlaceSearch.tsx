@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
-import './PlaceSearch.css';
+import styles from './PlaceSearch.module.css';
 
 const SUGGESTION_DELAY_MS = 200;
 
@@ -124,9 +124,9 @@ export function PlaceSearch({
   };
 
   return (
-    <div className="placeSearch">
-      <form className="floatingBtn navBtn" onSubmit={handleSubmit}>
-        <img className="searchIcon" src={getImagePath('icon-search.svg')} alt="Search Map" />
+    <div className={styles.placeSearch}>
+      <form className={`floatingBtn ${styles.navBtn}`} onSubmit={handleSubmit}>
+        <img className={styles.searchIcon} src={getImagePath('icon-search.svg')} alt="Search Map" />
         <input
           id="navigateTo"
           name="NavigateTo"
@@ -142,13 +142,13 @@ export function PlaceSearch({
           onBlur={closeSuggestions}
         />
         {query && (
-          <button type="button" className="clearInput" onClick={handleClear}>
+          <button type="button" className={styles.clearInput} onClick={handleClear}>
             <img src={getImagePath('icon-x.svg')} alt="Clear input" />
           </button>
         )}
       </form>
       {suggestions.length > 0 && (
-        <ul id="placeSuggestions" className="placeSuggestions" role="listbox">
+        <ul id="placeSuggestions" className={styles.placeSuggestions} role="listbox">
           {suggestions.map((suggestion, index) => {
             const prediction = suggestion.placePrediction;
             return (
@@ -156,14 +156,14 @@ export function PlaceSearch({
                 key={prediction.placeId}
                 role="option"
                 aria-selected={index === highlighted}
-                className={`placeSuggestion ${index === highlighted ? 'highlighted' : ''}`}
+                className={`${styles.placeSuggestion} ${index === highlighted ? styles.highlighted : ''}`}
                 // mousedown, not click: the input's blur would close the list first.
                 onMouseDown={(e) => {
                   e.preventDefault();
                   selectSuggestion(suggestion);
                 }}
               >
-                <span className="placeSuggestionMain">
+                <span className={styles.placeSuggestionMain}>
                   {prediction.mainText?.text ?? prediction.text.text}
                 </span>
                 {prediction.secondaryText && (

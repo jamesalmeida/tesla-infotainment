@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useCarActions, useCarState } from '../../state/CarStateContext';
 import type { Gear } from '../../state/carState';
-import './GearSelect.css';
+import styles from './GearSelect.module.css';
 
 const GEARS: Gear[] = ['P', 'R', 'N', 'D'];
 
@@ -43,11 +43,11 @@ function GearSelect() {
   }, [onGearSelect]);
 
   return (
-    <div className="gearSelect no-select">
+    <div className={`${styles.gearSelect} no-select`}>
       {GEARS.map((gear) => (
         <span
           key={gear}
-          className={`gearSelectIcon ${activeGear === gear ? 'active' : ''}`}
+          className={`${styles.gearSelectIcon} ${activeGear === gear ? styles.active : ''}`}
           onClick={() => onGearSelect(gear)}
         >
           {gear}

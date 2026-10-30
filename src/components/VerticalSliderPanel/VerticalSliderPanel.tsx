@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useRef, type ComponentType } from 'react';
 import type { AppId } from '../../state/carState';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
-import './VerticalSliderPanel.css';
+import styles from './VerticalSliderPanel.module.css';
 
 // Each app is its own chunk, downloaded the first time it is opened.
 const lazyNamed = <M, K extends keyof M>(load: () => Promise<M>, name: K) =>
@@ -30,12 +30,12 @@ const VerticalSliderPanel = ({ isOpen, activeIcon, onClose }: VerticalSliderPane
   const panelRef = useRef<HTMLDivElement>(null);
 
   const getPanelClassName = () => {
-    let className = `vertical-slider-panel ${isOpen ? 'open' : ''} ${isDragging ? 'dragging' : ''}`;
+    let className = `${styles['vertical-slider-panel']} ${isOpen ? styles.open : ''} ${isDragging ? styles.dragging : ''}`;
     if (isOpen) {
-      className += ' open';
+      className += ` ${styles.open}`;
     }
     if (activeIcon === 'camera') {
-      className += ' camera-background';
+      className += ` ${styles['camera-background']}`;
     }
     return className;
   };
@@ -106,8 +106,8 @@ const VerticalSliderPanel = ({ isOpen, activeIcon, onClose }: VerticalSliderPane
       onMouseUp={handleEnd}
       onMouseLeave={handleEnd}
     >
-      <div className="slider-handle"></div>
-      <div className="slider-content">
+      <div className={styles['slider-handle']}></div>
+      <div className={styles['slider-content']}>
         <Suspense fallback={<LoadingSpinner />}>{renderContent()}</Suspense>
       </div>
       {/* {!isCameraForced && <button onClick={handleClose}>Close</button>} */}

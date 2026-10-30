@@ -5,6 +5,13 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: '/tesla-infotainment/',
   plugins: [react()],
+  css: {
+    modules: {
+      // Keep the original class name at the front so built names stay readable,
+      // e.g. `.gearSelectIcon` becomes `.gearSelectIcon_a1B2c`.
+      generateScopedName: '[local]_[hash:base64:5]',
+    },
+  },
   build: {
     // three.js core alone is ~740 kB minified and cannot be split further.
     chunkSizeWarningLimit: 800,
@@ -25,6 +32,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/setupTests.ts',
-    css: true,
+    css: {
+      include: /.+/,
+      // Tests select elements by their original class names.
+      modules: { classNameStrategy: 'non-scoped' },
+    },
   },
 });

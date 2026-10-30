@@ -15,7 +15,7 @@ import OutsideTemp from '../OutsideTemp/OutsideTemp';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import UserProfile from '../UserProfile/UserProfile';
 import { PlaceSearch, type SelectedPlace } from './PlaceSearch';
-import './MapNavigation.css';
+import styles from './MapNavigation.module.css';
 
 type MapType = 'roadmap' | 'satellite';
 
@@ -189,29 +189,29 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
   };
 
   return (
-    <div className="MapNavigation">
-      <div className="topMenuBar">
-        <div className="carLockWrapper">
+    <div className={styles.MapNavigation}>
+      <div className={styles.topMenuBar}>
+        <div className={styles.carLockWrapper}>
           <CarLock />
         </div>
         <UserProfile />
-        <div className="wifiStatus">
+        <div className={styles.wifiStatus}>
           <img src={getImagePath('icon-wifi.svg')} alt="Wifi Status" onClick={onWifiClick} />
         </div>
         <div className="clock">
           <Clock />
         </div>
-        <div className="outsideTemp">
+        <div className={styles.outsideTemp}>
           <OutsideTemp />
         </div>
-        <div className="airbagStatus no-select">
+        <div className={`${styles.airbagStatus} no-select`}>
           <img src={getImagePath('icon-airbags.svg')} alt="Airbag Status" />
-          <div className="airbagStatusText">
-            PASSENGER AIRBAG&nbsp;<span className="airbagStatusOff">OFF</span>
+          <div className={styles.airbagStatusText}>
+            PASSENGER AIRBAG&nbsp;<span className={styles.airbagStatusOff}>OFF</span>
           </div>
         </div>
       </div>
-      <div className="mapOverlayWrapper">
+      <div className={styles.mapOverlayWrapper}>
         <PlaceSearch
           placesLibrary={placesLibrary}
           query={query}
@@ -221,20 +221,27 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
           locationBias={center}
         />
         {searchResult && !isNavigating && (
-          <button className="floatingBtn navigateBtn" onClick={calculateRoute}>
+          <button className={`floatingBtn ${styles.navigateBtn}`} onClick={calculateRoute}>
             Navigate
           </button>
         )}
         {isNavigating && (
-          <button className="floatingBtn endNavigateBtn" onClick={endNavigation}>
+          <button className={`floatingBtn ${styles.endNavigateBtn}`} onClick={endNavigation}>
             End Navigation
           </button>
         )}
-        <div className="floatingRightBtnsWrapper">
-          <button className="floatingBtn squareBtn compassDirection" onClick={handleCompass}>
-            <img className="icon-compass" src={getImagePath('icon-compass.svg')} alt="Compass" />
+        <div className={styles.floatingRightBtnsWrapper}>
+          <button
+            className={`floatingBtn squareBtn ${styles.compassDirection}`}
+            onClick={handleCompass}
+          >
+            <img
+              className={styles['icon-compass']}
+              src={getImagePath('icon-compass.svg')}
+              alt="Compass"
+            />
           </button>
-          <div className="floatingRightBtnColumn">
+          <div className={styles.floatingRightBtnColumn}>
             <button className="floatingBtn squareBtn btnGroup" onClick={toggleMapType}>
               <img className="icon" src={getImagePath('icon-globe.svg')} alt="Map Style" />
             </button>
@@ -258,7 +265,7 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
           </div>
         </div>
       </div>
-      <div className="mapBackground">
+      <div className={styles.mapBackground}>
         <Map
           style={containerStyle}
           defaultCenter={DEFAULT_CENTER}

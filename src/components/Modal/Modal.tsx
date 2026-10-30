@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { ModalId } from '../../state/carState';
-import './Modal.css';
+import styles from './Modal.module.css';
 
 interface ModalProps {
   isVisible: boolean;
@@ -13,8 +13,8 @@ export const Modal = ({ isVisible, onClose: _onClose, children, modalType }: Mod
   if (!isVisible) return null;
 
   return (
-    <div className={`modal-overlay ${modalType}`}>
-      <div className={`modal-content ${modalType}`}>
+    <div className={`${styles['modal-overlay']} ${modalType}`}>
+      <div className={`${styles['modal-content']} ${modalType && styles[modalType]}`}>
         {children}
         {/* <button className="modal-close" onClick={onClose}>Close</button> */}
       </div>

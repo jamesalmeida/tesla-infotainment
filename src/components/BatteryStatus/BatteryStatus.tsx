@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './BatteryStatus.css';
+import styles from './BatteryStatus.module.css';
 
 const BatteryStatus = () => {
   const [batteryPercentage, setBatteryPercentage] = useState(69);
@@ -22,7 +22,7 @@ const BatteryStatus = () => {
   };
 
   return (
-    <div className="batteryStatus no-select">
+    <div className={`${styles.batteryStatus} no-select`}>
       <span onClick={toggleMilesDisplay}>
         {showMiles ? `${calculateMiles(batteryPercentage)} mi` : `${batteryPercentage}%`}
       </span>
@@ -50,7 +50,7 @@ const BatteryStatus = () => {
           width={`${(batteryPercentage * 16) / 100}`}
           height="8"
           fill="currentColor"
-          className={animatingBattery ? 'battery-fill-animate' : ''}
+          className={animatingBattery ? styles['battery-fill-animate'] : ''}
         />
         <rect x="23" y="10" width="2" height="4" fill="currentColor" />
       </svg>
