@@ -39,6 +39,21 @@ Experience a simulated Tesla infotainment system in your browser!
 - Shift + <: Previous track
 - Shift + >: Next track
 
+## Project layout
+
+```
+src/components/   screen chrome, apps, panels and the 3D vehicle
+src/state/        reducer and context for the car and UI state
+src/hooks/        shared hooks (media queries, keyboard, assets)
+src/styles/       shared CSS; per-component styles are CSS Modules
+```
+
+The app is TypeScript (strict), and component styles are CSS Modules. `src/utils/assetPaths.ts` resolves asset URLs against the GitHub Pages base path.
+
+## Dependency updates
+
+Dependabot opens weekly PRs for npm packages and GitHub Actions. React, react-three-fiber, drei, react-spring and three are grouped into one PR because they must move together.
+
 ## Quick Start
 
 To run the project locally:
