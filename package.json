@@ -29,7 +29,7 @@
     "react-resizable-panels": "^4.14.8",
     "react-webcam": "^7.2.0",
     "react-youtube": "^10.1.0",
-    "three": "^0.186.1"
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -39,7 +39,7 @@
     "@types/google.maps": "^3.66.9",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@types/three": "~0.186.0",
+    "@types/three": "~0.187.0",
     "@vitejs/plugin-react": "^6.1.2",
     "eslint": "^10.13.0",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -54,7 +54,7 @@
   "pnpm": {
     "overrides": {
       "use-sync-external-store": "^1.5.0",
-      "@types/three": "~0.186.0"
+      "@types/three": "~0.187.0"
     }
   }
 }
