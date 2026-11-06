@@ -58,6 +58,7 @@ interface PlaceSearchProps {
   onSelect: (place: Place) => void;
   onClear: () => void;
   getLocationBias: () => google.maps.LatLngLiteral;
+  disabled?: boolean;
 }
 
 // Search box with place suggestions from the Places API (New). Replaces the legacy
@@ -69,6 +70,7 @@ export function PlaceSearch({
   onSelect,
   onClear,
   getLocationBias,
+  disabled = false,
 }: PlaceSearchProps) {
   const [{ status, requestId }, dispatch] = useReducer<
     PlaceSearchState<PlaceSuggestion>,
@@ -209,6 +211,7 @@ export function PlaceSearch({
           aria-controls={LIST_ID}
           aria-expanded={suggestions.length > 0}
           aria-activedescendant={highlighted >= 0 ? optionId(highlighted) : undefined}
+          disabled={disabled}
           value={query}
           onChange={handleChange}
           onKeyDown={handleKeyDown}

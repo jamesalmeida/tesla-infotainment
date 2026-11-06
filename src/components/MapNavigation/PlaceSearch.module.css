@@ -86,6 +86,11 @@
   background-color: transparent;
 }
 
+.navBtn input:disabled {
+  color: #a1a1a1;
+  cursor: not-allowed;
+}
+
 .searchIcon {
   width: 8%;
   margin-left: 5%;

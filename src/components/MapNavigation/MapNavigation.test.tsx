@@ -73,6 +73,7 @@ async function startTrip(name: string, location: google.maps.LatLngLiteral) {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', 'test-key');
   fake = installFakeMaps();
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -81,6 +82,7 @@ afterEach(() => {
   vi.clearAllTimers();
   vi.useRealTimers();
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
   Reflect.deleteProperty(navigator, 'geolocation');
 });
 
@@ -542,5 +544,88 @@ describe('map layers (#50)', () => {
     renderMap();
     fireEvent.click(button('Reset map heading'));
     expect(fake.map.setHeading).toHaveBeenCalledWith(0);
+  });
+});
+
+describe('no usable Google Maps key (#89)', () => {
+  const MAP_BUTTONS = [
+    'Reset map heading',
+    'Satellite map',
+    'Traffic',
+    'Locate car',
+    'Charging locations',
+  ];
+
+  function expectFallback(heading: string) {
+    expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+    expect(screen.queryByTestId('map')).not.toBeInTheDocument();
+    expect(searchBox()).toBeDisabled();
+    for (const name of MAP_BUTTONS) {
+      expect(screen.getByRole('button', { name })).toBeDisabled();
+    }
+  }
+
+  test.each([
+    ['empty', ''],
+    ['blank', '   '],
+    ['the template placeholder', 'YOUR_API_KEY_HERE'],
+  ])('a key that is %s never reaches Google', (_name, key) => {
+    vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', key);
+    renderMap();
+
+    expectFallback('Add a Google Maps key');
+    expect(fake.apiProvider).toBeNull();
+    expect(screen.getByText(/Copy \.env\.template to \.env/)).toBeInTheDocument();
+  });
+
+  test('the deployed site says maps are unavailable, with no setup talk', () => {
+    vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', '');
+    vi.stubEnv('DEV', false);
+    renderMap();
+
+    expectFallback('Maps are unavailable');
+    expect(screen.queryByText(/\.env/)).not.toBeInTheDocument();
+  });
+
+  test('the top bar stays and Wi-Fi still works', () => {
+    vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', '');
+    const onWifiClick = vi.fn();
+    render(<MapNavigation onWifiClick={onWifiClick} />);
+
+    fireEvent.click(screen.getByAltText('Wifi Status'));
+    expect(onWifiClick).toHaveBeenCalledOnce();
+  });
+
+  test('a working key shows the map', () => {
+    renderMap();
+
+    expect(screen.getByTestId('map')).toBeInTheDocument();
+    expect(fake.apiProvider?.apiKey).toBe('test-key');
+    expect(searchBox()).toBeEnabled();
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+  });
+
+  test('a load failure swaps the map for the fallback', () => {
+    renderMap();
+
+    act(() => fake.apiProvider?.onError?.(new Error('script blocked')));
+
+    expectFallback("Google Maps didn't load");
+  });
+
+  test("Google's auth failure callback swaps the map for the fallback", () => {
+    renderMap();
+
+    act(() => window.gm_authFailure?.());
+
+    expectFallback('Google rejected the Maps key');
+  });
+
+  test('the auth failure callback does not outlive the component', () => {
+    const { unmount } = renderMap();
+    expect(window.gm_authFailure).toBeInstanceOf(Function);
+
+    unmount();
+    expect(window.gm_authFailure).toBeUndefined();
   });
 });

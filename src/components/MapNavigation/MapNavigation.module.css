@@ -27,6 +27,55 @@
   border: none !important;
 }
 
+.fallback {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #eceef0;
+}
+
+.fallbackArt {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fallbackNote {
+  position: relative;
+  box-sizing: border-box;
+  width: min(380px, 70%);
+  margin-top: 8%;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  color: #4e4e4e;
+  background-color: rgb(250, 250, 250, 90%);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.fallbackNote h2 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.fallbackNote p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.fallbackNote code {
+  font-size: 12px;
+}
+
 input:focus {
   outline: none;
 }

@@ -1,67 +1,20 @@
-import { useEffect, useEffectEvent, useReducer, useRef, useState, type ReactNode } from 'react';
-import {
-  APIProvider,
-  AdvancedMarker,
-  Map,
-  Pin,
-  Polyline,
-  useMap,
-  useMapsLibrary,
-} from '@vis.gl/react-google-maps';
+import { useCallback, useEffect, useState } from 'react';
+import { APIProvider } from '@vis.gl/react-google-maps';
 import { getImagePath } from '../../utils/assetPaths';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
 import UserProfile from '../UserProfile/UserProfile';
-import { MapButtons } from './MapButtons';
-import { DEFAULT_CAR_POSITION, initialMapLayers, mapLayersReducer } from './mapLayers';
-import {
-  activeTripOf,
-  initialNavState,
-  navigateTarget,
-  navReducer,
-  searchedPlaceOf,
-  type Route,
-} from './navState';
-import type { Place } from './place';
-import { PlaceSearch } from './PlaceSearch';
-import { TrafficLayer } from './TrafficLayer';
+import { MapFallback } from './MapFallback';
+import { usableMapsKey, type MapsFailure } from './mapsAvailability';
+import { MapStage } from './MapStage';
 import styles from './MapNavigation.module.css';
 
-const containerStyle = {
-  width: '100%',
-  height: '100%',
-};
-
-const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-// Fall back to the original Tesla-style map ID when the env var is unset.
-const MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '2d1b7cd2cf277f7';
-
-const CHARGER_SEARCH_RADIUS_METERS = 5000;
-const LOCATE_TIMEOUT_MS = 10000;
-
-function MarkerIcon({ name, size }: { name: string; size: number }) {
-  return <img src={getImagePath(name)} width={size} height={size} alt="" />;
-}
-
-interface MapNoticeProps {
-  role: 'alert' | 'status';
-  onDismiss: () => void;
-  children: ReactNode;
-}
-
-function MapNotice({ role, onDismiss, children }: MapNoticeProps) {
-  return (
-    <div
-      role={role}
-      className={`${styles.navStatus} ${styles.mapNotice} ${role === 'alert' ? styles.navError : ''}`}
-    >
-      <span>{children}</span>
-      <button className={styles.noticeDismiss} aria-label="Dismiss" onClick={onDismiss}>
-        <img src={getImagePath('icon-x.svg')} alt="" />
-      </button>
-    </div>
-  );
+declare global {
+  interface Window {
+    /** Google calls this global when it rejects the key. The map library doesn't handle it. */
+    gm_authFailure?: () => void;
+  }
 }
 
 interface MapNavigationProps {
@@ -69,144 +22,22 @@ interface MapNavigationProps {
 }
 
 export function MapNavigation({ onWifiClick }: MapNavigationProps) {
-  return (
-    <APIProvider apiKey={API_KEY}>
-      <MapNavigationContent onWifiClick={onWifiClick} />
-    </APIProvider>
-  );
-}
+  const apiKey = usableMapsKey(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
+  const [failure, setFailure] = useState<MapsFailure | null>(null);
 
-function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
-  const map = useMap();
-  const placesLibrary = useMapsLibrary('places');
-  const routesLibrary = useMapsLibrary('routes');
-  const [layers, dispatchLayers] = useReducer(mapLayersReducer, initialMapLayers);
-  const { carPosition } = layers;
-  const [query, setQuery] = useState('');
-  const [nav, dispatchNav] = useReducer(navReducer, initialNavState);
-  const routeRequestIdRef = useRef(0);
-
-  const handlePlaceSelect = (place: Place) => {
-    setQuery(place.name);
-    dispatchNav({ type: 'placeChosen', place });
-    if (map) {
-      map.panTo(place.location);
-      map.setZoom(16);
-    }
-  };
-
-  const clearSearch = () => {
-    setQuery('');
-    dispatchNav({ type: 'searchCleared' });
-  };
-
-  // Read on demand rather than held in state: the map owns its viewport, and this way
-  // panning around doesn't re-render everything.
-  const viewportCenter = () => map?.getCenter()?.toJSON() ?? carPosition;
+  const handleLoadError = useCallback((error: unknown) => {
+    console.error('The Google Maps JavaScript API failed to load', error);
+    setFailure('loadFailed');
+  }, []);
 
   useEffect(() => {
-    if (map && carPosition !== DEFAULT_CAR_POSITION) {
-      map.panTo(carPosition);
-      map.setZoom(16);
-    }
-  }, [map, carPosition]);
-
-  const locateRequestId = layers.location === 'locating' ? layers.locationRequestId : null;
-  useEffect(() => {
-    if (locateRequestId === null) return;
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) =>
-        dispatchLayers({
-          type: 'located',
-          requestId: locateRequestId,
-          position: { lat: coords.latitude, lng: coords.longitude },
-        }),
-      ({ code }) => dispatchLayers({ type: 'locateFailed', requestId: locateRequestId, code }),
-      { timeout: LOCATE_TIMEOUT_MS },
-    );
-  }, [locateRequestId]);
-
-  const searchChargers = useEffectEvent(
-    async (library: google.maps.PlacesLibrary, requestId: number) => {
-      try {
-        const { places } = await library.Place.searchNearby({
-          fields: ['id', 'location'],
-          locationRestriction: { center: viewportCenter(), radius: CHARGER_SEARCH_RADIUS_METERS },
-          includedPrimaryTypes: ['electric_vehicle_charging_station'],
-          maxResultCount: 20,
-        });
-        dispatchLayers({ type: 'chargersLoaded', requestId, chargers: places });
-      } catch (error) {
-        console.error('Error fetching charger locations', error);
-        dispatchLayers({ type: 'chargersFailed', requestId });
-      }
-    },
-  );
-
-  const chargerRequestId = layers.chargers === 'loading' ? layers.chargerRequestId : null;
-  useEffect(() => {
-    if (chargerRequestId !== null && placesLibrary) searchChargers(placesLibrary, chargerRequestId);
-  }, [chargerRequestId, placesLibrary]);
-
-  const startNavigation = () => {
-    dispatchNav({ type: 'navigatePressed', requestId: ++routeRequestIdRef.current });
-  };
-
-  const fetchRoute = useEffectEvent(
-    async (library: google.maps.RoutesLibrary, place: Place, requestId: number) => {
-      const notFound = (reason: string) =>
-        dispatchNav({ type: 'routeNotFound', requestId, reason });
-      try {
-        const { routes } = await library.Route.computeRoutes({
-          origin: carPosition,
-          destination: place.location,
-          travelMode: 'DRIVING',
-          fields: ['path', 'viewport'],
-        });
-        const route = routes?.[0];
-        if (!route?.path?.length) {
-          notFound(`No route found to ${place.name}.`);
-          return;
-        }
-        dispatchNav({
-          type: 'routeFound',
-          requestId,
-          route: {
-            path: route.path.map(({ lat, lng }) => ({ lat, lng })),
-            viewport: route.viewport ?? null,
-          },
-        });
-      } catch (error) {
-        console.error('Error fetching directions', error);
-        notFound(`Couldn't get directions to ${place.name}.`);
-      }
-    },
-  );
-
-  const routing = nav.kind === 'routing' ? nav : null;
-  useEffect(() => {
-    if (routing && routesLibrary) fetchRoute(routesLibrary, routing.place, routing.requestId);
-  }, [routing, routesLibrary]);
-
-  const activeTrip = activeTripOf(nav);
-  const activeRoute: Route | null = activeTrip?.route ?? null;
-  useEffect(() => {
-    if (map && activeRoute?.viewport) map.fitBounds(activeRoute.viewport);
-  }, [map, activeRoute]);
-
-  const endNavigation = () => {
-    setQuery('');
-    dispatchNav({ type: 'navigationEnded' });
-
-    // Center the map on the current location
-    if (map) {
-      map.panTo(carPosition);
-      map.setZoom(16);
-    }
-  };
-
-  const toggleChargers = () => dispatchLayers({ type: 'chargersToggled' });
-  const searchedPlace = searchedPlaceOf(nav);
+    if (!apiKey) return;
+    const previous = window.gm_authFailure;
+    window.gm_authFailure = () => setFailure('authFailed');
+    return () => {
+      window.gm_authFailure = previous;
+    };
+  }, [apiKey]);
 
   return (
     <div className={styles.MapNavigation}>
@@ -231,110 +62,14 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
           </div>
         </div>
       </div>
-      <div className={styles.mapOverlayWrapper}>
-        <PlaceSearch
-          placesLibrary={placesLibrary}
-          query={query}
-          onQueryChange={setQuery}
-          onSelect={handlePlaceSelect}
-          onClear={clearSearch}
-          getLocationBias={viewportCenter}
-        />
-        <div className={styles.navPanel}>
-          {nav.kind === 'routing' && (
-            <p role="status" className={styles.navStatus}>
-              Routing to {nav.place.name}…
-            </p>
-          )}
-          {nav.kind === 'routeFailed' && (
-            <p role="alert" className={`${styles.navStatus} ${styles.navError}`}>
-              {nav.reason}
-              {activeTrip && ` Still navigating to ${activeTrip.place.name}.`}
-            </p>
-          )}
-          {nav.kind === 'navigating' && (
-            <p role="status" className={styles.navStatus}>
-              Navigating to {nav.place.name}
-            </p>
-          )}
-          {(navigateTarget(nav) || nav.kind === 'routing') && (
-            <button
-              className={`floatingBtn ${styles.navigateBtn}`}
-              onClick={startNavigation}
-              disabled={nav.kind === 'routing'}
-            >
-              {nav.kind === 'routing'
-                ? 'Routing…'
-                : nav.kind === 'routeFailed'
-                  ? 'Try again'
-                  : 'Navigate'}
-            </button>
-          )}
-          {activeTrip && (
-            <button className={`floatingBtn ${styles.endNavigateBtn}`} onClick={endNavigation}>
-              End Navigation
-            </button>
-          )}
-          {layers.locationError && (
-            <MapNotice
-              role="alert"
-              onDismiss={() => dispatchLayers({ type: 'locationErrorDismissed' })}
-            >
-              {layers.locationError}
-            </MapNotice>
-          )}
-          {layers.chargers === 'error' && (
-            <MapNotice role="alert" onDismiss={toggleChargers}>
-              Couldn't load chargers.
-            </MapNotice>
-          )}
-          {layers.chargers === 'on' && layers.chargerResults.length === 0 && (
-            <MapNotice role="status" onDismiss={toggleChargers}>
-              No chargers found in this area.
-            </MapNotice>
-          )}
-        </div>
-        <MapButtons
-          layers={layers}
-          actions={{
-            onCompass: () => map?.setHeading(0),
-            onToggleMapStyle: () => dispatchLayers({ type: 'mapStyleToggled' }),
-            onToggleTraffic: () => dispatchLayers({ type: 'trafficToggled' }),
-            onLocate: () =>
-              dispatchLayers({ type: 'locatePressed', supported: Boolean(navigator.geolocation) }),
-            onToggleChargers: toggleChargers,
-          }}
-        />
-      </div>
-      <div className={styles.mapBackground}>
-        <Map
-          style={containerStyle}
-          defaultCenter={DEFAULT_CAR_POSITION}
-          defaultZoom={16}
-          mapId={MAP_ID}
-          mapTypeId={layers.mapStyle}
-          disableDefaultUI
-          gestureHandling="greedy"
-        >
-          {layers.traffic && <TrafficLayer />}
-          <AdvancedMarker position={carPosition}>
-            <MarkerIcon name="icon-car-marker.svg" size={40} />
-          </AdvancedMarker>
-          {searchedPlace && (
-            <AdvancedMarker position={searchedPlace.location}>
-              <MarkerIcon name="icon-map-marker.svg" size={40} />
-            </AdvancedMarker>
-          )}
-          {activeRoute && (
-            <Polyline path={activeRoute.path} strokeColor="#1976D2" strokeWeight={5} />
-          )}
-          {layers.chargerResults.map((charger) => (
-            <AdvancedMarker key={charger.id} position={charger.location}>
-              <Pin background="#e31937" borderColor="#a8102a" glyphColor="#ffffff" />
-            </AdvancedMarker>
-          ))}
-        </Map>
-      </div>
+      {/* No APIProvider without a key: it would still load Google's script. */}
+      {apiKey && !failure ? (
+        <APIProvider apiKey={apiKey} onError={handleLoadError}>
+          <MapStage />
+        </APIProvider>
+      ) : (
+        <MapFallback failure={failure ?? 'missingKey'} />
+      )}
     </div>
   );
 }
