@@ -444,3 +444,8 @@ test('keeps the id Shift+M focuses', () => {
   render(<Harness />);
   expect(input()).toHaveAttribute('id', 'navigateTo');
 });
+
+test('offers a search key on touch keyboards', () => {
+  render(<Harness />);
+  expect(input()).toHaveAttribute('enterkeyhint', 'search');
+});

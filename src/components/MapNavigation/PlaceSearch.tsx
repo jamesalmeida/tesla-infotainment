@@ -202,6 +202,7 @@ export function PlaceSearch({
           name="NavigateTo"
           placeholder="Navigate"
           autoComplete="off"
+          enterKeyHint="search"
           role="combobox"
           aria-label="Navigate"
           aria-autocomplete="list"

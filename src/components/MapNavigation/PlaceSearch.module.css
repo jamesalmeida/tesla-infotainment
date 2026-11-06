@@ -74,10 +74,13 @@
   position: relative;
 }
 
+/* 16px at every width: iOS Safari zooms the page when focusing anything smaller. */
 .navBtn input {
+  flex: 1;
+  min-width: 0;
   border: none;
   margin-left: 3%;
-  font-size: 1em;
+  font-size: 16px;
   font-weight: 400;
   color: #4e4e4e;
   background-color: transparent;
@@ -102,12 +105,6 @@
 .clearInput img {
   width: 16px;
   height: 16px;
-}
-
-@media screen and (max-width: 768px) {
-  .navBtn input {
-    font-size: 10px;
-  }
 }
 
 /* Media query for mobile devices in landscape mode */
