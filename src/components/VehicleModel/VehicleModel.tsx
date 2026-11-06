@@ -1,32 +1,55 @@
-import { useRef, useState, useEffect, type ComponentRef } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
 import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber';
 import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei';
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import { useSpring, a } from '@react-spring/three';
 import { getCarModelPath } from '../../utils/assetPaths';
-import type { Gear } from '../../state/carState';
+import {
+  CLOSED_DOORS,
+  DEFAULT_AZIMUTH,
+  DOOR_IDS,
+  createParts,
+  doorNodeName,
+  findDoorId,
+  getPartTargets,
+  isClick,
+  stepParts,
+  type CarParts,
+  type DoorId,
+  type DoorStates,
+  type VehiclePose,
+} from './vehiclePose';
 import styles from './VehicleModel.module.css';
 
+export type { DoorId, DoorStates, VehiclePose };
+
 interface VehicleModelProps {
-  rotateToFrunk: boolean;
-  rotateToTrunk: boolean;
-  activeGear: Gear;
+  pose: VehiclePose;
+  // Controls the doors. Leave it out and the model keeps its own door state.
+  doors?: DoorStates;
+  onDoorToggle?: (door: DoorId) => void;
 }
 
 interface ModelProps extends VehicleModelProps {
   scale?: number;
 }
 
-interface DoorState {
-  isOpen: boolean;
-  angle: number;
+interface CarNodes {
+  car: THREE.Object3D;
+  frunk: THREE.Object3D | undefined;
+  trunk: THREE.Object3D | undefined;
+  doors: Partial<Record<DoorId, THREE.Object3D>>;
 }
 
 type OrbitControlsHandle = ComponentRef<typeof OrbitControls>;
 
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
+// Stage's Bounds refits the camera distance, but keeps this direction.
+const CAMERA_ELEVATION = Math.PI / 5.14;
+const CAMERA_POSITION: [number, number, number] = [
+  5 * Math.cos(CAMERA_ELEVATION) * Math.sin(DEFAULT_AZIMUTH),
+  5 * Math.sin(CAMERA_ELEVATION),
+  5 * Math.cos(CAMERA_ELEVATION) * Math.cos(DEFAULT_AZIMUTH),
+];
 
 const modelPath = getCarModelPath('tesla-model-3-2018.glb');
 
@@ -40,143 +63,53 @@ const stageEnvironment = {
 useGLTF.preload(modelPath);
 useEnvironment.preload(stageEnvironment);
 
-function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }: ModelProps) {
+function applyParts(nodes: CarNodes, parts: CarParts) {
+  nodes.car.rotation.y = parts.rotation.value;
+  if (nodes.frunk) nodes.frunk.rotation.x = parts.frunk.value;
+  if (nodes.trunk) nodes.trunk.rotation.x = parts.trunk.value;
+  for (const id of DOOR_IDS) {
+    const door = nodes.doors[id];
+    if (door) door.rotation.z = parts[id].value;
+  }
+}
+
+function Model({ pose, doors, onDoorToggle, ...props }: ModelProps) {
   const { scene } = useGLTF(modelPath);
-  const modelRef = useRef<THREE.Object3D>(null);
-  const frunkRef = useRef<THREE.Object3D | null>(null);
-  const trunkRef = useRef<THREE.Object3D | null>(null);
-  const doorRefs = useRef<Record<string, THREE.Object3D>>({});
-  const [targetRotation, setTargetRotation] = useState(Math.PI);
-  const [startRotation, setStartRotation] = useState(Math.PI);
-  const [frunkTargetAngle, setFrunkTargetAngle] = useState(0);
-  const [frunkStartAngle, setFrunkStartAngle] = useState(0);
-  const [trunkTargetAngle, setTrunkTargetAngle] = useState(0);
-  const [trunkStartAngle, setTrunkStartAngle] = useState(0);
-  const [doorStates, setDoorStates] = useState<Record<string, DoorState>>({});
-  const animationProgressRef = useRef(0);
-  const isAnimatingRef = useRef(false);
-  const defaultRotation = Math.PI;
+  const [localDoors, setLocalDoors] = useState(CLOSED_DOORS);
+  const doorStates = doors ?? localDoors;
+  const partsRef = useRef<CarParts | null>(null);
+  const nodes = useMemo<CarNodes>(
+    () => ({
+      car: scene,
+      frunk: scene.getObjectByName('bonnet_dummy'),
+      trunk: scene.getObjectByName('boot_dummy'),
+      doors: Object.fromEntries(
+        DOOR_IDS.map((id) => [id, scene.getObjectByName(doorNodeName(id))]),
+      ),
+    }),
+    [scene],
+  );
 
-  useEffect(() => {
-    const frunkPart = scene.getObjectByName('bonnet_dummy');
-    const trunkPart = scene.getObjectByName('boot_dummy');
-    if (frunkPart) frunkRef.current = frunkPart;
-    if (trunkPart) trunkRef.current = trunkPart;
-
-    // Find and set up door parts
-    const doorNames = ['door_lf_dummy', 'door_lr_dummy', 'door_rf_dummy', 'door_rr_dummy'];
-    doorNames.forEach((doorName) => {
-      const doorPart = scene.getObjectByName(doorName);
-      if (doorPart) {
-        doorRefs.current[doorName] = doorPart;
-        setDoorStates((prev) => ({ ...prev, [doorName]: { isOpen: false, angle: 0 } }));
-      }
-    });
-
-    // Set up click handlers for doors
-    scene.traverse((object) => {
-      if ((object as THREE.Mesh).isMesh && doorNames.includes(object.name)) {
-        object.userData.clickable = true;
-      }
-    });
-  }, [scene]);
-
-  useEffect(() => {
-    const model = modelRef.current;
-    if (!model) return;
-    setStartRotation(model.rotation.y);
-    setFrunkStartAngle(frunkRef.current ? frunkRef.current.rotation.x : 0);
-    setTrunkStartAngle(trunkRef.current ? trunkRef.current.rotation.x : 0);
-
-    if (activeGear === 'D') {
-      setTargetRotation(Math.PI / 4.3); // 90 degrees clockwise
-    } else if (rotateToFrunk) {
-      setFrunkTargetAngle(Math.PI / 6); // Open the frunk to 30 degrees
-      setTrunkTargetAngle(0); // Close the trunk
-      // No rotation for frunk
-      setTargetRotation(model.rotation.y);
-    } else if (rotateToTrunk) {
-      setTargetRotation(defaultRotation - Math.PI / 2); // 90 degrees counterclockwise for trunk
-      setFrunkTargetAngle(0); // Close the frunk
-      setTrunkTargetAngle(-Math.PI / 3.5); // Open the trunk to 45 degrees (negative because it likely opens downwards)
-    } else {
-      setTargetRotation(defaultRotation); // Reset to default position
-      setFrunkTargetAngle(0); // Close the frunk
-      setTrunkTargetAngle(0); // Close the trunk
-    }
-    animationProgressRef.current = 0;
-    isAnimatingRef.current = true;
-  }, [rotateToFrunk, rotateToTrunk, activeGear, defaultRotation]);
-
-  useFrame((state, delta) => {
-    if (isAnimatingRef.current) {
-      animationProgressRef.current += delta * 0.5; // Adjust this value to control animation speed
-      if (animationProgressRef.current >= 1) {
-        animationProgressRef.current = 1;
-        isAnimatingRef.current = false;
-      }
-
-      const easedProgress = easeInOutCubic(animationProgressRef.current);
-
-      // Only rotate for trunk or reset
-      if (modelRef.current && (rotateToTrunk || (!rotateToFrunk && !rotateToTrunk))) {
-        const newRotation = THREE.MathUtils.lerp(startRotation, targetRotation, easedProgress);
-        modelRef.current.rotation.y = newRotation;
-      }
-
-      // Animate the frunk
-      if (frunkRef.current) {
-        const newFrunkAngle = THREE.MathUtils.lerp(
-          frunkStartAngle,
-          frunkTargetAngle,
-          easedProgress,
-        );
-        frunkRef.current.rotation.x = newFrunkAngle;
-      }
-
-      // Animate the trunk
-      if (trunkRef.current) {
-        const newTrunkAngle = THREE.MathUtils.lerp(
-          trunkStartAngle,
-          trunkTargetAngle,
-          easedProgress,
-        );
-        trunkRef.current.rotation.x = newTrunkAngle;
-      }
-
-      // Animate doors
-      Object.entries(doorStates).forEach(([doorName, doorState]) => {
-        const door = doorRefs.current[doorName];
-        if (door) {
-          const targetAngle = doorState.isOpen ? Math.PI / 2 : 0;
-          const newAngle = THREE.MathUtils.lerp(doorState.angle, targetAngle, easedProgress);
-          door.rotation.y = newAngle;
-          setDoorStates((prev) => ({
-            ...prev,
-            [doorName]: { ...prev[doorName], angle: newAngle },
-          }));
-        }
-      });
-    }
+  useFrame((_, delta) => {
+    const targets = getPartTargets(pose, doorStates);
+    // The first frame places the car in its pose. Later changes animate.
+    partsRef.current ??= createParts(targets);
+    stepParts(partsRef.current, targets, delta);
+    applyParts(nodes, partsRef.current);
   });
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
-    const clickedMesh = event.object;
-    if (clickedMesh.userData.clickable) {
-      const doorName = clickedMesh.name;
-      setDoorStates((prev) => ({
-        ...prev,
-        [doorName]: { ...prev[doorName], isOpen: !prev[doorName].isOpen },
-      }));
-      animationProgressRef.current = 0;
-      isAnimatingRef.current = true;
-    }
+    if (!isClick(event.delta)) return;
+    const door = findDoorId(event.object);
+    if (!door) return;
+    if (!doors) setLocalDoors((current) => ({ ...current, [door]: !current[door] }));
+    onDoorToggle?.(door);
   };
 
   return (
     <group onClick={handleClick}>
-      <primitive ref={modelRef} object={scene} {...props} />
+      <primitive object={scene} {...props} />
     </group>
   );
 }
@@ -241,23 +174,13 @@ function ControlledOrbitControls() {
   );
 }
 
-export function VehicleModel({ rotateToFrunk, rotateToTrunk, activeGear }: VehicleModelProps) {
-  const distance = 5;
-  const horizontalAngle = Math.PI / 4; // 45 degrees
-  const verticalAngle = activeGear === 'D' ? Math.PI / 3 : Math.PI / 5.14; // Increased angle for 'D' mode
-
-  const cameraPosition: [number, number, number] = [
-    distance * Math.cos(horizontalAngle) * Math.cos(verticalAngle),
-    distance * Math.sin(verticalAngle),
-    distance * Math.sin(horizontalAngle) * Math.cos(verticalAngle),
-  ];
-
+export function VehicleModel({ pose, doors, onDoorToggle }: VehicleModelProps) {
   return (
     <Canvas
       dpr={[1, 2]}
       camera={{
         fov: 40,
-        position: cameraPosition,
+        position: CAMERA_POSITION,
         near: 0.1,
         far: 1000,
       }}
@@ -266,12 +189,7 @@ export function VehicleModel({ rotateToFrunk, rotateToTrunk, activeGear }: Vehic
     >
       <color attach="background" args={['#f1f1f1']} />
       <Stage environment={stageEnvironment}>
-        <Model
-          scale={0.01}
-          rotateToFrunk={rotateToFrunk}
-          rotateToTrunk={rotateToTrunk}
-          activeGear={activeGear}
-        />
+        <Model scale={0.01} pose={pose} doors={doors} onDoorToggle={onDoorToggle} />
       </Stage>
       <ControlledOrbitControls />
     </Canvas>

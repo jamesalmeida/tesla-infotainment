@@ -162,11 +162,7 @@ function Display() {
                 </div>
               </div>
               <Suspense fallback={null}>
-                <VehicleModel
-                  rotateToFrunk={openCompartment === 'frunk'}
-                  rotateToTrunk={openCompartment === 'trunk'}
-                  activeGear={gear}
-                />
+                <VehicleModel pose={gear === 'D' ? 'drive' : (openCompartment ?? 'park')} />
               </Suspense>
               <MusicPanel volume={volume} />
             </Panel>
