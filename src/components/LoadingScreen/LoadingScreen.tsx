@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import { useDots } from '../../utils/dots';
 import styles from './LoadingScreen.module.css';
@@ -29,6 +29,32 @@ const loadingMessages = [
   'Groking your prefered routes',
 ];
 
+const TICK_COUNT = 48;
+const SWEEP_SECONDS = 2;
+
+const ChargeRing = () => (
+  <svg
+    className={styles['charge-ring']}
+    viewBox="0 0 200 200"
+    aria-hidden="true"
+    style={{ '--charge-sweep-duration': `${SWEEP_SECONDS}s` } as CSSProperties}
+  >
+    {Array.from({ length: TICK_COUNT }, (_, tick) => (
+      <line
+        key={tick}
+        className={styles['charge-tick']}
+        x1="100"
+        y1="6"
+        x2="100"
+        y2="22"
+        transform={`rotate(${(tick * 360) / TICK_COUNT} 100 100)`}
+        // A negative delay starts each tick part-way through, so the sweep is already running.
+        style={{ animationDelay: `${((tick / TICK_COUNT - 1) * SWEEP_SECONDS).toFixed(3)}s` }}
+      />
+    ))}
+  </svg>
+);
+
 const LoadingScreen = () => {
   const [loadingText] = useState(
     () => loadingMessages[Math.floor(Math.random() * loadingMessages.length)],
@@ -38,17 +64,11 @@ const LoadingScreen = () => {
   return (
     <div className={styles['loading-screen']}>
       <div className={styles.displayInsideBezel}>
-        <div className={styles['circle-container']}>
-          <div className={styles.circle}></div>
-          <div className={styles['circle-small']}></div>
-          <div className={styles['circle-big']}></div>
-          <div className={styles['circle-inner-inner']}></div>
-          <div className={styles['circle-inner']}></div>
-        </div>
+        <ChargeRing />
         <img
           src={getImagePath('logo-grey.svg')}
           alt="Tesla Logo"
-          className={`${styles['tesla-logo']} spinning`}
+          className={styles['tesla-logo']}
         />
         <p className={styles['loading-text']}>
           {loadingText}

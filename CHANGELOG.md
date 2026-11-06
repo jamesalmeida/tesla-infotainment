@@ -12,6 +12,7 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 ### Changed
 
+- The loading screen has a new original animation, replacing the third-party CodePen circles, and it holds still for people who prefer reduced motion.
 - Migrated the app to TypeScript in strict mode; the UI state lives in a reducer instead of `App.jsx`, and component styles are scoped with CSS Modules.
 - Upgraded to React 19 with react-three-fiber 9, drei 10 and react-spring 10.
 - The map now uses `@vis.gl/react-google-maps` instead of deprecated Google Maps APIs.

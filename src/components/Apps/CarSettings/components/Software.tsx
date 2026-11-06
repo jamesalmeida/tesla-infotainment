@@ -74,12 +74,6 @@ export const Software = () => {
             </a>
           </li>
           <li>
-            Vasilj Miloevi for the{' '}
-            <a href="https://codepen.io/eboye/pen/ANPxVX" target="_blank" rel="noopener noreferrer">
-              loading screen circle animations
-            </a>
-          </li>
-          <li>
             Patrick Stillhart for sharing the{' '}
             <a href="https://codepen.io/arcs/pen/aGzNKY" target="_blank" rel="noopener noreferrer">
               OutRun video game on Codepen
