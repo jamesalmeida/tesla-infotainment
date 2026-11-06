@@ -3,6 +3,7 @@
 }
 
 .userProfile {
+  min-height: var(--tap-target);
   display: flex;
   align-items: center;
   padding: 0;
@@ -14,9 +15,9 @@
 }
 
 .userProfile img {
-  height: 24px;
+  height: calc(24 * var(--u));
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: calc(10 * var(--u));
 }
 
 .profile-dropdown {
@@ -25,10 +26,10 @@
   left: 0;
   background-color: #fff;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: calc(8 * var(--u));
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  width: 209px;
+  width: min(calc(209 * var(--u)), 90cqw);
 }
 
 .profile-option {
@@ -39,7 +40,7 @@
   border: none;
   color: inherit;
   font: inherit;
-  padding: 10px;
+  padding: calc(10 * var(--u));
   cursor: pointer;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -51,10 +52,10 @@
 }
 
 .profile-option img {
-  width: 24px;
-  height: 24px;
+  width: calc(24 * var(--u));
+  height: calc(24 * var(--u));
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: calc(10 * var(--u));
 }
 
 .active-profile-icon {
@@ -62,7 +63,7 @@
 }
 
 .profile-option-icon {
-  margin-left: 10px;
+  margin-left: calc(10 * var(--u));
   width: 14%;
 }
 
@@ -70,18 +71,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  padding: calc(10 * var(--u));
   cursor: pointer;
   border-top: 1px solid rgb(182, 182, 182);
 }
 
 .driver-profile-settings img {
   width: 9%;
-}
-
-@media (max-width: 768px) {
-  .userProfile img {
-    height: 14px;
-    margin-right: 4px;
-  }
 }

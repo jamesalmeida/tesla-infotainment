@@ -7,12 +7,15 @@ import GearSelect from '../GearSelect/GearSelect';
 
 const BLINK_MS = 500;
 
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // One clock for both arrows, so they can't drift apart when started at different times.
+// With reduced motion the arrows stay lit: they still show state, without flashing.
 function useBlink(isActive: boolean) {
   const [isOn, setIsOn] = useState(true);
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || prefersReducedMotion()) return;
     const timer = setInterval(() => setIsOn((on) => !on), BLINK_MS);
     return () => {
       clearInterval(timer);

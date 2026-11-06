@@ -1,14 +1,19 @@
 .carLock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   background: none;
   border: none;
   cursor: pointer;
-  width: 40px;
-  height: 24px;
+  width: max(calc(40 * var(--u)), var(--tap-target));
+  height: max(calc(24 * var(--u)), var(--tap-target));
   text-align: right;
 }
 
 .carLock svg {
+  width: calc(24 * var(--u));
+  height: calc(24 * var(--u));
   transition: all 0.5s ease;
 }
 
@@ -34,11 +39,4 @@
 
 .carLock .unlocked {
   color: #343434;
-}
-
-@media (max-width: 768px) {
-  .carLock {
-    width: 20px;
-    height: 12px;
-  }
 }

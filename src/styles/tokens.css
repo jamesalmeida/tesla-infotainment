@@ -1,0 +1,37 @@
+/*
+ * One unit for the whole display. 1u is one design pixel on a 1280-wide screen, and it is
+ * registered as a length so it resolves once on the display: an unregistered value would
+ * re-resolve against whichever container query surrounds each element that reads it.
+ */
+@property --u {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 1px;
+}
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  /* The real screen is 1920x1200. */
+  --display-ratio: 1.6;
+
+  /* Apple's minimum, applied wherever touch is the main input. */
+  --tap-target: 0px;
+  /* Nothing should render smaller than this. */
+  --text-min: 11px;
+}
+
+/* Phones have no room to scale a car display down, so these modes use real pixels. */
+:root[data-layout='compact'],
+:root[data-layout='stacked'] {
+  --tap-target: 44px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --tap-target: 44px;
+  }
+}

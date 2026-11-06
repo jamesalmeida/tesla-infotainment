@@ -4,12 +4,12 @@
 }
 
 .shortcutsHelp h2 {
-  margin: 0 0 12px;
+  margin: 0 0 calc(12 * var(--u));
   font-size: 1.1rem;
 }
 
 .shortcutsHelp h3 {
-  margin: 0 0 6px;
+  margin: 0 0 calc(6 * var(--u));
   font-size: 0.85rem;
   color: #a1a1a1;
 }
@@ -17,7 +17,7 @@
 .groups {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: calc(24 * var(--u));
 }
 
 .shortcutsHelp dl {
@@ -27,8 +27,8 @@
 .shortcutsHelp dl > div {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
-  padding: 3px 0;
+  gap: calc(16 * var(--u));
+  padding: calc(3 * var(--u)) 0;
 }
 
 .shortcutsHelp dt {

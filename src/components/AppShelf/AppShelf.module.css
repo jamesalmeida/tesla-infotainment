@@ -14,12 +14,12 @@
   justify-content: space-evenly;
   align-items: center;
   border-bottom: 1px solid grey;
-  padding: 10px;
+  padding: calc(10 * var(--u));
 }
 
 .appShelf {
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: calc(10 * var(--u));
+  padding: calc(10 * var(--u));
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -29,7 +29,7 @@
 }
 
 .appShelfIcon {
-  padding: 5px;
+  padding: calc(5 * var(--u));
   width: 13%;
   background: none;
   border: none;

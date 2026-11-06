@@ -9,15 +9,9 @@
 }
 
 .batteryStatus span {
-  padding-right: 4px;
+  padding-right: calc(4 * var(--u));
 }
 
 .battery-fill {
   transition: width 0.3s ease-in-out;
-}
-
-@media screen and (max-width: 768px) {
-  .batteryStatus span {
-    padding-right: 0px;
-  }
 }

@@ -4,6 +4,7 @@ import { CarStateProvider, useCar, useCarActions } from './state/CarStateContext
 import { activeApp, isCameraForced, isDriving, isPanelOpen, vehiclePose } from './state/carState';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useBoot } from './hooks/useBoot';
+import { useLayout } from './hooks/useLayout';
 import {
   Group,
   Panel,
@@ -19,7 +20,6 @@ import { Modal } from './components/Modal/Modal';
 import { AppShelf } from './components/AppShelf/AppShelf';
 import VerticalSliderPanel from './components/VerticalSliderPanel/VerticalSliderPanel';
 import BtmNavBar from './components/BtmNavBar/BtmNavBar';
-import ErrorScreen from './components/ErrorScreen/ErrorScreen';
 import { BrightnessOverlay } from './components/BrightnessOverlay/BrightnessOverlay';
 import { CarStatus } from './components/CarStatus/CarStatus';
 import { CompartmentControls } from './components/CarStatus/CompartmentControls';
@@ -41,6 +41,7 @@ const VehicleModel = lazy(() =>
 const LEFT_PANEL_ID = 'leftPanel';
 const DEFAULT_LEFT_PANEL_SIZE = 40;
 const RIGHT_PANEL_SIZE = 100 - DEFAULT_LEFT_PANEL_SIZE;
+const STACKED_LEFT_PANEL_SIZE = 45;
 // A drag has to go this far past the default before it counts as making room for the car.
 const CLOSE_APP_DRAG_MARGIN = 3;
 
@@ -134,7 +135,36 @@ function ActiveModal() {
   );
 }
 
+type StackedView = 'car' | 'map';
+
+// Phones show the car or the map; there's no room for both at a useful size.
+function StackedViewSwitch({
+  view,
+  onChange,
+}: {
+  view: StackedView;
+  onChange: (view: StackedView) => void;
+}) {
+  return (
+    <div className="stackedViewSwitch" role="tablist" aria-label="Main view">
+      {(['car', 'map'] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          role="tab"
+          aria-selected={view === option}
+          className={view === option ? 'active' : ''}
+          onClick={() => onChange(option)}
+        >
+          {option === 'car' ? 'Car' : 'Map'}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function Panels({ onCarSettled }: { onCarSettled: () => void }) {
+  const { mode, isTall } = useLayout();
   const driving = useCar(isDriving);
   const isOpen = useCar(isPanelOpen);
   const { closeSurface } = useCarActions();
@@ -143,15 +173,29 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
     id: 'tesla-panels',
     storage: safeStorage,
   });
+  const [stackedView, setStackedView] = useState<StackedView>('car');
 
-  // The split only widens in Drive, and an open app always gets the default width.
+  const isStacked = mode === 'stacked';
+  const hasViewSwitch = isStacked && !isTall;
+  // Apps open over the map, so a phone has to be showing it.
+  const visibleView = isOpen ? 'map' : stackedView;
+
+  // The same tree serves every mode, with only the sizes changing. Rendering a different one
+  // would remount the map and the audio, so rotating or folding would lose the route and
+  // stop playback.
   useEffect(() => {
-    if (!driving || isOpen) leftPanelRef.current?.resize(`${DEFAULT_LEFT_PANEL_SIZE}%`);
-  }, [driving, isOpen]);
+    const panel = leftPanelRef.current;
+    if (!panel) return;
+    if (hasViewSwitch) panel.resize(visibleView === 'car' ? '100%' : '0%');
+    else if (isStacked) panel.resize(`${STACKED_LEFT_PANEL_SIZE}%`);
+    // The split only widens in Drive, and an open app always gets the default width.
+    else if (!driving || isOpen) panel.resize(`${DEFAULT_LEFT_PANEL_SIZE}%`);
+  }, [driving, isOpen, isStacked, hasViewSwitch, visibleView]);
 
   // Only a real drag of the separator can close an app. Window resizes, rotation and
   // the resize above all land here too, and must not count as intent.
   const handleLayoutChanged = (layout: Layout, meta: LayoutChangedMeta) => {
+    if (isStacked) return;
     onLayoutChanged(layout, meta);
     const leftSize = layout[LEFT_PANEL_ID] ?? DEFAULT_LEFT_PANEL_SIZE;
     if (meta.isUserInteraction && leftSize > DEFAULT_LEFT_PANEL_SIZE + CLOSE_APP_DRAG_MARGIN) {
@@ -160,33 +204,36 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
   };
 
   return (
-    <Group
-      defaultLayout={defaultLayout}
-      onLayoutChanged={handleLayoutChanged}
-      orientation="horizontal"
-      className="horizontalPanelGroup"
-    >
-      <Panel
-        id={LEFT_PANEL_ID}
-        defaultSize={`${DEFAULT_LEFT_PANEL_SIZE}%`}
-        minSize={`${DEFAULT_LEFT_PANEL_SIZE}%`}
-        maxSize="100%"
-        className="leftPanel"
-        panelRef={leftPanelRef}
+    <>
+      {hasViewSwitch && <StackedViewSwitch view={visibleView} onChange={setStackedView} />}
+      <Group
+        defaultLayout={defaultLayout}
+        onLayoutChanged={handleLayoutChanged}
+        orientation={isStacked ? 'vertical' : 'horizontal'}
+        className="horizontalPanelGroup"
       >
-        <LeftPanelContent onCarSettled={onCarSettled} />
-      </Panel>
-      {driving && <Separator className="panelResizeHandle" />}
-      <Panel
-        id="rightPanel"
-        defaultSize={`${RIGHT_PANEL_SIZE}%`}
-        minSize="0%"
-        maxSize={`${RIGHT_PANEL_SIZE}%`}
-        className="rightPanel"
-      >
-        <RightPanelContent />
-      </Panel>
-    </Group>
+        <Panel
+          id={LEFT_PANEL_ID}
+          defaultSize={`${DEFAULT_LEFT_PANEL_SIZE}%`}
+          minSize={isStacked ? '0%' : `${DEFAULT_LEFT_PANEL_SIZE}%`}
+          maxSize="100%"
+          className="leftPanel"
+          panelRef={leftPanelRef}
+        >
+          <LeftPanelContent onCarSettled={onCarSettled} />
+        </Panel>
+        {driving && !isStacked && <Separator className="panelResizeHandle" />}
+        <Panel
+          id="rightPanel"
+          defaultSize={`${RIGHT_PANEL_SIZE}%`}
+          minSize="0%"
+          maxSize={isStacked ? '100%' : `${RIGHT_PANEL_SIZE}%`}
+          className="rightPanel"
+        >
+          <RightPanelContent />
+        </Panel>
+      </Group>
+    </>
   );
 }
 
@@ -198,24 +245,14 @@ function Display() {
   return (
     <>
       {isLoading && <LoadingScreen />}
-      <div id="displayBezel">
+      <div id="displayBezel" className="displayBezel">
         <div className="displayWrapper">
-          <ErrorScreen />
           <Panels onCarSettled={onContentSettled} />
           <BtmNavBar />
           <ActiveModal />
           <Notice />
           <BrightnessOverlay />
         </div>
-      </div>
-      <div className="small-screen-message">
-        Best viewed on a larger screen.
-        <br />
-        <span>
-          For now, try turning your phone sideways.
-          <br />
-          At least until I tweak the mobile styles.
-        </span>
       </div>
     </>
   );
