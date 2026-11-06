@@ -20,11 +20,25 @@
   grid-row: 1 / 3;
 }
 
-.albumArt img {
+.albumArt img,
+.artPlaceholder {
   height: 100%;
   width: 100%;
   max-width: 62px;
   border-top-left-radius: 5px;
+}
+
+.artPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e4e4e4;
+  color: #9c9c9c;
+}
+
+.artPlaceholder svg {
+  width: 50%;
+  height: 50%;
 }
 
 .musicText {

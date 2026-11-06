@@ -560,3 +560,31 @@ describe('re-rendering (#92)', () => {
     expect(panelRenders()).toBe(renders);
   });
 });
+
+describe('album art', () => {
+  const art = () => document.querySelector('.albumArt img');
+
+  it('shows a placeholder instead of a broken image', async () => {
+    render(<MusicPanel volume={50} />);
+    const image = art();
+    if (!image) throw new Error('No album art');
+
+    await inAct(() => fireEvent.error(image));
+
+    expect(art()).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'No album art' })).toBeInTheDocument();
+  });
+
+  it('tries again when the next track has different art', async () => {
+    vi.mocked(Math.random).mockReturnValue(0.5);
+    render(<MusicPanel volume={50} />);
+    const image = art();
+    if (!image) throw new Error('No album art');
+    await inAct(() => fireEvent.error(image));
+
+    await clickButton('Next Track');
+
+    expect(art()).toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'No album art' })).not.toBeInTheDocument();
+  });
+});

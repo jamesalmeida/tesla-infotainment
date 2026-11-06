@@ -1,4 +1,4 @@
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import { ProgressBar } from './ProgressBar';
 import { usePlayback } from './usePlayback';
@@ -31,6 +31,21 @@ const tracks = [
 const audioUrls = tracks.map((track) => track.audio);
 
 const chooseRandomTrack = () => Math.floor(Math.random() * tracks.length);
+
+function AlbumArt({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div className={styles.artPlaceholder} role="img" aria-label="No album art">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z" />
+        </svg>
+      </div>
+    );
+  }
+  return <img alt="" src={src} onError={() => setFailed(true)} />;
+}
 
 export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number }) {
   const { playback, timeline, togglePlayPause, next, previous, seek } = usePlayback(
@@ -75,7 +90,7 @@ export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number 
   return (
     <div className={styles.musicPanel}>
       <div className={styles.albumArt}>
-        <img alt="" src={track.art} />
+        <AlbumArt key={track.art} src={track.art} />
       </div>
       <div className={styles.musicText}>
         <div className={styles.title}>{track.title}</div>
