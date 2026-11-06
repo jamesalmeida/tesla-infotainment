@@ -1,5 +1,5 @@
 # Tesla Infotainment Simulator (WIP)
-
+Note: This is an unofficial fan project, not affiliated with Tesla, Inc.
 Experience a simulated Tesla infotainment system in your browser!
 
 [Live Demo](https://jamesalmeida.github.io/tesla-infotainment/)
