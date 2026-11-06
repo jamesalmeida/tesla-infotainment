@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useReducer, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useReducer, useRef, useState, type ReactNode } from 'react';
 import {
   APIProvider,
   AdvancedMarker,
@@ -12,8 +12,9 @@ import { getImagePath } from '../../utils/assetPaths';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
-import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import UserProfile from '../UserProfile/UserProfile';
+import { MapButtons } from './MapButtons';
+import { DEFAULT_CAR_POSITION, initialMapLayers, mapLayersReducer } from './mapLayers';
 import {
   activeTripOf,
   initialNavState,
@@ -24,9 +25,8 @@ import {
 } from './navState';
 import type { Place } from './place';
 import { PlaceSearch } from './PlaceSearch';
+import { TrafficLayer } from './TrafficLayer';
 import styles from './MapNavigation.module.css';
-
-type MapType = 'roadmap' | 'satellite';
 
 const containerStyle = {
   width: '100%',
@@ -37,11 +37,31 @@ const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 // Fall back to the original Tesla-style map ID when the env var is unset.
 const MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || '2d1b7cd2cf277f7';
 
-const DEFAULT_CENTER: google.maps.LatLngLiteral = { lat: 33.9210278, lng: -118.33005555555555 };
 const CHARGER_SEARCH_RADIUS_METERS = 5000;
+const LOCATE_TIMEOUT_MS = 10000;
 
 function MarkerIcon({ name, size }: { name: string; size: number }) {
   return <img src={getImagePath(name)} width={size} height={size} alt="" />;
+}
+
+interface MapNoticeProps {
+  role: 'alert' | 'status';
+  onDismiss: () => void;
+  children: ReactNode;
+}
+
+function MapNotice({ role, onDismiss, children }: MapNoticeProps) {
+  return (
+    <div
+      role={role}
+      className={`${styles.navStatus} ${styles.mapNotice} ${role === 'alert' ? styles.navError : ''}`}
+    >
+      <span>{children}</span>
+      <button className={styles.noticeDismiss} aria-label="Dismiss" onClick={onDismiss}>
+        <img src={getImagePath('icon-x.svg')} alt="" />
+      </button>
+    </div>
+  );
 }
 
 interface MapNavigationProps {
@@ -60,11 +80,8 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
   const map = useMap();
   const placesLibrary = useMapsLibrary('places');
   const routesLibrary = useMapsLibrary('routes');
-  const [center, setCenter] = useState(DEFAULT_CENTER);
-  const [mapType, setMapType] = useState<MapType>('roadmap');
-  const trafficLayerRef = useRef<google.maps.TrafficLayer | null>(null);
-  const [isLocating, setIsLocating] = useState(false);
-  const [chargers, setChargers] = useState<google.maps.places.Place[]>([]);
+  const [layers, dispatchLayers] = useReducer(mapLayersReducer, initialMapLayers);
+  const { carPosition } = layers;
   const [query, setQuery] = useState('');
   const [nav, dispatchNav] = useReducer(navReducer, initialNavState);
   const routeRequestIdRef = useRef(0);
@@ -83,82 +100,53 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
     dispatchNav({ type: 'searchCleared' });
   };
 
-  const handleCompass = () => {
-    if (map) {
-      map.setHeading(0);
-    }
-  };
-
-  const toggleMapType = () => {
-    setMapType((prevType) => (prevType === 'roadmap' ? 'satellite' : 'roadmap'));
-  };
-
-  const toggleTraffic = () => {
-    if (map) {
-      if (trafficLayerRef.current) {
-        trafficLayerRef.current.setMap(null);
-        trafficLayerRef.current = null;
-      } else {
-        if (mapType === 'satellite') {
-          setMapType('roadmap');
-        }
-        const newTrafficLayer = new window.google.maps.TrafficLayer();
-        newTrafficLayer.setMap(map);
-        trafficLayerRef.current = newTrafficLayer;
-      }
-    }
-  };
+  // Read on demand rather than held in state: the map owns its viewport, and this way
+  // panning around doesn't re-render everything.
+  const viewportCenter = () => map?.getCenter()?.toJSON() ?? carPosition;
 
   useEffect(() => {
-    if (map && mapType === 'roadmap' && trafficLayerRef.current) {
-      trafficLayerRef.current.setMap(null);
-      const newTrafficLayer = new window.google.maps.TrafficLayer();
-      newTrafficLayer.setMap(map);
-      trafficLayerRef.current = newTrafficLayer;
+    if (map && carPosition !== DEFAULT_CAR_POSITION) {
+      map.panTo(carPosition);
+      map.setZoom(16);
     }
-  }, [map, mapType]);
+  }, [map, carPosition]);
 
-  const handleLocation = () => {
-    if (navigator.geolocation) {
-      setIsLocating(true); // Start loading
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const pos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          setCenter(pos);
-          if (map) {
-            map.panTo(pos);
-            map.setZoom(16);
-          }
-          setIsLocating(false); // Stop loading
-        },
-        () => {
-          console.log('Error: The Geolocation service failed.');
-          setIsLocating(false); // Stop loading even if there's an error
-        },
-        { timeout: 10000 }, // Set a timeout of 10 seconds
-      );
-    } else {
-      console.log("Error: Your browser doesn't support geolocation.");
-    }
-  };
+  const locateRequestId = layers.location === 'locating' ? layers.locationRequestId : null;
+  useEffect(() => {
+    if (locateRequestId === null) return;
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) =>
+        dispatchLayers({
+          type: 'located',
+          requestId: locateRequestId,
+          position: { lat: coords.latitude, lng: coords.longitude },
+        }),
+      ({ code }) => dispatchLayers({ type: 'locateFailed', requestId: locateRequestId, code }),
+      { timeout: LOCATE_TIMEOUT_MS },
+    );
+  }, [locateRequestId]);
 
-  const handleChargerLocations = async () => {
-    if (!placesLibrary) return;
-    try {
-      const { places } = await placesLibrary.Place.searchNearby({
-        fields: ['id', 'location'],
-        locationRestriction: { center, radius: CHARGER_SEARCH_RADIUS_METERS },
-        includedPrimaryTypes: ['electric_vehicle_charging_station'],
-        maxResultCount: 20,
-      });
-      setChargers(places);
-    } catch (error) {
-      console.error('Error fetching charger locations', error);
-    }
-  };
+  const searchChargers = useEffectEvent(
+    async (library: google.maps.PlacesLibrary, requestId: number) => {
+      try {
+        const { places } = await library.Place.searchNearby({
+          fields: ['id', 'location'],
+          locationRestriction: { center: viewportCenter(), radius: CHARGER_SEARCH_RADIUS_METERS },
+          includedPrimaryTypes: ['electric_vehicle_charging_station'],
+          maxResultCount: 20,
+        });
+        dispatchLayers({ type: 'chargersLoaded', requestId, chargers: places });
+      } catch (error) {
+        console.error('Error fetching charger locations', error);
+        dispatchLayers({ type: 'chargersFailed', requestId });
+      }
+    },
+  );
+
+  const chargerRequestId = layers.chargers === 'loading' ? layers.chargerRequestId : null;
+  useEffect(() => {
+    if (chargerRequestId !== null && placesLibrary) searchChargers(placesLibrary, chargerRequestId);
+  }, [chargerRequestId, placesLibrary]);
 
   const startNavigation = () => {
     dispatchNav({ type: 'navigatePressed', requestId: ++routeRequestIdRef.current });
@@ -170,7 +158,7 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
         dispatchNav({ type: 'routeNotFound', requestId, reason });
       try {
         const { routes } = await library.Route.computeRoutes({
-          origin: center,
+          origin: carPosition,
           destination: place.location,
           travelMode: 'DRIVING',
           fields: ['path', 'viewport'],
@@ -212,11 +200,12 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
 
     // Center the map on the current location
     if (map) {
-      map.panTo(center);
+      map.panTo(carPosition);
       map.setZoom(16);
     }
   };
 
+  const toggleChargers = () => dispatchLayers({ type: 'chargersToggled' });
   const searchedPlace = searchedPlaceOf(nav);
 
   return (
@@ -249,7 +238,7 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
           onQueryChange={setQuery}
           onSelect={handlePlaceSelect}
           onClear={clearSearch}
-          locationBias={center}
+          getLocationBias={viewportCenter}
         />
         <div className={styles.navPanel}>
           {nav.kind === 'routing' && (
@@ -286,53 +275,49 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
               End Navigation
             </button>
           )}
+          {layers.locationError && (
+            <MapNotice
+              role="alert"
+              onDismiss={() => dispatchLayers({ type: 'locationErrorDismissed' })}
+            >
+              {layers.locationError}
+            </MapNotice>
+          )}
+          {layers.chargers === 'error' && (
+            <MapNotice role="alert" onDismiss={toggleChargers}>
+              Couldn't load chargers.
+            </MapNotice>
+          )}
+          {layers.chargers === 'on' && layers.chargerResults.length === 0 && (
+            <MapNotice role="status" onDismiss={toggleChargers}>
+              No chargers found in this area.
+            </MapNotice>
+          )}
         </div>
-        <div className={styles.floatingRightBtnsWrapper}>
-          <button
-            className={`floatingBtn squareBtn ${styles.compassDirection}`}
-            onClick={handleCompass}
-          >
-            <img
-              className={styles['icon-compass']}
-              src={getImagePath('icon-compass.svg')}
-              alt="Compass"
-            />
-          </button>
-          <div className={styles.floatingRightBtnColumn}>
-            <button className="floatingBtn squareBtn btnGroup" onClick={toggleMapType}>
-              <img className="icon" src={getImagePath('icon-globe.svg')} alt="Map Style" />
-            </button>
-            <button className="floatingBtn squareBtn btnGroup" onClick={toggleTraffic}>
-              <img className="icon" src={getImagePath('icon-traffic.svg')} alt="Toggle Traffic" />
-            </button>
-            <button className="floatingBtn squareBtn btnGroup" onClick={handleLocation}>
-              {isLocating ? (
-                <LoadingSpinner />
-              ) : (
-                <img className="icon" src={getImagePath('icon-map-marker.svg')} alt="Location" />
-              )}
-            </button>
-            <button className="floatingBtn squareBtn btnGroup" onClick={handleChargerLocations}>
-              <img
-                className="icon"
-                src={getImagePath('icon-charger-locations.svg')}
-                alt="Charging Locations"
-              />
-            </button>
-          </div>
-        </div>
+        <MapButtons
+          layers={layers}
+          actions={{
+            onCompass: () => map?.setHeading(0),
+            onToggleMapStyle: () => dispatchLayers({ type: 'mapStyleToggled' }),
+            onToggleTraffic: () => dispatchLayers({ type: 'trafficToggled' }),
+            onLocate: () =>
+              dispatchLayers({ type: 'locatePressed', supported: Boolean(navigator.geolocation) }),
+            onToggleChargers: toggleChargers,
+          }}
+        />
       </div>
       <div className={styles.mapBackground}>
         <Map
           style={containerStyle}
-          defaultCenter={DEFAULT_CENTER}
+          defaultCenter={DEFAULT_CAR_POSITION}
           defaultZoom={16}
           mapId={MAP_ID}
-          mapTypeId={mapType}
+          mapTypeId={layers.mapStyle}
           disableDefaultUI
           gestureHandling="greedy"
         >
-          <AdvancedMarker position={center}>
+          {layers.traffic && <TrafficLayer />}
+          <AdvancedMarker position={carPosition}>
             <MarkerIcon name="icon-car-marker.svg" size={40} />
           </AdvancedMarker>
           {searchedPlace && (
@@ -343,7 +328,7 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
           {activeRoute && (
             <Polyline path={activeRoute.path} strokeColor="#1976D2" strokeWeight={5} />
           )}
-          {chargers.map((charger) => (
+          {layers.chargerResults.map((charger) => (
             <AdvancedMarker key={charger.id} position={charger.location}>
               <Pin background="#e31937" borderColor="#a8102a" glyphColor="#ffffff" />
             </AdvancedMarker>

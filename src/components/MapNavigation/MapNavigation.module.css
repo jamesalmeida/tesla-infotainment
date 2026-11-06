@@ -57,6 +57,27 @@ input:focus {
   color: #b3261e;
 }
 
+.mapNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.noticeDismiss {
+  flex: none;
+  display: flex;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.noticeDismiss img {
+  width: 14px;
+  height: 14px;
+}
+
 .navigateBtn,
 .endNavigateBtn {
   width: 100%;
@@ -113,6 +134,19 @@ input:focus {
 
 :global(.floatingBtn):global(.squareBtn).compassDirection {
   background-color: rgb(250, 250, 250, 90%);
+}
+
+:global(.floatingBtn):global(.squareBtn).layerOn {
+  background-color: rgba(25, 118, 210, 0.25);
+}
+
+:global(.floatingBtn):global(.squareBtn).layerError {
+  background-color: rgba(211, 47, 47, 0.25);
+}
+
+:global(.floatingBtn):global(.squareBtn):disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .icon-compass {

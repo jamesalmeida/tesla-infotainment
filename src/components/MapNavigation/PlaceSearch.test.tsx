@@ -27,7 +27,7 @@ function Harness() {
         setQuery('');
         onClear();
       }}
-      locationBias={BIAS}
+      getLocationBias={() => BIAS}
     />
   );
 }

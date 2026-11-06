@@ -57,7 +57,7 @@ interface PlaceSearchProps {
   onQueryChange: (query: string) => void;
   onSelect: (place: Place) => void;
   onClear: () => void;
-  locationBias: google.maps.LatLngLiteral;
+  getLocationBias: () => google.maps.LatLngLiteral;
 }
 
 // Search box with place suggestions from the Places API (New). Replaces the legacy
@@ -68,7 +68,7 @@ export function PlaceSearch({
   onQueryChange,
   onSelect,
   onClear,
-  locationBias,
+  getLocationBias,
 }: PlaceSearchProps) {
   const [{ status, requestId }, dispatch] = useReducer<
     PlaceSearchState<PlaceSuggestion>,
@@ -84,7 +84,7 @@ export function PlaceSearch({
       try {
         const response = await library.AutocompleteSuggestion.fetchAutocompleteSuggestions({
           input,
-          locationBias,
+          locationBias: getLocationBias(),
           sessionToken: sessionTokenRef.current,
         });
         dispatch({

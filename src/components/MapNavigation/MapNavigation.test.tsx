@@ -81,6 +81,7 @@ afterEach(() => {
   vi.clearAllTimers();
   vi.useRealTimers();
   vi.restoreAllMocks();
+  Reflect.deleteProperty(navigator, 'geolocation');
 });
 
 describe('navigation flow (#49)', () => {
@@ -279,5 +280,267 @@ describe('navigation flow (#49)', () => {
 
     expect(routeLine()).not.toBeInTheDocument();
     expect(endButton()).not.toBeInTheDocument();
+  });
+});
+
+describe('map layers (#50)', () => {
+  const button = (name: string) => screen.getByRole('button', { name });
+  const satellite = () => button('Satellite map');
+  const traffic = () => button('Traffic');
+  const chargers = () => button('Charging locations');
+  const locate = () => button('Locate car');
+  const mapType = () => screen.getByTestId('map').getAttribute('data-map-type');
+  const liveTrafficLayers = () =>
+    fake.trafficLayers.filter((layer) => layer.setMap.mock.lastCall?.[0] === fake.map);
+
+  function stubGeolocation() {
+    const getCurrentPosition = vi.fn<Geolocation['getCurrentPosition']>();
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: { getCurrentPosition },
+    });
+    return {
+      getCurrentPosition,
+      succeed(index: number, lat: number, lng: number) {
+        const onSuccess = getCurrentPosition.mock.calls[index][0];
+        return settle(() =>
+          onSuccess({ coords: { latitude: lat, longitude: lng } } as GeolocationPosition),
+        );
+      },
+      fail(index: number, code: number) {
+        const onError = getCurrentPosition.mock.calls[index][1];
+        return settle(() => onError?.({ code } as GeolocationPositionError));
+      },
+    };
+  }
+
+  describe('traffic', () => {
+    test('the button shows its state and the layer follows it', async () => {
+      renderMap();
+      expect(traffic()).toHaveAttribute('aria-pressed', 'false');
+
+      fireEvent.click(traffic());
+      await flush();
+      expect(traffic()).toHaveAttribute('aria-pressed', 'true');
+      expect(traffic()).toHaveClass('layerOn');
+      expect(liveTrafficLayers()).toHaveLength(1);
+
+      fireEvent.click(traffic());
+      await flush();
+      expect(traffic()).toHaveAttribute('aria-pressed', 'false');
+      expect(traffic()).not.toHaveClass('layerOn');
+      expect(liveTrafficLayers()).toHaveLength(0);
+    });
+
+    test('turning traffic on from satellite goes back to the road map', async () => {
+      renderMap();
+      fireEvent.click(satellite());
+      fireEvent.click(traffic());
+      await flush();
+
+      expect(mapType()).toBe('roadmap');
+      expect(satellite()).toHaveAttribute('aria-pressed', 'false');
+      expect(liveTrafficLayers()).toHaveLength(1);
+    });
+
+    test('switching to satellite turns traffic off', async () => {
+      renderMap();
+      fireEvent.click(traffic());
+      fireEvent.click(satellite());
+      await flush();
+
+      expect(mapType()).toBe('satellite');
+      expect(traffic()).toHaveAttribute('aria-pressed', 'false');
+      expect(liveTrafficLayers()).toHaveLength(0);
+    });
+
+    test('the layer does not outlive the component', async () => {
+      const { unmount } = renderMap();
+      fireEvent.click(traffic());
+      await flush();
+
+      unmount();
+      expect(fake.trafficLayers).toHaveLength(1);
+      expect(liveTrafficLayers()).toHaveLength(0);
+    });
+  });
+
+  test('the map style button shows its state and turns off again', () => {
+    renderMap();
+    fireEvent.click(satellite());
+    expect(mapType()).toBe('satellite');
+    expect(satellite()).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(satellite());
+    expect(mapType()).toBe('roadmap');
+    expect(satellite()).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  describe('chargers', () => {
+    const pins = () => screen.queryAllByTestId('charger-pin');
+
+    test('load around the area on screen, not the car, and can be hidden', async () => {
+      renderMap();
+      fake.setViewportCenter({ lat: 40, lng: 50 });
+
+      fireEvent.click(chargers());
+      await flush();
+      expect(chargers()).toHaveAttribute('aria-busy', 'true');
+      expect(fake.nearbyCalls[0].request.locationRestriction).toMatchObject({
+        center: { lat: 40, lng: 50 },
+      });
+
+      await settle(() =>
+        fake.nearbyCalls[0].resolve({ places: [fake.charger('a', { lat: 40, lng: 50 })] }),
+      );
+      expect(chargers()).toHaveAttribute('aria-pressed', 'true');
+      expect(chargers()).toHaveAttribute('aria-busy', 'false');
+      expect(pins()).toHaveLength(1);
+
+      fireEvent.click(chargers());
+      await flush();
+      expect(chargers()).toHaveAttribute('aria-pressed', 'false');
+      expect(pins()).toHaveLength(0);
+    });
+
+    test('an empty result says so, unlike a failure', async () => {
+      renderMap();
+      fireEvent.click(chargers());
+      await flush();
+      await settle(() => fake.nearbyCalls[0].resolve({ places: [] }));
+
+      expect(screen.getByText('No chargers found in this area.')).toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    test('a failure is visible and the button turns it off', async () => {
+      renderMap();
+      fireEvent.click(chargers());
+      await flush();
+      await settle(() => fake.nearbyCalls[0].reject(new Error('boom')));
+
+      expect(screen.getByRole('alert')).toHaveTextContent("Couldn't load chargers.");
+      expect(chargers()).toHaveClass('layerError');
+
+      fireEvent.click(chargers());
+      await flush();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(chargers()).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    test('turning off during loading drops the response', async () => {
+      renderMap();
+      fireEvent.click(chargers());
+      await flush();
+      fireEvent.click(chargers());
+      await flush();
+
+      await settle(() =>
+        fake.nearbyCalls[0].resolve({ places: [fake.charger('a', { lat: 1, lng: 1 })] }),
+      );
+      expect(pins()).toHaveLength(0);
+    });
+
+    test('a response from before a retoggle cannot replace the current one', async () => {
+      renderMap();
+      fireEvent.click(chargers());
+      await flush();
+      fireEvent.click(chargers());
+      await flush();
+      fireEvent.click(chargers());
+      await flush();
+      expect(fake.nearbyCalls).toHaveLength(2);
+
+      await settle(() => fake.nearbyCalls[0].resolve({ places: [] }));
+      expect(chargers()).toHaveAttribute('aria-busy', 'true');
+    });
+  });
+
+  describe('locate', () => {
+    test('moves the car marker and the map', async () => {
+      const geolocation = stubGeolocation();
+      renderMap();
+
+      fireEvent.click(locate());
+      await flush();
+      expect(locate()).toHaveAttribute('aria-busy', 'true');
+
+      await geolocation.succeed(0, 7, 8);
+      expect(locate()).toHaveAttribute('aria-busy', 'false');
+      expect(markers()).toContainEqual({ lat: 7, lng: 8 });
+      expect(fake.map.panTo).toHaveBeenCalledExactlyOnceWith({ lat: 7, lng: 8 });
+    });
+
+    test('a second tap cancels, with no second request and no late jump', async () => {
+      const geolocation = stubGeolocation();
+      renderMap();
+
+      fireEvent.click(locate());
+      await flush();
+      fireEvent.click(locate());
+      await flush();
+      expect(geolocation.getCurrentPosition).toHaveBeenCalledOnce();
+      expect(locate()).toHaveAttribute('aria-busy', 'false');
+
+      await geolocation.succeed(0, 7, 8);
+      expect(fake.map.panTo).not.toHaveBeenCalled();
+    });
+
+    test('a failure is visible, and can be dismissed', async () => {
+      const geolocation = stubGeolocation();
+      renderMap();
+      fireEvent.click(locate());
+      await flush();
+
+      await geolocation.fail(0, 1);
+      expect(screen.getByRole('alert')).toHaveTextContent('Location access is blocked');
+      expect(locate()).toHaveClass('layerError');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(locate()).not.toHaveClass('layerError');
+    });
+
+    test('an unsupported browser is told so', () => {
+      renderMap();
+      fireEvent.click(locate());
+      expect(screen.getByRole('alert')).toHaveTextContent("This browser can't share its location.");
+    });
+  });
+
+  describe('car position and viewport', () => {
+    test('routes start at the car, while searches are biased to the area on screen', async () => {
+      const geolocation = stubGeolocation();
+      renderMap();
+      fireEvent.click(locate());
+      await flush();
+      await geolocation.succeed(0, 7, 8);
+      fake.setViewportCenter({ lat: 40, lng: 50 });
+
+      await choosePlace('Home', HOME);
+      expect(fake.autocompleteCalls[0].request.locationBias).toEqual({ lat: 40, lng: 50 });
+
+      await pressNavigate();
+      expect(lastRouteCall().request.origin).toEqual({ lat: 7, lng: 8 });
+    });
+
+    test('End Navigation returns to the car, not the viewport', async () => {
+      renderMap();
+      await startTrip('Home', HOME);
+      fake.setViewportCenter({ lat: 40, lng: 50 });
+      fake.map.panTo.mockClear();
+
+      fireEvent.click(endButton() as HTMLElement);
+      await flush();
+
+      expect(fake.map.panTo).toHaveBeenCalledExactlyOnceWith(markers()[0]);
+      expect(markers()[0]).not.toEqual({ lat: 40, lng: 50 });
+    });
+  });
+
+  test('the compass resets the heading', () => {
+    renderMap();
+    fireEvent.click(button('Reset map heading'));
+    expect(fake.map.setHeading).toHaveBeenCalledWith(0);
   });
 });
