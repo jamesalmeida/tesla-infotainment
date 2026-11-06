@@ -8,7 +8,14 @@ const SAVE_DELAY_MS = 250;
 // Preferences only. Gear, open apps and closures are transient: a visit always starts in Park.
 type Persisted = Pick<
   CarState,
-  'temperature' | 'volume' | 'activeProfileId' | 'settings' | 'display'
+  | 'temperature'
+  | 'volume'
+  | 'activeProfileId'
+  | 'settings'
+  | 'display'
+  | 'batteryPercent'
+  | 'odometerMiles'
+  | 'tripMiles'
 >;
 
 const pickPersisted = ({
@@ -17,7 +24,19 @@ const pickPersisted = ({
   activeProfileId,
   settings,
   display,
-}: CarState): Persisted => ({ temperature, volume, activeProfileId, settings, display });
+  batteryPercent,
+  odometerMiles,
+  tripMiles,
+}: CarState): Persisted => ({
+  temperature,
+  volume,
+  activeProfileId,
+  settings,
+  display,
+  batteryPercent,
+  odometerMiles,
+  tripMiles,
+});
 
 const inRange = (value: unknown, min: number, max: number): value is number =>
   typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
@@ -65,6 +84,15 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
       ? saved.temperature
       : defaults.temperature,
     volume: inRange(saved.volume, 0, 100) ? saved.volume : defaults.volume,
+    batteryPercent: inRange(saved.batteryPercent, 0, 100)
+      ? saved.batteryPercent
+      : defaults.batteryPercent,
+    odometerMiles: inRange(saved.odometerMiles, 0, Number.MAX_SAFE_INTEGER)
+      ? saved.odometerMiles
+      : defaults.odometerMiles,
+    tripMiles: inRange(saved.tripMiles, 0, Number.MAX_SAFE_INTEGER)
+      ? saved.tripMiles
+      : defaults.tripMiles,
     activeProfileId:
       typeof saved.activeProfileId === 'number' ? saved.activeProfileId : defaults.activeProfileId,
     settings: {

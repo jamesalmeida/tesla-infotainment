@@ -315,6 +315,35 @@ body {
   min-width: calc(40 * var(--u));
 }
 
+.pedals {
+  position: absolute;
+  z-index: 4;
+  top: 100%;
+  right: 3%;
+  display: flex;
+  gap: calc(8 * var(--u));
+}
+
+.pedalBtn {
+  min-width: max(calc(56 * var(--u)), var(--tap-target));
+  min-height: max(calc(36 * var(--u)), var(--tap-target));
+  border: none;
+  border-radius: calc(8 * var(--u));
+  background-color: rgba(0, 0, 0, 0.08);
+  color: #4e4e4e;
+  font: inherit;
+  font-size: 0.8em;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pedalBtn:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
 .stackedViewSwitch {
   display: flex;
   flex: none;

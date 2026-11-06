@@ -1,5 +1,5 @@
 import type { CarActions } from '../state/CarStateContext';
-import type { Gear } from '../state/carState';
+import type { Gear, Pedal } from '../state/carState';
 import { getMediaTransport } from '../state/mediaTransport';
 import { isKeyboardClaimed } from './keyboardClaim';
 
@@ -121,6 +121,12 @@ export const SHORTCUTS: Shortcut[] = [
     run: (actions) => actions.toggleModal('shortcuts'),
   },
 ];
+
+// Held rather than pressed, so they're handled by useSimulation instead of the table above.
+export const PEDAL_KEYS: Record<string, Pedal> = {
+  ArrowUp: 'accelerate',
+  ArrowDown: 'brake',
+};
 
 const NON_TEXT_INPUTS = ['range', 'checkbox', 'radio', 'button', 'color', 'file', 'submit'];
 

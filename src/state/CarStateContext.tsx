@@ -10,6 +10,7 @@ import {
   type DisplaySettings,
   type Gear,
   type ModalId,
+  type Pedal,
   type SettingsPanel,
   type Surface,
   type VehicleSettings,
@@ -37,6 +38,12 @@ export interface CarActions {
   selectProfile: (id: number) => void;
   showNotice: (message: string) => void;
   dismissNotice: () => void;
+  clearNotifications: () => void;
+  setPedal: (pedal: Pedal) => void;
+  tick: (seconds: number) => void;
+  plugIn: () => void;
+  unplug: () => void;
+  resetTrip: () => void;
 }
 
 interface CarStore {
@@ -85,6 +92,12 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   selectProfile: (id) => dispatch({ type: 'profile/select', id }),
   showNotice: (message) => dispatch({ type: 'notice/show', message }),
   dismissNotice: () => dispatch({ type: 'notice/dismiss' }),
+  clearNotifications: () => dispatch({ type: 'notifications/clear' }),
+  setPedal: (pedal) => dispatch({ type: 'pedal/set', pedal }),
+  tick: (seconds) => dispatch({ type: 'sim/tick', seconds }),
+  plugIn: () => dispatch({ type: 'charge/plug' }),
+  unplug: () => dispatch({ type: 'charge/unplug' }),
+  resetTrip: () => dispatch({ type: 'trip/reset' }),
 });
 
 interface CarContextValue {

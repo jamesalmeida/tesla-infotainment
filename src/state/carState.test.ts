@@ -5,8 +5,10 @@ import {
   initialCarState,
   isCameraForced,
   isPanelOpen,
+  isSimulationActive,
   leftSignalLit,
   rightSignalLit,
+  vehiclePower,
   type CarAction,
   type CarState,
   type Gear,
@@ -227,6 +229,99 @@ describe('settings', () => {
       { type: 'display/set', patch: { autoBrightness: false } },
     );
     expect(state.display.brightness).toBe(40);
+  });
+});
+
+describe('simulator', () => {
+  const drive = (seconds: number, state: CarState) => {
+    let next = state;
+    for (let ticks = 0; ticks < seconds * 10; ticks += 1) {
+      next = carReducer(next, { type: 'sim/tick', seconds: 0.1 });
+    }
+    return next;
+  };
+  const accelerating = reduce(gear('D'), { type: 'pedal/set', pedal: 'accelerate' });
+
+  test('accelerating in Drive adds speed, distance and uses battery', () => {
+    const state = drive(5, accelerating);
+    expect(state.speed).toBeCloseTo(50, 0);
+    expect(state.tripMiles).toBeGreaterThan(0);
+    expect(state.odometerMiles).toBeGreaterThan(initialCarState.odometerMiles);
+    expect(state.batteryPercent).toBeLessThan(initialCarState.batteryPercent);
+  });
+
+  test('the acceleration setting changes how fast the car gets there', () => {
+    const chill = reduceFrom(accelerating, {
+      type: 'settings/set',
+      patch: { acceleration: 'chill' },
+    });
+    expect(drive(5, chill).speed).toBeLessThan(drive(5, accelerating).speed);
+  });
+
+  test('top speed depends on the gear', () => {
+    expect(drive(30, accelerating).speed).toBe(90);
+    const reverse = reduce(gear('R'), { type: 'pedal/set', pedal: 'accelerate' });
+    expect(drive(30, reverse).speed).toBe(15);
+  });
+
+  test('the car does not move in Park or with an empty battery', () => {
+    const parked = reduce({ type: 'pedal/set', pedal: 'accelerate' });
+    expect(drive(5, parked).speed).toBe(0);
+    expect(drive(5, { ...accelerating, batteryPercent: 0 }).speed).toBe(0);
+  });
+
+  test('braking stops the car, and lifting off slows it gently', () => {
+    const moving = drive(5, accelerating);
+    const braking = carReducer(moving, { type: 'pedal/set', pedal: 'brake' });
+    expect(drive(5, braking).speed).toBe(0);
+    const coasting = drive(1, carReducer(moving, { type: 'pedal/set', pedal: 'none' }));
+    expect(coasting.speed).toBeGreaterThan(40);
+    expect(coasting.speed).toBeLessThan(moving.speed);
+  });
+
+  test('charging stops at the limit, and blocks driving until unplugged', () => {
+    const plugged = reduce({ type: 'charge/plug' });
+    expect(plugged.chargeState).toBe('charging');
+    expect(carReducer(plugged, gear('D')).gear).toBe('P');
+
+    const done = drive(30, plugged);
+    expect(done.batteryPercent).toBe(80);
+    expect(done.chargeState).toBe('complete');
+    expect(done.notice?.message).toBe('Charging complete');
+
+    expect(reduceFrom(done, { type: 'charge/unplug' }, gear('D')).gear).toBe('D');
+  });
+
+  test('the car only charges in Park', () => {
+    const state = reduce(gear('D'), { type: 'charge/plug' });
+    expect(state.chargeState).toBe('unplugged');
+    expect(state.notice?.message).toBe('Shift to Park to charge');
+  });
+
+  test('power follows the gear and the charge cable', () => {
+    expect(vehiclePower(initialCarState)).toBe('parked');
+    expect(vehiclePower(reduce(gear('D')))).toBe('driving');
+    expect(vehiclePower(reduce({ type: 'charge/plug' }))).toBe('charging');
+  });
+
+  test('the simulation only runs while something is changing', () => {
+    expect(isSimulationActive(initialCarState)).toBe(false);
+    expect(isSimulationActive(accelerating)).toBe(true);
+    expect(isSimulationActive(reduce({ type: 'charge/plug' }))).toBe(true);
+  });
+});
+
+describe('notifications', () => {
+  test('keeps a capped history, newest first, after the notice leaves the screen', () => {
+    let state = initialCarState;
+    for (let index = 0; index < 25; index += 1) {
+      state = carReducer(state, { type: 'notice/show', message: `Message ${index}` });
+    }
+    state = carReducer(state, { type: 'notice/dismiss' });
+    expect(state.notice).toBe(null);
+    expect(state.notifications).toHaveLength(20);
+    expect(state.notifications[0].message).toBe('Message 24');
+    expect(carReducer(state, { type: 'notifications/clear' }).notifications).toEqual([]);
   });
 });
 

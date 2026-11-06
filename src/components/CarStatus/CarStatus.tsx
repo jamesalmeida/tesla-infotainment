@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useCar, useCarActions } from '../../state/CarStateContext';
-import { isDriving, leftSignalLit, rightSignalLit } from '../../state/carState';
+import { isDriving, leftSignalLit, rightSignalLit, type Pedal } from '../../state/carState';
 import { getImagePath } from '../../utils/assetPaths';
 import BatteryStatus from '../BatteryStatus/BatteryStatus';
 import GearSelect from '../GearSelect/GearSelect';
+import { Telltales } from './Telltales';
 
 const BLINK_MS = 500;
 
@@ -110,6 +111,37 @@ function SpeedLimit() {
   );
 }
 
+function PedalButton({ pedal, label }: { pedal: Pedal; label: string }) {
+  const { setPedal } = useCarActions();
+  const release = () => setPedal('none');
+
+  return (
+    <button
+      type="button"
+      className="pedalBtn"
+      onPointerDown={() => setPedal(pedal)}
+      onPointerUp={release}
+      onPointerLeave={release}
+      onPointerCancel={release}
+    >
+      {label}
+    </button>
+  );
+}
+
+// Held like real pedals. Keyboard users get the same from the up and down arrows.
+function Pedals() {
+  const canDrive = useCar((state) => state.gear === 'D' || state.gear === 'R');
+  if (!canDrive) return null;
+
+  return (
+    <div className="pedals">
+      <PedalButton pedal="brake" label="Brake" />
+      <PedalButton pedal="accelerate" label="Go" />
+    </div>
+  );
+}
+
 export function CarStatus() {
   return (
     <div className="carStatusIcons">
@@ -123,6 +155,8 @@ export function CarStatus() {
         <TurnSignals />
         <SpeedLimit />
       </div>
+      <Telltales />
+      <Pedals />
     </div>
   );
 }

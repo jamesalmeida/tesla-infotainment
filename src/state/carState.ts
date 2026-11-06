@@ -6,6 +6,20 @@ export const MIN_TEMPERATURE = 60;
 export const MAX_TEMPERATURE = 90;
 // Above this speed the car refuses Park and Reverse.
 export const MAX_SHIFT_SPEED = 5;
+export const MAX_SPEED = 90;
+export const MAX_REVERSE_SPEED = 15;
+export const FULL_RANGE_MILES = 310;
+export const MAX_NOTIFICATIONS = 20;
+
+// mph per second.
+const ACCELERATION_RATE = { chill: 6, standard: 10, sport: 14 } as const;
+const BRAKING_RATE = 18;
+const REGEN_RATE = 3;
+const COAST_RATE = 1;
+// About 250 Wh per mile on a 75 kWh pack.
+const PERCENT_PER_MILE = 100 / FULL_RANGE_MILES;
+// A fast public charger, sped up so a demo session finishes in a minute or two.
+const CHARGE_PERCENT_PER_SECOND = 1;
 
 export type Gear = 'P' | 'R' | 'N' | 'D';
 
@@ -46,6 +60,14 @@ export type Headlights = 'off' | 'parking' | 'on' | 'auto';
 
 export type ChildLock = 'off' | 'left' | 'right' | 'both';
 
+export type Acceleration = keyof typeof ACCELERATION_RATE;
+
+export type Pedal = 'none' | 'accelerate' | 'brake';
+
+export type ChargeState = 'unplugged' | 'charging' | 'complete';
+
+export type VehiclePower = 'parked' | 'driving' | 'charging';
+
 // Vehicle settings live here rather than in their panels, so they outlive the panel
 // and anything else in the app can read them.
 export interface VehicleSettings {
@@ -59,6 +81,8 @@ export interface VehicleSettings {
   sentry: boolean;
   driveAwayLock: boolean;
   unlockOnPark: boolean;
+  acceleration: Acceleration;
+  chargeLimit: number;
 }
 
 export interface DisplaySettings {
@@ -70,11 +94,18 @@ export interface DisplaySettings {
 export interface Notice {
   id: number;
   message: string;
+  // Milliseconds since the epoch, for the notification history.
+  time: number;
 }
 
 export interface CarState {
   gear: Gear;
   speed: number;
+  pedal: Pedal;
+  batteryPercent: number;
+  odometerMiles: number;
+  tripMiles: number;
+  chargeState: ChargeState;
   surface: Surface;
   // Reverse takes over the screen; this is what comes back when it ends.
   surfaceBeforeReverse: Surface | null;
@@ -90,12 +121,20 @@ export interface CarState {
   activeProfileId: number;
   settings: VehicleSettings;
   display: DisplaySettings;
+  // The newest message, on screen for a moment.
   notice: Notice | null;
+  // Everything shown recently, newest first, for the bell in Settings.
+  notifications: Notice[];
 }
 
 export type CarAction =
   | { type: 'gear/select'; gear: Gear }
   | { type: 'speed/set'; speed: number }
+  | { type: 'pedal/set'; pedal: Pedal }
+  | { type: 'sim/tick'; seconds: number }
+  | { type: 'charge/plug' }
+  | { type: 'charge/unplug' }
+  | { type: 'trip/reset' }
   | { type: 'app/toggle'; app: AppId }
   | { type: 'surface/close' }
   | { type: 'surface/restore'; surface: Surface }
@@ -114,11 +153,17 @@ export type CarAction =
   | { type: 'volume/set'; volume: number }
   | { type: 'profile/select'; id: number }
   | { type: 'notice/show'; message: string }
-  | { type: 'notice/dismiss' };
+  | { type: 'notice/dismiss' }
+  | { type: 'notifications/clear' };
 
 export const initialCarState: CarState = {
   gear: 'P',
   speed: 0,
+  pedal: 'none',
+  batteryPercent: 69,
+  odometerMiles: 12480,
+  tripMiles: 0,
+  chargeState: 'unplugged',
   surface: { kind: 'closed' },
   surfaceBeforeReverse: null,
   activeModal: null,
@@ -140,9 +185,12 @@ export const initialCarState: CarState = {
     sentry: false,
     driveAwayLock: true,
     unlockOnPark: true,
+    acceleration: 'standard',
+    chargeLimit: 80,
   },
   display: { brightness: 100, autoBrightness: false },
   notice: null,
+  notifications: [],
 };
 
 /* -------------------- Selectors -------------------- */
@@ -158,6 +206,18 @@ export const rightSignalLit = (state: CarState): boolean =>
 
 export const vehiclePose = (state: CarState): 'park' | 'drive' | Compartment =>
   isDriving(state) ? 'drive' : (state.openCompartment ?? 'park');
+
+export const rangeMiles = (state: CarState): number =>
+  Math.round((state.batteryPercent / 100) * FULL_RANGE_MILES);
+
+export const vehiclePower = (state: CarState): VehiclePower => {
+  if (state.chargeState !== 'unplugged') return 'charging';
+  return isParked(state) ? 'parked' : 'driving';
+};
+
+// The loop only runs while something is actually changing.
+export const isSimulationActive = (state: CarState): boolean =>
+  state.speed > 0 || state.pedal !== 'none' || state.chargeState === 'charging';
 
 export const surfaceApp = (surface: Surface): AppId | null => {
   switch (surface.kind) {
@@ -191,6 +251,9 @@ const ALLOWED: Permission = { allowed: true };
 
 // Every "can this happen right now?" rule, so features don't each invent their own check.
 export function canShift(state: CarState, gear: Gear): Permission {
+  if (state.chargeState !== 'unplugged' && gear !== 'P') {
+    return { allowed: false, reason: 'Unplug the charge cable before driving' };
+  }
   if (state.speed > MAX_SHIFT_SPEED && (gear === 'P' || gear === 'R')) {
     return {
       allowed: false,
@@ -216,10 +279,18 @@ export function canOpenCompartment(state: CarState, compartment: Compartment): P
 
 /* -------------------- Transitions -------------------- */
 
-const notify = (state: CarState, message: string): CarState => ({
-  ...state,
-  notice: { id: (state.notice?.id ?? 0) + 1, message },
-});
+const notify = (state: CarState, message: string): CarState => {
+  const notice = {
+    id: (state.notifications[0]?.id ?? 0) + 1,
+    message,
+    time: Date.now(),
+  };
+  return {
+    ...state,
+    notice,
+    notifications: [notice, ...state.notifications].slice(0, MAX_NOTIFICATIONS),
+  };
+};
 
 // The one door every surface change goes through: nothing replaces the forced camera.
 const setSurface = (state: CarState, surface: Surface): CarState =>
@@ -262,6 +333,45 @@ function shift(state: CarState, gear: Gear): CarState {
   return next;
 }
 
+const approach = (value: number, target: number, step: number) =>
+  value < target ? Math.min(target, value + step) : Math.max(target, value - step);
+
+function nextSpeed(state: CarState, seconds: number): number {
+  const canPropel = state.gear === 'D' || state.gear === 'R';
+  const topSpeed = state.gear === 'R' ? MAX_REVERSE_SPEED : MAX_SPEED;
+  const hasCharge = state.batteryPercent > 0;
+
+  if (state.pedal === 'brake') return approach(state.speed, 0, BRAKING_RATE * seconds);
+  if (state.pedal === 'accelerate' && canPropel && hasCharge) {
+    const rate = ACCELERATION_RATE[state.settings.acceleration];
+    return approach(state.speed, topSpeed, rate * seconds);
+  }
+  // Regen slows the car in gear; in Neutral it only coasts.
+  return approach(state.speed, 0, (canPropel ? REGEN_RATE : COAST_RATE) * seconds);
+}
+
+function tick(state: CarState, seconds: number): CarState {
+  if (state.chargeState === 'charging') {
+    const batteryPercent = Math.min(
+      state.settings.chargeLimit,
+      state.batteryPercent + CHARGE_PERCENT_PER_SECOND * seconds,
+    );
+    if (batteryPercent < state.settings.chargeLimit) return { ...state, batteryPercent };
+    return notify({ ...state, batteryPercent, chargeState: 'complete' }, 'Charging complete');
+  }
+
+  const speed = nextSpeed(state, seconds);
+  const miles = ((state.speed + speed) / 2) * (seconds / 3600);
+  const batteryPercent = Math.max(0, state.batteryPercent - miles * PERCENT_PER_MILE);
+  return {
+    ...state,
+    speed,
+    batteryPercent,
+    odometerMiles: state.odometerMiles + miles,
+    tripMiles: state.tripMiles + miles,
+  };
+}
+
 export function carReducer(state: CarState, action: CarAction): CarState {
   switch (action.type) {
     case 'gear/select': {
@@ -272,6 +382,25 @@ export function carReducer(state: CarState, action: CarAction): CarState {
 
     case 'speed/set':
       return { ...state, speed: Math.max(0, action.speed) };
+
+    case 'pedal/set':
+      return state.pedal === action.pedal ? state : { ...state, pedal: action.pedal };
+
+    case 'sim/tick':
+      return tick(state, action.seconds);
+
+    case 'charge/plug':
+      if (!isParked(state)) return notify(state, 'Shift to Park to charge');
+      if (state.chargeState !== 'unplugged') return state;
+      return state.batteryPercent >= state.settings.chargeLimit
+        ? { ...state, chargeState: 'complete' }
+        : { ...state, chargeState: 'charging' };
+
+    case 'charge/unplug':
+      return { ...state, chargeState: 'unplugged' };
+
+    case 'trip/reset':
+      return { ...state, tripMiles: 0 };
 
     // A bottom bar app icon: opens that app, or closes it if it is already showing.
     case 'app/toggle': {
@@ -357,6 +486,9 @@ export function carReducer(state: CarState, action: CarAction): CarState {
 
     case 'notice/dismiss':
       return { ...state, notice: null };
+
+    case 'notifications/clear':
+      return { ...state, notice: null, notifications: [] };
 
     default: {
       // Unreachable for typed callers; still guards against untyped dispatches.

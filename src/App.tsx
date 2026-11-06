@@ -5,6 +5,7 @@ import { activeApp, isCameraForced, isDriving, isPanelOpen, vehiclePose } from '
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useBoot } from './hooks/useBoot';
 import { useLayout } from './hooks/useLayout';
+import { useSimulation } from './hooks/useSimulation';
 import {
   Group,
   Panel,
@@ -241,6 +242,7 @@ function Display() {
   const { isLoading, onContentSettled } = useBoot();
 
   useKeyboardShortcuts();
+  useSimulation();
 
   return (
     <>

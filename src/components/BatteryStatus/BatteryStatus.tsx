@@ -1,34 +1,23 @@
 import { useState } from 'react';
+import { useCar } from '../../state/CarStateContext';
+import { rangeMiles } from '../../state/carState';
 import styles from './BatteryStatus.module.css';
 
 const BatteryStatus = () => {
-  const [batteryPercentage, setBatteryPercentage] = useState(69);
+  const batteryPercent = useCar((state) => Math.round(state.batteryPercent));
+  const miles = useCar(rangeMiles);
+  const isCharging = useCar((state) => state.chargeState === 'charging');
   const [showMiles, setShowMiles] = useState(false);
 
-  const calculateMiles = (percentage: number) => {
-    return Math.round((percentage / 100) * 310);
-  };
-
-  const toggleMilesDisplay = () => {
-    setShowMiles(!showMiles);
-  };
-
-  const randomizeBatteryPercentage = () => {
-    setBatteryPercentage(Math.floor(Math.random() * 101)); // 0-100
-  };
-
   return (
-    <div className={`${styles.batteryStatus} no-select`}>
-      <span onClick={toggleMilesDisplay}>
-        {showMiles ? `${calculateMiles(batteryPercentage)} mi` : `${batteryPercentage}%`}
-      </span>
-      <svg
-        className="icon"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        onClick={randomizeBatteryPercentage}
-      >
+    <button
+      type="button"
+      className={`${styles.batteryStatus} no-select`}
+      aria-label={`Battery ${batteryPercent}%, ${miles} miles`}
+      onClick={() => setShowMiles((isShowing) => !isShowing)}
+    >
+      <span>{showMiles ? `${miles} mi` : `${batteryPercent}%`}</span>
+      <svg className="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
         <rect
           x="2"
           y="6"
@@ -43,14 +32,14 @@ const BatteryStatus = () => {
         <rect
           x="4"
           y="8"
-          width={`${(batteryPercentage * 16) / 100}`}
+          width={`${(batteryPercent * 16) / 100}`}
           height="8"
-          fill="currentColor"
+          fill={isCharging ? '#2ca02c' : 'currentColor'}
           className={styles['battery-fill']}
         />
         <rect x="23" y="10" width="2" height="4" fill="currentColor" />
       </svg>
-    </div>
+    </button>
   );
 };
 

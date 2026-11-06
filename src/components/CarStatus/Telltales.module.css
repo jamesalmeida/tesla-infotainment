@@ -1,0 +1,32 @@
+.telltales {
+  display: flex;
+  justify-content: center;
+  gap: calc(10 * var(--u));
+  min-height: calc(22 * var(--u));
+}
+
+.telltale {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.green {
+  color: #2ca02c;
+}
+
+.blue {
+  color: #2f6fed;
+}
+
+.amber {
+  color: #e69f59;
+}
+
+.red {
+  color: #e31937;
+}
