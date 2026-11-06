@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
+import { useMemo, useRef, useState, type ComponentRef } from 'react';
 import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber';
 import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei';
 import type * as THREE from 'three';
-import { useSpring, a } from '@react-spring/three';
 import { getCarModelPath } from '../../utils/assetPaths';
 import {
+  AZIMUTH_SMOOTH_TIME,
   CLOSED_DOORS,
   DEFAULT_AZIMUTH,
   DOOR_IDS,
@@ -13,8 +13,11 @@ import {
   findDoorId,
   getPartTargets,
   isClick,
+  nearestAngle,
+  stepDamped,
   stepParts,
   type CarParts,
+  type Damped,
   type DoorId,
   type DoorStates,
   type VehiclePose,
@@ -50,6 +53,9 @@ const CAMERA_POSITION: [number, number, number] = [
   5 * Math.sin(CAMERA_ELEVATION),
   5 * Math.cos(CAMERA_ELEVATION) * Math.cos(DEFAULT_AZIMUTH),
 ];
+
+const ORBIT_TARGET: [number, number, number] = [0, -0.5, 0];
+const ORBIT_POLAR_ANGLE = Math.PI / 2 - CAMERA_ELEVATION;
 
 const modelPath = getCarModelPath('tesla-model-3-2018.glb');
 
@@ -116,61 +122,45 @@ function Model({ pose, doors, onDoorToggle, ...props }: ModelProps) {
 
 function ControlledOrbitControls() {
   const controlsRef = useRef<OrbitControlsHandle>(null);
-  const [isInteracting, setIsInteracting] = useState(false);
+  const azimuthRef = useRef<Damped | null>(null);
 
-  // Adjust the default rotation to be 200 degrees clockwise
-  const defaultRotation = Math.PI + (200 * Math.PI) / 170;
+  const handleStart = () => {
+    azimuthRef.current = null;
+  };
 
-  const [springProps, setSpring] = useSpring(() => ({
-    rotation: defaultRotation,
-    config: { mass: 1, tension: 280, friction: 120 },
-  }));
+  const handleEnd = () => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+    azimuthRef.current = {
+      value: nearestAngle(controls.getAzimuthalAngle(), DEFAULT_AZIMUTH),
+      velocity: 0,
+    };
+  };
 
-  useEffect(() => {
-    if (controlsRef.current) {
-      controlsRef.current.target.set(0, -0.5, 0);
-      controlsRef.current.update();
+  useFrame((_, delta) => {
+    const controls = controlsRef.current;
+    const azimuth = azimuthRef.current;
+    if (!controls || !azimuth) return;
+    const isMoving = stepDamped(azimuth, DEFAULT_AZIMUTH, AZIMUTH_SMOOTH_TIME, delta);
+    controls.setAzimuthalAngle(azimuth.value);
+    if (!isMoving) azimuthRef.current = null;
+  });
 
-      const controls = controlsRef.current;
-
-      const onStart = () => setIsInteracting(true);
-      const onEnd = () => {
-        setIsInteracting(false);
-        setSpring({ rotation: defaultRotation });
-      };
-
-      controls.addEventListener('start', onStart);
-      controls.addEventListener('end', onEnd);
-
-      // Set initial rotation
-      controls.setAzimuthalAngle(defaultRotation);
-      controls.update();
-
-      return () => {
-        controls.removeEventListener('start', onStart);
-        controls.removeEventListener('end', onEnd);
-      };
-    }
-  }, [defaultRotation, setSpring]);
-
-  useEffect(() => {
-    if (controlsRef.current && !isInteracting) {
-      controlsRef.current.setAzimuthalAngle(springProps.rotation.get());
-      controlsRef.current.update();
-    }
-  }, [isInteracting, springProps.rotation]);
-
+  // With damping on, setAzimuthalAngle moves 5% of the way and carries the rest into later
+  // updates, which would fight the ease back to the default angle.
   return (
-    <a.group rotation-y={springProps.rotation}>
-      <OrbitControls
-        ref={controlsRef}
-        enableZoom={false}
-        enablePan={false}
-        enableRotate={true}
-        minPolarAngle={Math.PI / 2 - Math.PI / 5.14}
-        maxPolarAngle={Math.PI / 2 - Math.PI / 5.14}
-      />
-    </a.group>
+    <OrbitControls
+      ref={controlsRef}
+      target={ORBIT_TARGET}
+      enableDamping={false}
+      enableZoom={false}
+      enablePan={false}
+      enableRotate={true}
+      minPolarAngle={ORBIT_POLAR_ANGLE}
+      maxPolarAngle={ORBIT_POLAR_ANGLE}
+      onStart={handleStart}
+      onEnd={handleEnd}
+    />
   );
 }
 
