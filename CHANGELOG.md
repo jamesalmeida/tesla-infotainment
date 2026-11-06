@@ -6,6 +6,7 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 ### Added
 
+- A notice in the README and Software panel says this is an unofficial fan project, not affiliated with or endorsed by Tesla, Inc. The page title is now "Tesla Infotainment Simulator".
 - The README lists each `public/` folder with its known source and licence, or says it is unknown.
 - Dependabot keeps dependencies and GitHub Actions current, with React and the 3D packages grouped so they move together.
 - Prettier formatting, and CI fails on unformatted files.

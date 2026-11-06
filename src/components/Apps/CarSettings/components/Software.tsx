@@ -6,6 +6,10 @@ export const Software = () => {
       <div className="description">
         <h3>Tesla Infotainment Simulator (WIP)</h3>
         <p>Experience a simulated Tesla infotainment system in your browser!</p>
+        <p>
+          Unofficial fan project, not affiliated with or endorsed by Tesla, Inc. Tesla and all
+          related names, logos and trademarks belong to their respective owners.
+        </p>
 
         <h3>Features to try out:</h3>
         <ul>
