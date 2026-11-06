@@ -14,7 +14,8 @@ import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import UserProfile from '../UserProfile/UserProfile';
-import { PlaceSearch, type SelectedPlace } from './PlaceSearch';
+import type { Place } from './place';
+import { PlaceSearch } from './PlaceSearch';
 import styles from './MapNavigation.module.css';
 
 type MapType = 'roadmap' | 'satellite';
@@ -61,7 +62,7 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
   const [routePath, setRoutePath] = useState<google.maps.LatLngLiteral[] | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
 
-  const handlePlaceSelect = ({ name, location }: SelectedPlace) => {
+  const handlePlaceSelect = ({ name, location }: Place) => {
     setQuery(name);
     setSearchResult(location);
     if (map) {
