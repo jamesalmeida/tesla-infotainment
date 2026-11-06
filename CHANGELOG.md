@@ -20,6 +20,10 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 - The 3D car model is compressed from 22.7 MB to 4.6 MB (meshopt geometry, WebP textures), so it loads much faster.
 - The bundle is split: the 3D car and the slide-up apps load only when they are needed.
 
+### Fixed
+
+- The README and Software panel now match the app: Shift + Space plays and pauses, keys 1 to 4 select gears, and the 3D car is a Model 3. Typos in the Dynamics panel are corrected.
+
 ### Removed
 
 - Assets nothing used: the commercial Universal Sans font, `public/touchscreen/` (third-party logos of unknown origin), `logo512.svg` and an old car-settings icon. This cuts about 5 MB from the deployed site.

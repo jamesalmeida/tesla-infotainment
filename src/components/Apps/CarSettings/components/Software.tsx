@@ -9,7 +9,7 @@ export const Software = () => {
 
         <h3>Features to try out:</h3>
         <ul>
-          <li>Realistic 3D model of Tesla Model Y. Try opening the trunk and frunk!</li>
+          <li>Realistic 3D model of a Tesla Model 3. Try opening the trunk and frunk!</li>
           <li>
             Interactive infotainment system simulation. Play a podcast, adjust the volume, etc.
           </li>
@@ -35,15 +35,15 @@ export const Software = () => {
 
         <h4>Gear Selection:</h4>
         <ul>
-          <li>P: Park</li>
-          <li>R: Reverse</li>
-          <li>N: Neutral</li>
-          <li>D: Drive</li>
+          <li>P or 1: Park</li>
+          <li>R or 2: Reverse</li>
+          <li>N or 3: Neutral</li>
+          <li>D or 4: Drive</li>
         </ul>
 
         <h4>Music Controls:</h4>
         <ul>
-          <li>Space: Play/Pause</li>
+          <li>Shift + Space: Play/Pause</li>
           <li>Shift + &lt;: Previous track</li>
           <li>Shift + &gt;: Next track</li>
         </ul>

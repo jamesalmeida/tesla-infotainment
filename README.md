@@ -8,7 +8,7 @@ Experience a simulated Tesla infotainment system in your browser!
 
 ## Features to try out
 
-- Realistic 3D model of Tesla Model Y. Try opening the trunk and frunk!
+- Realistic 3D model of a Tesla Model 3. Try opening the trunk and frunk!
 - Interactive infotainment system simulation. Play a podcast, adjust the volume, etc.
 - Put the car in reverse (Click the R) and see what's behind you!
 - Try searching on the map. Turn on traffic or different map styles.
@@ -28,14 +28,14 @@ Experience a simulated Tesla infotainment system in your browser!
 
 ### Gear Selection
 
-- P: Park
-- R: Reverse
-- N: Neutral
-- D: Drive
+- P or 1: Park
+- R or 2: Reverse
+- N or 3: Neutral
+- D or 4: Drive
 
 ### Music Controls
 
-- Space: Play/Pause
+- Shift + Space: Play/Pause
 - Shift + <: Previous track
 - Shift + >: Next track
 
@@ -44,7 +44,7 @@ Experience a simulated Tesla infotainment system in your browser!
 ```
 src/components/   screen chrome, apps, panels and the 3D vehicle
 src/state/        reducer and context for the car and UI state
-src/hooks/        shared hooks (media queries, keyboard, assets)
+src/hooks/        shared hooks (keyboard shortcuts, loading screen)
 src/styles/       shared CSS; per-component styles are CSS Modules
 ```
 
