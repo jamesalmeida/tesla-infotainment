@@ -40,6 +40,7 @@ const cameraIsActive = () =>
 
 beforeEach(() => {
   vi.useFakeTimers();
+  localStorage.clear();
 });
 
 afterEach(() => {
@@ -48,8 +49,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// The app hides its content behind the loading screen until images report as
-// loaded (which never happens in jsdom), so advance to the fallback timer.
+// The loading screen waits for the 3D car, which is stubbed here, so advance to the fallback.
 const renderApp = () => {
   render(<App />);
   act(() => {
@@ -152,8 +152,95 @@ test('Shift+Arrow and Shift+H control the turn signals', () => {
   fireEvent.keyDown(document.body, { key: 'H', shiftKey: true });
   expect(document.querySelectorAll('.turnSignal.active')).toHaveLength(2);
 
+  // Hazards off brings the right signal back rather than losing it.
   fireEvent.keyDown(document.body, { key: 'H', shiftKey: true });
+  expect(document.querySelectorAll('.turnSignal.active')).toHaveLength(1);
+
+  fireEvent.keyDown(document.body, { key: 'ArrowRight', shiftKey: true });
   expect(document.querySelectorAll('.turnSignal.active')).toHaveLength(0);
+});
+
+test('the shelf closes from the backdrop and Escape, and the dock icon stays in sync', () => {
+  renderApp();
+  const shelfIsOpen = () => Boolean(screen.queryByRole('dialog'));
+
+  fireEvent.click(screen.getByAltText('Open Menu'));
+  expect(shelfIsOpen()).toBe(true);
+
+  fireEvent.keyDown(window, { key: 'Escape' });
+  expect(shelfIsOpen()).toBe(false);
+  expect(screen.getByAltText('Open Menu')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByAltText('Open Menu'));
+  const overlay = screen.getByRole('dialog').parentElement;
+  if (!overlay) throw new Error('Modal has no overlay');
+  fireEvent.click(overlay);
+  expect(shelfIsOpen()).toBe(false);
+});
+
+test('the shelf launches apps', async () => {
+  renderApp();
+
+  fireEvent.click(screen.getByAltText('Open Menu'));
+  fireEvent.click(screen.getByAltText('Calendar icon'));
+  await waitForLazyApp();
+
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(panelIsOpen()).toBe(true);
+  expect(screen.getByRole('heading', { name: 'Calendar' })).toBeInTheDocument();
+});
+
+test('? opens the shortcut list', () => {
+  renderApp();
+
+  fireEvent.keyDown(document.body, { key: '?', shiftKey: true });
+
+  expect(screen.getByRole('heading', { name: 'Keyboard shortcuts' })).toBeInTheDocument();
+});
+
+test('Settings survive leaving the panel and closing the app', async () => {
+  renderApp();
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Sentry'));
+  expect(screen.getByText('Sentry').className).toContain('active');
+
+  fireEvent.click(screen.getByText('Dynamics'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Controls'));
+  expect(screen.getByText('Sentry').className).toContain('active');
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  expect(screen.getByText('Sentry').className).toContain('active');
+});
+
+test('brightness survives closing Settings, and Auto restores the manual value', async () => {
+  renderApp();
+  const overlay = () => document.querySelector<HTMLElement>('.brightnessOverlay');
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.change(screen.getByLabelText('Brightness'), { target: { value: '40' } });
+  expect(overlay()?.style.opacity).toBe('0.6');
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  expect(overlay()?.style.opacity).toBe('0.6');
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  expect(screen.getByLabelText('Brightness')).toHaveValue('40');
+
+  const auto = document.querySelector('.brightness-auto-btn');
+  if (!auto) throw new Error('Auto brightness button did not render');
+  fireEvent.click(auto);
+  expect(overlay()?.style.opacity).toBe('0');
+
+  fireEvent.click(auto);
+  expect(overlay()?.style.opacity).toBe('0.6');
+  expect(screen.getByLabelText('Brightness')).toHaveValue('40');
 });
 
 test('Shift+M focuses the navigate input', () => {

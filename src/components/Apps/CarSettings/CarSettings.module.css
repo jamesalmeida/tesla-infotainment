@@ -281,8 +281,9 @@
   /* border-bottom-right-radius: none !important; */
 }
 
+/* Both fill the slide-up panel, which is their positioned ancestor. */
 .car-wash-mode-popup {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -292,7 +293,7 @@
 }
 
 .modal {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;

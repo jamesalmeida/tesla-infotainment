@@ -1,143 +1,341 @@
+import { isAppId, isParkedOnly, APPS, type AppId } from '../apps/registry';
+
+export type { AppId };
+
 export const MIN_TEMPERATURE = 60;
 export const MAX_TEMPERATURE = 90;
+// Above this speed the car refuses Park and Reverse.
+export const MAX_SHIFT_SPEED = 5;
 
 export type Gear = 'P' | 'R' | 'N' | 'D';
 
-// Apps that open in the slide-up panel over the map.
-export type AppId =
-  | 'apple-music'
-  | 'arcade'
-  | 'bluetooth'
-  | 'calendar'
-  | 'camera'
-  | 'car-settings'
-  | 'dashcam'
-  | 'podcasts'
-  | 'toybox';
+export const SETTINGS_PANELS = [
+  'Controls',
+  'Dynamics',
+  'Charging',
+  'Autopilot',
+  'Locks',
+  'Lights',
+  'Display',
+  'Trips',
+  'Navigation',
+  'Safety',
+  'Service',
+  'Software',
+  'Wifi',
+] as const;
 
-export type ModalId = 'app-shelf';
+export type SettingsPanel = (typeof SETTINGS_PANELS)[number];
+
+// What is showing over the map. One value, so "open with no app" can't exist.
+export type Surface =
+  | { kind: 'closed' }
+  | { kind: 'app'; app: Exclude<AppId, 'camera' | 'car-settings'> }
+  | { kind: 'settings'; panel: SettingsPanel }
+  | { kind: 'camera' };
+
+export type ModalId = 'app-shelf' | 'shortcuts';
 
 export type Compartment = 'frunk' | 'trunk';
 
+export type TurnSignal = 'off' | 'left' | 'right';
+
+export type Wipers = { mode: 'off' } | { mode: 'auto' } | { mode: 'manual'; speed: 1 | 2 | 3 | 4 };
+
+export type Headlights = 'off' | 'parking' | 'on' | 'auto';
+
+export type ChildLock = 'off' | 'left' | 'right' | 'both';
+
+// Vehicle settings live here rather than in their panels, so they outlive the panel
+// and anything else in the app can read them.
+export interface VehicleSettings {
+  headlights: Headlights;
+  highBeams: boolean;
+  foldMirrors: boolean;
+  windowLock: boolean;
+  childLock: ChildLock;
+  wipers: Wipers;
+  dashcam: boolean;
+  sentry: boolean;
+  driveAwayLock: boolean;
+  unlockOnPark: boolean;
+}
+
+export interface DisplaySettings {
+  // 0-100, the value the user chose. Auto overrides it without overwriting it.
+  brightness: number;
+  autoBrightness: boolean;
+}
+
+export interface Notice {
+  id: number;
+  message: string;
+}
+
 export interface CarState {
   gear: Gear;
-  isSliderOpen: boolean;
-  activeApp: AppId | null;
-  isWifiMenuOpen: boolean;
-  isShelfOpen: boolean;
+  speed: number;
+  surface: Surface;
+  // Reverse takes over the screen; this is what comes back when it ends.
+  surfaceBeforeReverse: Surface | null;
   activeModal: ModalId | null;
+  // Only one can be open at a time.
   openCompartment: Compartment | null;
-  leftSignal: boolean;
-  rightSignal: boolean;
+  isLocked: boolean;
+  signal: TurnSignal;
+  // Hazards sit on top of the signal instead of replacing it.
+  hazards: boolean;
   temperature: number;
   volume: number;
+  activeProfileId: number;
+  settings: VehicleSettings;
+  display: DisplaySettings;
+  notice: Notice | null;
 }
 
 export type CarAction =
   | { type: 'gear/select'; gear: Gear }
+  | { type: 'speed/set'; speed: number }
   | { type: 'app/toggle'; app: AppId }
-  | { type: 'slider/close' }
+  | { type: 'surface/close' }
+  | { type: 'surface/restore'; surface: Surface }
   | { type: 'camera/toggle' }
-  | { type: 'settings/openWifi' }
-  | { type: 'settings/leaveWifi' }
-  | { type: 'shelf/toggle' }
+  | { type: 'settings/open'; panel: SettingsPanel }
+  | { type: 'settings/set'; patch: Partial<VehicleSettings> }
+  | { type: 'display/set'; patch: Partial<DisplaySettings> }
+  | { type: 'modal/toggle'; modal: ModalId }
   | { type: 'modal/close' }
   | { type: 'compartment/toggle'; compartment: Compartment }
+  | { type: 'lock/toggle' }
   | { type: 'signal/left' }
   | { type: 'signal/right' }
   | { type: 'signal/hazards' }
   | { type: 'temperature/step'; delta: number }
-  | { type: 'volume/set'; volume: number };
+  | { type: 'volume/set'; volume: number }
+  | { type: 'profile/select'; id: number }
+  | { type: 'notice/show'; message: string }
+  | { type: 'notice/dismiss' };
 
 export const initialCarState: CarState = {
   gear: 'P',
-  // The slide-up panel over the map, and which app it shows.
-  isSliderOpen: false,
-  activeApp: null,
-  // Opening Settings from the map's wifi icon jumps straight to the Wifi panel.
-  isWifiMenuOpen: false,
-  isShelfOpen: false,
+  speed: 0,
+  surface: { kind: 'closed' },
+  surfaceBeforeReverse: null,
   activeModal: null,
-  // 'frunk', 'trunk' or null; only one can be open at a time.
   openCompartment: null,
-  leftSignal: false,
-  rightSignal: false,
+  isLocked: true,
+  signal: 'off',
+  hazards: false,
   temperature: 70,
   volume: 50,
+  activeProfileId: 1,
+  settings: {
+    headlights: 'auto',
+    highBeams: false,
+    foldMirrors: false,
+    windowLock: false,
+    childLock: 'off',
+    wipers: { mode: 'auto' },
+    dashcam: false,
+    sentry: false,
+    driveAwayLock: true,
+    unlockOnPark: true,
+  },
+  display: { brightness: 100, autoBrightness: false },
+  notice: null,
 };
+
+/* -------------------- Selectors -------------------- */
 
 // Reverse forces the backup camera open until the car leaves R.
 export const isCameraForced = (state: CarState): boolean => state.gear === 'R';
+export const isDriving = (state: CarState): boolean => state.gear === 'D';
+export const isParked = (state: CarState): boolean => state.gear === 'P';
+export const isPanelOpen = (state: CarState): boolean => state.surface.kind !== 'closed';
+export const leftSignalLit = (state: CarState): boolean => state.hazards || state.signal === 'left';
+export const rightSignalLit = (state: CarState): boolean =>
+  state.hazards || state.signal === 'right';
 
-const closeSlider = (state: CarState): CarState => ({
+export const vehiclePose = (state: CarState): 'park' | 'drive' | Compartment =>
+  isDriving(state) ? 'drive' : (state.openCompartment ?? 'park');
+
+export const surfaceApp = (surface: Surface): AppId | null => {
+  switch (surface.kind) {
+    case 'closed':
+      return null;
+    case 'camera':
+      return 'camera';
+    case 'settings':
+      return 'car-settings';
+    case 'app':
+      return surface.app;
+  }
+};
+
+export const activeApp = (state: CarState): AppId | null => surfaceApp(state.surface);
+
+const surfaceFor = (app: AppId): Surface => {
+  switch (app) {
+    case 'camera':
+      return { kind: 'camera' };
+    case 'car-settings':
+      return { kind: 'settings', panel: 'Controls' };
+    default:
+      return { kind: 'app', app };
+  }
+};
+
+export type Permission = { allowed: true } | { allowed: false; reason: string };
+
+const ALLOWED: Permission = { allowed: true };
+
+// Every "can this happen right now?" rule, so features don't each invent their own check.
+export function canShift(state: CarState, gear: Gear): Permission {
+  if (state.speed > MAX_SHIFT_SPEED && (gear === 'P' || gear === 'R')) {
+    return {
+      allowed: false,
+      reason: `Slow down to shift into ${gear === 'P' ? 'Park' : 'Reverse'}`,
+    };
+  }
+  return ALLOWED;
+}
+
+export function canOpenApp(state: CarState, app: AppId): Permission {
+  if (isParkedOnly(app) && !isParked(state)) {
+    return { allowed: false, reason: `${APPS[app].label} is only available in Park` };
+  }
+  return ALLOWED;
+}
+
+export function canOpenCompartment(state: CarState, compartment: Compartment): Permission {
+  if (!isParked(state)) {
+    return { allowed: false, reason: `Shift to Park to open the ${compartment}` };
+  }
+  return ALLOWED;
+}
+
+/* -------------------- Transitions -------------------- */
+
+const notify = (state: CarState, message: string): CarState => ({
   ...state,
-  isSliderOpen: false,
-  activeApp: null,
-  isWifiMenuOpen: false,
+  notice: { id: (state.notice?.id ?? 0) + 1, message },
 });
+
+// The one door every surface change goes through: nothing replaces the forced camera.
+const setSurface = (state: CarState, surface: Surface): CarState =>
+  isCameraForced(state) ? state : { ...state, surface };
+
+function shift(state: CarState, gear: Gear): CarState {
+  let next: CarState = {
+    ...state,
+    gear,
+    // Closures can only be open in Park.
+    openCompartment: gear === 'P' ? state.openCompartment : null,
+  };
+
+  if (gear === 'R') {
+    next = {
+      ...next,
+      surface: { kind: 'camera' },
+      surfaceBeforeReverse: state.surface,
+      activeModal: null,
+    };
+  } else if (state.gear === 'R') {
+    next = {
+      ...next,
+      surface: state.surfaceBeforeReverse ?? { kind: 'closed' },
+      surfaceBeforeReverse: null,
+    };
+  }
+
+  if (gear === 'D' && state.settings.driveAwayLock) next = { ...next, isLocked: true };
+  if (gear === 'P' && state.settings.unlockOnPark) next = { ...next, isLocked: false };
+
+  // An app that only runs in Park can't survive leaving it.
+  const app = surfaceApp(next.surface);
+  if (app) {
+    const permission = canOpenApp(next, app);
+    if (!permission.allowed) {
+      return notify({ ...next, surface: { kind: 'closed' } }, permission.reason);
+    }
+  }
+  return next;
+}
 
 export function carReducer(state: CarState, action: CarAction): CarState {
   switch (action.type) {
-    case 'gear/select':
-      return action.gear === 'R'
-        ? { ...state, gear: 'R', activeApp: 'camera', isSliderOpen: true }
-        : { ...state, gear: action.gear, activeApp: null, isSliderOpen: false };
+    case 'gear/select': {
+      if (action.gear === state.gear) return state;
+      const permission = canShift(state, action.gear);
+      return permission.allowed ? shift(state, action.gear) : notify(state, permission.reason);
+    }
+
+    case 'speed/set':
+      return { ...state, speed: Math.max(0, action.speed) };
 
     // A bottom bar app icon: opens that app, or closes it if it is already showing.
     case 'app/toggle': {
-      const forced = isCameraForced(state);
-      if (state.isSliderOpen && state.activeApp === action.app && !forced) {
-        return closeSlider(state);
-      }
-      if (!forced || action.app === 'camera') {
-        return { ...state, isWifiMenuOpen: false, activeApp: action.app, isSliderOpen: true };
-      }
-      return state;
+      if (isCameraForced(state)) return state;
+      if (surfaceApp(state.surface) === action.app) return setSurface(state, { kind: 'closed' });
+      const permission = canOpenApp(state, action.app);
+      return permission.allowed
+        ? setSurface(state, surfaceFor(action.app))
+        : notify(state, permission.reason);
     }
 
-    case 'slider/close':
-      return isCameraForced(state) ? state : closeSlider(state);
+    case 'surface/close':
+      return setSurface(state, { kind: 'closed' });
+
+    // Back and forward in the browser. Guards still apply: a link can't bypass Park.
+    case 'surface/restore': {
+      const app = surfaceApp(action.surface);
+      if (app && !canOpenApp(state, app).allowed) return state;
+      return setSurface(state, action.surface);
+    }
 
     case 'camera/toggle':
-      return state.isSliderOpen && state.activeApp === 'camera'
-        ? { ...state, activeApp: null, isSliderOpen: false }
-        : { ...state, activeApp: 'camera', isSliderOpen: true };
+      return setSurface(
+        state,
+        state.surface.kind === 'camera' ? { kind: 'closed' } : { kind: 'camera' },
+      );
 
-    case 'settings/openWifi':
-      return isCameraForced(state)
-        ? state
-        : { ...state, isWifiMenuOpen: true, activeApp: 'car-settings', isSliderOpen: true };
+    case 'settings/open':
+      return setSurface(state, { kind: 'settings', panel: action.panel });
 
-    case 'settings/leaveWifi':
-      return { ...state, isWifiMenuOpen: false };
+    case 'settings/set':
+      return { ...state, settings: { ...state.settings, ...action.patch } };
 
-    case 'shelf/toggle':
-      return {
-        ...state,
-        isShelfOpen: !state.isShelfOpen,
-        activeModal: state.isShelfOpen ? null : 'app-shelf',
-      };
+    case 'display/set':
+      return { ...state, display: { ...state.display, ...action.patch } };
+
+    case 'modal/toggle':
+      if (state.activeModal === action.modal) return { ...state, activeModal: null };
+      return isCameraForced(state) ? state : { ...state, activeModal: action.modal };
 
     case 'modal/close':
       return { ...state, activeModal: null };
 
-    case 'compartment/toggle':
-      return {
-        ...state,
-        openCompartment: state.openCompartment === action.compartment ? null : action.compartment,
-      };
+    case 'compartment/toggle': {
+      if (state.openCompartment === action.compartment) {
+        return { ...state, openCompartment: null };
+      }
+      const permission = canOpenCompartment(state, action.compartment);
+      return permission.allowed
+        ? { ...state, openCompartment: action.compartment }
+        : notify(state, permission.reason);
+    }
+
+    case 'lock/toggle':
+      return { ...state, isLocked: !state.isLocked };
 
     case 'signal/left':
-      return { ...state, leftSignal: !state.leftSignal, rightSignal: false };
+      return { ...state, signal: state.signal === 'left' ? 'off' : 'left' };
 
     case 'signal/right':
-      return { ...state, rightSignal: !state.rightSignal, leftSignal: false };
+      return { ...state, signal: state.signal === 'right' ? 'off' : 'right' };
 
-    // Hazards turn both signals on, or off if both are already on.
-    case 'signal/hazards': {
-      const on = !(state.leftSignal && state.rightSignal);
-      return { ...state, leftSignal: on, rightSignal: on };
-    }
+    case 'signal/hazards':
+      return { ...state, hazards: !state.hazards };
 
     case 'temperature/step':
       return {
@@ -149,7 +347,16 @@ export function carReducer(state: CarState, action: CarAction): CarState {
       };
 
     case 'volume/set':
-      return { ...state, volume: action.volume };
+      return { ...state, volume: Math.min(100, Math.max(0, action.volume)) };
+
+    case 'profile/select':
+      return { ...state, activeProfileId: action.id };
+
+    case 'notice/show':
+      return notify(state, action.message);
+
+    case 'notice/dismiss':
+      return { ...state, notice: null };
 
     default: {
       // Unreachable for typed callers; still guards against untyped dispatches.
@@ -158,3 +365,5 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     }
   }
 }
+
+export { isAppId };

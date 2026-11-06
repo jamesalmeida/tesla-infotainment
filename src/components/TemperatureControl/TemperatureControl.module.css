@@ -6,6 +6,15 @@
   align-items: center;
 }
 
+.temperature-btn {
+  width: 12%;
+  flex: 0 0 auto;
+}
+
+.temperature-btn :global(.navIcons.arrows) {
+  width: 100%;
+}
+
 .temperature-display {
   position: relative;
   bottom: 3px;

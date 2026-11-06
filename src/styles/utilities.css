@@ -72,6 +72,11 @@
 .navIconWrapper {
   position: relative;
   display: inline-block;
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .navIconWrapper.active::after {

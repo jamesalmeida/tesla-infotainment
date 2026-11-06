@@ -40,6 +40,8 @@ interface VehicleModelProps {
   // Controls the doors. Leave it out and the model keeps its own door state.
   doors?: DoorStates;
   onDoorToggle?: (door: DoorId) => void;
+  // Called once the model has loaded, which is what the loading screen waits for.
+  onReady?: () => void;
 }
 
 interface ModelProps extends VehicleModelProps {
@@ -97,9 +99,14 @@ function applyParts(nodes: CarNodes, parts: CarParts) {
   }
 }
 
-function Model({ pose, doors, onDoorToggle, pressRef, ...props }: ModelProps) {
+function Model({ pose, doors, onDoorToggle, onReady, pressRef, ...props }: ModelProps) {
   const { scene } = useGLTF(modelPath);
   const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    onReady?.();
+  }, [onReady]);
+
   const frameloop = useThree((state) => state.frameloop);
   const [localDoors, setLocalDoors] = useState(CLOSED_DOORS);
   const doorStates = doors ?? localDoors;
@@ -201,7 +208,7 @@ function subscribeToTabVisibility(onChange: () => void) {
 
 const isTabHidden = () => document.hidden;
 
-export function VehicleModel({ pose, doors, onDoorToggle }: VehicleModelProps) {
+export function VehicleModel({ pose, doors, onDoorToggle, onReady }: VehicleModelProps) {
   const tabHidden = useSyncExternalStore(subscribeToTabVisibility, isTabHidden);
   const pressRef = useRef<PointerPress>({ x: 0, y: 0, travel: 0 });
 
@@ -237,6 +244,7 @@ export function VehicleModel({ pose, doors, onDoorToggle }: VehicleModelProps) {
           pose={pose}
           doors={doors}
           onDoorToggle={onDoorToggle}
+          onReady={onReady}
           pressRef={pressRef}
         />
       </Stage>

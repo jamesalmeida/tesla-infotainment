@@ -1,0 +1,41 @@
+.shortcutsHelp {
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.shortcutsHelp h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.shortcutsHelp h3 {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: #a1a1a1;
+}
+
+.groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.shortcutsHelp dl {
+  margin: 0;
+}
+
+.shortcutsHelp dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 3px 0;
+}
+
+.shortcutsHelp dt {
+  font-weight: 600;
+}
+
+.shortcutsHelp dd {
+  margin: 0;
+  color: #d0d0d0;
+}

@@ -1,0 +1,71 @@
+.displayCrashed {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  background-color: #111111;
+  color: #d0d0d0;
+  text-align: center;
+}
+
+.displayCrashed h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.displayCrashed p {
+  margin: 0 0 12px;
+}
+
+.displayCrashed button,
+.appFailed button {
+  min-height: 44px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 8px;
+  background-color: #3e6ae1;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.appFailed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  color: #4e4e4e;
+}
+
+.carUnavailable {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #777777;
+  font-size: 0.8rem;
+}
+
+.carUnavailable svg {
+  height: 60%;
+  min-height: 80px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.carUnavailable p {
+  margin: 0;
+}

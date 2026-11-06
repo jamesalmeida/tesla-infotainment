@@ -4,6 +4,10 @@
 }
 
 .gearSelectIcon {
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
   color: #4e4e4e;
   font-weight: 400;
   cursor: pointer;

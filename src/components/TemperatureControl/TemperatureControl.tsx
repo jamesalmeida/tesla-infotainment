@@ -9,19 +9,29 @@ interface TemperatureControlProps {
 
 const TemperatureControl = ({ temperature, onIncrement, onDecrement }: TemperatureControlProps) => (
   <div className={styles['temperature-control']}>
-    <img
-      className={`navIcons arrows`}
-      src={getImagePath('icon-temp-down.svg')}
-      alt="Decrease temperature"
+    <button
+      type="button"
+      className={`navIconWrapper ${styles['temperature-btn']}`}
       onClick={onDecrement}
-    />
+    >
+      <img
+        className="navIcons arrows"
+        src={getImagePath('icon-temp-down.svg')}
+        alt="Decrease temperature"
+      />
+    </button>
     <span className={`navIcons ${styles['temperature-display']} no-select`}>{temperature}</span>
-    <img
-      className={`navIcons arrows`}
-      src={getImagePath('icon-temp-up.svg')}
-      alt="Increase temperature"
+    <button
+      type="button"
+      className={`navIconWrapper ${styles['temperature-btn']}`}
       onClick={onIncrement}
-    />
+    >
+      <img
+        className="navIcons arrows"
+        src={getImagePath('icon-temp-up.svg')}
+        alt="Increase temperature"
+      />
+    </button>
   </div>
 );
 

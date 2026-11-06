@@ -22,13 +22,23 @@
   background-color: rgba(0, 0, 0, 0.95);
 }
 
-.vertical-slider-panel.camera-background .slider-handle {
-  display: none;
+.slider-content {
+  height: calc(100% - 20px);
+  width: 100%;
 }
 
-.slider-content {
-  height: calc(100% - 12px);
-  width: 100%;
+/* The only place a drag can start, so scrolling and sliders inside apps stay theirs. */
+.slider-handle-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.slider-handle-spacer {
+  height: 20px;
 }
 
 .slider-handle {
@@ -36,10 +46,8 @@
   height: 3px;
   background-color: #ccc;
   border-radius: 2.5px;
-  margin: 5px auto;
-  cursor: grab;
 }
 
-.vertical-slider-panel:active .slider-handle {
+.dragging .slider-handle-area {
   cursor: grabbing;
 }

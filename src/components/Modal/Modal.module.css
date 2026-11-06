@@ -18,8 +18,17 @@
   color: white;
   padding: 10px;
   border-radius: 10px;
-  width: 40%;
   text-align: center;
+}
+
+.modal-content.shortcuts {
+  max-width: 80%;
+  max-height: 80%;
+  overflow: auto;
+  background-color: black;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 @media screen and (max-width: 768px) {

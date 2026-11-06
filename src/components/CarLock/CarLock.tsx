@@ -1,11 +1,17 @@
-import { useCarLock } from '../../contexts/CarLockContext';
+import { useCar, useCarActions } from '../../state/CarStateContext';
 import styles from './CarLock.module.css';
 
 const CarLock = () => {
-  const { isLocked, toggleLock } = useCarLock();
+  const isLocked = useCar((state) => state.isLocked);
+  const { toggleLock } = useCarActions();
 
   return (
-    <div className={styles.carLock} onClick={toggleLock}>
+    <button
+      type="button"
+      className={styles.carLock}
+      aria-label={isLocked ? 'Unlock car' : 'Lock car'}
+      onClick={toggleLock}
+    >
       <svg
         width="100%"
         height="100%"
@@ -31,7 +37,7 @@ const CarLock = () => {
           strokeLinejoin="round"
         />
       </svg>
-    </div>
+    </button>
   );
 };
 

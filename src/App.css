@@ -70,9 +70,6 @@ body {
   background-color: #999999;
   left: -8px;
   top: calc(50% - 60px);
-  top: -o-calc(50% - 60px);
-  top: -moz-calc(50% - 60px);
-  top: -webkit-calc(50% - 60px);
 }
 
 .rightPanel {
@@ -163,22 +160,47 @@ body {
 }
 
 .turnSignal {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
   opacity: 0;
   transition: opacity 0.1s ease-in-out;
 }
 
-.turnSignal.active {
-  animation: blink 1s step-start infinite;
+/* Blinks from one shared clock in CarStatus, so both arrows stay in step. */
+.turnSignal.lit {
+  opacity: 1;
 }
 
-@keyframes blink {
-  50% {
-    opacity: 0;
+/* With no stalk and no keyboard, the arrows are the only way to signal. */
+@media (hover: none) {
+  .turnSignal:not(.lit) {
+    opacity: 0.2;
   }
-  0%,
-  100% {
-    opacity: 1;
-  }
+}
+
+.hazardBtn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #4e4e4e;
+  cursor: pointer;
+}
+
+.hazardBtn.active {
+  color: #e31937;
+}
+
+.hazardBtn svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
 }
 
 .turnSignal img {
@@ -204,8 +226,19 @@ body {
   font-weight: 800;
 }
 
+.toggleFrunk,
+.toggleTrunk {
+  background: none;
+  border-top: none;
+  border-bottom: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
 .toggleFrunk {
   position: relative;
+  border-left: none;
   left: 5%;
   top: 80%;
   z-index: 2;
@@ -216,6 +249,7 @@ body {
 .toggleTrunk {
   position: relative;
   left: 60%;
+  border-right: none;
   z-index: 2;
   border-left: 1px solid black;
   padding-left: 6px;
@@ -237,20 +271,6 @@ body {
   display: flex;
   flex-direction: row-reverse;
 }
-
-/* .screenTooSmallError {
-  display: none;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: #343434;
-  z-index: 999999999;
-  border-radius: 3px;
-  color: #d0d0d0;
-  font-size: 16px;
-  text-align: center;
-  line-height: 16px;
-} */
 
 .small-screen-message {
   display: none;
@@ -292,8 +312,6 @@ body {
 
 /* -------------------- Media query for mobile devices in LANDSCAPE MODE --------------------  */
 @media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  /* body {} */
-
   #root {
     height: 100dvh;
     padding: 0px;

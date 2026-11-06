@@ -1,77 +1,41 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import styles from './VolumeModal.module.css';
 
 interface VolumeModalProps {
   volume: number;
+  isFading: boolean;
   onVolumeChange: (volume: number) => void;
-  onClose: () => void;
+  // Any interaction keeps the popup up; the timer lives in VolumeControl.
+  onActivity: () => void;
   onOpenAudioSettings: () => void;
 }
 
 const VolumeModal = ({
   volume,
+  isFading,
   onVolumeChange,
-  onClose,
+  onActivity,
   onOpenAudioSettings,
-}: VolumeModalProps) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [isFading, setIsFading] = useState(false);
-
-  const startFadeOut = () => {
-    setIsFading(true);
-    setTimeout(() => {
-      onClose();
-    }, 300); // Match this with the CSS transition duration
-  };
-
-  const resetCloseTimer = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(startFadeOut, 3000);
-  };
-
-  useEffect(() => {
-    resetCloseTimer();
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-    // The auto-close timer intentionally starts once on mount rather than
-    // restarting whenever resetCloseTimer's identity changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onVolumeChange(Number(e.target.value));
-    resetCloseTimer();
-  };
-
-  const handleMouseMove = () => {
-    resetCloseTimer();
-  };
-
-  return (
-    <div
-      className={`${styles['volume-modal']} ${isFading ? styles['fade-out'] : ''}`}
-      ref={modalRef}
-      onMouseMove={handleMouseMove}
-    >
-      <button className={styles['audio-settings-btn']} onClick={onOpenAudioSettings}>
-        <img src={getImagePath('icon-settings.svg')} alt="Audio Settings" />
-      </button>
-      <input
-        type="range"
-        min="0"
-        max="100"
-        value={volume}
-        onChange={handleVolumeChange}
-        className={styles['volume-slider']}
-      />
-      {/* <div className="volume-value">{volume}</div> */}
-    </div>
-  );
-};
+}: VolumeModalProps) => (
+  <div
+    className={`${styles['volume-modal']} ${isFading ? styles['fade-out'] : ''}`}
+    onPointerMove={onActivity}
+    onPointerDown={onActivity}
+    onMouseMove={onActivity}
+  >
+    <button type="button" className={styles['audio-settings-btn']} onClick={onOpenAudioSettings}>
+      <img src={getImagePath('icon-settings.svg')} alt="Audio Settings" />
+    </button>
+    <input
+      type="range"
+      min="0"
+      max="100"
+      value={volume}
+      aria-label="Volume"
+      onChange={(event) => onVolumeChange(Number(event.target.value))}
+      className={styles['volume-slider']}
+    />
+  </div>
+);
 
 export default VolumeModal;

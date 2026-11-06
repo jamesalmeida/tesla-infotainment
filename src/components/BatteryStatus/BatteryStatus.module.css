@@ -12,7 +12,7 @@
   padding-right: 4px;
 }
 
-.battery-fill-animate {
+.battery-fill {
   transition: width 0.3s ease-in-out;
 }
 

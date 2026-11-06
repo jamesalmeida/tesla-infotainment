@@ -5,15 +5,13 @@
 .userProfile {
   display: flex;
   align-items: center;
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
 }
-
-/* .profile-dropdown-header {
-    position: relative;
-    top: -20px;
-    padding: 10px;
-    background-color: #f0f0f0;
-  } */
 
 .userProfile img {
   height: 24px;
@@ -36,15 +34,16 @@
 .profile-option {
   display: flex;
   align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
   padding: 10px;
   cursor: pointer;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
-}
-
-.profile-option span {
-  /* margin-left: 10px; */
 }
 
 .profile-option:hover {
@@ -85,5 +84,4 @@
     height: 14px;
     margin-right: 4px;
   }
-  /* .userProfile span {} */
 }

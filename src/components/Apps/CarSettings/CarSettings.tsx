@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import UserProfile from '../../UserProfile/UserProfile';
-import { useCarActions, useCarState } from '../../../state/CarStateContext';
+import { Pressable } from '../../Pressable/Pressable';
+import { useCar, useCarActions } from '../../../state/CarStateContext';
+import type { SettingsPanel } from '../../../state/carState';
 import { Controls } from './components/Controls';
 import { Dynamics } from './components/Dynamics';
 import { Charging } from './components/Charging';
@@ -20,7 +21,6 @@ import styles from './CarSettings.module.css';
 interface TopBarItem {
   icon: string;
   alt: string;
-  text?: string;
 }
 
 const topBarItems: TopBarItem[] = [
@@ -30,7 +30,7 @@ const topBarItems: TopBarItem[] = [
   { icon: 'wifi', alt: 'Wifi' },
 ];
 
-const leftPanelItems = [
+const leftPanelItems: { icon: string; alt: string; label: SettingsPanel }[] = [
   { icon: 'controls', alt: 'Controls', label: 'Controls' },
   { icon: 'dynamics', alt: 'Dynamics', label: 'Dynamics' },
   { icon: 'charging', alt: 'Charging', label: 'Charging' },
@@ -47,21 +47,10 @@ const leftPanelItems = [
 ];
 
 export const CarSettings = () => {
-  const { isWifiMenuOpen } = useCarState();
-  const { leaveWifiSettings } = useCarActions();
-  const [selectedPanel, setSelectedPanel] = useState('Controls');
-
-  // Opening Settings from the map's wifi icon jumps straight to the Wifi panel.
-  const activePanel = isWifiMenuOpen ? 'Wifi' : selectedPanel;
-
-  const selectPanel = (panel: string) => {
-    setSelectedPanel(panel);
-    if (isWifiMenuOpen) leaveWifiSettings();
-  };
-
-  const handleWifiClick = () => {
-    selectPanel('Wifi');
-  };
+  const activePanel = useCar((state) =>
+    state.surface.kind === 'settings' ? state.surface.panel : 'Controls',
+  );
+  const { openSettings } = useCarActions();
 
   return (
     <div className={styles['car-settings-wrapper']}>
@@ -72,29 +61,35 @@ export const CarSettings = () => {
         </div>
         <div className={styles['top-bar-right-icons']}>
           <UserProfile />
-          {topBarItems.map((item, index) => (
-            <div
-              key={index}
-              className={styles['top-bar-item']}
-              onClick={item.icon === 'wifi' ? handleWifiClick : undefined}
-            >
-              <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
-              {item.text && item.text}
-            </div>
-          ))}
+          {topBarItems.map((item) =>
+            item.icon === 'wifi' ? (
+              <Pressable
+                key={item.icon}
+                className={styles['top-bar-item']}
+                onPress={() => openSettings('Wifi')}
+              >
+                <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
+              </Pressable>
+            ) : (
+              <div key={item.icon} className={styles['top-bar-item']}>
+                <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
+              </div>
+            ),
+          )}
         </div>
       </div>
       <div className={styles['car-settings-panel']}>
         <div className={styles['left-scroll-panel']}>
-          {leftPanelItems.map((item, index) => (
-            <div
-              key={index}
+          {leftPanelItems.map((item) => (
+            <Pressable
+              key={item.label}
               className={`${styles['left-scroll-panel-item']} ${activePanel === item.label ? styles.active : ''}`}
-              onClick={() => selectPanel(item.label)}
+              pressed={activePanel === item.label}
+              onPress={() => openSettings(item.label)}
             >
-              <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
+              <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt="" />
               {item.label}
-            </div>
+            </Pressable>
           ))}
         </div>
         <div className={styles['settings-right-panel']}>

@@ -1,3 +1,12 @@
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  box-sizing: border-box;
+  padding: 30px;
+  background: #4e4e4e;
+}
+
 .loading-screen {
   position: relative;
   border-radius: 3.5% / 5%;

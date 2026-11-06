@@ -31,21 +31,17 @@
 .appShelfIcon {
   padding: 5px;
   width: 13%;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.appShelfIconText {
+  margin-top: 2px;
 }
 
 .appShelfIcon img {
   width: 50%;
-}
-
-.customizeBtn {
-  position: absolute;
-  top: -53px;
-  right: calc(50% - 66px);
-  z-index: 10;
-  background-color: black;
-  padding: 10px 30px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 600;
 }

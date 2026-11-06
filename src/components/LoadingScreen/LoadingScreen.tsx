@@ -62,18 +62,20 @@ const LoadingScreen = () => {
   const dots = useDots();
 
   return (
-    <div className={styles['loading-screen']}>
-      <div className={styles.displayInsideBezel}>
-        <ChargeRing />
-        <img
-          src={getImagePath('logo-grey.svg')}
-          alt="Tesla Logo"
-          className={styles['tesla-logo']}
-        />
-        <p className={styles['loading-text']}>
-          {loadingText}
-          {dots}
-        </p>
+    <div className={styles['loading-overlay']}>
+      <div className={styles['loading-screen']}>
+        <div className={styles.displayInsideBezel}>
+          <ChargeRing />
+          <img
+            src={getImagePath('logo-grey.svg')}
+            alt="Tesla Logo"
+            className={styles['tesla-logo']}
+          />
+          <p className={styles['loading-text']}>
+            {loadingText}
+            {dots}
+          </p>
+        </div>
       </div>
     </div>
   );

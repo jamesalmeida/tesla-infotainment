@@ -17,12 +17,16 @@
 }
 
 :global(.navIcons).volume-display {
-  width: 12%;
   max-height: 38px;
 }
 
-.volume-display {
+.volume-btn {
   width: 12%;
+  flex: 0 0 auto;
+}
+
+.volume-btn :global(.navIcons.arrows) {
+  width: 100%;
 }
 
 /* Moved from BtmNavBar.css. */

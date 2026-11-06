@@ -1,4 +1,7 @@
 .carLock {
+  padding: 0;
+  background: none;
+  border: none;
   cursor: pointer;
   width: 40px;
   height: 24px;

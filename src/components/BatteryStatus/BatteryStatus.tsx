@@ -4,7 +4,6 @@ import styles from './BatteryStatus.module.css';
 const BatteryStatus = () => {
   const [batteryPercentage, setBatteryPercentage] = useState(69);
   const [showMiles, setShowMiles] = useState(false);
-  const [animatingBattery, setAnimatingBattery] = useState(false);
 
   const calculateMiles = (percentage: number) => {
     return Math.round((percentage / 100) * 310);
@@ -15,10 +14,7 @@ const BatteryStatus = () => {
   };
 
   const randomizeBatteryPercentage = () => {
-    const newPercentage = Math.floor(Math.random() * 101); // 0-100
-    setAnimatingBattery(true);
-    setBatteryPercentage(newPercentage);
-    setTimeout(() => setAnimatingBattery(false), 300); // Match this with the CSS transition duration
+    setBatteryPercentage(Math.floor(Math.random() * 101)); // 0-100
   };
 
   return (
@@ -50,7 +46,7 @@ const BatteryStatus = () => {
           width={`${(batteryPercentage * 16) / 100}`}
           height="8"
           fill="currentColor"
-          className={animatingBattery ? styles['battery-fill-animate'] : ''}
+          className={styles['battery-fill']}
         />
         <rect x="23" y="10" width="2" height="4" fill="currentColor" />
       </svg>

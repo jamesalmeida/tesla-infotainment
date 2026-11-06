@@ -1,83 +1,129 @@
-import { createContext, useContext, useMemo, useReducer, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, useSyncExternalStore } from 'react';
+import type { ReactNode } from 'react';
 import {
   carReducer,
   initialCarState,
-  isCameraForced,
   type AppId,
+  type CarAction,
   type CarState,
+  type Compartment,
+  type DisplaySettings,
   type Gear,
+  type ModalId,
+  type SettingsPanel,
+  type Surface,
+  type VehicleSettings,
 } from './carState';
-
-export interface CarStateValue extends CarState {
-  isCameraForced: boolean;
-}
+import { loadPersistedState, savePersistedState } from './persistence';
 
 export interface CarActions {
   selectGear: (gear: Gear) => void;
   toggleApp: (app: AppId) => void;
-  closeSlider: () => void;
+  closeSurface: () => void;
+  restoreSurface: (surface: Surface) => void;
   toggleCamera: () => void;
-  openWifiSettings: () => void;
-  leaveWifiSettings: () => void;
-  toggleShelf: () => void;
+  openSettings: (panel: SettingsPanel) => void;
+  setSettings: (patch: Partial<VehicleSettings>) => void;
+  setDisplay: (patch: Partial<DisplaySettings>) => void;
+  toggleModal: (modal: ModalId) => void;
   closeModal: () => void;
-  toggleFrunk: () => void;
-  toggleTrunk: () => void;
+  toggleCompartment: (compartment: Compartment) => void;
+  toggleLock: () => void;
   toggleLeftSignal: () => void;
   toggleRightSignal: () => void;
   toggleHazards: () => void;
   stepTemperature: (delta: number) => void;
   setVolume: (volume: number) => void;
+  selectProfile: (id: number) => void;
+  showNotice: (message: string) => void;
+  dismissNotice: () => void;
 }
 
-const CarStateContext = createContext<CarStateValue | null>(null);
-const CarActionsContext = createContext<CarActions | null>(null);
+interface CarStore {
+  getState: () => CarState;
+  subscribe: (listener: () => void) => () => void;
+  dispatch: (action: CarAction) => void;
+}
 
-export function CarStateProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(carReducer, initialCarState);
+function createCarStore(initial: CarState): CarStore {
+  let state = initial;
+  const listeners = new Set<() => void>();
+
+  return {
+    getState: () => state,
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    dispatch: (action) => {
+      const next = carReducer(state, action);
+      if (next === state) return;
+      state = next;
+      listeners.forEach((listener) => listener());
+    },
+  };
+}
+
+const createActions = ({ dispatch }: CarStore): CarActions => ({
+  selectGear: (gear) => dispatch({ type: 'gear/select', gear }),
+  toggleApp: (app) => dispatch({ type: 'app/toggle', app }),
+  closeSurface: () => dispatch({ type: 'surface/close' }),
+  restoreSurface: (surface) => dispatch({ type: 'surface/restore', surface }),
+  toggleCamera: () => dispatch({ type: 'camera/toggle' }),
+  openSettings: (panel) => dispatch({ type: 'settings/open', panel }),
+  setSettings: (patch) => dispatch({ type: 'settings/set', patch }),
+  setDisplay: (patch) => dispatch({ type: 'display/set', patch }),
+  toggleModal: (modal) => dispatch({ type: 'modal/toggle', modal }),
+  closeModal: () => dispatch({ type: 'modal/close' }),
+  toggleCompartment: (compartment) => dispatch({ type: 'compartment/toggle', compartment }),
+  toggleLock: () => dispatch({ type: 'lock/toggle' }),
+  toggleLeftSignal: () => dispatch({ type: 'signal/left' }),
+  toggleRightSignal: () => dispatch({ type: 'signal/right' }),
+  toggleHazards: () => dispatch({ type: 'signal/hazards' }),
+  stepTemperature: (delta) => dispatch({ type: 'temperature/step', delta }),
+  setVolume: (volume) => dispatch({ type: 'volume/set', volume }),
+  selectProfile: (id) => dispatch({ type: 'profile/select', id }),
+  showNotice: (message) => dispatch({ type: 'notice/show', message }),
+  dismissNotice: () => dispatch({ type: 'notice/dismiss' }),
+});
+
+interface CarContextValue {
+  store: CarStore;
+  actions: CarActions;
+}
+
+const CarContext = createContext<CarContextValue | null>(null);
+
+export function CarStateProvider({
+  children,
+  initialState,
+}: {
+  children: ReactNode;
+  initialState?: CarState;
+}) {
+  const [store] = useState(() => {
+    const created = createCarStore(initialState ?? loadPersistedState(initialCarState));
+    created.subscribe(() => savePersistedState(created.getState()));
+    return created;
+  });
 
   // Actions never change, so components that only act on the car don't re-render with it.
-  const actions = useMemo<CarActions>(
-    () => ({
-      selectGear: (gear) => dispatch({ type: 'gear/select', gear }),
-      toggleApp: (app) => dispatch({ type: 'app/toggle', app }),
-      closeSlider: () => dispatch({ type: 'slider/close' }),
-      toggleCamera: () => dispatch({ type: 'camera/toggle' }),
-      openWifiSettings: () => dispatch({ type: 'settings/openWifi' }),
-      leaveWifiSettings: () => dispatch({ type: 'settings/leaveWifi' }),
-      toggleShelf: () => dispatch({ type: 'shelf/toggle' }),
-      closeModal: () => dispatch({ type: 'modal/close' }),
-      toggleFrunk: () => dispatch({ type: 'compartment/toggle', compartment: 'frunk' }),
-      toggleTrunk: () => dispatch({ type: 'compartment/toggle', compartment: 'trunk' }),
-      toggleLeftSignal: () => dispatch({ type: 'signal/left' }),
-      toggleRightSignal: () => dispatch({ type: 'signal/right' }),
-      toggleHazards: () => dispatch({ type: 'signal/hazards' }),
-      stepTemperature: (delta) => dispatch({ type: 'temperature/step', delta }),
-      setVolume: (volume) => dispatch({ type: 'volume/set', volume }),
-    }),
-    [],
-  );
+  const value = useMemo(() => ({ store, actions: createActions(store) }), [store]);
 
-  const value = useMemo<CarStateValue>(
-    () => ({ ...state, isCameraForced: isCameraForced(state) }),
-    [state],
-  );
-
-  return (
-    <CarActionsContext.Provider value={actions}>
-      <CarStateContext.Provider value={value}>{children}</CarStateContext.Provider>
-    </CarActionsContext.Provider>
-  );
+  return <CarContext.Provider value={value}>{children}</CarContext.Provider>;
 }
 
-export const useCarState = (): CarStateValue => {
-  const value = useContext(CarStateContext);
-  if (!value) throw new Error('useCarState must be used inside <CarStateProvider>');
+const useCarContext = (): CarContextValue => {
+  const value = useContext(CarContext);
+  if (!value) throw new Error('Car hooks must be used inside <CarStateProvider>');
   return value;
 };
 
-export const useCarActions = (): CarActions => {
-  const value = useContext(CarActionsContext);
-  if (!value) throw new Error('useCarActions must be used inside <CarStateProvider>');
-  return value;
+// Subscribes to one slice, so a component only re-renders when that slice changes.
+// The selector must return a primitive or an existing object from the state.
+export const useCar = <T,>(selector: (state: CarState) => T): T => {
+  const { store } = useCarContext();
+  return useSyncExternalStore(store.subscribe, () => selector(store.getState()));
 };
+
+export const useCarActions = (): CarActions => useCarContext().actions;
