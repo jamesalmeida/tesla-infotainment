@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, type ComponentRef } from 'react';
 import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber';
-import { Stage, useGLTF, OrbitControls } from '@react-three/drei';
+import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSpring, a } from '@react-spring/three';
 import { getCarModelPath } from '../../utils/assetPaths';
@@ -30,8 +30,15 @@ function easeInOutCubic(t: number) {
 
 const modelPath = getCarModelPath('tesla-model-3-2018.glb');
 
-// Start downloading the model while the loading screen is up, not when the canvas mounts.
+// Poly Haven's Empty Warehouse 01 (CC0), halved from the 1k file. It only lights the car,
+// so the extra resolution bought nothing. Stage's presets download from a third-party CDN.
+const stageEnvironment = {
+  files: `${import.meta.env.BASE_URL}environments/empty_warehouse_01_512.hdr`,
+};
+
+// Start downloading these while the loading screen is up, not when the canvas mounts.
 useGLTF.preload(modelPath);
+useEnvironment.preload(stageEnvironment);
 
 function Model({ rotateToFrunk, rotateToTrunk, activeGear, ...props }: ModelProps) {
   const { scene } = useGLTF(modelPath);
@@ -258,7 +265,7 @@ export function VehicleModel({ rotateToFrunk, rotateToTrunk, activeGear }: Vehic
       className={styles.carModelWrapper}
     >
       <color attach="background" args={['#f1f1f1']} />
-      <Stage environment={'warehouse'}>
+      <Stage environment={stageEnvironment}>
         <Model
           scale={0.01}
           rotateToFrunk={rotateToFrunk}
