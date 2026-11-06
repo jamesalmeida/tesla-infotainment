@@ -9,9 +9,14 @@
       content="An attempt at recreating the Tesla Infotainment UI on the web using React.js."
     />
     <link rel="apple-touch-icon" href="/logo192.png" />
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+    />
+    <!-- Start the 3D model now rather than after the lazy VehicleModel chunk loads. -->
+    <link rel="preload" as="fetch" href="%BASE_URL%car-models/tesla-model-3-2018.glb" crossorigin />
     <link rel="manifest" href="/manifest.json" />
     <title>Tesla Infotainment Simulator</title>
 
