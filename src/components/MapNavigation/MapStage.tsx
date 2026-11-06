@@ -203,20 +203,19 @@ export function MapStage() {
           getLocationBias={viewportCenter}
         />
         <div className={styles.navPanel}>
-          {nav.kind === 'routing' && (
-            <p role="status" className={styles.navStatus}>
-              Routing to {nav.place.name}…
-            </p>
-          )}
+          {/* A live region has to exist before its text does for the change to be announced. */}
+          <div role="status">
+            {nav.kind === 'routing' && (
+              <p className={styles.navStatus}>Routing to {nav.place.name}…</p>
+            )}
+            {nav.kind === 'navigating' && (
+              <p className={styles.navStatus}>Navigating to {nav.place.name}</p>
+            )}
+          </div>
           {nav.kind === 'routeFailed' && (
             <p role="alert" className={`${styles.navStatus} ${styles.navError}`}>
               {nav.reason}
               {activeTrip && ` Still navigating to ${activeTrip.place.name}.`}
-            </p>
-          )}
-          {nav.kind === 'navigating' && (
-            <p role="status" className={styles.navStatus}>
-              Navigating to {nav.place.name}
             </p>
           )}
           {(navigateTarget(nav) || nav.kind === 'routing') && (
