@@ -1,9 +1,9 @@
-import './Calendar.css';
+import styles from './Calendar.module.css';
 
 export const Calendar = () => {
   return (
-    <div className="calendar">
-      <h2>Calendar</h2>
+    <div>
+      <h2 className={styles.title}>Calendar</h2>
       {/* Add component-specific content here */}
     </div>
   );

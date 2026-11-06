@@ -24,6 +24,7 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 ### Fixed
 
+- Calendar styles are scoped so they can't recentre headings elsewhere, and the outside temperature no longer shifts sideways once it loads.
 - The README and Software panel now match the app: Shift + Space plays and pauses, keys 1 to 4 select gears, and the 3D car is a Model 3. Typos in the Dynamics panel are corrected.
 
 ### Removed

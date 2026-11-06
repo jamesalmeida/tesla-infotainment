@@ -15,7 +15,7 @@ export default function ErrorScreen() {
             <div className={`${styles.__iris} ${circular} ${styles['-narrow']}`}></div>
             <div className={`${styles.__iris} ${circular} ${styles['-wide']}`}></div>
             <div className={`${styles.__highlight} ${styles['-alpha']}`}></div>
-            <div className={`${styles.__highlight} -beta`}></div>
+            <div className={styles.__highlight}></div>
             <div className={`${styles.__highlight} ${styles['-gamma']}`}></div>
           </div>
         </div>

@@ -3,7 +3,7 @@ import styles from '../CarSettings.module.css';
 export const Software = () => {
   return (
     <div className={styles['buttons-container']}>
-      <div className="description">
+      <div>
         <h3>Tesla Infotainment Simulator (WIP)</h3>
         <p>Experience a simulated Tesla infotainment system in your browser!</p>
         <p>

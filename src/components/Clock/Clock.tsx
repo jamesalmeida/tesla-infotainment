@@ -23,7 +23,7 @@ const Clock = () => {
     return `${hours}:${minutesStr} ${ampm}`;
   };
 
-  return <div className="clock no-select">{formatTime(time)}</div>;
+  return <div className="no-select">{formatTime(time)}</div>;
 };
 
 export default Clock;
