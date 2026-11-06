@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef, useCallback, type MouseEvent } from 'react';
+import { memo, useEffect } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
+import { ProgressBar } from './ProgressBar';
+import { usePlayback } from './usePlayback';
 import styles from './MusicPanel.module.css';
 
 const tracks = [
@@ -26,91 +28,21 @@ const tracks = [
   // Add more tracks here
 ];
 
-const getRandomIndex = (max: number) => Math.floor(Math.random() * max);
+const audioUrls = tracks.map((track) => track.audio);
 
-export function MusicPanel({ volume }: { volume: number }) {
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(() => getRandomIndex(tracks.length));
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const audioRef = useRef(new Audio(tracks[currentTrackIndex].audio));
-  const lastTapTimeRef = useRef(0);
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const currentTimeRef = useRef(0);
+const chooseRandomTrack = () => Math.floor(Math.random() * tracks.length);
 
-  const updateProgress = () => {
-    currentTimeRef.current = audioRef.current.currentTime;
-    setCurrentTime(currentTimeRef.current);
-  };
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    audio.addEventListener('timeupdate', updateProgress);
-    const updateDuration = () => setDuration(audio.duration);
-    audio.addEventListener('loadedmetadata', updateDuration);
-    return () => {
-      audio.removeEventListener('timeupdate', updateProgress);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-    };
-  }, []);
-
-  useEffect(() => {
-    audioRef.current.src = tracks[currentTrackIndex].audio;
-    if (isPlaying) {
-      audioRef.current.play().catch((error) => console.error('Playback failed:', error));
-    } else {
-      audioRef.current.pause();
-    }
-    audioRef.current.currentTime = currentTimeRef.current;
-  }, [currentTrackIndex, isPlaying]);
-
-  useEffect(() => {
-    audioRef.current.volume = volume / 100;
-  }, [volume]);
-
-  const togglePlayPause = useCallback(() => {
-    setIsPlaying((prevIsPlaying) => !prevIsPlaying);
-  }, []);
-
-  const handlePrevious = useCallback(() => {
-    const now = Date.now();
-    if (now - lastTapTimeRef.current < 1000) {
-      setCurrentTrackIndex((prevIndex) => (prevIndex === 0 ? tracks.length - 1 : prevIndex - 1));
-    } else {
-      audioRef.current.currentTime = 0;
-    }
-    lastTapTimeRef.current = now;
-  }, []);
-
-  const handleNext = useCallback(() => {
-    setCurrentTrackIndex((prevIndex) => (prevIndex === tracks.length - 1 ? 0 : prevIndex + 1));
-  }, []);
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const handleProgressBarClick = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      const progressBar = progressBarRef.current;
-      if (!progressBar) return;
-      const clickPosition =
-        (event.clientX - progressBar.getBoundingClientRect().left) / progressBar.offsetWidth;
-      audioRef.current.currentTime = clickPosition * duration;
-    },
-    [duration],
+export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number }) {
+  const { playback, timeline, togglePlayPause, next, previous, seek } = usePlayback(
+    audioUrls,
+    chooseRandomTrack,
+    volume,
   );
-  const handleProgressBarDrag = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      if (event.buttons === 1) {
-        handleProgressBarClick(event);
-      }
-    },
-    [handleProgressBarClick],
-  );
+  const track = tracks[playback.track];
+  const isBuffering = playback.status === 'loading';
+  const showPause = playback.status === 'playing' || isBuffering;
 
+  // Keyboard shortcuts, kept apart from playback: these move to a shared handler.
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.shiftKey) {
@@ -121,11 +53,11 @@ export function MusicPanel({ volume }: { volume: number }) {
             break;
           case '>':
             event.preventDefault();
-            handleNext();
+            next();
             break;
           case '<':
             event.preventDefault();
-            handlePrevious();
+            previous();
             break;
           default:
             break;
@@ -138,58 +70,49 @@ export function MusicPanel({ volume }: { volume: number }) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [togglePlayPause, handleNext, handlePrevious]);
+  }, [togglePlayPause, next, previous]);
 
   return (
     <div className={styles.musicPanel}>
       <div className={styles.albumArt}>
-        <img alt="" src={tracks[currentTrackIndex].art} />
+        <img alt="" src={track.art} />
       </div>
       <div className={styles.musicText}>
-        <div className={styles.title}>{tracks[currentTrackIndex].title}</div>
+        <div className={styles.title}>{track.title}</div>
         <img
           className={styles.sourceIcon}
           src={getImagePath('icon-music-bluetooth.svg')}
           alt="Bluetooth"
         />
-        <div className={styles.albumTitle}>{tracks[currentTrackIndex].album}</div>
-      </div>
-      <div className={styles.musicProgressBar}>
-        <div
-          className={styles.progressBackground}
-          ref={progressBarRef}
-          onClick={handleProgressBarClick}
-          onMouseMove={handleProgressBarDrag}
-        >
-          <div
-            className={styles.progressForeground}
-            style={{ width: `${(currentTime / duration) * 100}%` }}
-          >
-            <div className={`${styles.progressIndicator} ctaBtn`}></div>
+        {playback.status === 'error' ? (
+          <div className={`${styles.albumTitle} ${styles.errorText}`} role="alert">
+            {playback.message}
           </div>
-        </div>
-        <div className={styles.timeCode}>
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </div>
+        ) : (
+          <div className={styles.albumTitle}>{track.album}</div>
+        )}
       </div>
+      <ProgressBar timeline={timeline} onSeek={seek} />
       <div className={styles.musicBtnBar}>
-        <button className={styles.musicBtn} onClick={handlePrevious}>
+        <button className={styles.musicBtn} onClick={previous}>
           <img
             className={`${styles.musicIcon} ctaBtn`}
             src={getImagePath('icon-music-previous.svg')}
             alt="Previous Track"
           />
         </button>
-        <button className={styles.musicBtn} onClick={togglePlayPause}>
+        <button
+          className={`${styles.musicBtn} ${isBuffering ? styles.buffering : ''}`}
+          onClick={togglePlayPause}
+          aria-busy={isBuffering}
+        >
           <img
             className={`${styles.musicIcon} ctaBtn`}
-            src={
-              isPlaying ? getImagePath('icon-music-pause.svg') : getImagePath('icon-music-play.svg')
-            }
-            alt="Play & Pause"
+            src={getImagePath(showPause ? 'icon-music-pause.svg' : 'icon-music-play.svg')}
+            alt={showPause ? 'Pause' : 'Play'}
           />
         </button>
-        <button className={styles.musicBtn} onClick={handleNext}>
+        <button className={styles.musicBtn} onClick={next}>
           <img
             className={`${styles.musicIcon} ctaBtn`}
             src={getImagePath('icon-music-next.svg')}
@@ -213,4 +136,4 @@ export function MusicPanel({ volume }: { volume: number }) {
       </div>
     </div>
   );
-}
+});

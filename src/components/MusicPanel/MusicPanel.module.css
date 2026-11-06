@@ -64,6 +64,10 @@
   font-size: 14px;
 }
 
+.errorText {
+  color: #c62828;
+}
+
 .musicProgressBar {
   grid-column: 1 / 3;
   grid-row: 2 / 3;
@@ -100,9 +104,67 @@
   height: 20px;
 }
 
+/* The ring waits a moment so that a quick resume doesn't flash it. */
+.buffering {
+  position: relative;
+}
+
+.buffering::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  margin: auto;
+  border: 2px solid #ddd;
+  border-top-color: #4e4e4e;
+  border-radius: 50%;
+  pointer-events: none;
+  animation:
+    bufferingSpin 0.9s linear infinite,
+    bufferingReveal 0s linear 0.25s backwards;
+}
+
+@keyframes bufferingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bufferingReveal {
+  from {
+    opacity: 0;
+  }
+}
+
 .musicProgressBar {
+  position: relative;
   width: 100%;
   margin-bottom: 10px;
+}
+
+/* Grows upward over the text, which has no controls, so the transport buttons
+   keep their full height. The bar stays a thin line along its bottom edge. */
+.progressHitArea {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 16px;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (pointer: coarse) {
+  .progressHitArea {
+    height: 44px;
+  }
 }
 
 .progressBackground {
