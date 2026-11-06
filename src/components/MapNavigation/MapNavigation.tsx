@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useEffectEvent, useReducer, useRef, useState } from 'react';
 import {
   APIProvider,
   AdvancedMarker,
@@ -14,6 +14,14 @@ import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import UserProfile from '../UserProfile/UserProfile';
+import {
+  activeTripOf,
+  initialNavState,
+  navigateTarget,
+  navReducer,
+  searchedPlaceOf,
+  type Route,
+} from './navState';
 import type { Place } from './place';
 import { PlaceSearch } from './PlaceSearch';
 import styles from './MapNavigation.module.css';
@@ -58,22 +66,21 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
   const [isLocating, setIsLocating] = useState(false);
   const [chargers, setChargers] = useState<google.maps.places.Place[]>([]);
   const [query, setQuery] = useState('');
-  const [searchResult, setSearchResult] = useState<google.maps.LatLngLiteral | null>(null);
-  const [routePath, setRoutePath] = useState<google.maps.LatLngLiteral[] | null>(null);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [nav, dispatchNav] = useReducer(navReducer, initialNavState);
+  const routeRequestIdRef = useRef(0);
 
-  const handlePlaceSelect = ({ name, location }: Place) => {
-    setQuery(name);
-    setSearchResult(location);
+  const handlePlaceSelect = (place: Place) => {
+    setQuery(place.name);
+    dispatchNav({ type: 'placeChosen', place });
     if (map) {
-      map.panTo(location);
+      map.panTo(place.location);
       map.setZoom(16);
     }
   };
 
   const clearSearch = () => {
     setQuery('');
-    setSearchResult(null);
+    dispatchNav({ type: 'searchCleared' });
   };
 
   const handleCompass = () => {
@@ -153,34 +160,55 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
     }
   };
 
-  const calculateRoute = async () => {
-    if (!routesLibrary || !searchResult) return;
-    try {
-      const { routes } = await routesLibrary.Route.computeRoutes({
-        origin: center,
-        destination: searchResult,
-        travelMode: 'DRIVING',
-        fields: ['path', 'viewport'],
-      });
-      const route = routes?.[0];
-      if (!route?.path) {
-        console.error('No route found');
-        return;
-      }
-      setRoutePath(route.path.map(({ lat, lng }) => ({ lat, lng })));
-      setIsNavigating(true);
-      if (map && route.viewport) {
-        map.fitBounds(route.viewport);
-      }
-    } catch (error) {
-      console.error('Error fetching directions', error);
-    }
+  const startNavigation = () => {
+    dispatchNav({ type: 'navigatePressed', requestId: ++routeRequestIdRef.current });
   };
 
+  const fetchRoute = useEffectEvent(
+    async (library: google.maps.RoutesLibrary, place: Place, requestId: number) => {
+      const notFound = (reason: string) =>
+        dispatchNav({ type: 'routeNotFound', requestId, reason });
+      try {
+        const { routes } = await library.Route.computeRoutes({
+          origin: center,
+          destination: place.location,
+          travelMode: 'DRIVING',
+          fields: ['path', 'viewport'],
+        });
+        const route = routes?.[0];
+        if (!route?.path?.length) {
+          notFound(`No route found to ${place.name}.`);
+          return;
+        }
+        dispatchNav({
+          type: 'routeFound',
+          requestId,
+          route: {
+            path: route.path.map(({ lat, lng }) => ({ lat, lng })),
+            viewport: route.viewport ?? null,
+          },
+        });
+      } catch (error) {
+        console.error('Error fetching directions', error);
+        notFound(`Couldn't get directions to ${place.name}.`);
+      }
+    },
+  );
+
+  const routing = nav.kind === 'routing' ? nav : null;
+  useEffect(() => {
+    if (routing && routesLibrary) fetchRoute(routesLibrary, routing.place, routing.requestId);
+  }, [routing, routesLibrary]);
+
+  const activeTrip = activeTripOf(nav);
+  const activeRoute: Route | null = activeTrip?.route ?? null;
+  useEffect(() => {
+    if (map && activeRoute?.viewport) map.fitBounds(activeRoute.viewport);
+  }, [map, activeRoute]);
+
   const endNavigation = () => {
-    setIsNavigating(false);
-    setRoutePath(null);
-    clearSearch();
+    setQuery('');
+    dispatchNav({ type: 'navigationEnded' });
 
     // Center the map on the current location
     if (map) {
@@ -188,6 +216,8 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
       map.setZoom(16);
     }
   };
+
+  const searchedPlace = searchedPlaceOf(nav);
 
   return (
     <div className={styles.MapNavigation}>
@@ -221,16 +251,42 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
           onClear={clearSearch}
           locationBias={center}
         />
-        {searchResult && !isNavigating && (
-          <button className={`floatingBtn ${styles.navigateBtn}`} onClick={calculateRoute}>
-            Navigate
-          </button>
-        )}
-        {isNavigating && (
-          <button className={`floatingBtn ${styles.endNavigateBtn}`} onClick={endNavigation}>
-            End Navigation
-          </button>
-        )}
+        <div className={styles.navPanel}>
+          {nav.kind === 'routing' && (
+            <p role="status" className={styles.navStatus}>
+              Routing to {nav.place.name}…
+            </p>
+          )}
+          {nav.kind === 'routeFailed' && (
+            <p role="alert" className={`${styles.navStatus} ${styles.navError}`}>
+              {nav.reason}
+              {activeTrip && ` Still navigating to ${activeTrip.place.name}.`}
+            </p>
+          )}
+          {nav.kind === 'navigating' && (
+            <p role="status" className={styles.navStatus}>
+              Navigating to {nav.place.name}
+            </p>
+          )}
+          {(navigateTarget(nav) || nav.kind === 'routing') && (
+            <button
+              className={`floatingBtn ${styles.navigateBtn}`}
+              onClick={startNavigation}
+              disabled={nav.kind === 'routing'}
+            >
+              {nav.kind === 'routing'
+                ? 'Routing…'
+                : nav.kind === 'routeFailed'
+                  ? 'Try again'
+                  : 'Navigate'}
+            </button>
+          )}
+          {activeTrip && (
+            <button className={`floatingBtn ${styles.endNavigateBtn}`} onClick={endNavigation}>
+              End Navigation
+            </button>
+          )}
+        </div>
         <div className={styles.floatingRightBtnsWrapper}>
           <button
             className={`floatingBtn squareBtn ${styles.compassDirection}`}
@@ -279,12 +335,14 @@ function MapNavigationContent({ onWifiClick }: MapNavigationProps) {
           <AdvancedMarker position={center}>
             <MarkerIcon name="icon-car-marker.svg" size={40} />
           </AdvancedMarker>
-          {searchResult && !isNavigating && (
-            <AdvancedMarker position={searchResult}>
+          {searchedPlace && (
+            <AdvancedMarker position={searchedPlace.location}>
               <MarkerIcon name="icon-map-marker.svg" size={40} />
             </AdvancedMarker>
           )}
-          {routePath && <Polyline path={routePath} strokeColor="#1976D2" strokeWeight={5} />}
+          {activeRoute && (
+            <Polyline path={activeRoute.path} strokeColor="#1976D2" strokeWeight={5} />
+          )}
           {chargers.map((charger) => (
             <AdvancedMarker key={charger.id} position={charger.location}>
               <Pin background="#e31937" borderColor="#a8102a" glyphColor="#ffffff" />
