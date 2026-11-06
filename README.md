@@ -148,6 +148,20 @@ npx @gltf-transform/cli optimize input.glb output.glb \
 
 The `false` flags keep the node names and hierarchy that `VehicleModel.tsx` looks up (`bonnet_dummy`, `boot_dummy`, `door_*_dummy`) and keep the glass textures intact.
 
+## Public assets
+
+Everything in `public/` is deployed with the site. The [MIT License](LICENSE) covers only the rows marked MIT below. Where a source or licence is not known, the table says so rather than guessing.
+
+| Path                                                    | What it is                                                                                     | Source                                                                                                                  | Licence                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `public/` (`favicon.ico`, `logo192.png`, `logo512.png`) | Site and PWA icons                                                                             | Unknown                                                                                                                 | Unknown; check before reuse, they may show the Tesla logo |
+| `public/` (`app-preview.png`, `app-preview-02.png`)     | Screenshots of this app. The README uses the first; the second is unused                       | This project                                                                                                            | Screenshots of this project; they show the Tesla-style UI |
+| `public/` (`manifest.json`, `robots.txt`)               | PWA manifest and crawler rules                                                                 | This project                                                                                                            | MIT                                                       |
+| `public/audio/`                                         | Five car sound effects (hazards, door, horn, two seatbelt alarms). Not used yet; kept for #118 | Unknown. The file names look like stock sound-library IDs plus a build hash, but nothing confirms that                  | Unknown; confirm before wiring them in                    |
+| `public/car-models/`                                    | Tesla Model 3 3D model                                                                         | [Ameer Studio on Sketchfab](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f)        | CC-BY (#4)                                                |
+| `public/img/` (`app-*`, `icon-*`, `profile*`, `logo-*`) | UI icons, mostly SVGs exported from Affinity Designer                                          | Unknown. Several reproduce third-party logos (Spotify, Apple Music, Tidal, Audible, Amazon Music, YouTube Music, Tesla) | Unknown; those logos are trademarks of their owners       |
+| `public/img/games/`                                     | Arcade box art                                                                                 | Third-party titles (#170)                                                                                               | Unknown                                                   |
+
 ### Thanks
 
 - Want to thank Ameer Studio for sharing the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f) I'm using in the simulator.

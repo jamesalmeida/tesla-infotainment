@@ -6,6 +6,7 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 ### Added
 
+- The README lists each `public/` folder with its known source and licence, or says it is unknown.
 - Dependabot keeps dependencies and GitHub Actions current, with React and the 3D packages grouped so they move together.
 - Prettier formatting, and CI fails on unformatted files.
 
@@ -19,4 +20,5 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 ### Removed
 
+- Assets nothing used: the commercial Universal Sans font, `public/touchscreen/` (third-party logos of unknown origin), `logo512.svg` and an old car-settings icon. This cuts about 5 MB from the deployed site.
 - Create React App leftovers: the gh-pages deploy scripts (GitHub Actions deploys on push instead), the CRA sample manifest, the unused NavIcon and ShelfModal components, and the duplicate viewport meta tag.
