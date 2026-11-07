@@ -114,6 +114,17 @@ const CHARGE_PERCENT_PER_SECOND = 1;
 
 export type Gear = 'P' | 'R' | 'N' | 'D';
 
+export const TIRE_CORNERS = ['frontLeft', 'frontRight', 'rearLeft', 'rearRight'] as const;
+export type TireCorner = (typeof TIRE_CORNERS)[number];
+export type TirePressures = Record<TireCorner, number>;
+export const LOW_TIRE_PSI = 36;
+export const TIRE_CORNER_LABELS: Record<TireCorner, string> = {
+  frontLeft: 'Front Left',
+  frontRight: 'Front Right',
+  rearLeft: 'Rear Left',
+  rearRight: 'Rear Right',
+};
+
 export const SETTINGS_PANELS = [
   'Controls',
   'Dynamics',
@@ -452,6 +463,8 @@ export interface CarState {
   tripMeters: TripMeter[];
   chargeState: ChargeState;
   chargePortOpen: boolean;
+  // Cold pressures for each corner, in psi. Simulated readings.
+  tirePressures: TirePressures;
   // The current session, or the last one once the cable is out.
   chargeSession: ChargeSession | null;
   autopilot: Autopilot;
@@ -615,6 +628,7 @@ export const initialCarState: CarState = {
   ],
   chargeState: 'unplugged',
   chargePortOpen: false,
+  tirePressures: { frontLeft: 42, frontRight: 41, rearLeft: 42, rearRight: 34 },
   chargeSession: null,
   autopilot: 'off',
   sentryAlarm: false,
@@ -836,6 +850,13 @@ export function bluetoothMediaSource({ bluetooth }: CarState): string | null {
   const device = bluetooth.connectedId ? findBluetoothDevice(bluetooth.connectedId) : undefined;
   return device?.hasMedia ? device.name : null;
 }
+
+// A corner is low when its cold pressure is under the warning threshold.
+export const lowTireCorners = (state: CarState): TireCorner[] =>
+  TIRE_CORNERS.filter((corner) => state.tirePressures[corner] < LOW_TIRE_PSI);
+
+export const hasTirePressureWarning = (state: CarState): boolean =>
+  lowTireCorners(state).length > 0;
 
 export const isHomeLinkInRange = (state: CarState): boolean =>
   Math.abs(state.odometerMiles - state.homelink.homeOdometerMiles) <= HOMELINK_RANGE_MILES;

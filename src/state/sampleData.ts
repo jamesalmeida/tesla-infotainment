@@ -73,13 +73,16 @@ export const WHEEL_OPTIONS = [
 
 export type WheelConfig = (typeof WHEEL_OPTIONS)[number]['value'];
 
-// Recommended cold pressure and a fixed sample reading for each corner.
+// Recommended cold pressure and a fixed sample reading for each corner. The rear right
+// is deliberately low, so the tire warning has something to show in the demo.
+export const RECOMMENDED_TIRE_PSI = 42;
+
 export const TIRE_PRESSURES = [
-  { corner: 'Front Left', psi: 42 },
-  { corner: 'Front Right', psi: 41 },
-  { corner: 'Rear Left', psi: 42 },
-  { corner: 'Rear Right', psi: 40 },
-];
+  { corner: 'frontLeft', label: 'Front Left', psi: 42 },
+  { corner: 'frontRight', label: 'Front Right', psi: 41 },
+  { corner: 'rearLeft', label: 'Rear Left', psi: 42 },
+  { corner: 'rearRight', label: 'Rear Right', psi: 34 },
+] as const;
 
 export const SERVICE_INTERVALS = [
   { item: 'Tire rotation', everyMiles: 6250 },

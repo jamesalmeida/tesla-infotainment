@@ -18,7 +18,8 @@ import {
   type PanelImperativeHandle,
 } from 'react-resizable-panels';
 import { MapNavigation } from './components/MapNavigation/MapNavigation';
-import { MusicPanel } from './components/MusicPanel/MusicPanel';
+import { CarCards } from './components/CarCards/CarCards';
+import { DriveStrip } from './components/DriveStrip/DriveStrip';
 import { Modal } from './components/Modal/Modal';
 import { AppShelf } from './components/AppShelf/AppShelf';
 import VerticalSliderPanel from './components/VerticalSliderPanel/VerticalSliderPanel';
@@ -88,11 +89,6 @@ function VehicleView({ onSettled }: { onSettled: () => void }) {
   );
 }
 
-function Media() {
-  const volume = useCar((state) => state.volume);
-  return <MusicPanel volume={volume} />;
-}
-
 const LeftPanelContent = memo(function LeftPanelContent({
   onCarSettled,
 }: {
@@ -105,7 +101,8 @@ const LeftPanelContent = memo(function LeftPanelContent({
       <CompartmentControls />
       <ChargeStatus />
       <VehicleView onSettled={onCarSettled} />
-      <Media />
+      <CarCards />
+      <DriveStrip />
     </>
   );
 });

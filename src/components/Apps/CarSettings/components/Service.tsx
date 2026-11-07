@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import { useCar, useCarActions } from '../../../../state/CarStateContext';
 import {
+  hasTirePressureWarning,
+  TIRE_CORNERS,
+  TIRE_CORNER_LABELS,
+} from '../../../../state/carState';
+import {
   MANUAL_TOPICS,
+  RECOMMENDED_TIRE_PSI,
   SERVICE_INTERVALS,
-  TIRE_PRESSURES,
   VEHICLE_INFO,
   WHEEL_OPTIONS,
 } from '../../../../state/sampleData';
-import { formatDistanceFixed } from '../../../../utils/units';
+import { formatDistanceFixed, formatTirePressure } from '../../../../utils/units';
 import {
   Button,
   Choice,
@@ -43,15 +48,28 @@ function VehicleInfo() {
 
 function Tires() {
   const wheelConfig = useCar((state) => state.settings.wheelConfig);
+  const pressures = useCar((state) => state.tirePressures);
+  const unit = useCar((state) => state.settings.preferences.tirePressure);
+  const warning = useCar(hasTirePressureWarning);
   const { setSettings } = useCarActions();
 
   return (
     <Section title="Tire Service">
       <Stats>
-        {TIRE_PRESSURES.map(({ corner, psi }) => (
-          <Stat key={corner} label={corner} value={`${psi} psi`} />
+        {TIRE_CORNERS.map((corner) => (
+          <Stat
+            key={corner}
+            label={TIRE_CORNER_LABELS[corner]}
+            value={formatTirePressure(pressures[corner], unit)}
+          />
         ))}
       </Stats>
+      {warning && (
+        <p className={panelStyles.hint} role="status">
+          Low tire pressure. Recommended cold pressure is{' '}
+          {formatTirePressure(RECOMMENDED_TIRE_PSI, unit)}.
+        </p>
+      )}
       <Choice
         label="Wheel Configuration"
         value={wheelConfig}

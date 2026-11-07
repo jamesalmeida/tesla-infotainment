@@ -429,3 +429,14 @@ describe('systems', () => {
     expect(restored.restartSecondsLeft).toBe(0);
   });
 });
+
+test('tire pressures come back, and bad readings fall back one corner at a time', () => {
+  const restored = restoreState(
+    initialCarState,
+    saved({ tirePressures: { frontLeft: 38, rearRight: 'flat' } }),
+  );
+
+  expect(restored.tirePressures.frontLeft).toBe(38);
+  expect(restored.tirePressures.rearRight).toBe(initialCarState.tirePressures.rearRight);
+  expect(serializeState(restored)).toContain('"frontLeft":38');
+});

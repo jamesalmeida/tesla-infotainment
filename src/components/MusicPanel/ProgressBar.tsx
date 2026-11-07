@@ -48,6 +48,7 @@ export const ProgressBar = memo(function ProgressBar({ timeline, onSeek }: Progr
     <div className={styles.musicProgressBar}>
       <div
         className={styles.progressHitArea}
+        data-swipe-ignore=""
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

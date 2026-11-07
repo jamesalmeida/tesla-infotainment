@@ -33,6 +33,7 @@ import {
   STEERING_MODES,
   STOPPING_MODES,
   TEMPERATURE_UNITS,
+  TIRE_CORNERS,
   TIME_FORMATS,
   type CarKey,
   type CarState,
@@ -41,6 +42,7 @@ import {
   type BluetoothState,
   type Preferences,
   type ScheduleEntry,
+  type TirePressures,
   type TripMeter,
   type WifiState,
   type ValetSession,
@@ -89,6 +91,7 @@ type Persisted = {
   | 'settings'
   | 'display'
   | 'batteryPercent'
+  | 'tirePressures'
   | 'odometerMiles'
   | 'tripMiles'
   | 'energyUsedKwh'
@@ -113,6 +116,7 @@ const pickPersisted = ({
   settings,
   display,
   batteryPercent,
+  tirePressures,
   odometerMiles,
   tripMiles,
   energyUsedKwh,
@@ -135,6 +139,7 @@ const pickPersisted = ({
   settings,
   display,
   batteryPercent,
+  tirePressures,
   odometerMiles,
   tripMiles,
   energyUsedKwh,
@@ -422,6 +427,16 @@ const restoreCabin = (saved: unknown, defaults: CabinPosition): CabinPosition =>
   ) as unknown as CabinPosition;
 };
 
+const restoreTirePressures = (saved: unknown, defaults: TirePressures): TirePressures => {
+  const merged = mergeKnown(defaults, saved);
+  return Object.fromEntries(
+    TIRE_CORNERS.map((corner) => [
+      corner,
+      inRange(merged[corner], 0, 100) ? merged[corner] : defaults[corner],
+    ]),
+  ) as TirePressures;
+};
+
 const restoreProfileSettings = (saved: unknown, defaults: VehicleSettings): ProfileSettings => {
   const profileDefaults = Object.fromEntries(
     PROFILE_SETTING_KEYS.map((key) => [key, defaults[key]]),
@@ -571,6 +586,7 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
     batteryPercent: inRange(saved.batteryPercent, 0, 100)
       ? saved.batteryPercent
       : defaults.batteryPercent,
+    tirePressures: restoreTirePressures(saved.tirePressures, defaults.tirePressures),
     odometerMiles: inRange(saved.odometerMiles, 0, Number.MAX_SAFE_INTEGER)
       ? saved.odometerMiles
       : defaults.odometerMiles,

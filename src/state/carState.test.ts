@@ -15,12 +15,14 @@ import {
   chargeKilowatts,
   dashcamState,
   dockOrder,
+  hasTirePressureWarning,
   initialCarState,
   isCameraForced,
   isHolding,
   isPanelOpen,
   isSimulationActive,
   leftSignalLit,
+  lowTireCorners,
   MAX_TEMPERATURE,
   MIN_TEMPERATURE,
   rightSignalLit,
@@ -908,5 +910,21 @@ describe('invariants', () => {
         expect(['auto', 0, 1, 2, 3]).toContain(climate.seats['rear-left']);
       }
     }
+  });
+});
+
+describe('tire pressure warnings', () => {
+  test('the sample car has one low tire', () => {
+    expect(lowTireCorners(initialCarState)).toEqual(['rearRight']);
+    expect(hasTirePressureWarning(initialCarState)).toBe(true);
+  });
+
+  test('every corner at or above the threshold clears the warning', () => {
+    const state = {
+      ...initialCarState,
+      tirePressures: { frontLeft: 40, frontRight: 40, rearLeft: 40, rearRight: 36 },
+    };
+    expect(lowTireCorners(state)).toEqual([]);
+    expect(hasTirePressureWarning(state)).toBe(false);
   });
 });

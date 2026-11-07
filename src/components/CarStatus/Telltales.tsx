@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useCar } from '../../state/CarStateContext';
 import {
   dashcamState,
+  hasTirePressureWarning,
   isHolding,
   sentryState,
   type CarState,
@@ -106,6 +107,18 @@ const TELLTALES: Telltale[] = [
     color: 'amber',
     isOn: (state) => state.openCompartment !== null,
     glyph: <path d="M3 15h18l-2-5H8L5 7M7 15v2M17 15v2" />,
+  },
+  {
+    id: 'tire-pressure',
+    label: 'Low tire pressure',
+    color: 'amber',
+    isOn: hasTirePressureWarning,
+    glyph: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8 8v8M8 12h4a2 2 0 0 1 0 4H8M16 8v8" />
+      </>
+    ),
   },
   {
     id: 'low-battery',
