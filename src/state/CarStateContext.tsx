@@ -4,12 +4,15 @@ import {
   carReducer,
   initialCarState,
   type AppId,
+  type Autopilot,
   type CarAction,
   type CarState,
+  type ClipSource,
   type Compartment,
   type DisplaySettings,
   type Gear,
   type ModalId,
+  type OverlayMode,
   type Pedal,
   type SettingsPanel,
   type Surface,
@@ -43,7 +46,18 @@ export interface CarActions {
   tick: (seconds: number) => void;
   plugIn: () => void;
   unplug: () => void;
+  toggleCharging: () => void;
+  toggleChargePort: () => void;
   resetTrip: () => void;
+  engageAutopilot: (mode: Exclude<Autopilot, 'off'>) => void;
+  disengageAutopilot: () => void;
+  triggerSentryAlarm: () => void;
+  clearSentryAlarm: () => void;
+  saveDashcamClip: (source: Exclude<ClipSource, 'sentry'>) => void;
+  enterMode: (mode: OverlayMode) => void;
+  exitMode: () => void;
+  toggleGlovebox: () => void;
+  walkAway: () => void;
 }
 
 interface CarStore {
@@ -97,7 +111,18 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   tick: (seconds) => dispatch({ type: 'sim/tick', seconds }),
   plugIn: () => dispatch({ type: 'charge/plug' }),
   unplug: () => dispatch({ type: 'charge/unplug' }),
+  toggleCharging: () => dispatch({ type: 'charge/toggle' }),
+  toggleChargePort: () => dispatch({ type: 'charge-port/toggle' }),
   resetTrip: () => dispatch({ type: 'trip/reset' }),
+  engageAutopilot: (mode) => dispatch({ type: 'autopilot/engage', mode }),
+  disengageAutopilot: () => dispatch({ type: 'autopilot/disengage' }),
+  triggerSentryAlarm: () => dispatch({ type: 'sentry/alarm' }),
+  clearSentryAlarm: () => dispatch({ type: 'sentry/clear' }),
+  saveDashcamClip: (source) => dispatch({ type: 'dashcam/save', source }),
+  enterMode: (mode) => dispatch({ type: 'mode/enter', mode }),
+  exitMode: () => dispatch({ type: 'mode/exit' }),
+  toggleGlovebox: () => dispatch({ type: 'glovebox/toggle' }),
+  walkAway: () => dispatch({ type: 'lock/walk-away' }),
 });
 
 interface CarContextValue {
