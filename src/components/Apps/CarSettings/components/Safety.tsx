@@ -4,7 +4,7 @@ import {
   isParked,
   MAX_SPEED,
   MIN_SPEED_LIMIT,
-  type CabinOverheat,
+  type OverheatProtection,
   type CollisionWarning,
 } from '../../../../state/carState';
 import {
@@ -21,7 +21,7 @@ import {
   panelStyles,
 } from './SystemPanel';
 
-const OVERHEAT_OPTIONS: { value: CabinOverheat; label: string }[] = [
+const OVERHEAT_OPTIONS: { value: OverheatProtection; label: string }[] = [
   { value: 'off', label: 'Off' },
   { value: 'no-ac', label: 'Fan Only' },
   { value: 'on', label: 'On' },
@@ -57,6 +57,7 @@ function PinMode({
     <>
       <Row label={label} hint={hint}>
         <Button
+          label={`${isOn ? 'Turn off' : 'Turn on'} ${label}`}
           variant={isOn ? 'default' : 'primary'}
           onPress={() => setAskedWhile(isAsking ? null : isOn)}
         >
@@ -142,7 +143,8 @@ function Restrictions() {
 
 export const Safety = () => {
   const settings = useCar((state) => state.settings);
-  const { setSettings } = useCarActions();
+  const overheatProtection = useCar((state) => state.climate.overheatProtection);
+  const { setClimateOptions, setSettings } = useCarActions();
   const locked = settings.requireSafetyFeatures;
   const lockedHint = locked ? 'Required by Driver Limits.' : undefined;
 
@@ -165,9 +167,9 @@ export const Safety = () => {
           <Choice
             label="Cabin Overheat Protection"
             hint="Keeps a parked car from getting too hot inside."
-            value={settings.cabinOverheat}
+            value={overheatProtection}
             options={OVERHEAT_OPTIONS}
-            onChange={(cabinOverheat) => setSettings({ cabinOverheat })}
+            onChange={(protection) => setClimateOptions({ overheatProtection: protection })}
           />
         </Section>
         <Section title="Warnings">

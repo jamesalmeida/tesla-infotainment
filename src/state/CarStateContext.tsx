@@ -20,6 +20,7 @@ import {
   type ModalId,
   type OverlayMode,
   type Pedal,
+  type ScheduleKind,
   type SeatId,
   type SeatKind,
   type SettingsPanel,
@@ -107,6 +108,18 @@ export interface CarActions {
   disconnectBluetooth: () => void;
   forgetBluetooth: (id: string) => void;
   setPriorityBluetooth: (id: string | null) => void;
+  setTowMode: (enabled: boolean) => void;
+  restartDisplay: () => void;
+  checkForUpdate: () => void;
+  downloadUpdate: () => void;
+  installUpdate: () => void;
+  toggleGarageDoor: () => void;
+  setHomeHere: () => void;
+  addSchedule: (kind: ScheduleKind, time: string, days: number[]) => void;
+  removeSchedule: (id: number) => void;
+  setScheduleEnabled: (id: number, enabled: boolean) => void;
+  runSchedule: (id: number, date: string) => void;
+  startChargeNow: () => void;
 }
 
 interface CarStore {
@@ -211,6 +224,18 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   disconnectBluetooth: () => dispatch({ type: 'bluetooth/disconnect' }),
   forgetBluetooth: (id) => dispatch({ type: 'bluetooth/forget', id }),
   setPriorityBluetooth: (id) => dispatch({ type: 'bluetooth/priority', id }),
+  setTowMode: (enabled) => dispatch({ type: 'tow/set', enabled }),
+  restartDisplay: () => dispatch({ type: 'system/restart' }),
+  checkForUpdate: () => dispatch({ type: 'software/check' }),
+  downloadUpdate: () => dispatch({ type: 'software/download' }),
+  installUpdate: () => dispatch({ type: 'software/install' }),
+  toggleGarageDoor: () => dispatch({ type: 'homelink/toggle' }),
+  setHomeHere: () => dispatch({ type: 'homelink/setHome' }),
+  addSchedule: (kind, time, days) => dispatch({ type: 'schedule/add', kind, time, days }),
+  removeSchedule: (id) => dispatch({ type: 'schedule/remove', id }),
+  setScheduleEnabled: (id, enabled) => dispatch({ type: 'schedule/enable', id, enabled }),
+  runSchedule: (id, date) => dispatch({ type: 'schedule/run', id, date }),
+  startChargeNow: () => dispatch({ type: 'charge/startNow' }),
 });
 
 interface CarContextValue {

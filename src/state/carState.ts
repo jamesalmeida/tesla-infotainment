@@ -33,7 +33,7 @@ import {
   type ProfileSettings,
   type ProfileSnapshot,
 } from './profiles';
-import { findBluetoothDevice, findWifiNetwork } from './sampleData';
+import { DEMO_UPDATES, findBluetoothDevice, findWifiNetwork, type WheelConfig } from './sampleData';
 
 export type { AppId };
 export type { CabinPosition, Profile };
@@ -81,6 +81,11 @@ export const MIN_SPEED_LIMIT = 50;
 // How long the simulated radios take, in seconds.
 const WIFI_CONNECT_SECONDS = 2;
 const BLUETOOTH_LINK_SECONDS = 2;
+const GARAGE_DOOR_SECONDS = 4;
+const RESTART_SECONDS = 3;
+const UPDATE_PHASE_SECONDS = { checking: 2, downloading: 6, installing: 5 } as const;
+// HomeLink stops working once the car is this far from where the driver set home.
+export const HOMELINK_RANGE_MILES = 0.25;
 export const VALET_MAX_SPEED = 70;
 
 // mph per second.
@@ -127,6 +132,9 @@ export const SETTINGS_PANELS = [
   'Audio',
   'Profiles',
   'Bluetooth',
+  'Schedule',
+  'Upgrades',
+  'HomeLink',
 ] as const;
 
 export type SettingsPanel = (typeof SETTINGS_PANELS)[number];
@@ -231,7 +239,6 @@ export interface DashcamClip {
 // Takes over the whole display, so only one can be up at a time.
 export type OverlayMode = 'car-wash' | 'screen-clean';
 
-
 export type MapUnits = 'mi' | 'km';
 
 export interface SuperchargerFilters {
@@ -245,8 +252,6 @@ export interface SuperchargerFilters {
 export type ImmersiveSound = 'off' | 'standard' | 'high';
 
 export type AssistantStyle = 'friendly' | 'concise' | 'playful';
-
-export type CabinOverheat = 'off' | 'no-ac' | 'on';
 
 export type CollisionWarning = 'off' | 'late' | 'average' | 'early';
 
@@ -331,7 +336,6 @@ export interface VehicleSettings {
   assistantEnabled: boolean;
   assistantStyle: AssistantStyle;
   joeMode: boolean;
-  cabinOverheat: CabinOverheat;
   blindSpotWarning: boolean;
   collisionWarning: CollisionWarning;
   emergencyBraking: boolean;
@@ -345,6 +349,10 @@ export interface VehicleSettings {
   drivePin: string;
   easyEntry: boolean;
   vehicleName: string;
+  updatePreference: UpdatePreference;
+  wheelConfig: WheelConfig;
+  towMode: boolean;
+  serviceVisitBooked: boolean;
 }
 
 export interface WifiState {
@@ -371,6 +379,40 @@ export interface BluetoothState {
   priorityId: string | null;
   pairing: BluetoothPairing | null;
   error: { deviceId: string; message: string } | null;
+}
+
+export type GarageDoor = 'closed' | 'opening' | 'open' | 'closing';
+
+export interface HomeLinkState {
+  door: GarageDoor;
+  // 0 is shut, 1 is fully open.
+  doorPosition: number;
+  // Where home is, as an odometer reading, since the simulator has no position to compare.
+  homeOdometerMiles: number;
+}
+
+export type UpdatePreference = keyof typeof DEMO_UPDATES;
+
+export type SoftwareUpdate =
+  | { phase: 'idle' }
+  | { phase: 'checking'; progress: number }
+  | { phase: 'available'; version: string }
+  | { phase: 'downloading'; version: string; progress: number }
+  | { phase: 'ready'; version: string }
+  | { phase: 'installing'; version: string; progress: number };
+
+export type ScheduleKind = 'charge' | 'departure';
+
+export interface ScheduleEntry {
+  id: number;
+  kind: ScheduleKind;
+  // 24-hour HH:MM.
+  time: string;
+  // 0 is Sunday. Empty means once, at the next occurrence of the time.
+  days: number[];
+  enabled: boolean;
+  // The local date it last ran, so a recurring entry can't run twice in its minute.
+  lastRanOn: string | null;
 }
 
 // Valet Mode is on while this exists. The driver it replaced comes back when it ends.
@@ -444,6 +486,15 @@ export interface CarState {
   easyEntryActive: boolean;
   wifi: WifiState;
   bluetooth: BluetoothState;
+  homelink: HomeLinkState;
+  softwareUpdate: SoftwareUpdate;
+  // The last simulated update, shown beside the real version of this build.
+  installedUpdate: string | null;
+  // Above zero while the touchscreen is rebooting.
+  restartSecondsLeft: number;
+  schedule: ScheduleEntry[];
+  // Plugged in, but waiting for a scheduled charge to start.
+  chargeHeld: boolean;
   settings: VehicleSettings;
   display: DisplaySettings;
   // The newest message, on screen for a moment.
@@ -521,6 +572,18 @@ export type CarAction =
   | { type: 'pinToDrive/disable'; pin: string }
   | { type: 'pinToDrive/unlock'; pin: string }
   | { type: 'pins/reset' }
+  | { type: 'tow/set'; enabled: boolean }
+  | { type: 'system/restart' }
+  | { type: 'software/check' }
+  | { type: 'software/download' }
+  | { type: 'software/install' }
+  | { type: 'homelink/toggle' }
+  | { type: 'homelink/setHome' }
+  | { type: 'schedule/add'; kind: ScheduleKind; time: string; days: number[] }
+  | { type: 'schedule/remove'; id: number }
+  | { type: 'schedule/enable'; id: number; enabled: boolean }
+  | { type: 'schedule/run'; id: number; date: string }
+  | { type: 'charge/startNow' }
   | { type: 'wifi/enable'; enabled: boolean }
   | { type: 'wifi/connect'; id: string; password: string }
   | { type: 'wifi/disconnect' }
@@ -545,7 +608,7 @@ export const initialCarState: CarState = {
   tripMiles: 0,
   energyUsedKwh: 3020,
   tripStartKwh: 3020,
-  sinceChargeBaseline: { miles: 12460, kwh: 3015 },
+  sinceChargeBaseline: { miles: 12460, kwh: 3015.16 },
   tripMeters: [
     { id: 1, name: 'Trip A', miles: 12100, kwh: 2928 },
     { id: 2, name: 'Trip B', miles: 12480, kwh: 3020 },
@@ -599,6 +662,12 @@ export const initialCarState: CarState = {
     pairing: null,
     error: null,
   },
+  homelink: { door: 'closed', doorPosition: 0, homeOdometerMiles: 12480 },
+  softwareUpdate: { phase: 'idle' },
+  installedUpdate: null,
+  restartSecondsLeft: 0,
+  schedule: [],
+  chargeHeld: false,
   settings: {
     headlights: 'auto',
     highBeams: false,
@@ -670,7 +739,6 @@ export const initialCarState: CarState = {
     assistantEnabled: false,
     assistantStyle: 'friendly',
     joeMode: false,
-    cabinOverheat: 'on',
     blindSpotWarning: true,
     collisionWarning: 'average',
     emergencyBraking: true,
@@ -682,6 +750,10 @@ export const initialCarState: CarState = {
     drivePin: '',
     easyEntry: false,
     vehicleName: 'Demo Car',
+    updatePreference: 'standard',
+    wheelConfig: 'sport-19',
+    towMode: false,
+    serviceVisitBooked: false,
   },
   display: { brightness: 100, autoBrightness: false, appearance: 'light', blueLightReduction: 0 },
   notice: null,
@@ -765,15 +837,36 @@ export function bluetoothMediaSource({ bluetooth }: CarState): string | null {
   return device?.hasMedia ? device.name : null;
 }
 
+export const isHomeLinkInRange = (state: CarState): boolean =>
+  Math.abs(state.odometerMiles - state.homelink.homeOdometerMiles) <= HOMELINK_RANGE_MILES;
+
+export const isRestarting = (state: CarState): boolean => state.restartSecondsLeft > 0;
+
+// The update on offer for the driver's preference, once they aren't already on it.
+const offeredUpdate = (state: CarState): string | null => {
+  const version = DEMO_UPDATES[state.settings.updatePreference];
+  return version === state.installedUpdate ? null : version;
+};
+
+const isUpdateRunning = ({ softwareUpdate: { phase } }: CarState): boolean =>
+  phase === 'checking' || phase === 'downloading' || phase === 'installing';
+
+const isDoorMoving = ({ homelink: { door } }: CarState): boolean =>
+  door === 'opening' || door === 'closing';
+
 // Timed systems that need the loop even with the car standing still.
-const hasRunningSystem = ({ wifi, bluetooth }: CarState): boolean =>
-  wifi.attempt !== null || bluetooth.pairing?.phase === 'linking';
+const hasRunningSystem = (state: CarState): boolean =>
+  state.wifi.attempt !== null ||
+  state.bluetooth.pairing?.phase === 'linking' ||
+  isUpdateRunning(state) ||
+  isDoorMoving(state) ||
+  isRestarting(state);
 
 // The loop only runs while something is actually changing.
 export const isSimulationActive = (state: CarState): boolean =>
   state.speed > 0 ||
   state.pedal !== 'none' ||
-  state.chargeState === 'charging' ||
+  (state.chargeState === 'charging' && !state.chargeHeld) ||
   state.chargeState === 'scheduled' ||
   state.autopilot !== 'off' ||
   creepTarget(state) > 0 ||
@@ -870,7 +963,28 @@ export function canShift(state: CarState, gear: Gear): Permission {
       reason: `Slow down to shift into ${gear === 'P' ? 'Park' : 'Reverse'}`,
     };
   }
+  if (gear !== 'P' && state.softwareUpdate.phase === 'installing') {
+    return { allowed: false, reason: 'Wait for the update to finish' };
+  }
+  if ((gear === 'D' || gear === 'R') && state.settings.towMode) {
+    return { allowed: false, reason: 'Turn off Tow Mode to drive' };
+  }
   if (gear !== 'P' && needsDrivePin(state)) return { allowed: false, reason: DRIVE_PIN_REASON };
+  return ALLOWED;
+}
+
+export const canSetTowMode = (state: CarState): Permission => parkedFor(state, 'change Tow Mode');
+
+export const canRestartDisplay = (state: CarState): Permission =>
+  parkedFor(state, 'restart the touchscreen');
+
+export const canInstallUpdate = (state: CarState): Permission =>
+  parkedFor(state, 'install the update');
+
+export function canUseHomeLink(state: CarState): Permission {
+  if (isValet(state)) return { allowed: false, reason: 'Not available in Valet Mode' };
+  if (!isHomeLinkInRange(state))
+    return { allowed: false, reason: 'Too far from home for HomeLink' };
   return ALLOWED;
 }
 
@@ -1125,15 +1239,9 @@ const pickProfileSettings = (settings: VehicleSettings): ProfileSettings =>
     PROFILE_SETTING_KEYS.map((key) => [key, settings[key]]),
   ) as unknown as ProfileSettings;
 
-const snapshot = ({
+const snapshot = ({ cabin, climate, volume, display, settings }: CarState): ProfileSnapshot => ({
   cabin,
-  temperature,
-  volume,
-  display,
-  settings,
-}: CarState): ProfileSnapshot => ({
-  cabin,
-  temperature,
+  temperature: climate.driverTemp,
   volume,
   display,
   settings: pickProfileSettings(settings),
@@ -1148,13 +1256,18 @@ const saveActiveProfile = (state: CarState): CarState => ({
 
 // Makes a driver current. A driver with nothing saved takes the car as they find it.
 function loadProfile(state: CarState, id: number): CarState {
-  const { saved } = findProfile(state.profiles, id);
-  const next = { ...state, activeProfileId: id, easyEntryActive: false };
+  const profile = findProfile(state.profiles, id);
+  const { saved } = profile;
+  const next = { ...state, activeProfileId: profile.id, easyEntryActive: false };
   if (!saved) return next;
   return {
     ...next,
     cabin: saved.cabin,
-    temperature: saved.temperature,
+    climate: {
+      ...state.climate,
+      driverTemp: saved.temperature,
+      passengerTemp: state.climate.isSplit ? state.climate.passengerTemp : saved.temperature,
+    },
     volume: saved.volume,
     display: saved.display,
     settings: { ...state.settings, ...saved.settings },
@@ -1241,12 +1354,14 @@ function chargeTick(state: CarState, seconds: number): CarState {
     hours: session.hours + percentToKwh(added) / chargeKilowatts(state),
   };
   // Only charge that actually went in restarts the meter, not a plug pulled straight out.
-  const charged = { ...state, batteryPercent, chargeSession, sinceChargeBaseline: meterBaseline(state) };
+  const charged = {
+    ...state,
+    batteryPercent,
+    chargeSession,
+    sinceChargeBaseline: meterBaseline(state),
+  };
   if (batteryPercent < chargeLimit) return charged;
-  return notify(
-    { ...charged, chargeState: 'complete' },
-    'Charging complete',
-  );
+  return notify({ ...charged, chargeState: 'complete' }, 'Charging complete');
 }
 
 function moveDockItem(state: CarState, item: DockItem, delta: -1 | 1): CarState {
@@ -1319,8 +1434,76 @@ function finishBluetoothPairing(state: CarState, deviceId: string): CarState {
   return notify(paired, `Paired with ${device.name}`);
 }
 
+// Replays the boot sequence. Whatever was on screen goes, as it would on the real thing.
+const restart = (state: CarState): CarState => ({
+  ...state,
+  surface: { kind: 'closed' },
+  activeModal: null,
+  notice: null,
+  toasts: [],
+  restartSecondsLeft: RESTART_SECONDS,
+});
+
+function tickHomeLink(state: CarState, seconds: number): CarState {
+  const { door, doorPosition } = state.homelink;
+  if (door !== 'opening' && door !== 'closing') return state;
+
+  const step = seconds / GARAGE_DOOR_SECONDS;
+  const position = door === 'opening' ? doorPosition + step : doorPosition - step;
+  if (position > 0 && position < 1) {
+    return { ...state, homelink: { ...state.homelink, doorPosition: position } };
+  }
+  const isOpen = door === 'opening';
+  return notify(
+    {
+      ...state,
+      homelink: {
+        ...state.homelink,
+        door: isOpen ? 'open' : 'closed',
+        doorPosition: isOpen ? 1 : 0,
+      },
+    },
+    `Garage door ${isOpen ? 'open' : 'closed'}`,
+  );
+}
+
+function tickUpdate(state: CarState, seconds: number): CarState {
+  const update = state.softwareUpdate;
+  if (!('progress' in update)) return state;
+
+  const progress = update.progress + (seconds / UPDATE_PHASE_SECONDS[update.phase]) * 100;
+  if (progress < 100) return { ...state, softwareUpdate: { ...update, progress } };
+
+  switch (update.phase) {
+    case 'checking': {
+      const version = offeredUpdate(state);
+      if (!version) {
+        return notify({ ...state, softwareUpdate: { phase: 'idle' } }, 'Software is up to date');
+      }
+      return { ...state, softwareUpdate: { phase: 'available', version } };
+    }
+    case 'downloading':
+      return notify(
+        { ...state, softwareUpdate: { phase: 'ready', version: update.version } },
+        'Update ready to install',
+      );
+    case 'installing':
+      return notify(
+        restart({
+          ...state,
+          softwareUpdate: { phase: 'idle' },
+          installedUpdate: update.version,
+        }),
+        `Updated to ${update.version}`,
+      );
+  }
+}
+
 function tickSystems(state: CarState, seconds: number): CarState {
-  let next = state;
+  let next = tickUpdate(tickHomeLink(state, seconds), seconds);
+  if (next.restartSecondsLeft > 0) {
+    next = { ...next, restartSecondsLeft: Math.max(0, next.restartSecondsLeft - seconds) };
+  }
 
   const { attempt } = next.wifi;
   if (attempt) {
@@ -1347,6 +1530,7 @@ const tick = (state: CarState, seconds: number): CarState =>
   tickSystems(tickVehicle(state, seconds), seconds);
 
 function tickVehicle(state: CarState, seconds: number): CarState {
+  if (state.chargeState === 'charging' && state.chargeHeld) return state;
   if (state.chargeState === 'charging') return chargeTick(state, seconds);
   if (state.chargeState === 'scheduled') {
     return isScheduleDue(state.settings.scheduledChargeTime, new Date())
@@ -1393,6 +1577,25 @@ function allowedAutopilot(state: CarState): Autopilot {
   if (state.autopilot === 'off') return 'off';
   if (canEngageAutopilot(state, state.autopilot).allowed) return state.autopilot;
   return canEngageAutopilot(state, 'cruise').allowed ? 'cruise' : 'off';
+}
+
+export const isScheduleTime = (time: string): boolean => /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
+
+const localDate = (date: Date): string =>
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+
+const localTime = (date: Date): string =>
+  `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+
+// Whether an entry should run at this moment, and the date to record if it does.
+export function scheduleRunDate(entry: ScheduleEntry, now: Date): string | null {
+  const date = localDate(now);
+  if (!entry.enabled || entry.time !== localTime(now) || entry.lastRanOn === date) return null;
+  return entry.days.length === 0 || entry.days.includes(now.getDay()) ? date : null;
 }
 
 const nextId = (items: { id: number }[]) => Math.max(0, ...items.map((item) => item.id)) + 1;
@@ -1455,11 +1658,15 @@ export function carReducer(state: CarState, action: CarAction): CarState {
         chargePortOpen: true,
         chargeSession: { percentAdded: 0, hours: 0 },
         chargeState: chargeStateOnPlug(state),
+        chargeHeld: state.schedule.some((entry) => entry.enabled && entry.kind === 'charge'),
       };
 
     // Unlatching lets the cable out, and the port closes behind it.
     case 'charge/unplug':
-      return { ...state, chargeState: 'unplugged', chargePortOpen: false };
+      return { ...state, chargeState: 'unplugged', chargePortOpen: false, chargeHeld: false };
+
+    case 'charge/startNow':
+      return { ...state, chargeHeld: false };
 
     case 'charge/toggle':
       if (state.chargeState === 'charging') return { ...state, chargeState: 'stopped' };
@@ -1603,9 +1810,13 @@ export function carReducer(state: CarState, action: CarAction): CarState {
       const permission = canChangeSettings(state, action.patch);
       if (!permission.allowed) return notify(state, permission.reason);
       const next = applySettings(state, action.patch);
-      return next.settings.requireSafetyFeatures
-        ? { ...next, settings: safetyFeaturesOn(next.settings) }
-        : next;
+      return {
+        ...next,
+        easyEntryActive: state.easyEntryActive && next.settings.easyEntry,
+        settings: next.settings.requireSafetyFeatures
+          ? safetyFeaturesOn(next.settings)
+          : next.settings,
+      };
     }
 
     case 'speedLimit/enable': {
@@ -1647,6 +1858,110 @@ export function carReducer(state: CarState, action: CarAction): CarState {
 
     // Real cars fall back on the owner's account. This one has no account, so a forgotten
     // PIN mustn't leave a saved session stuck for good.
+    case 'tow/set': {
+      const permission = canSetTowMode(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      return { ...state, settings: { ...state.settings, towMode: action.enabled } };
+    }
+
+    case 'system/restart': {
+      const permission = canRestartDisplay(state);
+      return permission.allowed ? restart(state) : notify(state, permission.reason);
+    }
+
+    case 'software/check':
+      return state.softwareUpdate.phase === 'idle'
+        ? { ...state, softwareUpdate: { phase: 'checking', progress: 0 } }
+        : state;
+
+    case 'software/download': {
+      const update = state.softwareUpdate;
+      if (update.phase !== 'available') return state;
+      return {
+        ...state,
+        softwareUpdate: { phase: 'downloading', version: update.version, progress: 0 },
+      };
+    }
+
+    case 'software/install': {
+      const update = state.softwareUpdate;
+      if (update.phase !== 'ready') return state;
+      const permission = canInstallUpdate(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      return {
+        ...state,
+        softwareUpdate: { phase: 'installing', version: update.version, progress: 0 },
+      };
+    }
+
+    case 'homelink/toggle': {
+      const permission = canUseHomeLink(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      const { door } = state.homelink;
+      const isGoingUp = door === 'closed' || door === 'closing';
+      return {
+        ...state,
+        homelink: { ...state.homelink, door: isGoingUp ? 'opening' : 'closing' },
+      };
+    }
+
+    case 'homelink/setHome':
+      return {
+        ...state,
+        homelink: { ...state.homelink, homeOdometerMiles: state.odometerMiles },
+      };
+
+    case 'schedule/add': {
+      if (!isScheduleTime(action.time)) return notify(state, 'Choose a time');
+      const entry: ScheduleEntry = {
+        id: nextId(state.schedule),
+        kind: action.kind,
+        time: action.time,
+        days: [...action.days].sort(),
+        enabled: true,
+        lastRanOn: null,
+      };
+      return { ...state, schedule: [...state.schedule, entry] };
+    }
+
+    case 'schedule/remove':
+      return { ...state, schedule: state.schedule.filter((entry) => entry.id !== action.id) };
+
+    case 'schedule/enable':
+      return {
+        ...state,
+        schedule: state.schedule.map((entry) =>
+          entry.id === action.id ? { ...entry, enabled: action.enabled } : entry,
+        ),
+      };
+
+    case 'schedule/run': {
+      const entry = state.schedule.find(({ id }) => id === action.id);
+      if (!entry) return state;
+      const next: CarState = {
+        ...state,
+        schedule: state.schedule.map((item) =>
+          item.id === entry.id
+            ? {
+                ...item,
+                lastRanOn: action.date,
+                // A one-off entry has done its job.
+                enabled: item.days.length > 0,
+              }
+            : item,
+        ),
+      };
+      if (entry.kind === 'departure') {
+        return notify(next, `Getting ready for your ${entry.time} departure`);
+      }
+      if (state.chargeHeld) {
+        return notify({ ...next, chargeHeld: false }, 'Scheduled charging started');
+      }
+      return state.chargeState === 'unplugged'
+        ? notify(next, 'Plug in to start scheduled charging')
+        : next;
+    }
+
     case 'wifi/enable': {
       if (!action.enabled) {
         return withWifi(state, { enabled: false, connectedId: null, attempt: null, error: null });

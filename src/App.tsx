@@ -6,6 +6,7 @@ import { activeApp, isCameraForced, isDriving, isPanelOpen, vehiclePose } from '
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useBoot } from './hooks/useBoot';
 import { useLayout } from './hooks/useLayout';
+import { useSchedule } from './hooks/useSchedule';
 import { useSimulation } from './hooks/useSimulation';
 import {
   Group,
@@ -34,6 +35,8 @@ import { CarUnavailable, DisplayCrashed } from './components/ErrorBoundary/Fallb
 import { DisplayEffects } from './components/DisplayEffects/DisplayEffects';
 import { DrivePinPrompt } from './components/DrivePinPrompt/DrivePinPrompt';
 import { Notice } from './components/Notice/Notice';
+import { RestartOverlay } from './components/RestartOverlay/RestartOverlay';
+import { StatusIndicators } from './components/StatusIndicators/StatusIndicators';
 import { ScreenClean } from './components/ScreenClean/ScreenClean';
 import { SentryOverlay } from './components/SentryOverlay/SentryOverlay';
 import { ShortcutsHelp } from './components/ShortcutsHelp/ShortcutsHelp';
@@ -98,6 +101,7 @@ const LeftPanelContent = memo(function LeftPanelContent({
   return (
     <>
       <CarStatus />
+      <StatusIndicators />
       <CompartmentControls />
       <ChargeStatus />
       <VehicleView onSettled={onCarSettled} />
@@ -255,6 +259,7 @@ function Display() {
 
   useKeyboardShortcuts();
   useSimulation();
+  useSchedule();
 
   return (
     <>
@@ -270,6 +275,7 @@ function Display() {
           <SentryOverlay />
           <DisplayEffects />
           <DogModeDisplay />
+          <RestartOverlay />
           <BrightnessOverlay />
           <ScreenClean />
         </div>

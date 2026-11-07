@@ -235,3 +235,197 @@ describe('dock', () => {
     expect(restored.dockByProfile).toEqual({});
   });
 });
+
+describe('settings', () => {
+  const restoreSettings = (settings: object) =>
+    restoreState(initialCarState, saved({ settings: { ...initialCarState.settings, ...settings } }))
+      .settings;
+
+  test.each<[string, object, keyof typeof initialCarState.settings]>([
+    ['units', { mapUnits: 'furlongs' }, 'mapUnits'],
+    ['arrival charge', { arrivalChargeTarget: 80 }, 'arrivalChargeTarget'],
+    ['navigation volume', { navVolume: 300 }, 'navVolume'],
+    ['bass', { eqBass: 40 }, 'eqBass'],
+    ['balance', { audioBalance: -99 }, 'audioBalance'],
+    ['immersive sound', { immersiveSound: 'maximum' }, 'immersiveSound'],
+    ['assistant style', { assistantStyle: 'rude' }, 'assistantStyle'],
+    ['acceleration', { acceleration: 'ludicrous' }, 'acceleration'],
+    ['collision warning', { collisionWarning: 'never' }, 'collisionWarning'],
+    ['speed limit', { speedLimitMph: 5 }, 'speedLimitMph'],
+    ['a PIN', { drivePin: 'abcd' }, 'drivePin'],
+    ['update preference', { updatePreference: 'nightly' }, 'updatePreference'],
+    ['wheels', { wheelConfig: 'square' }, 'wheelConfig'],
+    ['vehicle name', { vehicleName: '   ' }, 'vehicleName'],
+    ['filters', { superchargerFilters: { minPowerKw: 3 } }, 'superchargerFilters'],
+  ])('an invalid %s falls back to the default', (_name, patch, key) => {
+    expect(restoreSettings(patch)[key]).toEqual(initialCarState.settings[key]);
+  });
+
+  test('valid values come back', () => {
+    const restored = restoreSettings({
+      mapUnits: 'km',
+      superchargerFilters: { minPowerKw: 250, food: true, restrooms: false, shopping: false },
+      vehicleName: 'Rocket',
+    });
+    expect(restored.mapUnits).toBe('km');
+    expect(restored.superchargerFilters.minPowerKw).toBe(250);
+    expect(restored.vehicleName).toBe('Rocket');
+  });
+
+  test('a PIN mode with no PIN comes back off, so nothing can lock the car for good', () => {
+    const restored = restoreSettings({ pinToDrive: true, drivePin: '', speedLimitMode: true });
+    expect(restored.pinToDrive).toBe(false);
+    expect(restored.speedLimitMode).toBe(false);
+  });
+
+  test('a PIN to Drive save asks again after a reload', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({
+        driveUnlocked: true,
+        settings: { ...initialCarState.settings, pinToDrive: true, drivePin: '1234' },
+      }),
+    );
+    expect(restored.settings.pinToDrive).toBe(true);
+    expect(restored.driveUnlocked).toBe(false);
+  });
+});
+
+describe('profiles', () => {
+  const alex = { id: 1, name: 'Alex', saved: null };
+
+  test('drivers come back with their saved settings, and Valet is always there', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({
+        activeProfileId: 7,
+        profiles: [
+          alex,
+          {
+            id: 7,
+            name: 'Robin',
+            image: 'https://example.com/evil.png',
+            saved: {
+              cabin: { ...initialCarState.cabin, seatPosition: 12 },
+              temperature: 65,
+              volume: 10,
+              display: initialCarState.display,
+              settings: { mapUnits: 'km', eqBass: 99 },
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(restored.activeProfileId).toBe(7);
+    expect(restored.profiles.map(({ name }) => name)).toEqual(['Alex', 'Robin', 'Valet']);
+    const robin = restored.profiles[1];
+    expect(robin.image).not.toContain('example.com');
+    expect(robin.saved?.cabin.seatPosition).toBe(12);
+    expect(robin.saved?.settings.mapUnits).toBe('km');
+    expect(robin.saved?.settings.eqBass).toBe(0);
+  });
+
+  test.each([
+    ['a missing driver', 99],
+    ['Valet with no session, from before it needed a PIN', 4],
+    ['nonsense', 'Sam'],
+  ])('an active profile of %s falls back to a driver', (_name, activeProfileId) => {
+    const restored = restoreState(initialCarState, saved({ activeProfileId }));
+    expect(restored.activeProfileId).toBe(1);
+    expect(restored.valet).toBe(null);
+  });
+
+  test('a Valet session survives a reload, still on the Valet profile', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({ activeProfileId: 4, valet: { pin: '1234', returnProfileId: 2 } }),
+    );
+    expect(restored.valet).toEqual({ pin: '1234', returnProfileId: 2 });
+    expect(restored.activeProfileId).toBe(4);
+  });
+
+  test('corrupt profile lists leave the defaults', () => {
+    expect(restoreState(initialCarState, saved({ profiles: 'nope' })).profiles).toBe(
+      initialCarState.profiles,
+    );
+    expect(
+      restoreState(initialCarState, saved({ profiles: [{ id: 'x', name: '' }] })).profiles,
+    ).toBe(initialCarState.profiles);
+  });
+
+  test('cabin positions are range checked one at a time', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({ cabin: { ...initialCarState.cabin, seatPosition: 500, mirrorTilt: 30 } }),
+    );
+    expect(restored.cabin.seatPosition).toBe(initialCarState.cabin.seatPosition);
+    expect(restored.cabin.mirrorTilt).toBe(30);
+  });
+});
+
+describe('systems', () => {
+  test('Wifi and Bluetooth come back on known ids only', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({
+        wifi: { enabled: true, hotspot: true, connectedId: 'home', savedIds: ['home', 'gone'] },
+        bluetooth: {
+          enabled: true,
+          pairedIds: ['phone', 'gone'],
+          connectedId: 'gone',
+          priorityId: 'phone',
+        },
+      }),
+    );
+    expect(restored.wifi).toMatchObject({
+      hotspot: true,
+      connectedId: 'home',
+      savedIds: ['home'],
+      attempt: null,
+    });
+    expect(restored.bluetooth).toMatchObject({
+      pairedIds: ['phone'],
+      connectedId: null,
+      priorityId: 'phone',
+    });
+  });
+
+  test('a connection to an unsaved network is dropped', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({ wifi: { enabled: true, connectedId: 'home', savedIds: [] } }),
+    );
+    expect(restored.wifi.connectedId).toBe(null);
+  });
+
+  test('trip meters and schedule entries keep what is valid', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({
+        tripMeters: [{ id: 9, name: 'Good', miles: 10, kwh: 2 }, { id: 'x' }, null],
+        schedule: [
+          { id: 1, kind: 'charge', time: '07:30', days: [1], enabled: true, lastRanOn: null },
+          { id: 2, kind: 'charge', time: 'soon', days: [], enabled: true, lastRanOn: null },
+          { id: 3, kind: 'fly', time: '07:30', days: [], enabled: true, lastRanOn: null },
+        ],
+      }),
+    );
+    expect(restored.tripMeters.map(({ name }) => name)).toEqual(['Good']);
+    expect(restored.schedule.map(({ id }) => id)).toEqual([1]);
+  });
+
+  test('a door and an update in progress do not survive a reload', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({
+        homelink: { door: 'opening', doorPosition: 0.5, homeOdometerMiles: 100 },
+        softwareUpdate: { phase: 'installing', version: 'x', progress: 50 },
+        restartSecondsLeft: 3,
+      }),
+    );
+    expect(restored.homelink).toEqual({ door: 'closed', doorPosition: 0, homeOdometerMiles: 100 });
+    expect(restored.softwareUpdate).toEqual({ phase: 'idle' });
+    expect(restored.restartSecondsLeft).toBe(0);
+  });
+});

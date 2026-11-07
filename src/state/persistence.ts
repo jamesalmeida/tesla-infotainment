@@ -1,6 +1,7 @@
 import { DOCK } from '../apps/registry';
 import { safeStorage } from '../utils/safeStorage';
 import {
+  isScheduleTime,
   isValidPin,
   ACCELERATION_MODES,
   APPEARANCES,
@@ -39,6 +40,7 @@ import {
   type MeterBaseline,
   type BluetoothState,
   type Preferences,
+  type ScheduleEntry,
   type TripMeter,
   type WifiState,
   type ValetSession,
@@ -69,7 +71,7 @@ import {
   type ProfileSettings,
   type ProfileSnapshot,
 } from './profiles';
-import { findBluetoothDevice, findWifiNetwork } from './sampleData';
+import { DEMO_UPDATES, findBluetoothDevice, findWifiNetwork, WHEEL_OPTIONS } from './sampleData';
 
 const STORAGE_KEY = 'tesla-car-state';
 const SCHEMA_VERSION = 1;
@@ -98,6 +100,9 @@ type Persisted = {
   | 'cabin'
   | 'wifi'
   | 'bluetooth'
+  | 'homelink'
+  | 'installedUpdate'
+  | 'schedule'
 >;
 
 const pickPersisted = ({
@@ -119,6 +124,9 @@ const pickPersisted = ({
   cabin,
   wifi,
   bluetooth,
+  homelink,
+  installedUpdate,
+  schedule,
 }: CarState): Persisted => ({
   climate: climatePreferences(climate),
   volume,
@@ -139,6 +147,10 @@ const pickPersisted = ({
   // A connection in progress doesn't outlive the page.
   wifi: { ...wifi, attempt: null, error: null },
   bluetooth: { ...bluetooth, pairing: null, error: null },
+  // A visit starts with the door shut, so only home itself matters.
+  homelink: { door: 'closed', doorPosition: 0, homeOdometerMiles: homelink.homeOdometerMiles },
+  installedUpdate,
+  schedule,
 });
 
 const inRange = (value: unknown, min: number, max: number): value is number =>
@@ -206,7 +218,7 @@ type NumericSetting = {
   [K in keyof VehicleSettings]: VehicleSettings[K] extends number ? K : never;
 }[keyof VehicleSettings];
 
-const SETTING_RANGES: Record<NumericSetting, [number, number]> = {
+const SETTING_RANGES: Partial<Record<NumericSetting, [number, number]>> = {
   chargeLimit: [MIN_CHARGE_LIMIT, MAX_CHARGE_LIMIT],
   chargeCurrent: [MIN_CHARGE_AMPS, MAX_CHARGE_AMPS],
   followingDistance: [MIN_FOLLOWING_DISTANCE, MAX_FOLLOWING_DISTANCE],
@@ -216,8 +228,8 @@ const SETTING_RANGES: Record<NumericSetting, [number, number]> = {
 function keepRanges(merged: VehicleSettings, defaults: VehicleSettings): VehicleSettings {
   const result = { ...merged };
   for (const key of Object.keys(SETTING_RANGES) as NumericSetting[]) {
-    const [min, max] = SETTING_RANGES[key];
-    if (!inRange(merged[key], min, max)) result[key] = defaults[key];
+    const range = SETTING_RANGES[key];
+    if (range && !inRange(merged[key], ...range)) result[key] = defaults[key];
   }
   return result;
 }
@@ -265,7 +277,7 @@ function restoreSettings(defaults: VehicleSettings, saved: unknown): VehicleSett
   };
 }
 
-const oneOf = <T>(options: readonly T[], value: unknown, fallback: T): T =>
+const oneOfOr = <T>(options: readonly T[], value: unknown, fallback: T): T =>
   options.includes(value as T) ? (value as T) : fallback;
 
 const isValidSeat = (seat: SeatId, heat: unknown): heat is SeatHeat => {
@@ -298,7 +310,7 @@ function restoreClimate(
         Number.isInteger(cabin.fanSpeed) && inRange(cabin.fanSpeed, MIN_FAN_SPEED, MAX_FAN_SPEED)
           ? cabin.fanSpeed
           : defaults.cabin.fanSpeed,
-      airflow: oneOf(AIRFLOWS, cabin.airflow, defaults.cabin.airflow),
+      airflow: oneOfOr(AIRFLOWS, cabin.airflow, defaults.cabin.airflow),
     },
     driverTemp,
     passengerTemp:
@@ -310,8 +322,8 @@ function restoreClimate(
         return [seat, isValidSeat(seat, heat) ? heat : defaults.seats[seat]];
       }),
     ) as ClimateState['seats'],
-    wheel: oneOf(WHEEL_HEAT, climate.wheel, defaults.wheel),
-    overheatProtection: oneOf(
+    wheel: oneOfOr(WHEEL_HEAT, climate.wheel, defaults.wheel),
+    overheatProtection: oneOfOr(
       OVERHEAT_PROTECTION,
       climate.overheatProtection,
       defaults.overheatProtection,
@@ -332,6 +344,9 @@ const restoreDock = (saved: unknown): CarState['dockByProfile'] =>
         Object.entries(saved).filter(([, order]) => isDockOrder(order)),
       ) as CarState['dockByProfile'])
     : {};
+
+const isName = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim() !== '' && value.length <= MAX_NAME_LENGTH;
 
 const oneOf =
   (...options: unknown[]) =>
@@ -368,11 +383,13 @@ const SETTING_RULES: { [K in keyof VehicleSettings]?: (value: unknown) => boolea
   audioFade: between(-10, 10),
   immersiveSound: oneOf('off', 'standard', 'high'),
   assistantStyle: oneOf('friendly', 'concise', 'playful'),
-  cabinOverheat: oneOf('off', 'no-ac', 'on'),
   collisionWarning: oneOf('off', 'late', 'average', 'early'),
   speedLimitMph: between(MIN_SPEED_LIMIT, MAX_SPEED),
   speedLimitPin: isSavedPin,
   drivePin: isSavedPin,
+  vehicleName: isName,
+  updatePreference: oneOf(...Object.keys(DEMO_UPDATES)),
+  wheelConfig: oneOf(...WHEEL_OPTIONS.map(({ value }) => value)),
 };
 
 function applySettingRules<T extends Partial<VehicleSettings>>(settings: T, defaults: T): T {
@@ -383,9 +400,6 @@ function applySettingRules<T extends Partial<VehicleSettings>>(settings: T, defa
   }
   return checked;
 }
-
-const isName = (value: unknown): value is string =>
-  typeof value === 'string' && value.trim() !== '' && value.length <= MAX_NAME_LENGTH;
 
 const isBaseline = (value: unknown): value is MeterBaseline =>
   isRecord(value) &&
@@ -422,7 +436,7 @@ const restoreSnapshot = (saved: unknown, defaults: CarState): ProfileSnapshot | 
     cabin: restoreCabin(saved.cabin, defaults.cabin),
     temperature: inRange(saved.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE)
       ? saved.temperature
-      : defaults.temperature,
+      : defaults.climate.driverTemp,
     volume: inRange(saved.volume, 0, 100) ? saved.volume : defaults.volume,
     display: inRange(display.brightness, 0, 100) ? display : defaults.display,
     settings: restoreProfileSettings(saved.settings, defaults.settings),
@@ -510,6 +524,17 @@ function restoreBluetooth(saved: unknown, defaults: BluetoothState): BluetoothSt
   };
 }
 
+const isScheduleEntry = (value: unknown): value is ScheduleEntry =>
+  isRecord(value) &&
+  Number.isInteger(value.id) &&
+  (value.kind === 'charge' || value.kind === 'departure') &&
+  typeof value.time === 'string' &&
+  isScheduleTime(value.time) &&
+  Array.isArray(value.days) &&
+  value.days.every((day) => Number.isInteger(day) && day >= 0 && day <= 6) &&
+  typeof value.enabled === 'boolean' &&
+  (value.lastRanOn === null || typeof value.lastRanOn === 'string');
+
 // A mode that needs a PIN can't be on without one, or nothing could ever turn it off.
 const withPinModesIntact = (settings: VehicleSettings): VehicleSettings => ({
   ...settings,
@@ -573,6 +598,19 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
     cabin: restoreCabin(saved.cabin, defaults.cabin),
     wifi: restoreWifi(saved.wifi, defaults.wifi),
     bluetooth: restoreBluetooth(saved.bluetooth, defaults.bluetooth),
+    homelink: {
+      ...defaults.homelink,
+      homeOdometerMiles:
+        isRecord(saved.homelink) &&
+        inRange(saved.homelink.homeOdometerMiles, 0, Number.MAX_SAFE_INTEGER)
+          ? saved.homelink.homeOdometerMiles
+          : defaults.homelink.homeOdometerMiles,
+    },
+    installedUpdate:
+      typeof saved.installedUpdate === 'string' ? saved.installedUpdate : defaults.installedUpdate,
+    schedule: Array.isArray(saved.schedule)
+      ? saved.schedule.filter(isScheduleEntry)
+      : defaults.schedule,
     dockByProfile: restoreDock(saved.dockByProfile),
     settings: withPinModesIntact(
       applySettingRules(restoreSettings(defaults.settings, saved.settings), defaults.settings),

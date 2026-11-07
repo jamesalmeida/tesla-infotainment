@@ -58,3 +58,56 @@ export const findBluetoothDevice = (id: string): BluetoothDevice | undefined =>
 
 // The sample password for the car's own hotspot.
 export const HOTSPOT_PASSWORD = 'demo-hotspot';
+
+export const VEHICLE_INFO = {
+  model: 'Demo Long Range',
+  vin: 'DEMO0SIMULATED000',
+  battery: '75 kWh (simulated)',
+};
+
+export const WHEEL_OPTIONS = [
+  { value: 'aero-18', label: '18" Aero' },
+  { value: 'sport-19', label: '19" Sport' },
+  { value: 'track-20', label: '20" Track' },
+] as const;
+
+export type WheelConfig = (typeof WHEEL_OPTIONS)[number]['value'];
+
+// Recommended cold pressure and a fixed sample reading for each corner.
+export const TIRE_PRESSURES = [
+  { corner: 'Front Left', psi: 42 },
+  { corner: 'Front Right', psi: 41 },
+  { corner: 'Rear Left', psi: 42 },
+  { corner: 'Rear Right', psi: 40 },
+];
+
+export const SERVICE_INTERVALS = [
+  { item: 'Tire rotation', everyMiles: 6250 },
+  { item: 'Cabin air filter', everyMiles: 20000 },
+  { item: 'Brake fluid check', everyMiles: 25000 },
+];
+
+export const MANUAL_TOPICS = [
+  {
+    title: 'Getting moving',
+    body: 'Pick a gear at the top of the car panel, then hold Go or the up arrow key to accelerate.',
+  },
+  {
+    title: 'Charging',
+    body: 'Plug in while parked. Charging stops at the limit you set, and the car will not shift until unplugged.',
+  },
+  {
+    title: 'Sharing the car',
+    body: 'Give each driver a profile, and use Valet Mode with a PIN when you hand over the keys.',
+  },
+];
+
+// Numbered like software releases, but these are made up for the simulated update.
+export const DEMO_UPDATES = { standard: '2026.44.1-demo', advanced: '2026.46.0-demo' } as const;
+
+export const DEMO_UPGRADES = [
+  { name: 'Heated Rear Seats', detail: 'Warm back seats on cold mornings.' },
+  { name: 'Acceleration Boost', detail: 'A quicker launch from a standstill.' },
+  { name: 'Assisted Driving Pack', detail: 'More help on the highway.' },
+  { name: 'Connectivity Plus', detail: 'Live traffic and streaming away from Wifi.' },
+];

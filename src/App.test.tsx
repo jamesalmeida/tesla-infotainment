@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import { vi } from 'vitest';
 import App from './App';
 
@@ -93,6 +93,74 @@ test('map wifi icon opens Settings on Wifi, and reopening returns to Controls', 
   await waitForLazyApp();
   expect(panelIsOpen()).toBe(true);
   expect(activeSettingsPanel()).toBe('Controls');
+});
+
+const openAudioSettings = async () => {
+  // A press on the icon closes the popup if it's still showing from last time.
+  if (!screen.queryByAltText('Audio Settings')) fireEvent.click(screen.getByAltText('Volume'));
+  fireEvent.click(screen.getByAltText('Audio Settings'));
+  await waitForLazyApp();
+};
+
+test('the volume popup opens the Audio panel, with Settings closed or already open', async () => {
+  renderApp();
+
+  await openAudioSettings();
+  expect(panelIsOpen()).toBe(true);
+  expect(activeSettingsPanel()).toBe('Audio');
+
+  fireEvent.click(screen.getByText('Dynamics'));
+  await openAudioSettings();
+  expect(panelIsOpen()).toBe(true);
+  expect(activeSettingsPanel()).toBe('Audio');
+});
+
+test('the Settings top bar opens HomeLink, the bell and Bluetooth', async () => {
+  renderApp();
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+
+  const topBar = within(document.querySelector<HTMLElement>('.top-bar')!);
+  fireEvent.click(topBar.getByAltText('Garage'));
+  expect(activeSettingsPanel()).toBe('HomeLink');
+  fireEvent.click(topBar.getByAltText('Notifications'));
+  expect(activeSettingsPanel()).toBe('Notifications');
+  fireEvent.click(topBar.getByAltText('Bluetooth'));
+  expect(activeSettingsPanel()).toBe('Bluetooth');
+});
+
+test('restarting the touchscreen replays the boot screen, then returns to the map', async () => {
+  renderApp();
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Service'));
+  fireEvent.click(screen.getByRole('button', { name: 'Restart' }));
+
+  expect(screen.getByAltText('Tesla Logo')).toBeInTheDocument();
+  expect(panelIsOpen()).toBe(false);
+
+  act(() => {
+    vi.advanceTimersByTime(4000);
+  });
+  expect(screen.queryByAltText('Tesla Logo')).not.toBeInTheDocument();
+});
+
+test('PIN to Drive asks for the PIN over everything when the car would leave Park', () => {
+  localStorage.setItem(
+    'tesla-car-state',
+    JSON.stringify({ version: 1, state: { settings: { pinToDrive: true, drivePin: '1234' } } }),
+  );
+  renderApp();
+
+  fireEvent.click(gearIcon('D'));
+  expect(activeGear()).toBe('P');
+
+  fireEvent.change(screen.getByLabelText('Drive PIN'), { target: { value: '1234' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Unlock' }));
+  expect(screen.queryByLabelText('Drive PIN')).not.toBeInTheDocument();
+
+  fireEvent.click(gearIcon('D'));
+  expect(activeGear()).toBe('D');
 });
 
 test('reverse gear forces the backup camera and blocks closing until Park', () => {

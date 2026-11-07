@@ -11,6 +11,7 @@
   min-width: 0;
   padding-bottom: calc(16 * var(--u));
   box-sizing: border-box;
+  background-color: var(--color-panel);
   color: var(--color-text);
   font-size: max(var(--text-min), calc(14 * var(--u)));
   text-align: left;
@@ -280,6 +281,16 @@
   letter-spacing: 0.2em;
 }
 
+.pinInput::placeholder {
+  letter-spacing: normal;
+}
+
+/* In a column the input's flex basis would become its height. */
+.stackedRow .input {
+  flex: none;
+  width: 100%;
+}
+
 .progress {
   overflow: hidden;
   height: max(6px, calc(8 * var(--u)));
@@ -371,7 +382,7 @@
 }
 
 /* Wide panels: sections sit side by side instead of running down one long column. */
-@container system-panel (min-width: 760px) {
+@container system-panel (min-width: 620px) {
   .twoColumns {
     display: grid;
     grid-template-columns: 1fr 1fr;

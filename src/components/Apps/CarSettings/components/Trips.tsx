@@ -5,11 +5,11 @@ import {
   MAX_TRIP_METERS,
   rangeMiles,
   vehiclePower,
-  type MapUnits,
+  type Preferences,
   type TripMeter,
   type VehiclePower,
 } from '../../../../state/carState';
-import { formatDistance, toDisplayDistance, unitLabel } from '../../../../utils/units';
+import { formatDistanceFixed, toDisplayDistance, unitLabel } from '../../../../utils/units';
 import {
   Button,
   ButtonRow,
@@ -28,18 +28,18 @@ const POWER_LABELS: Record<VehiclePower, string> = {
   charging: 'Charging',
 };
 
-const formatEfficiency = (miles: number, kwh: number, units: MapUnits) => {
+const formatEfficiency = (miles: number, kwh: number, units: Preferences['distance']) => {
   const distance = toDisplayDistance(miles, units);
   if (distance < 0.05) return '--';
   return `${Math.round((kwh * 1000) / distance)} Wh/${unitLabel(units)}`;
 };
 
 function MeterStats({ miles, kwh }: { miles: number; kwh: number }) {
-  const units = useCar((state) => state.settings.mapUnits);
+  const units = useCar((state) => state.settings.preferences.distance);
 
   return (
     <Stats>
-      <Stat label="Distance" value={formatDistance(miles, units)} />
+      <Stat label="Distance" value={formatDistanceFixed(miles, units)} />
       <Stat label="Energy" value={`${kwh.toFixed(1)} kWh`} />
       <Stat label="Average" value={formatEfficiency(miles, kwh, units)} />
     </Stats>
@@ -52,7 +52,7 @@ function LiveStatus() {
   const odometer = useCar((state) => state.odometerMiles);
   const range = useCar(rangeMiles);
   const power = useCar(vehiclePower);
-  const units = useCar((state) => state.settings.mapUnits);
+  const units = useCar((state) => state.settings.preferences.distance);
 
   return (
     <Section>
@@ -63,8 +63,8 @@ function LiveStatus() {
           value={`${Math.round(toDisplayDistance(speed, units))} ${units === 'km' ? 'km/h' : 'mph'}`}
         />
         <Stat label="Battery" value={`${Math.round(battery)}%`} />
-        <Stat label="Range" value={formatDistance(range, units, 0)} />
-        <Stat label="Odometer" value={formatDistance(odometer, units, 0)} />
+        <Stat label="Range" value={formatDistanceFixed(range, units, 0)} />
+        <Stat label="Odometer" value={formatDistanceFixed(odometer, units, 0)} />
       </Stats>
     </Section>
   );

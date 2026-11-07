@@ -123,7 +123,7 @@ function Positions() {
   const shown = useCar(effectiveCabin);
   const isEasyEntry = useCar((state) => state.easyEntryActive);
   const easyEntry = useCar((state) => state.settings.easyEntry);
-  const { setCabin, setSettings } = useCarActions();
+  const { setCabinPosition, setSettings } = useCarActions();
 
   return (
     <Section title="Seat, Mirrors and Steering" hint="Saved for the current driver.">
@@ -147,7 +147,7 @@ function Positions() {
               min={0}
               max={100}
               disabled={isEasyEntry}
-              onChange={(value) => setCabin({ [key]: value })}
+              onChange={(value) => setCabinPosition({ [key]: value })}
             />
           ))}
         </div>
