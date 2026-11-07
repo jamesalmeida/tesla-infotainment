@@ -1,0 +1,62 @@
+.stage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.lyrics {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10 * var(--u));
+  min-height: 0;
+  padding: calc(8 * var(--u));
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+  text-align: center;
+}
+
+.current {
+  margin: 0;
+  /* The sung part of the line fills in from the left. */
+  background-image: linear-gradient(
+    to right,
+    var(--color-accent) var(--sung, 0%),
+    var(--color-text-strong) var(--sung, 0%)
+  );
+  background-clip: text;
+  color: transparent;
+  font-size: max(18px, calc(34 * var(--u)));
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.next {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: max(13px, calc(20 * var(--u)));
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  margin-top: calc(8 * var(--u));
+}
+
+.time {
+  flex: 0 0 auto;
+  font-size: var(--app-text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+@container (max-width: 480px) {
+  .current {
+    font-size: max(17px, calc(26 * var(--u)));
+  }
+}
