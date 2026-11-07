@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1824"/>
+      <stop offset="1" stop-color="#1b3a57"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="600" fill="url(#night)"/>
+  <rect y="440" width="1600" height="160" fill="#0b1824"/>
+  <g fill="#1b3a57">
+    <rect x="160" y="110" width="1280" height="26" rx="8"/>
+    <rect x="280" y="136" width="20" height="310"/>
+    <rect x="1300" y="136" width="20" height="310"/>
+  </g>
+  <g id="stalls">
+    <g transform="translate(400 340)">
+      <rect x="-48" y="-120" width="96" height="220" rx="14" fill="#e9ecef"/>
+      <rect x="-32" y="-102" width="64" height="70" rx="6" fill="#1b3a57"/>
+      <path d="M6 -98 L-14 -64 H0 L-6 -40 L16 -74 H2Z" fill="#51cf66"/>
+    </g>
+    <g transform="translate(680 340)">
+      <rect x="-48" y="-120" width="96" height="220" rx="14" fill="#e9ecef"/>
+      <rect x="-32" y="-102" width="64" height="70" rx="6" fill="#1b3a57"/>
+      <path d="M6 -98 L-14 -64 H0 L-6 -40 L16 -74 H2Z" fill="#ffd43b"/>
+    </g>
+    <g transform="translate(960 340)">
+      <rect x="-48" y="-120" width="96" height="220" rx="14" fill="#e9ecef"/>
+      <rect x="-32" y="-102" width="64" height="70" rx="6" fill="#1b3a57"/>
+      <path d="M6 -98 L-14 -64 H0 L-6 -40 L16 -74 H2Z" fill="#ff6b6b"/>
+    </g>
+    <g transform="translate(1240 340)">
+      <rect x="-48" y="-120" width="96" height="220" rx="14" fill="#e9ecef"/>
+      <rect x="-32" y="-102" width="64" height="70" rx="6" fill="#1b3a57"/>
+      <path d="M6 -98 L-14 -64 H0 L-6 -40 L16 -74 H2Z" fill="#51cf66"/>
+    </g>
+  </g>
+  <g fill="none" stroke="#ffd43b" stroke-width="5" stroke-dasharray="3 15" stroke-linecap="round">
+    <path d="M400 190 Q540 40 680 190"/>
+    <path d="M680 190 Q820 40 960 190"/>
+    <path d="M960 190 Q1100 40 1240 190"/>
+  </g>
+  <g fill="#ffd43b" stroke="#0b1824" stroke-width="4" stroke-linejoin="round">
+    <path d="M548 68 L518 122 H542 L530 172 L578 106 H552Z"/>
+    <path d="M828 68 L798 122 H822 L810 172 L858 106 H832Z"/>
+    <path d="M1108 68 L1078 122 H1102 L1090 172 L1138 106 H1112Z"/>
+  </g>
+</svg>
