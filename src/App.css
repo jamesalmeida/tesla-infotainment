@@ -169,6 +169,29 @@ body {
 }
 
 /* In the flow, so the car takes whatever height is left instead of sitting behind these. */
+.parkViewBtn {
+  position: absolute;
+  top: calc(44 * var(--u));
+  right: calc(8 * var(--u));
+  z-index: 8;
+  min-height: var(--tap-target);
+  padding: 0 calc(10 * var(--u));
+  border: none;
+  border-radius: calc(7 * var(--u));
+  background: rgba(255, 255, 255, 0.78);
+  color: #4e4e4e;
+  font: inherit;
+  font-size: max(var(--text-min), calc(11 * var(--u)));
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: rgba(0, 0, 0, 0.12) 0 2px 6px;
+}
+
+.parkViewBtn.active {
+  background: #2b2b2b;
+  color: #ffffff;
+}
+
 .carModelStatus {
   position: relative;
   z-index: 4;

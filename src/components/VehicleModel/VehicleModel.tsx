@@ -390,7 +390,6 @@ export function VehicleModel({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
     >
-      <color attach="background" args={['#f1f1f1']} />
       <Stage environment={stageEnvironment}>
         <Model
           scale={0.01}

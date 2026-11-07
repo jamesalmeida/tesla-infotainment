@@ -7,6 +7,7 @@ import {
   isCameraForced,
   isDriving,
   isPanelOpen,
+  isParked,
   leftSignalLit,
   rightSignalLit,
   vehiclePose,
@@ -113,10 +114,29 @@ function VehicleView({ onSettled }: { onSettled: () => void }) {
   );
 }
 
+function ParkViewButton({ isActive, onToggle }: { isActive: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      className={`parkViewBtn ${isActive ? 'active' : ''}`}
+      aria-pressed={isActive}
+      onClick={onToggle}
+    >
+      {isActive ? 'Exit Park View' : 'Park View'}
+    </button>
+  );
+}
+
 const LeftPanelContent = memo(function LeftPanelContent({
   onCarSettled,
+  canParkView,
+  isParkView,
+  onToggleParkView,
 }: {
   onCarSettled: () => void;
+  canParkView: boolean;
+  isParkView: boolean;
+  onToggleParkView: () => void;
 }) {
   return (
     <>
@@ -127,6 +147,7 @@ const LeftPanelContent = memo(function LeftPanelContent({
       <VehicleView onSettled={onCarSettled} />
       <CarCards />
       <DriveStrip />
+      {canParkView && <ParkViewButton isActive={isParkView} onToggle={onToggleParkView} />}
     </>
   );
 });
@@ -205,7 +226,9 @@ function StackedViewSwitch({
 function Panels({ onCarSettled }: { onCarSettled: () => void }) {
   const { mode, isTall } = useLayout();
   const driving = useCar(isDriving);
+  const parked = useCar(isParked);
   const isOpen = useCar(isPanelOpen);
+  const [parkView, setParkView] = useState(false);
   const { closeSurface } = useCarActions();
   const leftPanelRef = useRef<PanelImperativeHandle>(null);
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
@@ -218,6 +241,11 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
   const hasViewSwitch = isStacked && !isTall;
   // Apps open over the map, so a phone has to be showing it.
   const visibleView = isOpen ? 'map' : stackedView;
+  const showParkView = parkView && parked && !isStacked && !isOpen;
+
+  useEffect(() => {
+    if (!parked) setParkView(false);
+  }, [parked]);
 
   // The same tree serves every mode, with only the sizes changing. Rendering a different one
   // would remount the map and the audio, so rotating or folding would lose the route and
@@ -227,9 +255,11 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
     if (!panel) return;
     if (hasViewSwitch) panel.resize(visibleView === 'car' ? '100%' : '0%');
     else if (isStacked) panel.resize(`${STACKED_LEFT_PANEL_SIZE}%`);
+    // Park View is the full-width scene, with no map beside it.
+    else if (showParkView) panel.resize('100%');
     // The split only widens in Drive, and an open app always gets the default width.
     else if (!driving || isOpen) panel.resize(`${DEFAULT_LEFT_PANEL_SIZE}%`);
-  }, [driving, isOpen, isStacked, hasViewSwitch, visibleView]);
+  }, [driving, isOpen, isStacked, hasViewSwitch, visibleView, showParkView]);
 
   // Only a real drag of the separator can close an app. Window resizes, rotation and
   // the resize above all land here too, and must not count as intent.
@@ -259,9 +289,14 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
           className="leftPanel"
           panelRef={leftPanelRef}
         >
-          <LeftPanelContent onCarSettled={onCarSettled} />
+          <LeftPanelContent
+            onCarSettled={onCarSettled}
+            canParkView={parked && !isStacked}
+            isParkView={showParkView}
+            onToggleParkView={() => setParkView((open) => !open)}
+          />
         </Panel>
-        {driving && !isStacked && <Separator className="panelResizeHandle" />}
+        {!isStacked && !showParkView && <Separator className="panelResizeHandle" />}
         <Panel
           id="rightPanel"
           defaultSize={`${RIGHT_PANEL_SIZE}%`}

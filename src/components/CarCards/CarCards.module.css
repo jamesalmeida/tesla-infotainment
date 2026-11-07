@@ -48,10 +48,14 @@
   will-change: transform;
 }
 
-.card,
-.mediaCard {
+.slide {
   flex: 0 0 100%;
   min-width: 100%;
+}
+
+.card,
+.mediaCard {
+  width: 100%;
   box-sizing: border-box;
   background: #ffffff;
   padding: calc(8 * var(--u));

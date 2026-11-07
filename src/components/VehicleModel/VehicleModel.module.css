@@ -3,4 +3,14 @@
   flex: 1;
   min-height: 0;
   height: auto !important;
+  /* A soft park scene behind the car, rather than a flat grey rectangle. */
+  background:
+    radial-gradient(ellipse at 50% 78%, rgba(255, 255, 255, 0.92), transparent 62%),
+    linear-gradient(180deg, #dbe4eb 0%, #eef1f3 48%, #c9d2d9 100%);
+}
+
+:global(:root[data-theme='dark']) .carModelWrapper {
+  background:
+    radial-gradient(ellipse at 50% 78%, rgba(80, 88, 96, 0.55), transparent 62%),
+    linear-gradient(180deg, #11161b 0%, #1b2127 48%, #0c1014 100%);
 }

@@ -191,11 +191,25 @@ export function CarCards() {
           className={styles.track}
           style={{ transform: `translateX(calc(${-index * 100}% + ${dragPercent * 100}%))` }}
         >
-          <div className={styles.mediaCard}>
-            <MusicPanel volume={volume} />
+          <div
+            className={styles.slide}
+            aria-hidden={card.id !== 'media'}
+            inert={card.id !== 'media'}
+          >
+            <div className={styles.mediaCard}>
+              <MusicPanel volume={volume} />
+            </div>
           </div>
-          <TireCard />
-          <TripCard />
+          <div
+            className={styles.slide}
+            aria-hidden={card.id !== 'tires'}
+            inert={card.id !== 'tires'}
+          >
+            <TireCard />
+          </div>
+          <div className={styles.slide} aria-hidden={card.id !== 'trip'} inert={card.id !== 'trip'}>
+            <TripCard />
+          </div>
         </div>
       </div>
       <div className={styles.dots} aria-hidden="true">
