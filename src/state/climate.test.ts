@@ -266,11 +266,11 @@ describe('climate modes', () => {
   });
 
   test('leaving Park reports both the mode and an app closing behind it', () => {
-    const left = reduce({ type: 'app/toggle', app: 'arcade' }, mode('dog'), gear('D'));
+    const left = reduce({ type: 'app/toggle', app: 'theater' }, mode('dog'), gear('D'));
     expect(left.climate.mode).toBe(null);
     expect(left.surface).toEqual({ kind: 'closed' });
     expect(left.notifications.map(({ message }) => message)).toEqual([
-      'Arcade is only available in Park',
+      'Theater is only available in Park',
       'Dog Mode is off: the car left Park',
     ]);
   });
