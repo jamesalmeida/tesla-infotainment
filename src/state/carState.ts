@@ -103,6 +103,7 @@ export const SETTINGS_PANELS = [
   'Software',
   'Wifi',
   'Notifications',
+  'Audio',
 ] as const;
 
 export type SettingsPanel = (typeof SETTINGS_PANELS)[number];
@@ -210,6 +211,18 @@ export type OverlayMode = 'car-wash' | 'screen-clean';
 
 export type MapUnits = 'mi' | 'km';
 
+export interface SuperchargerFilters {
+  // 0 shows every site.
+  minPowerKw: 0 | 150 | 250;
+  food: boolean;
+  restrooms: boolean;
+  shopping: boolean;
+}
+
+export type ImmersiveSound = 'off' | 'standard' | 'high';
+
+export type AssistantStyle = 'friendly' | 'concise' | 'playful';
+
 // Where a meter started counting. Odometer and energy only rise, so a meter is a subtraction.
 export interface MeterBaseline {
   miles: number;
@@ -270,6 +283,26 @@ export interface VehicleSettings {
   petMode: PetMode;
   preferences: Preferences;
   mapUnits: MapUnits;
+  // The route request reads these.
+  onlineRouting: boolean;
+  avoidTolls: boolean;
+  avoidFerries: boolean;
+  tripPlanner: boolean;
+  // Percent of battery left on arrival at the destination.
+  arrivalChargeTarget: number;
+  superchargerFilters: SuperchargerFilters;
+  // 0-100, separate from the media volume in CarState.volume.
+  navVolume: number;
+  // -6 to +6 dB.
+  eqBass: number;
+  eqMid: number;
+  eqTreble: number;
+  // -10 (left, rear) to +10 (right, front).
+  audioBalance: number;
+  audioFade: number;
+  immersiveSound: ImmersiveSound;
+  assistantEnabled: boolean;
+  assistantStyle: AssistantStyle;
 }
 
 export interface DisplaySettings {
@@ -483,6 +516,21 @@ export const initialCarState: CarState = {
       timeFormat: '12h',
     },
     mapUnits: 'mi',
+    onlineRouting: true,
+    avoidTolls: false,
+    avoidFerries: false,
+    tripPlanner: true,
+    arrivalChargeTarget: 10,
+    superchargerFilters: { minPowerKw: 0, food: false, restrooms: false, shopping: false },
+    navVolume: 50,
+    eqBass: 0,
+    eqMid: 0,
+    eqTreble: 0,
+    audioBalance: 0,
+    audioFade: 0,
+    immersiveSound: 'standard',
+    assistantEnabled: false,
+    assistantStyle: 'friendly',
   },
   display: { brightness: 100, autoBrightness: false, appearance: 'light', blueLightReduction: 0 },
   notice: null,

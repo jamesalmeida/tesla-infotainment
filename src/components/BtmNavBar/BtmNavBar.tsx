@@ -68,13 +68,13 @@ function ClimateControl({ zone }: { zone: TemperatureZone }) {
 
 function AudioControl() {
   const volume = useCar((state) => state.volume);
-  const { setVolume, toggleApp } = useCarActions();
+  const { setVolume, openSettings } = useCarActions();
 
   return (
     <VolumeControl
       volume={volume}
       onVolumeChange={setVolume}
-      onOpenAudioSettings={() => toggleApp('car-settings')}
+      onOpenAudioSettings={() => openSettings('Audio')}
     />
   );
 }

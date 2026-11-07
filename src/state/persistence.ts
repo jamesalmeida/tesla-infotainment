@@ -308,10 +308,27 @@ const between =
   (value: unknown): boolean =>
     inRange(value, min, max);
 
+const isSuperchargerFilters = (value: unknown): boolean =>
+  isRecord(value) &&
+  [0, 150, 250].includes(value.minPowerKw as number) &&
+  typeof value.food === 'boolean' &&
+  typeof value.restrooms === 'boolean' &&
+  typeof value.shopping === 'boolean';
+
 // mergeKnown only checks a value's type, so anything narrower than that is checked here.
 const SETTING_RULES: { [K in keyof VehicleSettings]?: (value: unknown) => boolean } = {
   wipers: isValidWipers,
   mapUnits: oneOf('mi', 'km'),
+  arrivalChargeTarget: between(0, 50),
+  superchargerFilters: isSuperchargerFilters,
+  navVolume: between(0, 100),
+  eqBass: between(-6, 6),
+  eqMid: between(-6, 6),
+  eqTreble: between(-6, 6),
+  audioBalance: between(-10, 10),
+  audioFade: between(-10, 10),
+  immersiveSound: oneOf('off', 'standard', 'high'),
+  assistantStyle: oneOf('friendly', 'concise', 'playful'),
 };
 
 function applySettingRules<T extends Partial<VehicleSettings>>(settings: T, defaults: T): T {
