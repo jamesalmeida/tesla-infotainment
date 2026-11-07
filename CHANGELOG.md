@@ -6,6 +6,15 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 ### Added
 
+- Media, tire-pressure and trip cards under the car, a swipe-to-shift drive strip, and a full-width Park View with a park scene.
+- A stylised driving scene with lanes, traffic and a route line, animated car lamps and wheels, and a Paint Shop for paint, wheels and a plate.
+- Live weather and air quality from Open-Meteo, with a clearly-labelled sample fallback.
+- Voice control through the browser's speech recognition, plus a typed fallback, mapped onto real car actions.
+- An SOS screen that says it is a simulation, a rear-display window for climate and media, and optional on-screen keyboard for desktop kiosks.
+- Sleep and wake screens with a welcome animation and a hold-to-restart gesture.
+- Local car sounds for locks, doors, indicators and the seat-belt reminder, with a mute control and a mute/unmute button in the volume popup.
+- The Camera app now has rear, front and side views, and routes show distance, time, arrival battery and a charge-stop hint.
+- The app can be installed to a home screen and starts offline, with an update prompt and an iOS install hint.
 - A notice in the README and Software panel says this is an unofficial fan project, not affiliated with or endorsed by Tesla, Inc. The page title is now "Tesla Infotainment Simulator".
 - The README lists each `public/` folder with its known source and licence, or says it is unknown.
 - Dependabot keeps dependencies and GitHub Actions current, with React and the 3D packages grouped so they move together.

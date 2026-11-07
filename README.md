@@ -15,7 +15,9 @@ Experience a simulated Tesla infotainment system in your browser!
 - Put the car in reverse (Click the R) and see what's behind you!
 - Try searching on the map. Turn on traffic or different map styles.
 - Check out the keyboard shortcuts below for more controls.
-- Working on more responsive design for various screen sizes. Works best on desktop but you can try it out on your phone in landscape mode too.
+- Adapts to desktop, laptop, iPad, foldable and phone sizes, including a full-width Park View and a rear-display window.
+- Try the voice control, live weather, Paint Shop and the animated car lamps.
+- The app can be installed to a home screen and starts offline after the first visit.
 - Adding features periodically. Leave a feature request in the issues section ^_^
 
 ## Keyboard Shortcuts
