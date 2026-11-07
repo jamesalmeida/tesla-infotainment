@@ -60,11 +60,15 @@ test('an app opens on the first click from a widened panel', async ({ page }) =>
   await page.setViewportSize({ width: 1440, height: 900 });
   await openApp(page);
   await page.keyboard.press('d');
+  // Let the drive layout settle before measuring the separator.
+  await page.waitForTimeout(250);
 
-  const separator = await page.locator('.panelResizeHandle').boundingBox();
+  const handle = page.locator('.panelResizeHandle');
+  await expect(handle).toBeVisible();
+  const separator = await handle.boundingBox();
   await page.mouse.move(separator!.x + 1, separator!.y + separator!.height / 2);
   await page.mouse.down();
-  await page.mouse.move(separator!.x + 300, separator!.y + separator!.height / 2, { steps: 8 });
+  await page.mouse.move(separator!.x + 300, separator!.y + separator!.height / 2, { steps: 4 });
   await page.mouse.up();
 
   await dockIcon(page, 'bluetooth').click();

@@ -17,9 +17,12 @@ const readGitSha = () => {
   }
 };
 
-// Deployed to GitHub Pages at https://jamesalmeida.github.io/tesla-infotainment/
+// GitHub Pages serves the app under /tesla-infotainment/. Vercel previews are served at the
+// root, so the same branch can be tested without rewriting every asset URL.
+const base = process.env.VERCEL ? '/' : '/tesla-infotainment/';
+
 export default defineConfig({
-  base: '/tesla-infotainment/',
+  base,
   plugins: [
     react(),
     VitePWA({
