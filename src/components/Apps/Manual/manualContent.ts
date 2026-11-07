@@ -151,6 +151,10 @@ export const MANUAL_TOPICS: ManualTopic[] = [
       'Phone and Messages are mock apps with invented contacts. They never place a call or send a message. You can dial, browse recents, and try the incoming call banner, and Messages can read a message aloud.',
     ],
     keywords: ['call', 'contacts', 'dial', 'sms', 'text', 'bluetooth', 'read aloud'],
+    links: [
+      { label: 'Open Phone', app: 'phone' },
+      { label: 'Open Messages', app: 'messages' },
+    ],
   },
   {
     id: 'dashcam',

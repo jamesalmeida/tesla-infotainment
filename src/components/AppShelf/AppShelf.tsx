@@ -33,6 +33,8 @@ const SHELF_APPS: AppId[] = [
   'arcade',
   'energy',
   'manual',
+  'phone',
+  'messages',
 ];
 
 function ShelfIcon({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {

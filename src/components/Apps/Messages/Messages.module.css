@@ -1,0 +1,55 @@
+.preview {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: max(20px, calc(22 * var(--u)));
+  height: max(20px, calc(22 * var(--u)));
+  padding: 0 calc(5 * var(--u));
+  border-radius: calc(11 * var(--u));
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--text-min);
+  font-weight: 600;
+}
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.received,
+.sent {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.sent {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.bubble {
+  padding: calc(8 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  overflow-wrap: anywhere;
+}
+
+.sent .bubble {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
