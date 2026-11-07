@@ -62,6 +62,11 @@ export const APPS = {
     icon: 'app-energy.svg',
     load: named(() => import('../components/Apps/Energy/Energy'), 'Energy'),
   },
+  manual: {
+    label: 'Manual',
+    icon: 'app-manual.svg',
+    load: named(() => import('../components/Apps/Manual/Manual'), 'Manual'),
+  },
   podcasts: {
     label: 'Podcasts',
     icon: 'app-podcasts.svg',
@@ -113,6 +118,5 @@ export const SHELF_PLACEHOLDERS = [
   { id: 'phone', label: 'Phone' },
   { id: 'messages', label: 'Messages' },
   { id: 'caraoke', label: 'Caraoke' },
-  { id: 'manual', label: 'Manual' },
   { id: 'tidal', label: 'Tidal' },
 ];
