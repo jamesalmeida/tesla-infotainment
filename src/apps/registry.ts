@@ -54,7 +54,7 @@ export const APPS = {
   camera: {
     label: 'Camera',
     icon: 'app-camera.svg',
-    load: named(() => import('../components/Apps/BackupCam/BackupCam'), 'BackupCam'),
+    load: named(() => import('../components/Apps/Camera/Camera'), 'Camera'),
   },
   caraoke: {
     label: 'Caraoke',
