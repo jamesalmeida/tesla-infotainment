@@ -1,6 +1,7 @@
 import { DOCK } from '../apps/registry';
 import { safeStorage } from '../utils/safeStorage';
 import {
+  isValidPin,
   ACCELERATION_MODES,
   APPEARANCES,
   CHILD_LOCK_MODES,
@@ -16,12 +17,14 @@ import {
   MAX_CHARGE_LIMIT,
   MAX_FOLLOWING_DISTANCE,
   MAX_NAME_LENGTH,
+  MAX_SPEED,
   MAX_SPEED_OFFSET,
   MAX_TEMPERATURE,
   MAX_TRIP_METERS,
   MIN_CHARGE_AMPS,
   MIN_CHARGE_LIMIT,
   MIN_FOLLOWING_DISTANCE,
+  MIN_SPEED_LIMIT,
   MIN_TEMPERATURE,
   PET_MODES,
   PRESSURE_UNITS,
@@ -308,6 +311,9 @@ const between =
   (value: unknown): boolean =>
     inRange(value, min, max);
 
+const isSavedPin = (value: unknown): boolean =>
+  value === '' || (typeof value === 'string' && isValidPin(value));
+
 const isSuperchargerFilters = (value: unknown): boolean =>
   isRecord(value) &&
   [0, 150, 250].includes(value.minPowerKw as number) &&
@@ -329,6 +335,11 @@ const SETTING_RULES: { [K in keyof VehicleSettings]?: (value: unknown) => boolea
   audioFade: between(-10, 10),
   immersiveSound: oneOf('off', 'standard', 'high'),
   assistantStyle: oneOf('friendly', 'concise', 'playful'),
+  cabinOverheat: oneOf('off', 'no-ac', 'on'),
+  collisionWarning: oneOf('off', 'late', 'average', 'early'),
+  speedLimitMph: between(MIN_SPEED_LIMIT, MAX_SPEED),
+  speedLimitPin: isSavedPin,
+  drivePin: isSavedPin,
 };
 
 function applySettingRules<T extends Partial<VehicleSettings>>(settings: T, defaults: T): T {
@@ -355,6 +366,13 @@ const isTripMeter = (value: unknown): value is TripMeter =>
 
 const restoreTripMeters = (saved: unknown, defaults: TripMeter[]): TripMeter[] =>
   Array.isArray(saved) ? saved.filter(isTripMeter).slice(0, MAX_TRIP_METERS) : defaults;
+
+// A mode that needs a PIN can't be on without one, or nothing could ever turn it off.
+const withPinModesIntact = (settings: VehicleSettings): VehicleSettings => ({
+  ...settings,
+  speedLimitMode: settings.speedLimitMode && settings.speedLimitPin !== '',
+  pinToDrive: settings.pinToDrive && settings.drivePin !== '',
+});
 
 // Corrupt or outdated data must never reach the reducer, so anything invalid is dropped
 // and the default for that value stays.
@@ -402,7 +420,9 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
     activeProfileId:
       typeof saved.activeProfileId === 'number' ? saved.activeProfileId : defaults.activeProfileId,
     dockByProfile: restoreDock(saved.dockByProfile),
-    settings: applySettingRules(restoreSettings(defaults.settings, saved.settings), defaults.settings),
+    settings: withPinModesIntact(
+      applySettingRules(restoreSettings(defaults.settings, saved.settings), defaults.settings),
+    ),
     display: {
       ...display,
       brightness: inRange(display.brightness, 0, 100)

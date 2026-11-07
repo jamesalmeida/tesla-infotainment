@@ -32,6 +32,7 @@ import { DogModeDisplay } from './components/Climate/DogModeDisplay';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { CarUnavailable, DisplayCrashed } from './components/ErrorBoundary/Fallbacks';
 import { DisplayEffects } from './components/DisplayEffects/DisplayEffects';
+import { DrivePinPrompt } from './components/DrivePinPrompt/DrivePinPrompt';
 import { Notice } from './components/Notice/Notice';
 import { ScreenClean } from './components/ScreenClean/ScreenClean';
 import { SentryOverlay } from './components/SentryOverlay/SentryOverlay';
@@ -142,6 +143,7 @@ function ActiveModal() {
       {activeModal === 'app-shelf' && <AppShelf />}
       {activeModal === 'climate' && <ClimatePanel />}
       {activeModal === 'shortcuts' && <ShortcutsHelp />}
+      {activeModal === 'drive-pin' && <DrivePinPrompt />}
     </Modal>
   );
 }

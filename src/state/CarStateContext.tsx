@@ -80,6 +80,13 @@ export interface CarActions {
   resetTripMeter: (id: number) => void;
   removeTripMeter: (id: number) => void;
   moveTripMeter: (id: number, offset: -1 | 1) => void;
+  enableSpeedLimit: (pin: string) => void;
+  disableSpeedLimit: (pin: string) => void;
+  enablePinToDrive: (pin: string) => void;
+  disablePinToDrive: (pin: string) => void;
+  unlockDrive: (pin: string) => void;
+  resetPins: () => void;
+  setRequireSafetyFeatures: (enabled: boolean) => void;
 }
 
 interface CarStore {
@@ -158,6 +165,13 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   resetTripMeter: (id) => dispatch({ type: 'trip/resetMeter', id }),
   removeTripMeter: (id) => dispatch({ type: 'trip/remove', id }),
   moveTripMeter: (id, offset) => dispatch({ type: 'trip/move', id, offset }),
+  enableSpeedLimit: (pin) => dispatch({ type: 'speedLimit/enable', pin }),
+  disableSpeedLimit: (pin) => dispatch({ type: 'speedLimit/disable', pin }),
+  enablePinToDrive: (pin) => dispatch({ type: 'pinToDrive/enable', pin }),
+  disablePinToDrive: (pin) => dispatch({ type: 'pinToDrive/disable', pin }),
+  unlockDrive: (pin) => dispatch({ type: 'pinToDrive/unlock', pin }),
+  resetPins: () => dispatch({ type: 'pins/reset' }),
+  setRequireSafetyFeatures: (enabled) => dispatch({ type: 'safety/require', enabled }),
 });
 
 interface CarContextValue {

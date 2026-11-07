@@ -61,6 +61,7 @@ const MAX_TRACK_SPEED = 120;
 export const MAX_TOASTS = 3;
 export const MAX_TRIP_METERS = 6;
 export const MAX_NAME_LENGTH = 24;
+export const MIN_SPEED_LIMIT = 50;
 
 // mph per second.
 const ACCELERATION_RATE = { chill: 6, standard: 10, sport: 14 } as const;
@@ -115,7 +116,7 @@ export type Surface =
   | { kind: 'settings'; panel: SettingsPanel }
   | { kind: 'camera' };
 
-export type ModalId = 'app-shelf' | 'climate' | 'shortcuts';
+export type ModalId = 'app-shelf' | 'climate' | 'shortcuts' | 'drive-pin';
 
 export type DockItem = (typeof DOCK)[number];
 
@@ -223,6 +224,10 @@ export type ImmersiveSound = 'off' | 'standard' | 'high';
 
 export type AssistantStyle = 'friendly' | 'concise' | 'playful';
 
+export type CabinOverheat = 'off' | 'no-ac' | 'on';
+
+export type CollisionWarning = 'off' | 'late' | 'average' | 'early';
+
 // Where a meter started counting. Odometer and energy only rise, so a meter is a subtraction.
 export interface MeterBaseline {
   miles: number;
@@ -303,6 +308,19 @@ export interface VehicleSettings {
   immersiveSound: ImmersiveSound;
   assistantEnabled: boolean;
   assistantStyle: AssistantStyle;
+  joeMode: boolean;
+  cabinOverheat: CabinOverheat;
+  blindSpotWarning: boolean;
+  collisionWarning: CollisionWarning;
+  emergencyBraking: boolean;
+  // While on, the warnings above can't be turned off.
+  requireSafetyFeatures: boolean;
+  speedLimitMph: number;
+  // Both modes hold their PIN, and are only switched with the actions that check it.
+  speedLimitMode: boolean;
+  speedLimitPin: string;
+  pinToDrive: boolean;
+  drivePin: string;
 }
 
 export interface DisplaySettings {
@@ -350,6 +368,8 @@ export interface CarState {
   // Reverse takes over the screen; this is what comes back when it ends.
   surfaceBeforeReverse: Surface | null;
   activeModal: ModalId | null;
+  // PIN to Drive asks once per visit, and again after the car is locked.
+  driveUnlocked: boolean;
   // Only one can be open at a time.
   openCompartment: Compartment | null;
   isLocked: boolean;
@@ -425,7 +445,14 @@ export type CarAction =
   // Without an id, clears every toast.
   | { type: 'notice/dismiss'; id?: number }
   | { type: 'notifications/clear' }
-  | { type: 'notifications/seen' };
+  | { type: 'notifications/seen' }
+  | { type: 'speedLimit/enable'; pin: string }
+  | { type: 'speedLimit/disable'; pin: string }
+  | { type: 'pinToDrive/enable'; pin: string }
+  | { type: 'pinToDrive/disable'; pin: string }
+  | { type: 'pinToDrive/unlock'; pin: string }
+  | { type: 'pins/reset' }
+  | { type: 'safety/require'; enabled: boolean };
 
 export const initialCarState: CarState = {
   gear: 'P',
@@ -453,6 +480,7 @@ export const initialCarState: CarState = {
   surface: { kind: 'closed' },
   surfaceBeforeReverse: null,
   activeModal: null,
+  driveUnlocked: false,
   openCompartment: null,
   isLocked: true,
   signal: 'off',
@@ -531,6 +559,17 @@ export const initialCarState: CarState = {
     immersiveSound: 'standard',
     assistantEnabled: false,
     assistantStyle: 'friendly',
+    joeMode: false,
+    cabinOverheat: 'on',
+    blindSpotWarning: true,
+    collisionWarning: 'average',
+    emergencyBraking: true,
+    requireSafetyFeatures: false,
+    speedLimitMph: 65,
+    speedLimitMode: false,
+    speedLimitPin: '',
+    pinToDrive: false,
+    drivePin: '',
   },
   display: { brightness: 100, autoBrightness: false, appearance: 'light', blueLightReduction: 0 },
   notice: null,
@@ -573,6 +612,15 @@ const creepTarget = (state: CarState): number =>
   inGear(state) && state.settings.stoppingMode === 'creep' && state.batteryPercent > 0
     ? CREEP_SPEED
     : 0;
+
+export const isValidPin = (pin: string): boolean => /^\d{4}$/.test(pin);
+
+export const needsDrivePin = (state: CarState): boolean =>
+  state.settings.pinToDrive && !state.driveUnlocked;
+
+// The fastest the car will go in Drive right now.
+export const speedCap = (state: CarState): number =>
+  state.settings.speedLimitMode ? Math.min(MAX_SPEED, state.settings.speedLimitMph) : MAX_SPEED;
 
 // The loop only runs while something is actually changing.
 export const isSimulationActive = (state: CarState): boolean =>
@@ -659,6 +707,11 @@ export type Permission = { allowed: true } | { allowed: false; reason: string };
 const ALLOWED: Permission = { allowed: true };
 
 // Every "can this happen right now?" rule, so features don't each invent their own check.
+const DRIVE_PIN_REASON = 'Enter your PIN to drive';
+
+const parkedFor = (state: CarState, what: string): Permission =>
+  isParked(state) ? ALLOWED : { allowed: false, reason: `Shift to Park to ${what}` };
+
 export function canShift(state: CarState, gear: Gear): Permission {
   if (state.chargeState !== 'unplugged' && gear !== 'P') {
     return { allowed: false, reason: 'Unplug the charge cable before driving' };
@@ -669,8 +722,18 @@ export function canShift(state: CarState, gear: Gear): Permission {
       reason: `Slow down to shift into ${gear === 'P' ? 'Park' : 'Reverse'}`,
     };
   }
+  if (gear !== 'P' && needsDrivePin(state)) return { allowed: false, reason: DRIVE_PIN_REASON };
   return ALLOWED;
 }
+
+export const canSetSpeedLimit = (state: CarState): Permission =>
+  parkedFor(state, 'change Speed Limit Mode');
+
+export const canSetPinToDrive = (state: CarState): Permission =>
+  parkedFor(state, 'change PIN to Drive');
+
+export const canRequireSafetyFeatures = (state: CarState): Permission =>
+  parkedFor(state, 'change this setting');
 
 export function canOpenApp(state: CarState, app: AppId): Permission {
   if (isParkedOnly(app) && !isParked(state)) {
@@ -876,6 +939,26 @@ function shift(state: CarState, gear: Gear): CarState {
   return next;
 }
 
+const safetyFeaturesOn = (settings: VehicleSettings): VehicleSettings => ({
+  ...settings,
+  blindSpotWarning: true,
+  emergencyBraking: true,
+  collisionWarning: settings.collisionWarning === 'off' ? 'average' : settings.collisionWarning,
+});
+
+// Turning a PIN mode on or off, once its permission and PIN are checked.
+function withPin(
+  state: CarState,
+  permission: Permission,
+  pin: string,
+  expected: string,
+  apply: (settings: VehicleSettings) => Partial<VehicleSettings>,
+): CarState {
+  if (!permission.allowed) return notify(state, permission.reason);
+  if (pin !== expected) return notify(state, 'Incorrect PIN');
+  return { ...state, settings: { ...state.settings, ...apply(state.settings) } };
+}
+
 const approach = (value: number, target: number, step: number) =>
   value < target ? Math.min(target, value + step) : Math.max(target, value - step);
 
@@ -891,7 +974,7 @@ function liftOffRate(state: CarState): number {
 
 function nextSpeed(state: CarState, seconds: number): number {
   const { acceleration, trackMode, drivingProfile } = state.settings;
-  const forwardSpeed = trackMode ? MAX_TRACK_SPEED : MAX_SPEED;
+  const forwardSpeed = trackMode ? MAX_TRACK_SPEED : speedCap(state);
   const topSpeed = state.gear === 'R' ? MAX_REVERSE_SPEED : forwardSpeed;
   const hasCharge = state.batteryPercent > 0;
 
@@ -1036,7 +1119,11 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     case 'gear/select': {
       if (action.gear === state.gear) return state;
       const permission = canShift(state, action.gear);
-      return permission.allowed ? shift(state, action.gear) : notify(state, permission.reason);
+      if (permission.allowed) return shift(state, action.gear);
+      const refused = notify(state, permission.reason);
+      return permission.reason === DRIVE_PIN_REASON
+        ? { ...refused, activeModal: 'drive-pin' }
+        : refused;
     }
 
     case 'speed/set':
@@ -1208,9 +1295,73 @@ export function carReducer(state: CarState, action: CarAction): CarState {
 
     case 'settings/set': {
       const permission = canChangeSettings(state, action.patch);
-      return permission.allowed
-        ? applySettings(state, action.patch)
-        : notify(state, permission.reason);
+      if (!permission.allowed) return notify(state, permission.reason);
+      const next = applySettings(state, action.patch);
+      return next.settings.requireSafetyFeatures
+        ? { ...next, settings: safetyFeaturesOn(next.settings) }
+        : next;
+    }
+
+    case 'speedLimit/enable': {
+      if (!isValidPin(action.pin)) return notify(state, 'Choose a 4-digit PIN');
+      return withPin(state, canSetSpeedLimit(state), action.pin, action.pin, () => ({
+        speedLimitMode: true,
+        speedLimitPin: action.pin,
+      }));
+    }
+
+    case 'speedLimit/disable':
+      return withPin(
+        state,
+        canSetSpeedLimit(state),
+        action.pin,
+        state.settings.speedLimitPin,
+        () => ({ speedLimitMode: false, speedLimitPin: '' }),
+      );
+
+    case 'pinToDrive/enable': {
+      if (!isValidPin(action.pin)) return notify(state, 'Choose a 4-digit PIN');
+      const enabled = withPin(state, canSetPinToDrive(state), action.pin, action.pin, () => ({
+        pinToDrive: true,
+        drivePin: action.pin,
+      }));
+      return { ...enabled, driveUnlocked: false };
+    }
+
+    case 'pinToDrive/disable':
+      return withPin(state, canSetPinToDrive(state), action.pin, state.settings.drivePin, () => ({
+        pinToDrive: false,
+        drivePin: '',
+      }));
+
+    case 'pinToDrive/unlock':
+      return action.pin === state.settings.drivePin
+        ? { ...state, driveUnlocked: true, activeModal: null }
+        : notify(state, 'Incorrect PIN');
+
+    // Real cars fall back on the owner's account. This one has no account, so a forgotten
+    // PIN mustn't leave a saved session stuck for good.
+    case 'pins/reset':
+      return notify(
+        {
+          ...state,
+          activeModal: state.activeModal === 'drive-pin' ? null : state.activeModal,
+          settings: {
+            ...state.settings,
+            speedLimitMode: false,
+            speedLimitPin: '',
+            pinToDrive: false,
+            drivePin: '',
+          },
+        },
+        'PINs cleared',
+      );
+
+    case 'safety/require': {
+      const permission = canRequireSafetyFeatures(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      const settings = { ...state.settings, requireSafetyFeatures: action.enabled };
+      return { ...state, settings: action.enabled ? safetyFeaturesOn(settings) : settings };
     }
 
     case 'display/set':
@@ -1239,6 +1390,7 @@ export function carReducer(state: CarState, action: CarAction): CarState {
         ...state,
         isLocked: !state.isLocked,
         sentryAlarm: state.isLocked ? false : state.sentryAlarm,
+        driveUnlocked: state.isLocked && state.driveUnlocked,
       };
 
     case 'signal/left':
