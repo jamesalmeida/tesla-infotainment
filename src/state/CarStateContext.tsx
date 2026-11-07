@@ -94,6 +94,19 @@ export interface CarActions {
   unlockDrive: (pin: string) => void;
   resetPins: () => void;
   setRequireSafetyFeatures: (enabled: boolean) => void;
+  setWifiEnabled: (enabled: boolean) => void;
+  connectWifi: (id: string, password: string) => void;
+  disconnectWifi: () => void;
+  forgetWifi: (id: string) => void;
+  setHotspot: (enabled: boolean) => void;
+  setBluetoothEnabled: (enabled: boolean) => void;
+  pairBluetooth: (id: string) => void;
+  confirmBluetoothPairing: () => void;
+  cancelBluetoothPairing: () => void;
+  connectBluetooth: (id: string) => void;
+  disconnectBluetooth: () => void;
+  forgetBluetooth: (id: string) => void;
+  setPriorityBluetooth: (id: string | null) => void;
 }
 
 interface CarStore {
@@ -185,6 +198,19 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   unlockDrive: (pin) => dispatch({ type: 'pinToDrive/unlock', pin }),
   resetPins: () => dispatch({ type: 'pins/reset' }),
   setRequireSafetyFeatures: (enabled) => dispatch({ type: 'safety/require', enabled }),
+  setWifiEnabled: (enabled) => dispatch({ type: 'wifi/enable', enabled }),
+  connectWifi: (id, password) => dispatch({ type: 'wifi/connect', id, password }),
+  disconnectWifi: () => dispatch({ type: 'wifi/disconnect' }),
+  forgetWifi: (id) => dispatch({ type: 'wifi/forget', id }),
+  setHotspot: (enabled) => dispatch({ type: 'wifi/hotspot', enabled }),
+  setBluetoothEnabled: (enabled) => dispatch({ type: 'bluetooth/enable', enabled }),
+  pairBluetooth: (id) => dispatch({ type: 'bluetooth/pair', id }),
+  confirmBluetoothPairing: () => dispatch({ type: 'bluetooth/confirm' }),
+  cancelBluetoothPairing: () => dispatch({ type: 'bluetooth/cancel' }),
+  connectBluetooth: (id) => dispatch({ type: 'bluetooth/connect', id }),
+  disconnectBluetooth: () => dispatch({ type: 'bluetooth/disconnect' }),
+  forgetBluetooth: (id) => dispatch({ type: 'bluetooth/forget', id }),
+  setPriorityBluetooth: (id) => dispatch({ type: 'bluetooth/priority', id }),
 });
 
 interface CarContextValue {

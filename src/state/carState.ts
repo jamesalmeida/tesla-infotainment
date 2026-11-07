@@ -33,6 +33,7 @@ import {
   type ProfileSettings,
   type ProfileSnapshot,
 } from './profiles';
+import { findBluetoothDevice, findWifiNetwork } from './sampleData';
 
 export type { AppId };
 export type { CabinPosition, Profile };
@@ -77,6 +78,9 @@ export const MAX_TOASTS = 3;
 export const MAX_TRIP_METERS = 6;
 export const MAX_NAME_LENGTH = 24;
 export const MIN_SPEED_LIMIT = 50;
+// How long the simulated radios take, in seconds.
+const WIFI_CONNECT_SECONDS = 2;
+const BLUETOOTH_LINK_SECONDS = 2;
 export const VALET_MAX_SPEED = 70;
 
 // mph per second.
@@ -122,6 +126,7 @@ export const SETTINGS_PANELS = [
   'Notifications',
   'Audio',
   'Profiles',
+  'Bluetooth',
 ] as const;
 
 export type SettingsPanel = (typeof SETTINGS_PANELS)[number];
@@ -339,6 +344,33 @@ export interface VehicleSettings {
   pinToDrive: boolean;
   drivePin: string;
   easyEntry: boolean;
+  vehicleName: string;
+}
+
+export interface WifiState {
+  enabled: boolean;
+  hotspot: boolean;
+  connectedId: string | null;
+  // Most recent first. These connect again without asking for the password.
+  savedIds: string[];
+  attempt: { networkId: string; password: string; secondsLeft: number } | null;
+  error: { networkId: string; message: string } | null;
+}
+
+export type WifiIndicator = 'off' | 'disconnected' | 'connecting' | 'connected';
+
+export type BluetoothPairing =
+  | { deviceId: string; phase: 'confirm' }
+  | { deviceId: string; phase: 'linking'; secondsLeft: number };
+
+export interface BluetoothState {
+  enabled: boolean;
+  pairedIds: string[];
+  connectedId: string | null;
+  // Connects first whenever Bluetooth comes on.
+  priorityId: string | null;
+  pairing: BluetoothPairing | null;
+  error: { deviceId: string; message: string } | null;
 }
 
 // Valet Mode is on while this exists. The driver it replaced comes back when it ends.
@@ -410,6 +442,8 @@ export interface CarState {
   // Where the driver set the seat, mirrors and wheel. Easy Entry moves away from this, and back.
   cabin: CabinPosition;
   easyEntryActive: boolean;
+  wifi: WifiState;
+  bluetooth: BluetoothState;
   settings: VehicleSettings;
   display: DisplaySettings;
   // The newest message, on screen for a moment.
@@ -487,6 +521,19 @@ export type CarAction =
   | { type: 'pinToDrive/disable'; pin: string }
   | { type: 'pinToDrive/unlock'; pin: string }
   | { type: 'pins/reset' }
+  | { type: 'wifi/enable'; enabled: boolean }
+  | { type: 'wifi/connect'; id: string; password: string }
+  | { type: 'wifi/disconnect' }
+  | { type: 'wifi/forget'; id: string }
+  | { type: 'wifi/hotspot'; enabled: boolean }
+  | { type: 'bluetooth/enable'; enabled: boolean }
+  | { type: 'bluetooth/pair'; id: string }
+  | { type: 'bluetooth/confirm' }
+  | { type: 'bluetooth/cancel' }
+  | { type: 'bluetooth/connect'; id: string }
+  | { type: 'bluetooth/disconnect' }
+  | { type: 'bluetooth/forget'; id: string }
+  | { type: 'bluetooth/priority'; id: string | null }
   | { type: 'safety/require'; enabled: boolean };
 
 export const initialCarState: CarState = {
@@ -536,6 +583,22 @@ export const initialCarState: CarState = {
     steeringReach: 50,
   },
   easyEntryActive: false,
+  wifi: {
+    enabled: true,
+    hotspot: false,
+    connectedId: null,
+    savedIds: [],
+    attempt: null,
+    error: null,
+  },
+  bluetooth: {
+    enabled: true,
+    pairedIds: [],
+    connectedId: null,
+    priorityId: null,
+    pairing: null,
+    error: null,
+  },
   settings: {
     headlights: 'auto',
     highBeams: false,
@@ -618,6 +681,7 @@ export const initialCarState: CarState = {
     pinToDrive: false,
     drivePin: '',
     easyEntry: false,
+    vehicleName: 'Demo Car',
   },
   display: { brightness: 100, autoBrightness: false, appearance: 'light', blueLightReduction: 0 },
   notice: null,
@@ -682,6 +746,29 @@ export const effectiveCabin = (state: CarState): CabinPosition =>
     ? { ...state.cabin, seatPosition: 100, steeringTilt: 100, steeringReach: 0 }
     : state.cabin;
 
+// What the map icon and the status bar show.
+export function wifiIndicator({ wifi }: CarState): WifiIndicator {
+  if (!wifi.enabled) return 'off';
+  if (wifi.attempt) return 'connecting';
+  return wifi.connectedId ? 'connected' : 'disconnected';
+}
+
+export const connectedWifiName = ({ wifi }: CarState): string | null =>
+  wifi.connectedId ? (findWifiNetwork(wifi.connectedId)?.ssid ?? null) : null;
+
+export const connectedBluetoothName = ({ bluetooth }: CarState): string | null =>
+  bluetooth.connectedId ? (findBluetoothDevice(bluetooth.connectedId)?.name ?? null) : null;
+
+// The device the player's source icon stands for, if one can play audio.
+export function bluetoothMediaSource({ bluetooth }: CarState): string | null {
+  const device = bluetooth.connectedId ? findBluetoothDevice(bluetooth.connectedId) : undefined;
+  return device?.hasMedia ? device.name : null;
+}
+
+// Timed systems that need the loop even with the car standing still.
+const hasRunningSystem = ({ wifi, bluetooth }: CarState): boolean =>
+  wifi.attempt !== null || bluetooth.pairing?.phase === 'linking';
+
 // The loop only runs while something is actually changing.
 export const isSimulationActive = (state: CarState): boolean =>
   state.speed > 0 ||
@@ -689,7 +776,8 @@ export const isSimulationActive = (state: CarState): boolean =>
   state.chargeState === 'charging' ||
   state.chargeState === 'scheduled' ||
   state.autopilot !== 'off' ||
-  creepTarget(state) > 0;
+  creepTarget(state) > 0 ||
+  hasRunningSystem(state);
 
 // In gear and stationary with Hold selected: the car keeps itself still with no pedal down.
 export const isHolding = (state: CarState): boolean =>
@@ -803,6 +891,20 @@ export function canEnterValet(state: CarState): Permission {
 }
 
 export const canExitValet = (state: CarState): Permission => parkedFor(state, 'exit Valet Mode');
+
+const VALET_RADIOS_REASON = 'Not available in Valet Mode';
+
+export function canConnectWifi(state: CarState): Permission {
+  if (isValet(state)) return { allowed: false, reason: VALET_RADIOS_REASON };
+  if (!state.wifi.enabled) return { allowed: false, reason: 'Turn on Wifi first' };
+  return ALLOWED;
+}
+
+export function canPairBluetooth(state: CarState): Permission {
+  if (isValet(state)) return { allowed: false, reason: VALET_RADIOS_REASON };
+  if (!state.bluetooth.enabled) return { allowed: false, reason: 'Turn on Bluetooth first' };
+  return ALLOWED;
+}
 
 export const canSetSpeedLimit = (state: CarState): Permission =>
   parkedFor(state, 'change Speed Limit Mode');
@@ -1161,7 +1263,90 @@ const meterBaseline = (state: CarState): MeterBaseline => ({
   kwh: state.energyUsedKwh,
 });
 
-function tick(state: CarState, seconds: number): CarState {
+const withWifi = (state: CarState, patch: Partial<WifiState>): CarState => ({
+  ...state,
+  wifi: { ...state.wifi, ...patch },
+});
+
+const withBluetooth = (state: CarState, patch: Partial<BluetoothState>): CarState => ({
+  ...state,
+  bluetooth: { ...state.bluetooth, ...patch },
+});
+
+function finishWifiAttempt(state: CarState, networkId: string, password: string): CarState {
+  const network = findWifiNetwork(networkId);
+  if (!network) return withWifi(state, { attempt: null });
+
+  const isSaved = state.wifi.savedIds.includes(networkId);
+  const needsPassword = network.password !== null && !isSaved;
+  const failure =
+    network.failure ??
+    (needsPassword && password !== network.password ? 'Incorrect password' : null);
+  if (failure) {
+    const failed = withWifi(state, { attempt: null, error: { networkId, message: failure } });
+    return notify(failed, `Couldn't connect to ${network.ssid}`);
+  }
+
+  const connected = withWifi(state, {
+    attempt: null,
+    error: null,
+    connectedId: networkId,
+    savedIds: [networkId, ...state.wifi.savedIds.filter((id) => id !== networkId)],
+  });
+  return notify(connected, `Connected to ${network.ssid}`);
+}
+
+function finishBluetoothPairing(state: CarState, deviceId: string): CarState {
+  const device = findBluetoothDevice(deviceId);
+  if (!device) return withBluetooth(state, { pairing: null });
+
+  if (device.failure) {
+    const failed = withBluetooth(state, {
+      pairing: null,
+      error: { deviceId, message: device.failure },
+    });
+    return notify(failed, `Couldn't pair with ${device.name}`);
+  }
+
+  const paired = withBluetooth(state, {
+    pairing: null,
+    error: null,
+    pairedIds: [...state.bluetooth.pairedIds, deviceId],
+    connectedId: deviceId,
+    // The first device paired is the one to prefer, until the driver says otherwise.
+    priorityId: state.bluetooth.priorityId ?? deviceId,
+  });
+  return notify(paired, `Paired with ${device.name}`);
+}
+
+function tickSystems(state: CarState, seconds: number): CarState {
+  let next = state;
+
+  const { attempt } = next.wifi;
+  if (attempt) {
+    const secondsLeft = attempt.secondsLeft - seconds;
+    next =
+      secondsLeft > 0
+        ? withWifi(next, { attempt: { ...attempt, secondsLeft } })
+        : finishWifiAttempt(next, attempt.networkId, attempt.password);
+  }
+
+  const { pairing } = next.bluetooth;
+  if (pairing?.phase === 'linking') {
+    const secondsLeft = pairing.secondsLeft - seconds;
+    next =
+      secondsLeft > 0
+        ? withBluetooth(next, { pairing: { ...pairing, secondsLeft } })
+        : finishBluetoothPairing(next, pairing.deviceId);
+  }
+
+  return next;
+}
+
+const tick = (state: CarState, seconds: number): CarState =>
+  tickSystems(tickVehicle(state, seconds), seconds);
+
+function tickVehicle(state: CarState, seconds: number): CarState {
   if (state.chargeState === 'charging') return chargeTick(state, seconds);
   if (state.chargeState === 'scheduled') {
     return isScheduleDue(state.settings.scheduledChargeTime, new Date())
@@ -1462,6 +1647,107 @@ export function carReducer(state: CarState, action: CarAction): CarState {
 
     // Real cars fall back on the owner's account. This one has no account, so a forgotten
     // PIN mustn't leave a saved session stuck for good.
+    case 'wifi/enable': {
+      if (!action.enabled) {
+        return withWifi(state, { enabled: false, connectedId: null, attempt: null, error: null });
+      }
+      const [lastUsed] = state.wifi.savedIds;
+      return withWifi(state, {
+        enabled: true,
+        attempt: lastUsed
+          ? { networkId: lastUsed, password: '', secondsLeft: WIFI_CONNECT_SECONDS }
+          : null,
+      });
+    }
+
+    case 'wifi/connect': {
+      const permission = canConnectWifi(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      return withWifi(state, {
+        connectedId: null,
+        error: null,
+        attempt: {
+          networkId: action.id,
+          password: action.password,
+          secondsLeft: WIFI_CONNECT_SECONDS,
+        },
+      });
+    }
+
+    case 'wifi/disconnect':
+      return withWifi(state, { connectedId: null, attempt: null });
+
+    case 'wifi/forget':
+      return withWifi(state, {
+        savedIds: state.wifi.savedIds.filter((id) => id !== action.id),
+        connectedId: state.wifi.connectedId === action.id ? null : state.wifi.connectedId,
+      });
+
+    case 'wifi/hotspot':
+      return withWifi(state, { hotspot: action.enabled });
+
+    case 'bluetooth/enable': {
+      if (!action.enabled) {
+        return withBluetooth(state, {
+          enabled: false,
+          connectedId: null,
+          pairing: null,
+          error: null,
+        });
+      }
+      return withBluetooth(state, { enabled: true, connectedId: state.bluetooth.priorityId });
+    }
+
+    case 'bluetooth/pair': {
+      const permission = canPairBluetooth(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      return withBluetooth(state, {
+        error: null,
+        pairing: { deviceId: action.id, phase: 'confirm' },
+      });
+    }
+
+    case 'bluetooth/confirm': {
+      const { pairing } = state.bluetooth;
+      if (pairing?.phase !== 'confirm') return state;
+      return withBluetooth(state, {
+        pairing: {
+          deviceId: pairing.deviceId,
+          phase: 'linking',
+          secondsLeft: BLUETOOTH_LINK_SECONDS,
+        },
+      });
+    }
+
+    case 'bluetooth/cancel':
+      return withBluetooth(state, { pairing: null });
+
+    case 'bluetooth/connect': {
+      const permission = canPairBluetooth(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      return state.bluetooth.pairedIds.includes(action.id)
+        ? withBluetooth(state, { connectedId: action.id })
+        : state;
+    }
+
+    case 'bluetooth/disconnect':
+      return withBluetooth(state, { connectedId: null });
+
+    case 'bluetooth/forget': {
+      const { connectedId, pairedIds, priorityId } = state.bluetooth;
+      const remaining = pairedIds.filter((id) => id !== action.id);
+      const nextPriority = priorityId === action.id ? (remaining[0] ?? null) : priorityId;
+      return withBluetooth(state, {
+        pairedIds: remaining,
+        priorityId: nextPriority,
+        // Losing the connected device hands over to the preferred one.
+        connectedId: connectedId === action.id ? nextPriority : connectedId,
+      });
+    }
+
+    case 'bluetooth/priority':
+      return withBluetooth(state, { priorityId: action.id });
+
     case 'pins/reset': {
       const released = state.valet
         ? loadProfile({ ...state, valet: null }, state.valet.returnProfileId)

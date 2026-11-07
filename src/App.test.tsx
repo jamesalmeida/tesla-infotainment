@@ -71,7 +71,7 @@ test('bottom bar icon opens the slide-up panel and clicking it again closes it',
   fireEvent.click(navIcon('bluetooth'));
   await waitForLazyApp();
   expect(panelIsOpen()).toBe(true);
-  expect(screen.getByText('Bluetooth')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Bluetooth' })).toBeInTheDocument();
 
   fireEvent.click(navIcon('bluetooth'));
   expect(panelIsOpen()).toBe(false);

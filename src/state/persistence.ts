@@ -37,8 +37,10 @@ import {
   type CarState,
   type DisplaySettings,
   type MeterBaseline,
+  type BluetoothState,
   type Preferences,
   type TripMeter,
+  type WifiState,
   type ValetSession,
   type VehicleSettings,
 } from './carState';
@@ -67,6 +69,7 @@ import {
   type ProfileSettings,
   type ProfileSnapshot,
 } from './profiles';
+import { findBluetoothDevice, findWifiNetwork } from './sampleData';
 
 const STORAGE_KEY = 'tesla-car-state';
 const SCHEMA_VERSION = 1;
@@ -93,6 +96,8 @@ type Persisted = {
   | 'profiles'
   | 'valet'
   | 'cabin'
+  | 'wifi'
+  | 'bluetooth'
 >;
 
 const pickPersisted = ({
@@ -112,6 +117,8 @@ const pickPersisted = ({
   profiles,
   valet,
   cabin,
+  wifi,
+  bluetooth,
 }: CarState): Persisted => ({
   climate: climatePreferences(climate),
   volume,
@@ -129,6 +136,9 @@ const pickPersisted = ({
   profiles,
   valet,
   cabin,
+  // A connection in progress doesn't outlive the page.
+  wifi: { ...wifi, attempt: null, error: null },
+  bluetooth: { ...bluetooth, pairing: null, error: null },
 });
 
 const inRange = (value: unknown, min: number, max: number): value is number =>
@@ -461,6 +471,45 @@ function restoreActiveProfile(
   return (match ?? drivers[0]).id;
 }
 
+const knownIds = (saved: unknown, isKnown: (id: string) => boolean): string[] =>
+  Array.isArray(saved)
+    ? saved.filter((id): id is string => typeof id === 'string' && isKnown(id))
+    : [];
+
+// Only sample networks and devices exist, so an id for anything else is stale.
+function restoreWifi(saved: unknown, defaults: WifiState): WifiState {
+  const wifi = mergeKnown(defaults, saved);
+  const savedIds = knownIds(isRecord(saved) ? saved.savedIds : null, (id) =>
+    Boolean(findWifiNetwork(id)),
+  );
+  const connectedId = isRecord(saved) ? saved.connectedId : null;
+  return {
+    ...defaults,
+    enabled: wifi.enabled,
+    hotspot: wifi.hotspot,
+    savedIds,
+    connectedId:
+      wifi.enabled && typeof connectedId === 'string' && savedIds.includes(connectedId)
+        ? connectedId
+        : null,
+  };
+}
+
+function restoreBluetooth(saved: unknown, defaults: BluetoothState): BluetoothState {
+  const bluetooth = mergeKnown(defaults, saved);
+  const pairedIds = knownIds(isRecord(saved) ? saved.pairedIds : null, (id) =>
+    Boolean(findBluetoothDevice(id)),
+  );
+  const paired = (id: unknown) => (typeof id === 'string' && pairedIds.includes(id) ? id : null);
+  return {
+    ...defaults,
+    enabled: bluetooth.enabled,
+    pairedIds,
+    connectedId: bluetooth.enabled && isRecord(saved) ? paired(saved.connectedId) : null,
+    priorityId: isRecord(saved) ? paired(saved.priorityId) : null,
+  };
+}
+
 // A mode that needs a PIN can't be on without one, or nothing could ever turn it off.
 const withPinModesIntact = (settings: VehicleSettings): VehicleSettings => ({
   ...settings,
@@ -522,6 +571,8 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
     profiles,
     valet,
     cabin: restoreCabin(saved.cabin, defaults.cabin),
+    wifi: restoreWifi(saved.wifi, defaults.wifi),
+    bluetooth: restoreBluetooth(saved.bluetooth, defaults.bluetooth),
     dockByProfile: restoreDock(saved.dockByProfile),
     settings: withPinModesIntact(
       applySettingRules(restoreSettings(defaults.settings, saved.settings), defaults.settings),

@@ -1,0 +1,6 @@
+.bluetooth {
+  box-sizing: border-box;
+  height: 100%;
+  overflow: auto;
+  padding: calc(12 * var(--u)) calc(20 * var(--u));
+}

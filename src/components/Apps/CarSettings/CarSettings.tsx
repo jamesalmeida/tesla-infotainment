@@ -19,6 +19,7 @@ import { Wifi } from './components/Wifi';
 import { Notifications } from './components/Notifications';
 import { Audio } from './components/Audio';
 import { Profiles } from './components/Profiles';
+import { BluetoothDevices } from '../Bluetooth/BluetoothDevices';
 import { getImagePath } from '../../../utils/assetPaths';
 import { SettingsSearch } from './SettingsSearch';
 import type { SettingEntry } from './settingsIndex';
@@ -35,7 +36,7 @@ interface TopBarItem {
 const topBarItems: TopBarItem[] = [
   { icon: 'homelink', alt: 'Garage', panel: 'Wifi' },
   { icon: 'notifications', alt: 'Notifications', panel: 'Notifications' },
-  { icon: 'bluetooth', alt: 'Bluetooth', panel: 'Wifi' },
+  { icon: 'bluetooth', alt: 'Bluetooth', panel: 'Bluetooth' },
   { icon: 'wifi', alt: 'Wifi', panel: 'Wifi' },
 ];
 
@@ -56,6 +57,7 @@ const leftPanelItems: { icon: string; alt: string; label: SettingsPanel }[] = [
   { icon: 'notifications', alt: 'Notifications', label: 'Notifications' },
   { icon: 'audio', alt: 'Audio', label: 'Audio' },
   { icon: 'profiles', alt: 'Profiles', label: 'Profiles' },
+  { icon: 'bluetooth', alt: 'Bluetooth', label: 'Bluetooth' },
 ];
 
 function UnreadDot() {
@@ -161,6 +163,7 @@ export const CarSettings = () => {
             {activePanel === 'Notifications' && <Notifications />}
             {activePanel === 'Audio' && <Audio />}
             {activePanel === 'Profiles' && <Profiles />}
+            {activePanel === 'Bluetooth' && <BluetoothDevices />}
           </div>
         </div>
       </div>
