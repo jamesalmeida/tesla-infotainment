@@ -191,6 +191,7 @@ export const MANUAL_TOPICS: ManualTopic[] = [
     links: [
       { label: 'Open Toybox', app: 'toybox' },
       { label: 'Open Theater', app: 'theater' },
+      { label: 'Open Caraoke', app: 'caraoke' },
     ],
   },
   {
@@ -201,6 +202,7 @@ export const MANUAL_TOPICS: ManualTopic[] = [
       'Most websites refuse to load inside another page, so this can never be a full browser. Sites that allow it open in place, and everything else opens in a new tab.',
     ],
     keywords: ['web', 'internet', 'bookmarks', 'iframe'],
+    links: [{ label: 'Open Browser', app: 'browser' }],
   },
 ];
 

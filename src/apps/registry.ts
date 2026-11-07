@@ -36,6 +36,11 @@ export const APPS = {
     icon: 'app-bluetooth.svg',
     load: named(() => import('../components/Apps/Bluetooth/Bluetooth'), 'Bluetooth'),
   },
+  browser: {
+    label: 'Browser',
+    icon: 'app-browser.svg',
+    load: named(() => import('../components/Apps/Browser/Browser'), 'Browser'),
+  },
   calendar: {
     label: 'Calendar',
     icon: 'app-calendar.svg',
@@ -45,6 +50,12 @@ export const APPS = {
     label: 'Camera',
     icon: 'app-camera.svg',
     load: named(() => import('../components/Apps/BackupCam/BackupCam'), 'BackupCam'),
+  },
+  caraoke: {
+    label: 'Caraoke',
+    icon: 'app-caraoke.svg',
+    load: named(() => import('../components/Apps/Caraoke/Caraoke'), 'Caraoke'),
+    parkedOnly: true,
   },
   'car-settings': {
     label: 'Settings',
@@ -121,10 +132,8 @@ export const SHELF_PLACEHOLDERS = [
   { id: 'amazon-music', label: 'Amazon Music' },
   { id: 'youtube-music', label: 'YouTube Music' },
   { id: 'spotify', label: 'Spotify' },
-  { id: 'browser', label: 'Browser' },
   { id: 'radio', label: 'Radio' },
   { id: 'audible', label: 'Audible' },
   { id: 'nav', label: 'Nav' },
-  { id: 'caraoke', label: 'Caraoke' },
   { id: 'tidal', label: 'Tidal' },
 ];
