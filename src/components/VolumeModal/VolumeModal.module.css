@@ -29,6 +29,33 @@
   filter: invert(1);
 }
 
+.mute-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: 0;
+  border: none;
+  background: none;
+  color: #4e4e4e;
+  cursor: pointer;
+}
+
+.mute-btn svg {
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mute-btn.muted {
+  color: #c62828;
+}
+
 .volume-slider {
   width: calc(150 * var(--u));
 }
