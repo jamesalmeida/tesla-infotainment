@@ -3,6 +3,8 @@ import type { Place } from './place';
 export interface Route {
   path: google.maps.LatLngLiteral[];
   viewport: google.maps.LatLngBounds | null;
+  distanceMeters: number;
+  durationSeconds: number;
 }
 
 export interface Trip {

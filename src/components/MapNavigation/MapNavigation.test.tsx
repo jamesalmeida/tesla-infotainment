@@ -1,5 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
+import { CarStateProvider } from '../../state/CarStateContext';
+import { initialCarState } from '../../state/carState';
 import { installFakeMaps, type FakeMaps } from './fakeGoogleMaps';
 import { MapNavigation } from './MapNavigation';
 
@@ -27,7 +29,12 @@ const settle = async (fn: () => void) => {
   await flush();
 };
 
-const renderMap = () => render(<MapNavigation onWifiClick={() => {}} />);
+const renderMap = () =>
+  render(
+    <CarStateProvider initialState={initialCarState}>
+      <MapNavigation onWifiClick={() => {}} />
+    </CarStateProvider>,
+  );
 const searchBox = () => screen.getByRole<HTMLInputElement>('combobox');
 const navigateButton = () => screen.queryByRole('button', { name: 'Navigate' });
 const endButton = () => screen.queryByRole('button', { name: 'End Navigation' });
@@ -113,6 +120,16 @@ describe('navigation flow (#49)', () => {
     expect(endButton()).toBeInTheDocument();
     expect(navigateButton()).not.toBeInTheDocument();
     expect(fake.map.fitBounds).toHaveBeenCalledExactlyOnceWith({ fake: 'bounds' });
+  });
+
+  test('shows distance, time and arrival battery for the trip', async () => {
+    renderMap();
+    await startTrip('Home', HOME);
+
+    expect(screen.getByText('0.7 mi')).toBeInTheDocument();
+    expect(screen.getByText('5 min')).toBeInTheDocument();
+    expect(screen.getByText('Arrival 69%')).toBeInTheDocument();
+    expect(screen.queryByText('Charge stop suggested')).not.toBeInTheDocument();
   });
 
   test('routes from the car to the place', async () => {
@@ -590,7 +607,11 @@ describe('no usable Google Maps key (#89)', () => {
   test('the top bar stays and Wi-Fi still works', () => {
     vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', '');
     const onWifiClick = vi.fn();
-    render(<MapNavigation onWifiClick={onWifiClick} />);
+    render(
+      <CarStateProvider initialState={initialCarState}>
+        <MapNavigation onWifiClick={onWifiClick} />
+      </CarStateProvider>,
+    );
 
     fireEvent.click(screen.getByAltText('Wifi Status'));
     expect(onWifiClick).toHaveBeenCalledOnce();

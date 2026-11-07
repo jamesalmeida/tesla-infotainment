@@ -14,8 +14,18 @@ import type { Place } from './place';
 const home: Place = { name: 'Home', location: { lat: 1, lng: 1 } };
 const work: Place = { name: 'Work', location: { lat: 2, lng: 2 } };
 const gym: Place = { name: 'Gym', location: { lat: 3, lng: 3 } };
-const homeRoute: Route = { path: [{ lat: 1, lng: 1 }], viewport: null };
-const workRoute: Route = { path: [{ lat: 2, lng: 2 }], viewport: null };
+const homeRoute: Route = {
+  path: [{ lat: 1, lng: 1 }],
+  viewport: null,
+  distanceMeters: 1200,
+  durationSeconds: 300,
+};
+const workRoute: Route = {
+  path: [{ lat: 2, lng: 2 }],
+  viewport: null,
+  distanceMeters: 2400,
+  durationSeconds: 600,
+};
 const trip: Trip = { place: home, route: homeRoute };
 
 const idle: NavState = { kind: 'idle' };

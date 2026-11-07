@@ -102,6 +102,25 @@
   color: #b3261e;
 }
 
+.routeSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+  padding: calc(8 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(8 * var(--u));
+  background-color: rgb(250, 250, 250, 92%);
+  color: #4e4e4e;
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  font-weight: 600;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.chargeStop {
+  color: #b26a00;
+}
+
 .mapNotice {
   display: flex;
   align-items: center;

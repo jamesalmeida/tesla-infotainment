@@ -7,7 +7,10 @@ import {
   useMap,
   useMapsLibrary,
 } from '@vis.gl/react-google-maps';
+import { useCar } from '../../state/CarStateContext';
+import { FULL_RANGE_MILES } from '../../state/carState';
 import { getImagePath } from '../../utils/assetPaths';
+import { formatDistanceFixed, formatDuration } from '../../utils/units';
 import { MapButtons } from './MapButtons';
 import { DEFAULT_CAR_POSITION, initialMapLayers, mapLayersReducer } from './mapLayers';
 import {
@@ -154,7 +157,7 @@ export function MapStage() {
           origin: carPosition,
           destination: place.location,
           travelMode: 'DRIVING',
-          fields: ['path', 'viewport'],
+          fields: ['path', 'viewport', 'distanceMeters', 'durationMillis'],
         });
         const route = routes?.[0];
         if (!route?.path?.length) {
@@ -167,6 +170,8 @@ export function MapStage() {
           route: {
             path: route.path.map(({ lat, lng }) => ({ lat, lng })),
             viewport: route.viewport ?? null,
+            distanceMeters: route.distanceMeters ?? 0,
+            durationSeconds: (route.durationMillis ?? 0) / 1000,
           },
         });
       } catch (error) {
@@ -200,6 +205,16 @@ export function MapStage() {
 
   const toggleChargers = () => dispatchLayers({ type: 'chargersToggled' });
   const searchedPlace = searchedPlaceOf(nav);
+  const batteryPercent = useCar((state) => state.batteryPercent);
+  const arrivalTarget = useCar((state) => state.settings.arrivalChargeTarget);
+  const preferences = useCar((state) => state.settings.preferences);
+  const tripRoute = activeTrip?.route ?? null;
+  const tripMiles = tripRoute ? tripRoute.distanceMeters / 1609.344 : 0;
+  const arrivalPercent = Math.max(
+    0,
+    Math.round(batteryPercent - (tripMiles / FULL_RANGE_MILES) * 100),
+  );
+  const needsCharge = tripRoute !== null && arrivalPercent < arrivalTarget;
 
   return (
     <>
@@ -222,6 +237,14 @@ export function MapStage() {
               <p className={styles.navStatus}>Navigating to {nav.place.name}</p>
             )}
           </div>
+          {tripRoute && (
+            <div className={styles.routeSummary} role="status">
+              <span>{formatDistanceFixed(tripMiles, preferences.distance, 1)}</span>
+              <span>{formatDuration(tripRoute.durationSeconds / 3600)}</span>
+              <span>Arrival {arrivalPercent}%</span>
+              {needsCharge && <span className={styles.chargeStop}>Charge stop suggested</span>}
+            </div>
+          )}
           {nav.kind === 'routeFailed' && (
             <p role="alert" className={`${styles.navStatus} ${styles.navError}`}>
               {nav.reason}

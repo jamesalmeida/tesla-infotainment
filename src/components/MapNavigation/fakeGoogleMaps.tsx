@@ -135,7 +135,9 @@ export function createFakeMaps() {
     },
     /** Builds a computeRoutes response whose path runs through `points`. */
     route(points: LatLng[], viewport: unknown = { fake: 'bounds' }) {
-      return { routes: [{ path: points, viewport }] } as unknown as {
+      return {
+        routes: [{ path: points, viewport, distanceMeters: 1200, durationMillis: 300000 }],
+      } as unknown as {
         routes: google.maps.routes.Route[];
       };
     },
