@@ -62,18 +62,18 @@
 
 .fallbackNote h2 {
   margin: 0 0 calc(6 * var(--u));
-  font-size: calc(16 * var(--u));
+  font-size: max(var(--text-min), calc(16 * var(--u)));
   font-weight: 600;
 }
 
 .fallbackNote p {
   margin: 0;
-  font-size: calc(13 * var(--u));
+  font-size: max(var(--text-min), calc(13 * var(--u)));
   line-height: 1.4;
 }
 
 .fallbackNote code {
-  font-size: calc(12 * var(--u));
+  font-size: max(var(--text-min), calc(12 * var(--u)));
 }
 
 .navPanel {
@@ -90,7 +90,7 @@
   margin: 0;
   padding: calc(8 * var(--u)) calc(12 * var(--u));
   border-radius: calc(8 * var(--u));
-  font-size: calc(14 * var(--u));
+  font-size: max(var(--text-min), calc(14 * var(--u)));
   color: #4e4e4e;
   background-color: rgb(250, 250, 250, 90%);
   box-shadow:
@@ -299,8 +299,11 @@
   padding: 0;
 }
 
+.floatingRightBtnColumn button {
+  min-height: var(--tap-target);
+}
+
 :global(:root[data-layout='compact']) .floatingRightBtnColumn button,
 :global(:root[data-layout='stacked']) .floatingRightBtnColumn button {
-  min-height: var(--tap-target);
   padding: 0;
 }

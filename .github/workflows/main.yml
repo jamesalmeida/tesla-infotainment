@@ -54,6 +54,13 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Install browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Maps and audio hosts are blocked in these tests, so no key is used or billed.
+      - name: End-to-end tests
+        run: pnpm run test:e2e
+
       - name: Upload artifact
         if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v5

@@ -14,5 +14,5 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["vite/client", "vitest/globals", "google.maps"]
   },
-  "include": ["src"]
+  "include": ["src", "e2e"]
 }

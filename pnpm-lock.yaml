@@ -43,6 +43,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.13.0(jiti@1.21.6))
+      '@playwright/test':
+        specifier: ^1.65.0
+        version: 1.65.0
       '@testing-library/dom':
         specifier: ^10.4.2
         version: 10.4.2
@@ -364,6 +367,11 @@ packages:
 
   '@oxc-project/types@0.155.0':
     resolution: {integrity: sha512-SeE8JPwW1xs1tHeNycjUtUBdhorRa8o4jlvjwk49R7/Z291i+4DQa7JJIgOm/TaYQZx+QrPQbVJ/9c8dMIZN8Q==}
+
+  '@playwright/test@1.65.0':
+    resolution: {integrity: sha512-iGURLGuKDLakSEl7Pgfv8h7f+XLT+V861Wfhz0zlEl5nyFuKUopdkFBPKqTllTUp06aOwPuH8iuUEb3yp3MpbQ==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   '@react-three/drei@10.7.9':
     resolution: {integrity: sha512-wP4Y6o58KFi+hT1zCfjJarRtPCT6WW/lo53WMiA/aCORuUvBzW916XsCtadnIB1KB+3IQNcDU5JeVh/gYb8MYw==}
@@ -1281,6 +1289,16 @@ packages:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
+  playwright-core@1.65.0:
+    resolution: {integrity: sha512-vNSKgH6YqtN7cdT/L334zo0a+YwkrpicyrHJlWWPIm/Q+Nn2SWInil01oT0mbu96U4GgoRtCYQD9CzJQgju+lA==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  playwright@1.65.0:
+    resolution: {integrity: sha512-F3AMWcR44qMBt4kq+6Kb6mX7bjGXshktKFOPULd7reED6ZJWevjbNRqysP7q+AATE9kdPEZBibex1BYsvpVoeA==}
+    engines: {node: '>=20'}
+    hasBin: true
+
   postcss@8.5.31:
     resolution: {integrity: sha512-YUbWYCgErwnMAVkjUnYa+KlMBzGpHwiIt/DE7f0G33AuX2LH9UcTk6KgWxd3zRU+pN3u/C+Xl3EnMLM4Hea7Sg==}
     engines: {node: ^10 || ^12 || >=14}
@@ -2010,6 +2028,10 @@ snapshots:
       three: 0.186.1
 
   '@oxc-project/types@0.155.0': {}
+
+  '@playwright/test@1.65.0':
+    dependencies:
+      playwright: 1.65.0
 
   '@react-three/drei@10.7.9(@react-three/fiber@9.8.2(@types/react@19.3.0)(immer@9.0.21)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(three@0.186.1))(@types/react@19.3.0)(@types/three@0.186.0)(immer@9.0.21)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(three@0.186.1)':
     dependencies:
@@ -2840,6 +2862,12 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.7: {}
+
+  playwright-core@1.65.0: {}
+
+  playwright@1.65.0:
+    dependencies:
+      playwright-core: 1.65.0
 
   postcss@8.5.31:
     dependencies:

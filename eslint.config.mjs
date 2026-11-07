@@ -8,7 +8,7 @@ const unusedVarsOptions = { argsIgnorePattern: '^_', varsIgnorePattern: '^_' };
 
 export default defineConfig([
   {
-    ignores: ['dist/', 'node_modules/'],
+    ignores: ['dist/', 'node_modules/', 'playwright-report/', 'test-results/'],
   },
   {
     files: ['**/*.{js,jsx,mjs,ts,tsx}'],
@@ -49,7 +49,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['vite.config.mjs'],
+    files: ['vite.config.mjs', 'playwright.config.ts'],
     languageOptions: {
       globals: globals.node,
     },

@@ -266,7 +266,7 @@ body {
 }
 
 .speedLimit {
-  font-size: calc(12 * var(--u));
+  font-size: max(var(--text-min), calc(12 * var(--u)));
   background-color: #ffffff;
   padding: calc(4 * var(--u)) calc(5 * var(--u)) 2px;
   border-radius: calc(5 * var(--u));
