@@ -22,11 +22,16 @@ import { AppShelf } from './components/AppShelf/AppShelf';
 import VerticalSliderPanel from './components/VerticalSliderPanel/VerticalSliderPanel';
 import BtmNavBar from './components/BtmNavBar/BtmNavBar';
 import { BrightnessOverlay } from './components/BrightnessOverlay/BrightnessOverlay';
+import CarWashMode from './components/Apps/CarSettings/components/CarWashMode/CarWashMode';
 import { CarStatus } from './components/CarStatus/CarStatus';
+import { ChargeStatus } from './components/ChargeStatus/ChargeStatus';
 import { CompartmentControls } from './components/CarStatus/CompartmentControls';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { CarUnavailable, DisplayCrashed } from './components/ErrorBoundary/Fallbacks';
+import { DisplayEffects } from './components/DisplayEffects/DisplayEffects';
 import { Notice } from './components/Notice/Notice';
+import { ScreenClean } from './components/ScreenClean/ScreenClean';
+import { SentryOverlay } from './components/SentryOverlay/SentryOverlay';
 import { ShortcutsHelp } from './components/ShortcutsHelp/ShortcutsHelp';
 import { safeStorage } from './utils/safeStorage';
 import { hasWebGL } from './utils/webgl';
@@ -90,6 +95,7 @@ const LeftPanelContent = memo(function LeftPanelContent({
     <>
       <CarStatus />
       <CompartmentControls />
+      <ChargeStatus />
       <VehicleView onSettled={onCarSettled} />
       <Media />
     </>
@@ -253,7 +259,11 @@ function Display() {
           <BtmNavBar />
           <ActiveModal />
           <Notice />
+          <CarWashMode />
+          <SentryOverlay />
+          <DisplayEffects />
           <BrightnessOverlay />
+          <ScreenClean />
         </div>
       </div>
     </>

@@ -1,0 +1,67 @@
+.sentryOverlay {
+  position: absolute;
+  inset: 0;
+  /* Over the bottom bar, because the frame goes around the whole screen. */
+  z-index: 99999999;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: calc(16 * var(--u));
+  border: calc(6 * var(--u)) solid var(--color-danger);
+  box-sizing: border-box;
+  pointer-events: none;
+  animation: alarm 1s ease-in-out infinite;
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: calc(12 * var(--u));
+  max-width: 90%;
+  padding: calc(8 * var(--u)) calc(14 * var(--u));
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-danger);
+  color: var(--color-on-accent);
+  font-size: max(var(--text-min), calc(15 * var(--u)));
+  pointer-events: auto;
+}
+
+.eye {
+  width: calc(40 * var(--u));
+  height: calc(20 * var(--u));
+  fill: var(--color-on-accent);
+}
+
+.pupil {
+  fill: var(--color-danger);
+  animation: scan 2.4s ease-in-out infinite;
+}
+
+.dismiss {
+  min-height: var(--tap-target);
+  padding: calc(6 * var(--u)) calc(12 * var(--u));
+  border: 1px solid var(--color-on-accent);
+  border-radius: calc(8 * var(--u));
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+@keyframes alarm {
+  50% {
+    border-color: transparent;
+  }
+}
+
+@keyframes scan {
+  0%,
+  100% {
+    transform: translateX(-8px);
+  }
+  50% {
+    transform: translateX(8px);
+  }
+}

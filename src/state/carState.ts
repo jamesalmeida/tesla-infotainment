@@ -546,6 +546,7 @@ export function canChangeSettings(state: CarState, patch: Partial<VehicleSetting
   if (patch.trackMode && !isParked(state)) {
     return { allowed: false, reason: 'Shift to Park to turn on Track Mode' };
   }
+  if (patch.steeringWheel) return canAdjustSteering(state);
   if (patch.keys?.length === 0) {
     return { allowed: false, reason: 'The car needs at least one key' };
   }
@@ -589,6 +590,15 @@ export function canAdjustSteering(state: CarState): Permission {
   if (!isParked(state)) {
     return { allowed: false, reason: 'Shift to Park to adjust the steering wheel' };
   }
+  return ALLOWED;
+}
+
+export function canWalkAwayLock(state: CarState): Permission {
+  if (!state.settings.walkAwayLock) {
+    return { allowed: false, reason: 'Turn on Walk-Away Door Lock first' };
+  }
+  if (!isParked(state)) return { allowed: false, reason: 'Shift to Park first' };
+  if (state.isLocked) return { allowed: false, reason: 'The car is already locked' };
   return ALLOWED;
 }
 
@@ -873,10 +883,9 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     case 'sentry/alarm': {
       if (sentryState(state) !== 'standby') return state;
       const alarmed = { ...state, sentryAlarm: true };
-      return notify(
-        dashcamState(state) === 'off' ? alarmed : saveClip(alarmed, 'sentry'),
-        'Sentry Mode alarm',
-      );
+      const saved = dashcamState(state) === 'off' ? alarmed : saveClip(alarmed, 'sentry');
+      // The alarm has its own banner, so this only goes in the history.
+      return { ...notify(saved, 'Sentry Mode alarm'), notice: null };
     }
 
     case 'sentry/clear':
@@ -907,9 +916,13 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     case 'glovebox/toggle':
       return { ...state, gloveboxOpen: !state.gloveboxOpen };
 
-    case 'lock/walk-away':
-      if (!state.settings.walkAwayLock || state.isLocked || !isParked(state)) return state;
-      return notify({ ...state, isLocked: true }, 'Locked as you walked away');
+    case 'lock/walk-away': {
+      const permission = canWalkAwayLock(state);
+      return notify(
+        permission.allowed ? { ...state, isLocked: true } : state,
+        permission.allowed ? 'Locked as you walked away' : permission.reason,
+      );
+    }
 
     case 'trip/reset':
       return { ...state, tripMiles: 0 };

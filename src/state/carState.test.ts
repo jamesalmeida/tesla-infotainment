@@ -8,6 +8,7 @@ import {
   canSaveClip,
   canShift,
   canToggleChargePort,
+  canWalkAwayLock,
   carReducer,
   chargeHoursRemaining,
   chargeKilowatts,
@@ -455,6 +456,12 @@ describe('permissions', () => {
     ['steering wheel in Drive', canAdjustSteering(drive), false],
     ['saving a clip with the dashcam on', canSaveClip(withSettings({ dashcam: true })), true],
     ['saving a clip with the dashcam off', canSaveClip(initialCarState), false],
+    [
+      'walking away from an unlocked car',
+      canWalkAwayLock({ ...initialCarState, isLocked: false }),
+      true,
+    ],
+    ['walking away from a locked car', canWalkAwayLock(initialCarState), false],
   ])('%s', (_, permission, allowed) => {
     expect(permission.allowed).toBe(allowed);
   });

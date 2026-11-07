@@ -29,6 +29,11 @@
   --color-danger: #e31937;
   --color-success: #2ca02c;
   --color-warning: #e69f59;
+  /* The same in both themes: a screen that is off, and what is drawn on it. */
+  --color-screen-off: #000000;
+  --color-on-screen-off: #ffffff;
+  /* What blue-light reduction lays over the screen. */
+  --color-night-tint: #ff9a3c;
 
   /* The real screen is 1920x1200. */
   --display-ratio: 1.6;

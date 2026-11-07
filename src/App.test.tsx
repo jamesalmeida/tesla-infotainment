@@ -250,3 +250,99 @@ test('Shift+M focuses the navigate input', () => {
   fireEvent.keyDown(document.body, { key: 'M', shiftKey: true });
   expect(document.activeElement).toBe(input);
 });
+
+describe('modes outlive Settings', () => {
+  const openControls = async () => {
+    renderApp();
+    fireEvent.click(screen.getByAltText('car settings icon'));
+    await waitForLazyApp();
+  };
+  const carWash = () => screen.queryByRole('dialog', { name: 'Car Wash Mode' });
+
+  test('Car Wash covers the display, stays through closing Settings, and restores on exit', async () => {
+    await openControls();
+    fireEvent.click(screen.getByText('Sentry'));
+    fireEvent.click(screen.getByText('Car Wash'));
+    expect(carWash()).toBeInTheDocument();
+    expect(screen.getByText('Sentry off')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByAltText('car settings icon'));
+    expect(carWash()).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exit Car Wash Mode' }));
+    expect(carWash()).toBeNull();
+
+    fireEvent.click(screen.getByAltText('car settings icon'));
+    await waitForLazyApp();
+    expect(screen.getByText('Sentry').className).toContain('active');
+  });
+
+  test('Free Roll shows Neutral, and shifting to Drive ends the mode', async () => {
+    await openControls();
+    fireEvent.click(screen.getByText('Car Wash'));
+    fireEvent.click(screen.getByRole('button', { name: 'Free Roll' }));
+    expect(activeGear()).toBe('N');
+    expect(screen.getByRole('button', { name: 'Free Roll' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+
+    fireEvent.click(gearIcon('D'));
+    expect(carWash()).toBeNull();
+  });
+
+  test('Car Wash is refused in Drive, with the reason on screen', async () => {
+    await openControls();
+    fireEvent.click(gearIcon('D'));
+    fireEvent.click(screen.getByText('Car Wash'));
+    expect(carWash()).toBeNull();
+    expect(screen.getByRole('status')).toHaveTextContent('Shift to Park to use Car Wash Mode');
+  });
+
+  test('a Sentry alarm frames the display until it is dismissed', async () => {
+    await openControls();
+    fireEvent.click(screen.getByText('Sentry'));
+    fireEvent.click(screen.getByRole('button', { name: 'Simulate a Break-In' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Sentry Mode alarm');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+});
+
+test('units reach the battery display and are saved', async () => {
+  renderApp();
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Display'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByRole('radio', { name: 'Kilometers' }));
+  fireEvent.click(screen.getByRole('radio', { name: 'Distance' }));
+
+  expect(screen.getByRole('button', { name: /^Battery/ })).toHaveTextContent('344 km');
+  act(() => {
+    vi.advanceTimersByTime(1000);
+  });
+
+  const saved = JSON.parse(localStorage.getItem('tesla-car-state') ?? '{}');
+  expect(saved.state.settings.preferences).toMatchObject({
+    distance: 'km',
+    energyDisplay: 'distance',
+  });
+});
+
+test('the charge status sits with the car while a cable is in', async () => {
+  renderApp();
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Charging'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByRole('button', { name: 'Plug In Cable' }));
+
+  const status = document.querySelector('.chargeStatus');
+  expect(status).toHaveTextContent(/Charging/);
+  expect(status).toHaveTextContent(/remaining/);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Unlock and Unplug' }));
+  expect(document.querySelector('.chargeStatus')).toBeNull();
+});
