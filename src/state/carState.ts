@@ -6,6 +6,7 @@ import {
   initialClimate,
   setCabin,
   setOptions,
+  setTemperature,
   startMode,
   stepTemperature,
   toggleDefrost,
@@ -559,6 +560,7 @@ export type CarAction =
   | { type: 'signal/right' }
   | { type: 'signal/hazards' }
   | { type: 'climate/temperature'; zone: TemperatureZone; delta: number }
+  | { type: 'climate/setTemperature'; zone: TemperatureZone; value: number }
   | { type: 'climate/cabin'; patch: Partial<CabinSettings> }
   | { type: 'climate/options'; options: ClimateOptions }
   | { type: 'climate/defrost'; window: DefrostWindow }
@@ -2153,6 +2155,12 @@ export function carReducer(state: CarState, action: CarAction): CarState {
       return {
         ...state,
         climate: stepTemperature(state.climate, action.zone, action.delta),
+      };
+
+    case 'climate/setTemperature':
+      return {
+        ...state,
+        climate: setTemperature(state.climate, action.zone, action.value),
       };
 
     case 'climate/cabin': {

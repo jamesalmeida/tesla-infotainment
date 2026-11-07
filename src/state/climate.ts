@@ -154,6 +154,21 @@ export function stepTemperature(
     : { ...climate, passengerTemp: clampTemperature(climate.passengerTemp + delta) };
 }
 
+// Sets a zone to an exact temperature, which voice commands and any future keypad can use.
+export function setTemperature(
+  climate: ClimateState,
+  zone: TemperatureZone,
+  value: number,
+): ClimateState {
+  const temperature = clampTemperature(value);
+  if (!climate.isSplit) {
+    return { ...climate, driverTemp: temperature, passengerTemp: temperature };
+  }
+  return zone === 'driver'
+    ? { ...climate, driverTemp: temperature }
+    : { ...climate, passengerTemp: temperature };
+}
+
 export function setOptions(climate: ClimateState, options: ClimateOptions): ClimateState {
   const next = { ...climate, ...options };
   return next.isSplit ? next : { ...next, passengerTemp: next.driverTemp };

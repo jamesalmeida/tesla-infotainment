@@ -6,6 +6,7 @@ import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
 import UserProfile from '../UserProfile/UserProfile';
+import { VoiceControl } from '../VoiceControl/VoiceControl';
 import { MapFallback } from './MapFallback';
 import { usableMapsKey, type MapsFailure } from './mapsAvailability';
 import { MapStage } from './MapStage';
@@ -63,6 +64,7 @@ export function MapNavigation({ onWifiClick }: MapNavigationProps) {
             PASSENGER AIRBAG&nbsp;<span className={styles.airbagStatusOff}>OFF</span>
           </div>
         </div>
+        <VoiceControl />
         <button
           type="button"
           className={styles.sosButton}

@@ -69,6 +69,16 @@ export function MapStage() {
   const [nav, dispatchNav] = useReducer(navReducer, initialNavState);
   const routeRequestIdRef = useRef(0);
 
+  // Voice commands reach the map through one event, so they don't need a shared context.
+  useEffect(() => {
+    const handleNavigate = (event: Event) => {
+      const detail = (event as CustomEvent<{ query?: string }>).detail;
+      if (detail?.query) setQuery(detail.query);
+    };
+    window.addEventListener('tesla:navigate', handleNavigate);
+    return () => window.removeEventListener('tesla:navigate', handleNavigate);
+  }, []);
+
   const handlePlaceSelect = (place: Place) => {
     setQuery(place.name);
     dispatchNav({ type: 'placeChosen', place });

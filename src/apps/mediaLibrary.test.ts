@@ -173,7 +173,14 @@ describe('one source at a time', () => {
 
   test('starting an item pauses the media card', () => {
     const pause = vi.fn();
-    setMediaTransport({ togglePlayPause: vi.fn(), pause, next: vi.fn(), previous: vi.fn() });
+    setMediaTransport({
+      togglePlayPause: vi.fn(),
+      play: vi.fn(),
+      pause,
+      next: vi.fn(),
+      previous: vi.fn(),
+      isPlaying: () => false,
+    });
 
     playItem(item);
 

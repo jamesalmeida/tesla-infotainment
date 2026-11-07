@@ -1,8 +1,10 @@
 export interface MediaTransport {
   togglePlayPause: () => void;
+  play: () => void;
   pause: () => void;
   next: () => void;
   previous: () => void;
+  isPlaying: () => boolean;
 }
 
 let transport: MediaTransport | null = null;

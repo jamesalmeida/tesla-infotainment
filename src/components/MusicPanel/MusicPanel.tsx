@@ -50,7 +50,7 @@ function AlbumArt({ src }: { src: string }) {
 }
 
 export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number }) {
-  const { playback, timeline, togglePlayPause, pause, next, previous, seek } = usePlayback(
+  const { playback, timeline, togglePlayPause, play, pause, next, previous, seek } = usePlayback(
     audioUrls,
     chooseRandomTrack,
     volume,
@@ -62,9 +62,16 @@ export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number 
   // Keyboard shortcuts, kept apart from playback: these move to a shared handler.
   // Lets the shortcut table and other apps drive the player without owning it.
   useEffect(() => {
-    setMediaTransport({ togglePlayPause, pause, next, previous });
+    setMediaTransport({
+      togglePlayPause,
+      play,
+      pause,
+      next,
+      previous,
+      isPlaying: () => playback.status === 'playing',
+    });
     return () => setMediaTransport(null);
-  }, [togglePlayPause, pause, next, previous]);
+  }, [togglePlayPause, play, pause, next, previous, playback.status]);
 
   // One source at a time: starting this player pauses anything from the media apps.
   useEffect(() => {

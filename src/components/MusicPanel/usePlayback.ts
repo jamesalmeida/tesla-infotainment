@@ -100,6 +100,16 @@ export function usePlayback(urls: readonly string[], chooseTrack: () => number, 
     }
   }, [failed, getAudio, startPlaying]);
 
+  const play = useCallback(() => {
+    const audio = getAudio();
+    if (failed) {
+      dispatch({ type: 'transport/retry' });
+    } else if (audio.paused) {
+      dispatch({ type: 'transport/play' });
+      startPlaying(audio);
+    }
+  }, [failed, getAudio, startPlaying]);
+
   const pause = useCallback(() => getAudio().pause(), [getAudio]);
 
   const seek = useCallback(
@@ -123,5 +133,5 @@ export function usePlayback(urls: readonly string[], chooseTrack: () => number, 
     }
   }, [getAudio, seek]);
 
-  return { playback, timeline, togglePlayPause, pause, next, previous, seek };
+  return { playback, timeline, togglePlayPause, play, pause, next, previous, seek };
 }

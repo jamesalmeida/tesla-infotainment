@@ -47,6 +47,7 @@ export interface CarActions {
   toggleRightSignal: () => void;
   toggleHazards: () => void;
   stepTemperature: (zone: TemperatureZone, delta: number) => void;
+  setTemperature: (zone: TemperatureZone, value: number) => void;
   setCabin: (patch: Partial<CabinSettings>) => void;
   setClimateOptions: (options: ClimateOptions) => void;
   toggleDefrost: (window: DefrostWindow) => void;
@@ -164,6 +165,7 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   toggleRightSignal: () => dispatch({ type: 'signal/right' }),
   toggleHazards: () => dispatch({ type: 'signal/hazards' }),
   stepTemperature: (zone, delta) => dispatch({ type: 'climate/temperature', zone, delta }),
+  setTemperature: (zone, value) => dispatch({ type: 'climate/setTemperature', zone, value }),
   setCabin: (patch) => dispatch({ type: 'climate/cabin', patch }),
   setClimateOptions: (options) => dispatch({ type: 'climate/options', options }),
   toggleDefrost: (window) => dispatch({ type: 'climate/defrost', window }),

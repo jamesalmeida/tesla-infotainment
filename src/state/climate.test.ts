@@ -22,6 +22,7 @@ import {
   seatHeatLabel,
   setCabin,
   setOptions,
+  setTemperature,
   stepTemperature,
   toggleDefrost,
   toggleHeatAuto,
@@ -54,6 +55,16 @@ describe('temperature', () => {
     ['the bottom of the range holds', split, 'driver', -100, 60, 75],
   ] as const)('%s', (_name, climate, zone, delta, driverTemp, passengerTemp) => {
     expect(stepTemperature(climate, zone, delta)).toMatchObject({ driverTemp, passengerTemp });
+  });
+
+  test.each([
+    ['one temperature sets both', initialClimate, 'driver', 74, 74, 74],
+    ['split sets only the driver', split, 'driver', 74, 74, 75],
+    ['split sets only the passenger', split, 'passenger', 66, 70, 66],
+    ['the top of the range holds', split, 'driver', 200, 90, 75],
+    ['the bottom of the range holds', split, 'passenger', 0, 70, 60],
+  ] as const)('%s', (_name, climate, zone, value, driverTemp, passengerTemp) => {
+    expect(setTemperature(climate, zone, value)).toMatchObject({ driverTemp, passengerTemp });
   });
 
   test('turning split on starts from the same temperature, and off drops the passenger one', () => {
