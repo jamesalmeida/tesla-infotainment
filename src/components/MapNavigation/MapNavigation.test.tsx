@@ -1,9 +1,11 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
-import { CarStateProvider, useCarActions } from '../../state/CarStateContext';
+import { CarStateProvider, useCarActions, type CarActions } from '../../state/CarStateContext';
 import { initialCarState } from '../../state/carState';
+import { PUBLISH_INTERVAL_MS } from './carTracker';
 import { installFakeMaps, type FakeMaps } from './fakeGoogleMaps';
 import { MapNavigation } from './MapNavigation';
+import { distanceBetween } from './routeGeometry';
 
 vi.mock('@vis.gl/react-google-maps', async () => (await import('./fakeGoogleMaps')).visGlMock);
 
@@ -542,7 +544,7 @@ describe('map layers (#50)', () => {
       fireEvent.click(endButton() as HTMLElement);
       await flush();
 
-      expect(fake.map.panTo).toHaveBeenCalledExactlyOnceWith(markers()[0]);
+      expect(fake.map.moveCamera).toHaveBeenLastCalledWith({ center: markers()[0], zoom: 16 });
       expect(markers()[0]).not.toEqual({ lat: 40, lng: 50 });
     });
   });
@@ -550,7 +552,269 @@ describe('map layers (#50)', () => {
   test('the compass resets the heading', () => {
     renderMap();
     fireEvent.click(button('Reset map heading'));
-    expect(fake.map.setHeading).toHaveBeenCalledWith(0);
+    expect(fake.map.moveCamera).toHaveBeenCalledWith({ heading: 0 });
+  });
+});
+
+describe('tracking the car (#161)', () => {
+  const START = { lat: 0, lng: 0 };
+  // About 11 km due east, then the same due north.
+  const EAST = { lat: 0, lng: 0.1 };
+  const NORTH_EAST = { lat: 0.1, lng: 0.1 };
+  const SIXTY_MPH_METERS_PER_SECOND = 26.8224;
+
+  let actions: CarActions;
+
+  function CaptureActions() {
+    actions = useCarActions();
+    return null;
+  }
+
+  const renderDriving = () =>
+    render(
+      <CarStateProvider
+        initialState={{ ...initialCarState, gear: 'D', speed: 60, pedal: 'accelerate' }}
+      >
+        <CaptureActions />
+        <MapNavigation onWifiClick={() => {}} />
+      </CarStateProvider>,
+    );
+
+  const drive = (seconds: number) =>
+    act(async () => {
+      actions.tick(seconds);
+      await vi.advanceTimersByTimeAsync(PUBLISH_INTERVAL_MS);
+    });
+
+  const carIconRotation = () => screen.getByTestId('car-icon').style.transform;
+  const carPosition = () => markers()[0];
+
+  async function startRoute() {
+    await choosePlace('Far away', NORTH_EAST);
+    await pressNavigate();
+    await settle(() => lastRouteCall().resolve(fake.route([START, EAST, NORTH_EAST])));
+  }
+
+  function stubWatch() {
+    const watchPosition = vi.fn<Geolocation['watchPosition']>(() => 7);
+    const clearWatch = vi.fn<Geolocation['clearWatch']>();
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: { watchPosition, clearWatch, getCurrentPosition: vi.fn() },
+    });
+    const fix = (lat: number, lng: number, heading: number | null = null) =>
+      act(async () => {
+        watchPosition.mock.lastCall?.[0]({
+          coords: { latitude: lat, longitude: lng, heading },
+        } as GeolocationPosition);
+        await vi.advanceTimersByTimeAsync(PUBLISH_INTERVAL_MS);
+      });
+    const fail = (code: number) =>
+      act(async () => {
+        watchPosition.mock.lastCall?.[1]?.({ code } as GeolocationPositionError);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+    return { watchPosition, clearWatch, fix, fail };
+  }
+
+  const openOptions = () => fireEvent.click(screen.getByRole('button', { name: 'Map options' }));
+  const liveSwitch = () => screen.getByRole('switch', { name: "Use this device's location" });
+
+  test('driving moves the car along the route by the distance simulated', async () => {
+    renderDriving();
+    await startRoute();
+    expect(carIconRotation()).toBe('rotate(90deg)');
+
+    await drive(10);
+
+    const travelled = distanceBetween(START, carPosition());
+    expect(travelled).toBeGreaterThan(SIXTY_MPH_METERS_PER_SECOND * 10 * 0.95);
+    expect(carPosition().lat).toBeCloseTo(0, 6);
+  });
+
+  test('the marker turns with the road', async () => {
+    renderDriving();
+    await startRoute();
+    await drive(600);
+
+    expect(carPosition().lng).toBeCloseTo(0.1, 6);
+    expect(carIconRotation()).toBe('rotate(0deg)');
+  });
+
+  test('ticks are throttled: the map does not re-render or move on each one', async () => {
+    renderDriving();
+    await startRoute();
+    fireEvent.click(screen.getByRole('button', { name: 'Recenter' }));
+    await flush();
+    fake.map.moveCamera.mockClear();
+    const renders = fake.mapRenders;
+
+    await act(async () => {
+      for (let i = 0; i < 20; i++) {
+        actions.tick(0.1);
+        await vi.advanceTimersByTimeAsync(100);
+      }
+    });
+
+    expect(fake.mapRenders).toBe(renders);
+    expect(fake.map.moveCamera.mock.calls.length).toBeLessThanOrEqual(9);
+    expect(fake.map.moveCamera.mock.calls.length).toBeGreaterThan(0);
+  });
+
+  test('reversing does not drive the route', async () => {
+    renderDriving();
+    await startRoute();
+    await act(async () => {
+      actions.setPedal('brake');
+      actions.tick(10);
+      actions.selectGear('R');
+      actions.setPedal('accelerate');
+      await vi.advanceTimersByTimeAsync(PUBLISH_INTERVAL_MS);
+    });
+    const before = carPosition();
+
+    await drive(1);
+
+    expect(carPosition()).toEqual(before);
+  });
+
+  test('with no route the car keeps going the way it faces', async () => {
+    renderDriving();
+    const start = carPosition();
+
+    await drive(10);
+
+    expect(carPosition().lat).toBeGreaterThan(start.lat);
+    expect(carPosition().lng).toBeCloseTo(start.lng, 6);
+  });
+
+  test('routes start from where the car has got to', async () => {
+    renderDriving();
+    await drive(10);
+    const position = carPosition();
+
+    await choosePlace('Gym', GYM);
+    await pressNavigate();
+
+    expect(lastRouteCall().request.origin).toEqual(position);
+  });
+
+  test('the camera follows until panned, and Recenter brings it back', async () => {
+    renderDriving();
+    await drive(1);
+    expect(fake.map.moveCamera).toHaveBeenLastCalledWith({ center: carPosition() });
+    expect(screen.queryByRole('button', { name: 'Recenter' })).not.toBeInTheDocument();
+
+    act(() => fake.mapProps?.onDragstart?.());
+    fake.map.moveCamera.mockClear();
+    await drive(1);
+
+    expect(fake.map.moveCamera).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Recenter' }));
+    await flush();
+
+    expect(fake.map.moveCamera).toHaveBeenLastCalledWith({ center: carPosition(), zoom: 16 });
+    expect(screen.queryByRole('button', { name: 'Recenter' })).not.toBeInTheDocument();
+  });
+
+  test('choosing a place stops following, so driving does not pull the map off it', async () => {
+    renderDriving();
+    await choosePlace('Gym', GYM);
+    fake.map.moveCamera.mockClear();
+
+    await drive(1);
+
+    expect(fake.map.moveCamera).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Recenter' })).toBeInTheDocument();
+  });
+
+  describe('device location', () => {
+    test('nothing is asked of the browser until it is switched on', () => {
+      const { watchPosition } = stubWatch();
+      renderMap();
+
+      expect(watchPosition).not.toHaveBeenCalled();
+    });
+
+    test('a watched fix moves the car, with its heading, and stops the simulator', async () => {
+      const { fix } = stubWatch();
+      renderDriving();
+      openOptions();
+      fireEvent.click(liveSwitch());
+      await flush();
+
+      await fix(5, 6, 45);
+
+      expect(carPosition()).toEqual({ lat: 5, lng: 6 });
+      expect(carIconRotation()).toBe('rotate(45deg)');
+
+      await drive(10);
+      expect(carPosition()).toEqual({ lat: 5, lng: 6 });
+    });
+
+    test('with no compass the heading comes from the movement between fixes', async () => {
+      const { fix } = stubWatch();
+      renderMap();
+      openOptions();
+      fireEvent.click(liveSwitch());
+      await fix(0, 0);
+      await fix(0, 0.01);
+
+      expect(carIconRotation()).toBe('rotate(90deg)');
+    });
+
+    test('a fix on the route snaps to it', async () => {
+      const { fix } = stubWatch();
+      renderDriving();
+      await startRoute();
+      openOptions();
+      fireEvent.click(liveSwitch());
+
+      await fix(0.0001, 0.05);
+
+      expect(carPosition().lat).toBeCloseTo(0, 6);
+      expect(carPosition().lng).toBeCloseTo(0.05, 4);
+    });
+
+    test('switching off clears the watch and goes back to simulating', async () => {
+      const { clearWatch } = stubWatch();
+      renderDriving();
+      openOptions();
+      fireEvent.click(liveSwitch());
+      await flush();
+
+      fireEvent.click(liveSwitch());
+      await flush();
+
+      expect(clearWatch).toHaveBeenCalledWith(7);
+      expect(liveSwitch()).toHaveAttribute('aria-checked', 'false');
+    });
+
+    test('a refusal switches it off and says why', async () => {
+      const { fail, clearWatch } = stubWatch();
+      renderMap();
+      openOptions();
+      fireEvent.click(liveSwitch());
+
+      await fail(1);
+
+      expect(screen.getByRole('alert')).toHaveTextContent('Location access is blocked');
+      expect(liveSwitch()).toHaveAttribute('aria-checked', 'false');
+      expect(clearWatch).toHaveBeenCalled();
+    });
+
+    test('a lost signal keeps watching', async () => {
+      const { fail, clearWatch } = stubWatch();
+      renderMap();
+      openOptions();
+      fireEvent.click(liveSwitch());
+
+      await fail(2);
+
+      expect(liveSwitch()).toHaveAttribute('aria-checked', 'true');
+      expect(clearWatch).not.toHaveBeenCalled();
+    });
   });
 });
 

@@ -67,13 +67,26 @@ export function createFakeMaps() {
   }
 
   let viewportCenter: LatLng = { lat: 10, lng: 20 };
+  let heading = 0;
+  const mapListeners = new globalThis.Map<string, Set<() => void>>();
 
   const map = {
     panTo: vi.fn(),
     setZoom: vi.fn(),
-    setHeading: vi.fn(),
+    moveCamera: vi.fn((camera: google.maps.CameraOptions) => {
+      if (camera.heading === undefined || camera.heading === heading) return;
+      heading = camera.heading;
+      mapListeners.get('heading_changed')?.forEach((listener) => listener());
+    }),
     fitBounds: vi.fn(),
     getCenter: vi.fn(() => ({ toJSON: () => viewportCenter })),
+    getHeading: vi.fn(() => heading),
+    getRenderingType: vi.fn(() => 'VECTOR'),
+    addListener: vi.fn((event: string, listener: () => void) => {
+      const listeners = mapListeners.get(event) ?? new Set();
+      mapListeners.set(event, listeners.add(listener));
+      return { remove: () => listeners.delete(listener) };
+    }),
   };
 
   const places = {
@@ -103,6 +116,10 @@ export function createFakeMaps() {
     sessionTokens,
     /** What the last render passed to APIProvider, or null if it never rendered. */
     apiProvider: null as { apiKey: string; onError?: (error: unknown) => void } | null,
+    /** What the last render passed to Map. */
+    mapProps: null as MockMapProps | null,
+    /** How many times Map has rendered, to prove what doesn't re-render it. */
+    mapRenders: 0,
     setViewportCenter(center: LatLng) {
       viewportCenter = center;
     },
@@ -167,22 +184,40 @@ interface MockAPIProviderProps {
   children?: ReactNode;
 }
 
+interface MockMapProps {
+  mapTypeId?: string;
+  renderingType?: string;
+  onDragstart?: () => void;
+  children?: ReactNode;
+}
+
 /** Stands in for `@vis.gl/react-google-maps`. None of it loads a script or calls Google. */
 export const visGlMock = {
   APIProvider({ apiKey, onError, children }: MockAPIProviderProps) {
     installed().apiProvider = { apiKey, onError };
     return <>{children}</>;
   },
-  Map({ mapTypeId, children }: { mapTypeId?: string; children?: ReactNode }) {
+  RenderingType: { VECTOR: 'VECTOR', RASTER: 'RASTER' },
+  Map(props: MockMapProps) {
+    installed().mapProps = props;
+    installed().mapRenders++;
     return (
-      <div data-testid="map" data-map-type={mapTypeId}>
-        {children}
+      <div data-testid="map" data-map-type={props.mapTypeId}>
+        {props.children}
       </div>
     );
   },
-  AdvancedMarker({ position, children }: { position?: LatLng | null; children?: ReactNode }) {
+  AdvancedMarker({
+    position,
+    onClick,
+    children,
+  }: {
+    position?: LatLng | null;
+    onClick?: () => void;
+    children?: ReactNode;
+  }) {
     return (
-      <div data-testid="marker" data-position={JSON.stringify(position)}>
+      <div data-testid="marker" data-position={JSON.stringify(position)} onClick={onClick}>
         {children}
       </div>
     );

@@ -4,10 +4,12 @@ import {
   Map,
   Pin,
   Polyline,
+  RenderingType,
   useMap,
   useMapsLibrary,
 } from '@vis.gl/react-google-maps';
 import { getImagePath } from '../../utils/assetPaths';
+import { CarMarker } from './CarMarker';
 import { MapButtons } from './MapButtons';
 import { DEFAULT_CAR_POSITION, initialMapLayers, mapLayersReducer } from './mapLayers';
 import {
@@ -22,6 +24,8 @@ import type { Place } from './place';
 import { PlaceSearch } from './PlaceSearch';
 import { PlaceActions } from './PlaceActions';
 import { TrafficLayer } from './TrafficLayer';
+import { useCarTracking } from './useCarTracking';
+import { useFollowCamera } from './useFollowCamera';
 import { useSavedPlaces } from './useSavedPlaces';
 import styles from './MapNavigation.module.css';
 
@@ -72,9 +76,22 @@ export function MapStage() {
   const routeRequestIdRef = useRef(0);
   const [saved, dispatchSaved] = useSavedPlaces();
 
+  const activeTrip = activeTripOf(nav);
+  const activeRoute: Route | null = activeTrip?.route ?? null;
+  const tracker = useCarTracking({
+    carPosition,
+    routePath: activeRoute?.path ?? null,
+    liveLocation: layers.liveLocation,
+    onLiveFix: () => dispatchLayers({ type: 'liveFixReceived' }),
+    onLiveError: (code) => dispatchLayers({ type: 'liveLocationFailed', code }),
+  });
+  useFollowCamera(map, tracker, layers.following);
+  const livePosition = () => tracker.getLivePose().position;
+
   const handlePlaceSelect = (place: Place) => {
     setQuery(place.name);
     dispatchNav({ type: 'placeChosen', place });
+    dispatchLayers({ type: 'followStopped' });
     if (map) {
       map.panTo(place.location);
       map.setZoom(16);
@@ -88,7 +105,7 @@ export function MapStage() {
 
   // Read on demand rather than held in state: the map owns its viewport, and this way
   // panning around doesn't re-render everything.
-  const viewportCenter = () => map?.getCenter()?.toJSON() ?? carPosition;
+  const viewportCenter = () => map?.getCenter()?.toJSON() ?? livePosition();
 
   useEffect(() => {
     if (map && carPosition !== DEFAULT_CAR_POSITION) {
@@ -144,7 +161,7 @@ export function MapStage() {
         dispatchNav({ type: 'routeNotFound', requestId, reason });
       try {
         const { routes } = await library.Route.computeRoutes({
-          origin: carPosition,
+          origin: livePosition(),
           destination: place.location,
           travelMode: 'DRIVING',
           fields: ['path', 'viewport'],
@@ -174,8 +191,6 @@ export function MapStage() {
     if (routing && routesLibrary) fetchRoute(routesLibrary, routing.place, routing.requestId);
   }, [routing, routesLibrary]);
 
-  const activeTrip = activeTripOf(nav);
-  const activeRoute: Route | null = activeTrip?.route ?? null;
   useEffect(() => {
     if (map && activeRoute?.viewport) map.fitBounds(activeRoute.viewport);
   }, [map, activeRoute]);
@@ -188,12 +203,7 @@ export function MapStage() {
   const endNavigation = () => {
     setQuery('');
     dispatchNav({ type: 'navigationEnded' });
-
-    // Center the map on the current location
-    if (map) {
-      map.panTo(carPosition);
-      map.setZoom(16);
-    }
+    dispatchLayers({ type: 'followResumed' });
   };
 
   const toggleChargers = () => dispatchLayers({ type: 'chargersToggled' });
@@ -271,15 +281,28 @@ export function MapStage() {
             </MapNotice>
           )}
         </div>
+        {!layers.following && (
+          <button
+            className={`floatingBtn ${styles.recenterBtn}`}
+            onClick={() => dispatchLayers({ type: 'followResumed' })}
+          >
+            Recenter
+          </button>
+        )}
         <MapButtons
           layers={layers}
           actions={{
-            onCompass: () => map?.setHeading(0),
+            onCompass: () => map?.moveCamera({ heading: 0 }),
             onToggleMapStyle: () => dispatchLayers({ type: 'mapStyleToggled' }),
             onToggleTraffic: () => dispatchLayers({ type: 'trafficToggled' }),
             onLocate: () =>
               dispatchLayers({ type: 'locatePressed', supported: Boolean(navigator.geolocation) }),
             onToggleChargers: toggleChargers,
+            onToggleLiveLocation: () =>
+              dispatchLayers({
+                type: 'liveLocationToggled',
+                supported: Boolean(navigator.geolocation),
+              }),
           }}
         />
       </div>
@@ -292,11 +315,11 @@ export function MapStage() {
           mapTypeId={layers.mapStyle}
           disableDefaultUI
           gestureHandling="greedy"
+          renderingType={RenderingType.VECTOR}
+          onDragstart={() => dispatchLayers({ type: 'followStopped' })}
         >
           {layers.traffic && <TrafficLayer />}
-          <AdvancedMarker position={carPosition}>
-            <MarkerIcon name="icon-car-marker.svg" size={40} />
-          </AdvancedMarker>
+          <CarMarker tracker={tracker} />
           {searchedPlace && (
             <AdvancedMarker position={searchedPlace.location}>
               <MarkerIcon name="icon-map-marker.svg" size={40} />

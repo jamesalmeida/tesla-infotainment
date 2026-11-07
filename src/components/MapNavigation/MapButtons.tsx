@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import type { MapLayersState } from './mapLayers';
+import { MapOptions } from './MapOptions';
 import styles from './MapNavigation.module.css';
 
 export interface MapButtonActions {
@@ -9,10 +11,11 @@ export interface MapButtonActions {
   onToggleTraffic: () => void;
   onLocate: () => void;
   onToggleChargers: () => void;
+  onToggleLiveLocation: () => void;
 }
 
 interface MapButtonsProps {
-  layers: Pick<MapLayersState, 'mapStyle' | 'traffic' | 'chargers' | 'location'>;
+  layers: Pick<MapLayersState, 'mapStyle' | 'traffic' | 'chargers' | 'location' | 'liveLocation'>;
   /** Leave out to show the buttons disabled, for when there is no map to act on. */
   actions?: MapButtonActions;
 }
@@ -27,8 +30,9 @@ const buttonClass = (state?: 'on' | 'error') =>
     .join(' ');
 
 export function MapButtons({ layers, actions }: MapButtonsProps) {
-  const { mapStyle, traffic, chargers, location } = layers;
+  const { mapStyle, traffic, chargers, location, liveLocation } = layers;
   const disabled = !actions;
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   return (
     <div className={styles.floatingRightBtnsWrapper}>
@@ -41,6 +45,15 @@ export function MapButtons({ layers, actions }: MapButtonsProps) {
         <img className={styles['icon-compass']} src={getImagePath('icon-compass.svg')} alt="" />
       </button>
       <div className={styles.floatingRightBtnColumn}>
+        <button
+          className={buttonClass(optionsOpen ? 'on' : undefined)}
+          aria-label="Map options"
+          aria-expanded={optionsOpen}
+          disabled={disabled}
+          onClick={() => setOptionsOpen(!optionsOpen)}
+        >
+          <img className="icon" src={getImagePath('icon-gear.svg')} alt="" />
+        </button>
         <button
           className={buttonClass(mapStyle === 'satellite' ? 'on' : undefined)}
           aria-label="Satellite map"
@@ -92,6 +105,12 @@ export function MapButtons({ layers, actions }: MapButtonsProps) {
           )}
         </button>
       </div>
+      {optionsOpen && actions && (
+        <MapOptions
+          liveLocation={liveLocation}
+          onToggleLiveLocation={actions.onToggleLiveLocation}
+        />
+      )}
     </div>
   );
 }

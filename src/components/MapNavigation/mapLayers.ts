@@ -1,6 +1,8 @@
 export type MapStyle = 'roadmap' | 'satellite';
 export type ChargerStatus = 'off' | 'loading' | 'on' | 'error';
 export type LocationStatus = 'idle' | 'locating' | 'error';
+/** Off simulates movement from the car store. The others watch the device's real position. */
+export type LiveLocation = 'off' | 'waiting' | 'on';
 export type Charger = Pick<google.maps.places.Place, 'id' | 'location'>;
 
 export const DEFAULT_CAR_POSITION: google.maps.LatLngLiteral = {
@@ -17,8 +19,15 @@ export interface MapLayersState {
   location: LocationStatus;
   locationError: string | null;
   locationRequestId: number;
-  /** Where the car is. The area on screen belongs to the map, which can pan away from it. */
+  /**
+   * The car's last known fix. The area on screen belongs to the map, which can pan away
+   * from it, and movement between fixes belongs to the car tracker, which keeps it out of
+   * React state.
+   */
   carPosition: google.maps.LatLngLiteral;
+  liveLocation: LiveLocation;
+  /** Whether the map keeps the car in view. Panning by hand stops it until Recenter. */
+  following: boolean;
 }
 
 export type MapLayersAction =
@@ -30,7 +39,12 @@ export type MapLayersAction =
   | { type: 'locatePressed'; supported: boolean }
   | { type: 'located'; requestId: number; position: google.maps.LatLngLiteral }
   | { type: 'locateFailed'; requestId: number; code: number }
-  | { type: 'locationErrorDismissed' };
+  | { type: 'locationErrorDismissed' }
+  | { type: 'liveLocationToggled'; supported: boolean }
+  | { type: 'liveFixReceived' }
+  | { type: 'liveLocationFailed'; code: number }
+  | { type: 'followStopped' }
+  | { type: 'followResumed' };
 
 export const initialMapLayers: MapLayersState = {
   mapStyle: 'roadmap',
@@ -42,6 +56,8 @@ export const initialMapLayers: MapLayersState = {
   locationError: null,
   locationRequestId: 0,
   carPosition: DEFAULT_CAR_POSITION,
+  liveLocation: 'off',
+  following: true,
 };
 
 const GEOLOCATION_PERMISSION_DENIED = 1;
@@ -110,7 +126,7 @@ export function mapLayersReducer(state: MapLayersState, action: MapLayersAction)
       if (state.location !== 'locating' || action.requestId !== state.locationRequestId) {
         return state;
       }
-      return { ...state, location: 'idle', carPosition: action.position };
+      return { ...state, location: 'idle', carPosition: action.position, following: true };
 
     case 'locateFailed':
       if (state.location !== 'locating' || action.requestId !== state.locationRequestId) {
@@ -121,5 +137,36 @@ export function mapLayersReducer(state: MapLayersState, action: MapLayersAction)
     case 'locationErrorDismissed':
       if (state.location !== 'error') return state;
       return { ...state, location: 'idle', locationError: null };
+
+    case 'liveLocationToggled':
+      if (state.liveLocation !== 'off') return { ...state, liveLocation: 'off' };
+      if (!action.supported) {
+        return {
+          ...state,
+          location: 'error',
+          locationError: "This browser can't share its location.",
+        };
+      }
+      return { ...state, liveLocation: 'waiting', locationError: null };
+
+    case 'liveFixReceived':
+      return state.liveLocation === 'waiting' ? { ...state, liveLocation: 'on' } : state;
+
+    // Only permission is final. A lost signal can come back on the same watch.
+    case 'liveLocationFailed':
+      if (state.liveLocation === 'off') return state;
+      if (action.code !== GEOLOCATION_PERMISSION_DENIED) return state;
+      return {
+        ...state,
+        liveLocation: 'off',
+        location: 'error',
+        locationError: geolocationMessage(action.code),
+      };
+
+    case 'followStopped':
+      return state.following ? { ...state, following: false } : state;
+
+    case 'followResumed':
+      return state.following ? state : { ...state, following: true };
   }
 }

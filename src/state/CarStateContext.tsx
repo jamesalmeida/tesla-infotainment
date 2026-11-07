@@ -46,7 +46,7 @@ export interface CarActions {
   resetTrip: () => void;
 }
 
-interface CarStore {
+export interface CarStore {
   getState: () => CarState;
   subscribe: (listener: () => void) => () => void;
   dispatch: (action: CarAction) => void;
@@ -140,3 +140,7 @@ export const useCar = <T,>(selector: (state: CarState) => T): T => {
 };
 
 export const useCarActions = (): CarActions => useCarContext().actions;
+
+// For code that follows the car without rendering each change, such as the map tracking
+// movement. Anything that displays a value should use `useCar`.
+export const useCarStore = (): CarStore => useCarContext().store;

@@ -159,3 +159,90 @@ describe('mapLayersReducer', () => {
     expect(mapLayersReducer(from, action)).toBe(from);
   });
 });
+
+describe('live location and following (#161)', () => {
+  const on: MapLayersState = { ...initialMapLayers, liveLocation: 'on' };
+  const waiting: MapLayersState = { ...initialMapLayers, liveLocation: 'waiting' };
+  const free: MapLayersState = { ...initialMapLayers, following: false };
+  const blocked = 'Location access is blocked. Allow it in your browser settings to use Locate.';
+
+  const transitions: [string, MapLayersState, MapLayersAction, MapLayersState][] = [
+    [
+      'switching on waits for a fix',
+      initialMapLayers,
+      { type: 'liveLocationToggled', supported: true },
+      waiting,
+    ],
+    [
+      'with no geolocation it reports instead',
+      initialMapLayers,
+      { type: 'liveLocationToggled', supported: false },
+      {
+        ...initialMapLayers,
+        location: 'error',
+        locationError: "This browser can't share its location.",
+      },
+    ],
+    [
+      'switching off while waiting',
+      waiting,
+      { type: 'liveLocationToggled', supported: true },
+      initialMapLayers,
+    ],
+    [
+      'switching off once on',
+      on,
+      { type: 'liveLocationToggled', supported: true },
+      initialMapLayers,
+    ],
+    ['the first fix confirms it', waiting, { type: 'liveFixReceived' }, on],
+    ['later fixes change nothing', on, { type: 'liveFixReceived' }, on],
+    [
+      'a stray fix after off is ignored',
+      initialMapLayers,
+      { type: 'liveFixReceived' },
+      initialMapLayers,
+    ],
+    [
+      'a refusal turns it off',
+      on,
+      { type: 'liveLocationFailed', code: 1 },
+      { ...initialMapLayers, location: 'error', locationError: blocked },
+    ],
+    ['a lost signal does not', on, { type: 'liveLocationFailed', code: 2 }, on],
+    ['nor does a timeout', on, { type: 'liveLocationFailed', code: 3 }, on],
+    [
+      'a stray error after off is ignored',
+      initialMapLayers,
+      { type: 'liveLocationFailed', code: 1 },
+      initialMapLayers,
+    ],
+    ['panning stops following', initialMapLayers, { type: 'followStopped' }, free],
+    ['recentring resumes it', free, { type: 'followResumed' }, initialMapLayers],
+  ];
+
+  test.each(transitions)('%s', (_name, state, action, expected) => {
+    expect(mapLayersReducer(state, action)).toEqual(expected);
+  });
+
+  test.each<[string, MapLayersState, MapLayersAction]>([
+    ['stopping twice', free, { type: 'followStopped' }],
+    ['resuming twice', initialMapLayers, { type: 'followResumed' }],
+  ])('%s keeps the same state, so nothing re-renders', (_name, state, action) => {
+    expect(mapLayersReducer(state, action)).toBe(state);
+  });
+
+  test('a located fix resumes following', () => {
+    const locating: MapLayersState = {
+      ...free,
+      location: 'locating',
+      locationRequestId: 3,
+    };
+    const position = { lat: 1, lng: 2 };
+
+    expect(mapLayersReducer(locating, { type: 'located', requestId: 3, position })).toMatchObject({
+      following: true,
+      carPosition: position,
+    });
+  });
+});
