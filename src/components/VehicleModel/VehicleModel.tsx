@@ -1,5 +1,12 @@
-import { useMemo, useRef, useState, type ComponentRef } from 'react';
-import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentRef,
+} from 'react';
+import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei';
 import type * as THREE from 'three';
 import { getCarModelPath } from '../../utils/assetPaths';
@@ -81,6 +88,8 @@ function applyParts(nodes: CarNodes, parts: CarParts) {
 
 function Model({ pose, doors, onDoorToggle, ...props }: ModelProps) {
   const { scene } = useGLTF(modelPath);
+  const invalidate = useThree((state) => state.invalidate);
+  const frameloop = useThree((state) => state.frameloop);
   const [localDoors, setLocalDoors] = useState(CLOSED_DOORS);
   const doorStates = doors ?? localDoors;
   const partsRef = useRef<CarParts | null>(null);
@@ -96,12 +105,19 @@ function Model({ pose, doors, onDoorToggle, ...props }: ModelProps) {
     [scene],
   );
 
-  useFrame((_, delta) => {
+  // The canvas only draws on request, so a change has to ask for the first frame. Coming
+  // back to the tab asks too, in case an animation was cut off when the tab was hidden.
+  useEffect(() => {
+    invalidate();
+  }, [invalidate, pose, doorStates, frameloop]);
+
+  useFrame((state, delta) => {
     const targets = getPartTargets(pose, doorStates);
     // The first frame places the car in its pose. Later changes animate.
     partsRef.current ??= createParts(targets);
-    stepParts(partsRef.current, targets, delta);
+    const isMoving = stepParts(partsRef.current, targets, delta);
     applyParts(nodes, partsRef.current);
+    if (isMoving) state.invalidate();
   });
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
@@ -123,6 +139,7 @@ function Model({ pose, doors, onDoorToggle, ...props }: ModelProps) {
 function ControlledOrbitControls() {
   const controlsRef = useRef<OrbitControlsHandle>(null);
   const azimuthRef = useRef<Damped | null>(null);
+  const invalidate = useThree((state) => state.invalidate);
 
   const handleStart = () => {
     azimuthRef.current = null;
@@ -135,15 +152,17 @@ function ControlledOrbitControls() {
       value: nearestAngle(controls.getAzimuthalAngle(), DEFAULT_AZIMUTH),
       velocity: 0,
     };
+    invalidate();
   };
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const controls = controlsRef.current;
     const azimuth = azimuthRef.current;
     if (!controls || !azimuth) return;
     const isMoving = stepDamped(azimuth, DEFAULT_AZIMUTH, AZIMUTH_SMOOTH_TIME, delta);
     controls.setAzimuthalAngle(azimuth.value);
-    if (!isMoving) azimuthRef.current = null;
+    if (isMoving) state.invalidate();
+    else azimuthRef.current = null;
   });
 
   // With damping on, setAzimuthalAngle moves 5% of the way and carries the rest into later
@@ -164,9 +183,19 @@ function ControlledOrbitControls() {
   );
 }
 
+function subscribeToTabVisibility(onChange: () => void) {
+  document.addEventListener('visibilitychange', onChange);
+  return () => document.removeEventListener('visibilitychange', onChange);
+}
+
+const isTabHidden = () => document.hidden;
+
 export function VehicleModel({ pose, doors, onDoorToggle }: VehicleModelProps) {
+  const tabHidden = useSyncExternalStore(subscribeToTabVisibility, isTabHidden);
+
   return (
     <Canvas
+      frameloop={tabHidden ? 'never' : 'demand'}
       dpr={[1, 2]}
       camera={{
         fov: 40,
