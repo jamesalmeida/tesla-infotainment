@@ -63,7 +63,7 @@ const LoadingScreen = () => {
 
   return (
     <div className={styles['loading-overlay']}>
-      <div className={styles['loading-screen']}>
+      <div className="displayBezel">
         <div className={styles.displayInsideBezel}>
           <ChargeRing />
           <img

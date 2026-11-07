@@ -4,12 +4,12 @@
 
 .searchPopover {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + calc(4 * var(--u)));
   left: 0;
   width: 35%;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: calc(4 * var(--u));
   z-index: 1000;
 }
 
@@ -18,7 +18,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border-radius: 8px;
+  border-radius: calc(8 * var(--u));
   border: 1px solid #ddd;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   font-family: Arial, sans-serif;
@@ -27,8 +27,8 @@
 }
 
 .placeSuggestion {
-  padding: 10px;
-  font-size: 14px;
+  padding: calc(10 * var(--u));
+  font-size: calc(14 * var(--u));
   color: #999;
   cursor: pointer;
   white-space: nowrap;
@@ -46,19 +46,19 @@
 }
 
 .placeSuggestionMain {
-  margin-right: 6px;
+  margin-right: calc(6 * var(--u));
   color: #333;
   font-weight: bold;
 }
 
 .searchMessage {
   margin: 0;
-  padding: 10px;
-  border-radius: 8px;
+  padding: calc(10 * var(--u));
+  border-radius: calc(8 * var(--u));
   border: 1px solid #ddd;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   font-family: Arial, sans-serif;
-  font-size: 14px;
+  font-size: calc(14 * var(--u));
   color: #666;
   background-color: #fff;
 }
@@ -80,7 +80,7 @@
   min-width: 0;
   border: none;
   margin-left: 3%;
-  font-size: 16px;
+  font-size: max(16px, calc(16 * var(--u)));
   font-weight: 400;
   color: #4e4e4e;
   background-color: transparent;
@@ -98,7 +98,7 @@
 
 .clearInput {
   position: absolute;
-  right: 10px;
+  right: calc(10 * var(--u));
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -108,17 +108,12 @@
 }
 
 .clearInput img {
-  width: 16px;
-  height: 16px;
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
 }
 
-/* Media query for mobile devices in landscape mode */
-@media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  .navBtn input {
-    max-width: 138px;
-    margin-left: 0px;
-  }
-  .searchIcon {
-    margin-left: 5px;
-  }
+/* Wider boxes on phones, where 35% of the panel is too narrow to type in. */
+:global(:root[data-layout='compact']) .searchPopover,
+:global(:root[data-layout='stacked']) .searchPopover {
+  width: calc(100% - 64px);
 }

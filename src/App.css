@@ -177,7 +177,7 @@ body {
   justify-content: center;
   align-items: center;
   gap: 12%;
-  font-size: 0.7em;
+  font-size: max(var(--text-min), 0.7em);
   color: #4e4e4e;
 }
 
@@ -342,9 +342,36 @@ body {
 
 /* -------------------- Compact: a phone on its side -------------------- */
 
+/* The screen is too short to stack these, so they sit over the car and it gets the height. */
 :root[data-layout='compact'] .drivingGearIcons {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
   margin-top: 0;
+  padding: 0 8px;
   max-height: 44px;
+}
+
+:root[data-layout='compact'] .carModelStatus {
+  position: absolute;
+  top: 92px;
+  left: 0;
+  right: 0;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+:root[data-layout='compact'] .toggleLocks {
+  display: none;
+}
+
+:root[data-layout='compact'] .toggleFrunk {
+  border-right: none;
+}
+
+:root[data-layout='compact'] .toggleTrunk {
+  border-left: none;
 }
 
 :root[data-layout='compact'] .speedometer {
