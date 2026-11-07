@@ -37,7 +37,17 @@
   margin: 0 auto;
 }
 
+/* The number sits above the keys, even though it follows them for the short layout below. */
+.keys {
+  order: 1;
+}
+
+.dialActions {
+  flex-wrap: wrap;
+}
+
 .display {
+  flex: 1 1 100%;
   min-height: var(--app-control);
   color: var(--color-text-strong);
   font-size: max(16px, calc(24 * var(--u)));
@@ -84,11 +94,20 @@
   text-align: center;
 }
 
-/* A short screen can't hold four rows of keys, so the pad sits beside its display. */
-:global(:root[data-layout='compact']) .keys {
-  grid-template-columns: repeat(6, 1fr);
+/* A short screen can't hold four rows of keys, so the number and the keys sit side by side. */
+:global(:root[data-layout='compact']) .dialPad {
+  flex-direction: row;
+  align-items: flex-start;
+  max-width: none;
 }
 
-:global(:root[data-layout='compact']) .dialPad {
-  max-width: none;
+:global(:root[data-layout='compact']) .keys {
+  flex: 3;
+  order: 0;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+:global(:root[data-layout='compact']) .dialActions {
+  flex: 2;
+  min-width: 0;
 }

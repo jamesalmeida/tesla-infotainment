@@ -50,7 +50,8 @@
 }
 
 .hours {
-  --hour-height: max(44px, calc(56 * var(--u)));
+  /* Half an hour is the shortest event, and it still has to be big enough to tap. */
+  --hour-height: max(calc(2 * var(--tap-target)), calc(56 * var(--u)));
   --rail: max(48px, calc(62 * var(--u)));
 
   position: relative;
@@ -134,4 +135,16 @@
     align-items: center;
     max-height: 55%;
   }
+}
+
+/* A short screen is the opposite problem: the timeline needs the height, so they stay side by side. */
+:global(:root[data-layout='compact']) .layout {
+  flex-direction: row;
+}
+
+:global(:root[data-layout='compact']) .detail {
+  flex: 0 0 44%;
+  flex-flow: column;
+  align-items: stretch;
+  max-height: none;
 }

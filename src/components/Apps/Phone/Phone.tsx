@@ -127,9 +127,6 @@ function DialPad() {
 
   return (
     <div className={styles.dialPad}>
-      <div className={styles.display} aria-live="polite" aria-label="Number entered">
-        {digits || <span className={ui.muted}>Enter a number</span>}
-      </div>
       <div className={styles.keys}>
         {KEYS.map((key) => (
           <button
@@ -143,6 +140,9 @@ function DialPad() {
         ))}
       </div>
       <div className={styles.dialActions}>
+        <div className={styles.display} aria-live="polite" aria-label="Number entered">
+          {digits || <span className={ui.muted}>Enter a number</span>}
+        </div>
         <button
           type="button"
           className={ui.button}
@@ -198,17 +198,19 @@ export const Phone = () => {
         <ActiveCall name={call.caller.name} number={call.caller.number} since={call.since} />
       ) : (
         <div className={ui.stack}>
-          <div className={styles.device}>
-            <span className={ui.muted}>Connected to {connectedPhoneName()}</span>
-            <button
-              type="button"
-              className={ui.button}
-              disabled={call.status !== 'idle'}
-              onClick={() => simulateIncomingCall(CONTACTS[0])}
-            >
-              Simulate incoming call
-            </button>
-          </div>
+          {tab !== 'dial' && (
+            <div className={styles.device}>
+              <span className={ui.muted}>Connected to {connectedPhoneName()}</span>
+              <button
+                type="button"
+                className={ui.button}
+                disabled={call.status !== 'idle'}
+                onClick={() => simulateIncomingCall(CONTACTS[0])}
+              >
+                Simulate incoming call
+              </button>
+            </div>
+          )}
           {tab === 'recents' &&
             (recents.length === 0 ? (
               <div className={ui.muted}>No recent calls.</div>

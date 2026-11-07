@@ -184,7 +184,7 @@ function ConsumptionTab({ history }: { history: EnergySample[] }) {
                       />
                     </span>
                     <span className={styles.shareValue}>
-                      {kwh.toFixed(1)} kWh · {Math.round(share * 100)}%
+                      {kwh.toFixed(kwh < 1 ? 2 : 1)} kWh · {Math.round(share * 100)}%
                     </span>
                   </li>
                 ))}

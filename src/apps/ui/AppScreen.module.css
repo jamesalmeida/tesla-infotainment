@@ -49,12 +49,12 @@
 
 .toolbar {
   display: flex;
-  flex: 1 1 0;
+  flex: 1 1 calc(240 * var(--u));
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: calc(8 * var(--u));
-  min-width: min(100%, calc(180 * var(--u)));
+  min-width: 0;
 }
 
 .body {
@@ -93,7 +93,7 @@
 }
 
 .tab {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: var(--app-control);
   padding: calc(4 * var(--u)) calc(8 * var(--u));
@@ -104,8 +104,8 @@
   font: inherit;
   font-size: var(--app-text-small);
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
-  overflow-wrap: anywhere;
 }
 
 .tabActive {
