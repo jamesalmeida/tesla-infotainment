@@ -169,6 +169,14 @@ body {
 }
 
 /* In the flow, so the car takes whatever height is left instead of sitting behind these. */
+/* The car canvas is transparent, so the park scene or the driving road can sit behind it. */
+.vehicleStage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
 .parkViewBtn {
   position: absolute;
   top: calc(44 * var(--u));

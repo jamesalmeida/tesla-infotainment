@@ -34,6 +34,7 @@ import {
 import { MapNavigation } from './components/MapNavigation/MapNavigation';
 import { CarCards } from './components/CarCards/CarCards';
 import { DriveStrip } from './components/DriveStrip/DriveStrip';
+import { DrivingVisualization } from './components/DrivingVisualization/DrivingVisualization';
 import { Modal } from './components/Modal/Modal';
 import { AppShelf } from './components/AppShelf/AppShelf';
 import VerticalSliderPanel from './components/VerticalSliderPanel/VerticalSliderPanel';
@@ -106,11 +107,20 @@ function VehicleView({ onSettled }: { onSettled: () => void }) {
   if (!canRender) return <CarUnavailable />;
 
   return (
-    <ErrorBoundary fallback={() => <CarUnavailable />} onError={onSettled}>
-      <Suspense fallback={null}>
-        <VehicleModel pose={pose} onReady={onSettled} lights={lights} paint={paint} speed={speed} />
-      </Suspense>
-    </ErrorBoundary>
+    <div className="vehicleStage">
+      <DrivingVisualization />
+      <ErrorBoundary fallback={() => <CarUnavailable />} onError={onSettled}>
+        <Suspense fallback={null}>
+          <VehicleModel
+            pose={pose}
+            onReady={onSettled}
+            lights={lights}
+            paint={paint}
+            speed={speed}
+          />
+        </Suspense>
+      </ErrorBoundary>
+    </div>
   );
 }
 
