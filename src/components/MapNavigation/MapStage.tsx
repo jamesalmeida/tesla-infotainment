@@ -20,7 +20,9 @@ import {
 } from './navState';
 import type { Place } from './place';
 import { PlaceSearch } from './PlaceSearch';
+import { PlaceActions } from './PlaceActions';
 import { TrafficLayer } from './TrafficLayer';
+import { useSavedPlaces } from './useSavedPlaces';
 import styles from './MapNavigation.module.css';
 
 const containerStyle = {
@@ -68,6 +70,7 @@ export function MapStage() {
   const [query, setQuery] = useState('');
   const [nav, dispatchNav] = useReducer(navReducer, initialNavState);
   const routeRequestIdRef = useRef(0);
+  const [saved, dispatchSaved] = useSavedPlaces();
 
   const handlePlaceSelect = (place: Place) => {
     setQuery(place.name);
@@ -177,6 +180,11 @@ export function MapStage() {
     if (map && activeRoute?.viewport) map.fitBounds(activeRoute.viewport);
   }, [map, activeRoute]);
 
+  const tripPlace = activeTrip?.place ?? null;
+  useEffect(() => {
+    if (tripPlace) dispatchSaved({ type: 'recentAdded', place: tripPlace });
+  }, [tripPlace, dispatchSaved]);
+
   const endNavigation = () => {
     setQuery('');
     dispatchNav({ type: 'navigationEnded' });
@@ -201,6 +209,11 @@ export function MapStage() {
           onSelect={handlePlaceSelect}
           onClear={clearSearch}
           getLocationBias={viewportCenter}
+          saved={saved}
+          savedActions={{
+            onToggleFavorite: (place) => dispatchSaved({ type: 'favoriteToggled', place }),
+            onRemoveRecent: (place) => dispatchSaved({ type: 'recentRemoved', place }),
+          }}
         />
         <div className={styles.navPanel}>
           {/* A live region has to exist before its text does for the change to be announced. */}
@@ -217,6 +230,9 @@ export function MapStage() {
               {nav.reason}
               {activeTrip && ` Still navigating to ${activeTrip.place.name}.`}
             </p>
+          )}
+          {searchedPlace && nav.kind !== 'routing' && (
+            <PlaceActions place={searchedPlace} saved={saved} dispatch={dispatchSaved} />
           )}
           {(navigateTarget(nav) || nav.kind === 'routing') && (
             <button

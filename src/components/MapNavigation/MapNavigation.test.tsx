@@ -1,5 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
+import { CarStateProvider, useCarActions } from '../../state/CarStateContext';
+import { initialCarState } from '../../state/carState';
 import { installFakeMaps, type FakeMaps } from './fakeGoogleMaps';
 import { MapNavigation } from './MapNavigation';
 
@@ -27,7 +29,12 @@ const settle = async (fn: () => void) => {
   await flush();
 };
 
-const renderMap = () => render(<MapNavigation onWifiClick={() => {}} />);
+const renderMap = (onWifiClick = () => {}) =>
+  render(
+    <CarStateProvider initialState={initialCarState}>
+      <MapNavigation onWifiClick={onWifiClick} />
+    </CarStateProvider>,
+  );
 const searchBox = () => screen.getByRole<HTMLInputElement>('combobox');
 const navigateButton = () => screen.queryByRole('button', { name: 'Navigate' });
 const endButton = () => screen.queryByRole('button', { name: 'End Navigation' });
@@ -590,7 +597,7 @@ describe('no usable Google Maps key (#89)', () => {
   test('the top bar stays and Wi-Fi still works', () => {
     vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', '');
     const onWifiClick = vi.fn();
-    render(<MapNavigation onWifiClick={onWifiClick} />);
+    renderMap(onWifiClick);
 
     fireEvent.click(screen.getByAltText('Wifi Status'));
     expect(onWifiClick).toHaveBeenCalledOnce();
@@ -627,5 +634,147 @@ describe('no usable Google Maps key (#89)', () => {
 
     unmount();
     expect(window.gm_authFailure).toBeUndefined();
+  });
+});
+
+describe('saved places (#157)', () => {
+  const GYM_PLACE = { name: 'Gym', location: GYM };
+  const savedList = () => screen.queryByRole('list', { name: 'Saved places' });
+  const row = (name: string) => screen.getByRole('button', { name });
+
+  const seed = (profileId: number, saved: object) =>
+    window.localStorage.setItem(
+      `tesla-saved-places-${profileId}`,
+      JSON.stringify({ version: 1, saved }),
+    );
+
+  function SwitchProfile() {
+    const { selectProfile } = useCarActions();
+    return <button onClick={() => selectProfile(2)}>Switch profile</button>;
+  }
+
+  const renderWithProfileSwitch = () =>
+    render(
+      <CarStateProvider initialState={initialCarState}>
+        <SwitchProfile />
+        <MapNavigation onWifiClick={() => {}} />
+      </CarStateProvider>,
+    );
+
+  beforeEach(() => window.localStorage.clear());
+
+  test('focusing an empty search offers Home and Work, unset at first', () => {
+    renderMap();
+    expect(savedList()).not.toBeInTheDocument();
+
+    fireEvent.focus(searchBox());
+
+    expect(savedList()).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Home/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /^Work/ })).toBeDisabled();
+  });
+
+  test('typing swaps saved places for suggestions, and leaving closes them', () => {
+    renderMap();
+    fireEvent.focus(searchBox());
+    fireEvent.change(searchBox(), { target: { value: 'g' } });
+    expect(savedList()).not.toBeInTheDocument();
+
+    fireEvent.change(searchBox(), { target: { value: '' } });
+    expect(savedList()).toBeInTheDocument();
+
+    fireEvent.blur(searchBox());
+    expect(savedList()).not.toBeInTheDocument();
+  });
+
+  test('a saved place is selected with no call to Google', async () => {
+    seed(1, { home: { name: 'Home sweet home', location: HOME } });
+    renderMap();
+    fireEvent.focus(searchBox());
+
+    fireEvent.mouseDown(screen.getByRole('button', { name: /^Home/ }));
+    await flush();
+
+    expect(savedList()).not.toBeInTheDocument();
+    expect(searchBox()).toHaveValue('Home sweet home');
+    expect(navigateButton()).toBeInTheDocument();
+    expect(fake.autocompleteCalls).toHaveLength(0);
+    expect(fake.detailCalls).toHaveLength(0);
+  });
+
+  test('a chosen place can be starred and set as Home', async () => {
+    renderMap();
+    await choosePlace('Gym', GYM);
+
+    fireEvent.click(row('Favorite'));
+    fireEvent.click(row('Home'));
+    await flush();
+
+    expect(row('Favorite')).toHaveAttribute('aria-pressed', 'true');
+    expect(row('Home')).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByAltText('Clear input'));
+    fireEvent.focus(searchBox());
+    await flush();
+
+    expect(screen.getByRole('button', { name: 'Home Gym' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Favorite Gym' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  test('a trip lands in Recents, where a star saves it and × removes it', async () => {
+    renderMap();
+    await startTrip('Gym', GYM);
+    fireEvent.click(endButton() as HTMLElement);
+    fireEvent.focus(searchBox());
+    await flush();
+
+    fireEvent.mouseDown(screen.getByRole('button', { name: 'Favorite Gym' }));
+    await flush();
+    expect(screen.getAllByRole('button', { name: 'Favorite Gym' })).toHaveLength(2);
+
+    fireEvent.mouseDown(row('Remove Gym from recents'));
+    await flush();
+    expect(screen.queryByRole('button', { name: 'Remove Gym from recents' })).toBeNull();
+    expect(screen.getAllByRole('button', { name: 'Favorite Gym' })).toHaveLength(1);
+  });
+
+  test('saved places survive a reload', async () => {
+    const { unmount } = renderMap();
+    await choosePlace('Gym', GYM);
+    fireEvent.click(row('Work'));
+    await flush();
+    unmount();
+
+    renderMap();
+    fireEvent.focus(searchBox());
+    expect(screen.getByRole('button', { name: 'Work Gym' })).toBeEnabled();
+  });
+
+  test('each profile has its own, and switching never overwrites the other', async () => {
+    seed(1, { favorites: [GYM_PLACE] });
+    seed(2, { home: { name: 'Second home', location: WORK } });
+    renderWithProfileSwitch();
+    fireEvent.focus(searchBox());
+    expect(screen.getByRole('button', { name: 'Favorite Gym' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Switch profile'));
+    await flush();
+
+    expect(screen.queryByRole('button', { name: 'Favorite Gym' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Home Second home' })).toBeEnabled();
+    expect(window.localStorage.getItem('tesla-saved-places-1')).toContain('Gym');
+    expect(window.localStorage.getItem('tesla-saved-places-2')).not.toContain('Gym');
+  });
+
+  test('the disabled search offers nothing with no key', () => {
+    vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', '');
+    renderMap();
+
+    fireEvent.focus(searchBox());
+
+    expect(savedList()).not.toBeInTheDocument();
   });
 });

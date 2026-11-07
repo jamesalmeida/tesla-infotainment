@@ -123,6 +123,30 @@
   height: calc(14 * var(--u));
 }
 
+.placeActions {
+  display: flex;
+  gap: calc(6 * var(--u));
+}
+
+.placeAction {
+  flex: 1;
+  min-height: var(--tap-target);
+  padding: calc(6 * var(--u)) calc(8 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(5 * var(--u));
+  font: inherit;
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  color: var(--color-text);
+  background-color: var(--color-card);
+  cursor: pointer;
+}
+
+.placeAction[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+  background-color: var(--color-accent);
+}
+
 .navigateBtn,
 .endNavigateBtn {
   width: 100%;

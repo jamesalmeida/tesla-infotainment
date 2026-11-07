@@ -20,9 +20,12 @@ export type SearchStatus<S> =
 export interface PlaceSearchState<S> {
   status: SearchStatus<S>;
   requestId: number;
+  /** True while the box has focus, which is when saved places and the phone sheet show. */
+  sheetOpen: boolean;
 }
 
 export type PlaceSearchAction<S> =
+  | { type: 'focused' }
   | { type: 'inputChanged'; input: string }
   | { type: 'debounceElapsed'; requestId: number }
   | { type: 'suggestionsLoaded'; requestId: number; suggestions: S[] }
@@ -32,12 +35,13 @@ export type PlaceSearchAction<S> =
   | { type: 'suggestionPicked'; index: number }
   | { type: 'selectionResolved'; requestId: number; place: Place }
   | { type: 'selectionFailed'; requestId: number }
+  | { type: 'placePicked'; place: Place }
   | { type: 'dismissed' }
   | { type: 'blurred' }
   | { type: 'cleared' };
 
 export function initialPlaceSearchState<S>(): PlaceSearchState<S> {
-  return { status: { kind: 'closed' }, requestId: 0 };
+  return { status: { kind: 'closed' }, requestId: 0, sheetOpen: false };
 }
 
 /** The suggestions on screen. Old ones stay up while newer ones load, to avoid a flicker. */
@@ -53,14 +57,15 @@ export function isCommitted<S>(status: SearchStatus<S>): boolean {
 }
 
 function next<S>(state: PlaceSearchState<S>, status: SearchStatus<S>): PlaceSearchState<S> {
-  return { status, requestId: state.requestId + 1 };
+  return { ...state, status, requestId: state.requestId + 1 };
 }
 
 function close<S>(state: PlaceSearchState<S>): PlaceSearchState<S> {
+  const closed = state.sheetOpen ? { ...state, sheetOpen: false } : state;
   // A placed search stays `selected`, so Enter on it doesn't search again.
-  return state.status.kind === 'closed' || state.status.kind === 'selected'
-    ? state
-    : next(state, { kind: 'closed' });
+  return closed.status.kind === 'closed' || closed.status.kind === 'selected'
+    ? closed
+    : next(closed, { kind: 'closed' });
 }
 
 function select<S>(state: PlaceSearchState<S>, input: string, suggestion: S | undefined) {
@@ -76,6 +81,9 @@ export function placeSearchReducer<S>(
   if (isStale) return state;
 
   switch (action.type) {
+    case 'focused':
+      return state.sheetOpen ? state : { ...state, sheetOpen: true };
+
     case 'inputChanged':
       return next(state, {
         kind: 'debouncing',
@@ -156,11 +164,15 @@ export function placeSearchReducer<S>(
 
     case 'selectionResolved':
       if (status.kind !== 'selecting') return state;
-      return { ...state, status: { kind: 'selected', place: action.place } };
+      return { ...state, status: { kind: 'selected', place: action.place }, sheetOpen: false };
 
     case 'selectionFailed':
       if (status.kind !== 'selecting') return state;
       return { ...state, status: { kind: 'error', input: status.input, failed: 'details' } };
+
+    // Already known, so unlike a suggestion this costs no lookup. In-flight work is dropped.
+    case 'placePicked':
+      return { ...next(state, { kind: 'selected', place: action.place }), sheetOpen: false };
 
     case 'dismissed':
       return close(state);
@@ -168,6 +180,7 @@ export function placeSearchReducer<S>(
     case 'blurred':
       return isCommitted(status) ? state : close(state);
 
+    // The box keeps focus, so whatever was showing for it stays open.
     case 'cleared':
       return next(state, { kind: 'closed' });
   }

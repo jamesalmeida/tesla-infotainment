@@ -17,7 +17,7 @@ const place: Place = { name: 'Cafe', location: { lat: 1, lng: 2 } };
 const ID = 5;
 const STALE = 4;
 
-const at = (status: Status): State => ({ status, requestId: ID });
+const at = (status: Status): State => ({ status, requestId: ID, sheetOpen: false });
 const closed: Status = { kind: 'closed' };
 const debouncing: Status = { kind: 'debouncing', input: 'ca', suggestions: [] };
 const debouncingOverList: Status = { kind: 'debouncing', input: 'caf', suggestions: ['old'] };
@@ -32,8 +32,8 @@ const searchError: Status = { kind: 'error', input: 'ca', failed: 'suggestions' 
 
 // `requestId` is ID when the transition keeps the running request, ID + 1 when it starts
 // a new one or abandons it.
-const same = (status: Status): State => ({ status, requestId: ID });
-const bumped = (status: Status): State => ({ status, requestId: ID + 1 });
+const same = (status: Status): State => ({ status, requestId: ID, sheetOpen: false });
+const bumped = (status: Status): State => ({ status, requestId: ID + 1, sheetOpen: false });
 
 describe('placeSearchReducer', () => {
   const transitions: [string, Status, Action, State][] = [
@@ -317,9 +317,63 @@ describe('placeSearchReducer', () => {
   });
 });
 
+describe('the sheet', () => {
+  const opened = (status: Status): State => ({ ...at(status), sheetOpen: true });
+
+  const transitions: [string, State, Action, State][] = [
+    ['focus opens it', at(closed), { type: 'focused' }, opened(closed)],
+    ['focus again changes nothing', opened(closed), { type: 'focused' }, opened(closed)],
+    [
+      'typing leaves it open',
+      opened(closed),
+      { type: 'inputChanged', input: 'c' },
+      {
+        status: { kind: 'debouncing', input: 'c', suggestions: [] },
+        requestId: ID + 1,
+        sheetOpen: true,
+      },
+    ],
+    [
+      'clearing leaves it open, since the box keeps focus',
+      opened(open),
+      { type: 'cleared' },
+      { status: closed, requestId: ID + 1, sheetOpen: true },
+    ],
+    ['blur closes it', opened(closed), { type: 'blurred' }, at(closed)],
+    ['Escape closes it', opened(closed), { type: 'dismissed' }, at(closed)],
+    ['blur closes it over a placed search', opened(selected), { type: 'blurred' }, at(selected)],
+    [
+      'a committed choice holds it through blur',
+      opened(selecting),
+      { type: 'blurred' },
+      opened(selecting),
+    ],
+    [
+      'details arriving closes it',
+      opened(selecting),
+      { type: 'selectionResolved', requestId: ID, place },
+      at(selected),
+    ],
+    [
+      'a saved place closes it and drops anything in flight',
+      opened(loading),
+      { type: 'placePicked', place },
+      { status: selected, requestId: ID + 1, sheetOpen: false },
+    ],
+  ];
+
+  test.each(transitions)('%s', (_name, from, action, expected) => {
+    expect(placeSearchReducer(from, action)).toEqual(expected);
+  });
+});
+
 describe('selectors', () => {
   test('starts closed', () => {
-    expect(initialPlaceSearchState<string>()).toEqual({ status: closed, requestId: 0 });
+    expect(initialPlaceSearchState<string>()).toEqual({
+      status: closed,
+      requestId: 0,
+      sheetOpen: false,
+    });
   });
 
   test.each<[Status, string[]]>([

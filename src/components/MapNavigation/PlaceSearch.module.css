@@ -67,6 +67,92 @@
   color: #b3261e;
 }
 
+.savedPlaces {
+  margin: 0;
+  padding: 0;
+  max-height: calc(320 * var(--u));
+  overflow-y: auto;
+  list-style: none;
+  border-radius: calc(8 * var(--u));
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  color: var(--color-text);
+  background-color: var(--color-card);
+}
+
+.savedHeading {
+  padding: calc(8 * var(--u)) calc(10 * var(--u)) calc(2 * var(--u));
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.savedRow {
+  display: flex;
+  align-items: center;
+}
+
+.savedRow + .savedRow {
+  border-top: 1px solid var(--color-border);
+}
+
+.savedPick {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-target);
+  padding: calc(10 * var(--u));
+  border: none;
+  overflow: hidden;
+  font: inherit;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-strong);
+  background: none;
+  cursor: pointer;
+}
+
+.savedPick:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.savedLabel {
+  margin-right: calc(6 * var(--u));
+  font-weight: 600;
+}
+
+.savedHint {
+  color: var(--color-text-muted);
+}
+
+@media (hover: hover) {
+  .savedPick:hover:enabled {
+    background-color: var(--color-card-hover);
+  }
+}
+
+.savedAction {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: max(calc(36 * var(--u)), var(--tap-target));
+  min-height: max(calc(36 * var(--u)), var(--tap-target));
+  padding: 0;
+  border: none;
+  font-size: max(var(--text-min), calc(18 * var(--u)));
+  line-height: 1;
+  color: var(--color-text-muted);
+  background: none;
+  cursor: pointer;
+}
+
+.savedAction[aria-pressed='true'] {
+  color: var(--color-warning);
+}
+
 /* The search box below moved from MapNavigation.css (and App.css for the small-screen font size). */
 .navBtn {
   padding: 2%;
