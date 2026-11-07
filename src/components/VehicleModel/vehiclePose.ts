@@ -13,7 +13,7 @@ export const DOOR_IDS: readonly DoorId[] = ['lf', 'lr', 'rf', 'rr'];
 
 export const CLOSED_DOORS: DoorStates = { lf: false, lr: false, rf: false, rr: false };
 
-// Where the camera sits around the car, in radians. Dragging orbits away from it.
+// Where the camera rests around the car, in radians. A drag orbits away and eases back.
 export const DEFAULT_AZIMUTH = 0.6;
 
 // How long a part takes to get most of the way to its target, in seconds.
@@ -41,7 +41,7 @@ const DOOR_OPEN_ANGLE = (65 * Math.PI) / 180;
 
 const POSE_TARGETS: Record<VehiclePose, { rotation: number; frunk: number; trunk: number }> = {
   park: { rotation: Math.PI, frunk: 0, trunk: 0 },
-  // Rotating the nose towards the left of the screen.
+  // Seen from behind, as if following the car.
   drive: { rotation: Math.PI / 4.3, frunk: 0, trunk: 0 },
   // The parked view already shows the frunk. It opens 30 degrees.
   frunk: { rotation: Math.PI, frunk: Math.PI / 6, trunk: 0 },

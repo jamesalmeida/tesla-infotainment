@@ -5,6 +5,8 @@ import {
   useState,
   useSyncExternalStore,
   type ComponentRef,
+  type PointerEvent,
+  type RefObject,
 } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei';
@@ -42,6 +44,15 @@ interface VehicleModelProps {
 
 interface ModelProps extends VehicleModelProps {
   scale?: number;
+  pressRef: RefObject<PointerPress>;
+}
+
+interface PointerPress {
+  x: number;
+  y: number;
+  // The furthest the pointer has got from where it went down, in pixels. Measuring only
+  // the two ends would read a drag that came back to its start as a click.
+  travel: number;
 }
 
 interface CarNodes {
@@ -86,7 +97,7 @@ function applyParts(nodes: CarNodes, parts: CarParts) {
   }
 }
 
-function Model({ pose, doors, onDoorToggle, ...props }: ModelProps) {
+function Model({ pose, doors, onDoorToggle, pressRef, ...props }: ModelProps) {
   const { scene } = useGLTF(modelPath);
   const invalidate = useThree((state) => state.invalidate);
   const frameloop = useThree((state) => state.frameloop);
@@ -122,7 +133,7 @@ function Model({ pose, doors, onDoorToggle, ...props }: ModelProps) {
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
-    if (!isClick(event.delta)) return;
+    if (!isClick(pressRef.current.travel)) return;
     const door = findDoorId(event.object);
     if (!door) return;
     if (!doors) setLocalDoors((current) => ({ ...current, [door]: !current[door] }));
@@ -192,6 +203,17 @@ const isTabHidden = () => document.hidden;
 
 export function VehicleModel({ pose, doors, onDoorToggle }: VehicleModelProps) {
   const tabHidden = useSyncExternalStore(subscribeToTabVisibility, isTabHidden);
+  const pressRef = useRef<PointerPress>({ x: 0, y: 0, travel: 0 });
+
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    pressRef.current = { x: event.clientX, y: event.clientY, travel: 0 };
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const press = pressRef.current;
+    const distance = Math.hypot(event.clientX - press.x, event.clientY - press.y);
+    press.travel = Math.max(press.travel, distance);
+  };
 
   return (
     <Canvas
@@ -205,10 +227,18 @@ export function VehicleModel({ pose, doors, onDoorToggle }: VehicleModelProps) {
       }}
       style={{ position: 'relative' }}
       className={styles.carModelWrapper}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
     >
       <color attach="background" args={['#f1f1f1']} />
       <Stage environment={stageEnvironment}>
-        <Model scale={0.01} pose={pose} doors={doors} onDoorToggle={onDoorToggle} />
+        <Model
+          scale={0.01}
+          pose={pose}
+          doors={doors}
+          onDoorToggle={onDoorToggle}
+          pressRef={pressRef}
+        />
       </Stage>
       <ControlledOrbitControls />
     </Canvas>
