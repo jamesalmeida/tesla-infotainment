@@ -1,3 +1,137 @@
-.title {
+.date {
+  min-width: calc(90 * var(--u));
+  color: var(--color-text-strong);
+  font-size: var(--app-text-small);
+  font-weight: 600;
   text-align: center;
+}
+
+.layout {
+  display: flex;
+  flex: 1;
+  gap: var(--app-gap);
+  min-height: 0;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  min-width: 0;
+  min-height: 0;
+}
+
+.allDay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(4 * var(--u));
+}
+
+.allDayEvent {
+  min-height: max(var(--tap-target), calc(30 * var(--u)));
+  padding: calc(2 * var(--u)) calc(10 * var(--u));
+  border: none;
+  border-radius: calc(6 * var(--u));
+  background-color: var(--color-panel);
+  color: var(--color-text-strong);
+  font: inherit;
+  font-size: var(--app-text-small);
+  cursor: pointer;
+}
+
+.timeline {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+}
+
+.hours {
+  --hour-height: max(44px, calc(56 * var(--u)));
+  --rail: max(48px, calc(62 * var(--u)));
+
+  position: relative;
+  height: calc(24 * var(--hour-height));
+}
+
+.hour {
+  height: var(--hour-height);
+  padding: calc(2 * var(--u)) calc(8 * var(--u));
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--app-text-small);
+}
+
+.events {
+  position: absolute;
+  top: 0;
+  right: calc(6 * var(--u));
+  bottom: 0;
+  left: var(--rail);
+}
+
+.event {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: calc(2 * var(--u)) calc(8 * var(--u));
+  overflow: hidden;
+  border: none;
+  border-left: calc(3 * var(--u)) solid var(--color-accent);
+  border-radius: calc(5 * var(--u));
+  background-color: var(--color-panel);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--app-text-small);
+  text-align: left;
+  cursor: pointer;
+}
+
+.selected {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.eventTime {
+  color: var(--color-text-muted);
+}
+
+.nowLine {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background-color: var(--color-danger);
+  pointer-events: none;
+}
+
+.detail {
+  display: flex;
+  flex: 0 0 34%;
+  flex-direction: column;
+  gap: var(--app-gap);
+  min-width: 0;
+  padding: var(--app-gap);
+  overflow-y: auto;
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+}
+
+/* Narrow panels stack the details under the timeline instead of squeezing both. */
+@container (max-width: 560px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .detail {
+    flex: 0 1 auto;
+    flex-flow: row wrap;
+    align-items: center;
+    max-height: 55%;
+  }
 }
