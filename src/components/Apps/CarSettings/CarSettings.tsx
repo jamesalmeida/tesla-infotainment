@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import UserProfile from '../../UserProfile/UserProfile';
 import { Pressable } from '../../Pressable/Pressable';
 import { useCar, useCarActions } from '../../../state/CarStateContext';
@@ -16,7 +17,11 @@ import { Service } from './components/Service';
 import { Software } from './components/Software';
 import { Wifi } from './components/Wifi';
 import { getImagePath } from '../../../utils/assetPaths';
+import { SettingsSearch } from './SettingsSearch';
+import type { SettingEntry } from './settingsIndex';
 import styles from './CarSettings.module.css';
+
+const HIGHLIGHT_MS = 1600;
 
 interface TopBarItem {
   icon: string;
@@ -51,14 +56,43 @@ export const CarSettings = () => {
     state.surface.kind === 'settings' ? state.surface.panel : 'Controls',
   );
   const { openSettings } = useCarActions();
+  const detailRef = useRef<HTMLDivElement>(null);
+  const [jumpTarget, setJumpTarget] = useState<string | null>(null);
+
+  // Only narrow panels use this, showing the list or one panel. CSS decides when that applies.
+  const [isDetailOpen, setIsDetailOpen] = useState(activePanel !== 'Controls');
+  const [shownPanel, setShownPanel] = useState(activePanel);
+  // Anything that picks a panel lands on it, including jumps from outside Settings.
+  if (shownPanel !== activePanel) {
+    setShownPanel(activePanel);
+    setIsDetailOpen(true);
+  }
+
+  useEffect(() => {
+    if (!jumpTarget) return;
+    const target = detailRef.current?.querySelector<HTMLElement>(`[data-setting="${jumpTarget}"]`);
+    target?.scrollIntoView({ block: 'center' });
+    target?.setAttribute('data-highlighted', '');
+    const timer = setTimeout(() => {
+      target?.removeAttribute('data-highlighted');
+      setJumpTarget(null);
+    }, HIGHLIGHT_MS);
+    return () => {
+      clearTimeout(timer);
+      target?.removeAttribute('data-highlighted');
+    };
+  }, [jumpTarget]);
+
+  const handleSearchPick = (entry: SettingEntry) => {
+    openSettings(entry.panel);
+    setIsDetailOpen(true);
+    setJumpTarget(entry.id);
+  };
 
   return (
     <div className={styles['car-settings-wrapper']}>
       <div className={styles['top-bar']}>
-        <div className={`${styles['top-bar-item']} ${styles['search-bar']}`}>
-          <img src={getImagePath('icon-search.svg')} alt="Search" />
-          <input type="text" placeholder="Search settings" />
-        </div>
+        <SettingsSearch onPick={handleSearchPick} />
         <div className={styles['top-bar-right-icons']}>
           <UserProfile />
           {topBarItems.map((item) =>
@@ -78,21 +112,31 @@ export const CarSettings = () => {
           )}
         </div>
       </div>
-      <div className={styles['car-settings-panel']}>
+      <div className={styles['car-settings-panel']} data-view={isDetailOpen ? 'detail' : 'list'}>
         <div className={styles['left-scroll-panel']}>
           {leftPanelItems.map((item) => (
             <Pressable
               key={item.label}
               className={`${styles['left-scroll-panel-item']} ${activePanel === item.label ? styles.active : ''}`}
               pressed={activePanel === item.label}
-              onPress={() => openSettings(item.label)}
+              onPress={() => {
+                openSettings(item.label);
+                setIsDetailOpen(true);
+              }}
             >
               <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt="" />
               {item.label}
             </Pressable>
           ))}
         </div>
-        <div className={styles['settings-right-panel']}>
+        <div ref={detailRef} className={styles['settings-right-panel']}>
+          <button
+            type="button"
+            className={styles['back-button']}
+            onClick={() => setIsDetailOpen(false)}
+          >
+            <span aria-hidden="true">‹</span> {activePanel}
+          </button>
           <div className={`${styles['buttons-grid']} ${activePanel.toLowerCase()}`}>
             {activePanel === 'Controls' && <Controls />}
             {activePanel === 'Dynamics' && <Dynamics />}
