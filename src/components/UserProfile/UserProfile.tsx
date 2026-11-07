@@ -1,13 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
 import { useDismiss } from '../../hooks/useDismiss';
 import { useCar, useCarActions } from '../../state/CarStateContext';
-import { PROFILES, findProfile } from '../../state/profiles';
+import { findProfile, VALET_PROFILE_ID } from '../../state/profiles';
 import { getImagePath } from '../../utils/assetPaths';
 import styles from './UserProfile.module.css';
 
 const UserProfile = () => {
-  const activeProfile = useCar((state) => findProfile(state.activeProfileId));
-  const { selectProfile } = useCarActions();
+  const profiles = useCar((state) => state.profiles);
+  const activeProfile = useCar((state) => findProfile(state.profiles, state.activeProfileId));
+  const { openSettings, selectProfile } = useCarActions();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -15,8 +16,15 @@ const UserProfile = () => {
   const closeDropdown = useCallback(() => setIsDropdownOpen(false), []);
   useDismiss(containerRef, isDropdownOpen, closeDropdown);
 
+  // Valet needs a PIN, which the Profiles panel asks for.
   const handleProfileSelect = (id: number) => {
-    selectProfile(id);
+    if (id === VALET_PROFILE_ID) openSettings('Profiles');
+    else selectProfile(id);
+    closeDropdown();
+  };
+
+  const handleOpenSettings = () => {
+    openSettings('Profiles');
     closeDropdown();
   };
 
@@ -33,7 +41,7 @@ const UserProfile = () => {
       </button>
       {isDropdownOpen && (
         <div className={styles['profile-dropdown']}>
-          {PROFILES.map((profile) => (
+          {profiles.map((profile) => (
             <button
               key={profile.id}
               type="button"
@@ -55,10 +63,14 @@ const UserProfile = () => {
               )}
             </button>
           ))}
-          <div className={styles['driver-profile-settings']}>
+          <button
+            type="button"
+            className={styles['driver-profile-settings']}
+            onClick={handleOpenSettings}
+          >
             Driver Profile Settings
-            <img src={getImagePath('icon-gear.svg')} alt="Driver Profile Settings" />
-          </div>
+            <img src={getImagePath('icon-gear.svg')} alt="" />
+          </button>
         </div>
       )}
     </div>

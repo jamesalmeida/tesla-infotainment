@@ -6,6 +6,7 @@ import {
   type AppId,
   type Autopilot,
   type CabinSettings,
+  type CabinPosition,
   type CarAction,
   type CarState,
   type ClimateMode,
@@ -54,6 +55,12 @@ export interface CarActions {
   setVolume: (volume: number) => void;
   selectProfile: (id: number) => void;
   moveDockItem: (item: DockItem, delta: -1 | 1) => void;
+  addProfile: (name: string) => void;
+  renameProfile: (id: number, name: string) => void;
+  deleteProfile: (id: number) => void;
+  setCabinPosition: (patch: Partial<CabinPosition>) => void;
+  enterValet: (pin: string) => void;
+  exitValet: (pin: string) => void;
   showNotice: (message: string) => void;
   // Without an id, clears every toast.
   dismissNotice: (id?: number) => void;
@@ -140,6 +147,12 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   setVolume: (volume) => dispatch({ type: 'volume/set', volume }),
   selectProfile: (id) => dispatch({ type: 'profile/select', id }),
   moveDockItem: (item, delta) => dispatch({ type: 'dock/move', item, delta }),
+  addProfile: (name) => dispatch({ type: 'profile/add', name }),
+  renameProfile: (id, name) => dispatch({ type: 'profile/rename', id, name }),
+  deleteProfile: (id) => dispatch({ type: 'profile/delete', id }),
+  setCabinPosition: (patch) => dispatch({ type: 'cabin/set', patch }),
+  enterValet: (pin) => dispatch({ type: 'valet/enter', pin }),
+  exitValet: (pin) => dispatch({ type: 'valet/exit', pin }),
   showNotice: (message) => dispatch({ type: 'notice/show', message }),
   dismissNotice: (id) => dispatch({ type: 'notice/dismiss', id }),
   clearNotifications: () => dispatch({ type: 'notifications/clear' }),

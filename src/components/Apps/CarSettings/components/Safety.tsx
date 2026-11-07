@@ -48,18 +48,18 @@ function PinMode({
   onEnable: (pin: string) => void;
   onDisable: (pin: string) => void;
 }) {
-  const [isAsking, setIsAsking] = useState(false);
-
-  // The store refuses a wrong PIN with a message; the form stays up for another go.
-  const submit = (pin: string) => {
-    (isOn ? onDisable : onEnable)(pin);
-    setIsAsking(false);
-  };
+  // Remembers which way the switch was going, so the form leaves once the mode changes and
+  // stays for another try after a wrong PIN.
+  const [askedWhile, setAskedWhile] = useState<boolean | null>(null);
+  const isAsking = askedWhile === isOn;
 
   return (
     <>
       <Row label={label} hint={hint}>
-        <Button variant={isOn ? 'default' : 'primary'} onPress={() => setIsAsking(!isAsking)}>
+        <Button
+          variant={isOn ? 'default' : 'primary'}
+          onPress={() => setAskedWhile(isAsking ? null : isOn)}
+        >
           {isOn ? 'Turn Off' : 'Turn On'}
         </Button>
       </Row>
@@ -67,8 +67,8 @@ function PinMode({
         <PinForm
           label={isOn ? `PIN to turn off ${label}` : `Choose a PIN for ${label}`}
           submitLabel={isOn ? 'Turn Off' : 'Turn On'}
-          onSubmit={submit}
-          onCancel={() => setIsAsking(false)}
+          onSubmit={isOn ? onDisable : onEnable}
+          onCancel={() => setAskedWhile(null)}
         />
       )}
     </>

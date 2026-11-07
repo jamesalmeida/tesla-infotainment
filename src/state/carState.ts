@@ -20,7 +20,22 @@ import {
   type TemperatureZone,
 } from './climate';
 
+import {
+  DEFAULT_PROFILES,
+  findProfile,
+  isDriverProfile,
+  MAX_PROFILES,
+  PROFILE_SETTING_KEYS,
+  profileImage,
+  VALET_PROFILE_ID,
+  type CabinPosition,
+  type Profile,
+  type ProfileSettings,
+  type ProfileSnapshot,
+} from './profiles';
+
 export type { AppId };
+export type { CabinPosition, Profile };
 export type {
   Airflow,
   CabinSettings,
@@ -62,6 +77,7 @@ export const MAX_TOASTS = 3;
 export const MAX_TRIP_METERS = 6;
 export const MAX_NAME_LENGTH = 24;
 export const MIN_SPEED_LIMIT = 50;
+export const VALET_MAX_SPEED = 70;
 
 // mph per second.
 const ACCELERATION_RATE = { chill: 6, standard: 10, sport: 14 } as const;
@@ -105,6 +121,7 @@ export const SETTINGS_PANELS = [
   'Wifi',
   'Notifications',
   'Audio',
+  'Profiles',
 ] as const;
 
 export type SettingsPanel = (typeof SETTINGS_PANELS)[number];
@@ -321,6 +338,13 @@ export interface VehicleSettings {
   speedLimitPin: string;
   pinToDrive: boolean;
   drivePin: string;
+  easyEntry: boolean;
+}
+
+// Valet Mode is on while this exists. The driver it replaced comes back when it ends.
+export interface ValetSession {
+  pin: string;
+  returnProfileId: number;
 }
 
 export interface DisplaySettings {
@@ -381,6 +405,11 @@ export interface CarState {
   activeProfileId: number;
   // Only the profiles that have changed their dock; the rest use the default.
   dockByProfile: Record<number, DockItem[]>;
+  profiles: Profile[];
+  valet: ValetSession | null;
+  // Where the driver set the seat, mirrors and wheel. Easy Entry moves away from this, and back.
+  cabin: CabinPosition;
+  easyEntryActive: boolean;
   settings: VehicleSettings;
   display: DisplaySettings;
   // The newest message, on screen for a moment.
@@ -441,6 +470,12 @@ export type CarAction =
   | { type: 'volume/set'; volume: number }
   | { type: 'profile/select'; id: number }
   | { type: 'dock/move'; item: DockItem; delta: -1 | 1 }
+  | { type: 'profile/add'; name: string }
+  | { type: 'profile/rename'; id: number; name: string }
+  | { type: 'profile/delete'; id: number }
+  | { type: 'cabin/set'; patch: Partial<CabinPosition> }
+  | { type: 'valet/enter'; pin: string }
+  | { type: 'valet/exit'; pin: string }
   | { type: 'notice/show'; message: string }
   // Without an id, clears every toast.
   | { type: 'notice/dismiss'; id?: number }
@@ -489,6 +524,18 @@ export const initialCarState: CarState = {
   volume: 50,
   activeProfileId: 1,
   dockByProfile: {},
+  profiles: DEFAULT_PROFILES,
+  valet: null,
+  cabin: {
+    seatPosition: 50,
+    seatHeight: 50,
+    seatRecline: 50,
+    mirrorTilt: 50,
+    mirrorPan: 50,
+    steeringTilt: 50,
+    steeringReach: 50,
+  },
+  easyEntryActive: false,
   settings: {
     headlights: 'auto',
     highBeams: false,
@@ -570,6 +617,7 @@ export const initialCarState: CarState = {
     speedLimitPin: '',
     pinToDrive: false,
     drivePin: '',
+    easyEntry: false,
   },
   display: { brightness: 100, autoBrightness: false, appearance: 'light', blueLightReduction: 0 },
   notice: null,
@@ -618,9 +666,21 @@ export const isValidPin = (pin: string): boolean => /^\d{4}$/.test(pin);
 export const needsDrivePin = (state: CarState): boolean =>
   state.settings.pinToDrive && !state.driveUnlocked;
 
+export const isValet = (state: CarState): boolean => state.valet !== null;
+
 // The fastest the car will go in Drive right now.
 export const speedCap = (state: CarState): number =>
-  state.settings.speedLimitMode ? Math.min(MAX_SPEED, state.settings.speedLimitMph) : MAX_SPEED;
+  Math.min(
+    MAX_SPEED,
+    isValet(state) ? VALET_MAX_SPEED : MAX_SPEED,
+    state.settings.speedLimitMode ? state.settings.speedLimitMph : MAX_SPEED,
+  );
+
+// Easy Entry slides the seat back and lifts the wheel, without touching the saved position.
+export const effectiveCabin = (state: CarState): CabinPosition =>
+  state.easyEntryActive
+    ? { ...state.cabin, seatPosition: 100, steeringTilt: 100, steeringReach: 0 }
+    : state.cabin;
 
 // The loop only runs while something is actually changing.
 export const isSimulationActive = (state: CarState): boolean =>
@@ -725,6 +785,24 @@ export function canShift(state: CarState, gear: Gear): Permission {
   if (gear !== 'P' && needsDrivePin(state)) return { allowed: false, reason: DRIVE_PIN_REASON };
   return ALLOWED;
 }
+
+const VALET_PROFILES_REASON = 'Exit Valet Mode to change drivers';
+
+export const canEditProfiles = (state: CarState): Permission =>
+  isValet(state) ? { allowed: false, reason: VALET_PROFILES_REASON } : ALLOWED;
+
+export function canSelectProfile(state: CarState, id: number): Permission {
+  if (isValet(state)) return { allowed: false, reason: VALET_PROFILES_REASON };
+  if (id === VALET_PROFILE_ID) return { allowed: false, reason: 'Enter a PIN to use Valet Mode' };
+  return parkedFor(state, 'change drivers');
+}
+
+export function canEnterValet(state: CarState): Permission {
+  if (isValet(state)) return { allowed: false, reason: 'Valet Mode is already on' };
+  return parkedFor(state, 'use Valet Mode');
+}
+
+export const canExitValet = (state: CarState): Permission => parkedFor(state, 'exit Valet Mode');
 
 export const canSetSpeedLimit = (state: CarState): Permission =>
   parkedFor(state, 'change Speed Limit Mode');
@@ -898,6 +976,7 @@ function shift(state: CarState, gear: Gear): CarState {
     openCompartment: gear === 'P' ? state.openCompartment : null,
     autopilot: gear === 'D' ? state.autopilot : 'off',
     sentryAlarm: gear === 'P' && state.sentryAlarm,
+    easyEntryActive: gear === 'P' && state.settings.easyEntry,
   };
 
   if (state.overlayMode && !survivesGear(state.overlayMode, gear)) {
@@ -937,6 +1016,47 @@ function shift(state: CarState, gear: Gear): CarState {
     }
   }
   return next;
+}
+
+const pickProfileSettings = (settings: VehicleSettings): ProfileSettings =>
+  Object.fromEntries(
+    PROFILE_SETTING_KEYS.map((key) => [key, settings[key]]),
+  ) as unknown as ProfileSettings;
+
+const snapshot = ({
+  cabin,
+  temperature,
+  volume,
+  display,
+  settings,
+}: CarState): ProfileSnapshot => ({
+  cabin,
+  temperature,
+  volume,
+  display,
+  settings: pickProfileSettings(settings),
+});
+
+const saveActiveProfile = (state: CarState): CarState => ({
+  ...state,
+  profiles: state.profiles.map((profile) =>
+    profile.id === state.activeProfileId ? { ...profile, saved: snapshot(state) } : profile,
+  ),
+});
+
+// Makes a driver current. A driver with nothing saved takes the car as they find it.
+function loadProfile(state: CarState, id: number): CarState {
+  const { saved } = findProfile(state.profiles, id);
+  const next = { ...state, activeProfileId: id, easyEntryActive: false };
+  if (!saved) return next;
+  return {
+    ...next,
+    cabin: saved.cabin,
+    temperature: saved.temperature,
+    volume: saved.volume,
+    display: saved.display,
+    settings: { ...state.settings, ...saved.settings },
+  };
 }
 
 const safetyFeaturesOn = (settings: VehicleSettings): VehicleSettings => ({
@@ -980,7 +1100,8 @@ function nextSpeed(state: CarState, seconds: number): number {
 
   if (state.pedal === 'brake') return approach(state.speed, 0, BRAKING_RATE * seconds);
   if (state.pedal === 'accelerate' && inGear(state) && hasCharge) {
-    const rate = trackMode ? TRACK_ACCELERATION_RATE : ACCELERATION_RATE[acceleration];
+    const mode = isValet(state) ? 'chill' : acceleration;
+    const rate = trackMode ? TRACK_ACCELERATION_RATE : ACCELERATION_RATE[mode];
     return approach(state.speed, topSpeed, rate * seconds);
   }
   if (state.autopilot !== 'off' && hasCharge) {
@@ -1341,13 +1462,16 @@ export function carReducer(state: CarState, action: CarAction): CarState {
 
     // Real cars fall back on the owner's account. This one has no account, so a forgotten
     // PIN mustn't leave a saved session stuck for good.
-    case 'pins/reset':
+    case 'pins/reset': {
+      const released = state.valet
+        ? loadProfile({ ...state, valet: null }, state.valet.returnProfileId)
+        : state;
       return notify(
         {
-          ...state,
+          ...released,
           activeModal: state.activeModal === 'drive-pin' ? null : state.activeModal,
           settings: {
-            ...state.settings,
+            ...released.settings,
             speedLimitMode: false,
             speedLimitPin: '',
             pinToDrive: false,
@@ -1356,6 +1480,7 @@ export function carReducer(state: CarState, action: CarAction): CarState {
         },
         'PINs cleared',
       );
+    }
 
     case 'safety/require': {
       const permission = canRequireSafetyFeatures(state);
@@ -1443,8 +1568,92 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     case 'volume/set':
       return { ...state, volume: Math.min(100, Math.max(0, action.volume)) };
 
-    case 'profile/select':
-      return { ...state, activeProfileId: action.id };
+    case 'profile/select': {
+      if (action.id === state.activeProfileId) return state;
+      const permission = canSelectProfile(state, action.id);
+      if (!permission.allowed) return notify(state, permission.reason);
+      if (!state.profiles.some((profile) => profile.id === action.id)) return state;
+      return loadProfile(saveActiveProfile(state), action.id);
+    }
+
+    case 'profile/add': {
+      const permission = canEditProfiles(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      if (state.profiles.length >= MAX_PROFILES) {
+        return notify(state, `Up to ${MAX_PROFILES - 1} drivers`);
+      }
+      const checked = checkName(state.profiles, action.name);
+      if ('reason' in checked) return notify(state, checked.reason);
+      const id = nextId(state.profiles);
+      const added: Profile = {
+        id,
+        name: checked.name,
+        image: profileImage(id),
+        saved: snapshot(state),
+      };
+      // Valet stays last, under the drivers.
+      const profiles = [...state.profiles.filter(isDriverProfile), added].concat(
+        state.profiles.filter((profile) => !isDriverProfile(profile)),
+      );
+      return loadProfile(saveActiveProfile({ ...state, profiles }), id);
+    }
+
+    case 'profile/rename': {
+      const permission = canEditProfiles(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      if (action.id === VALET_PROFILE_ID) return state;
+      const checked = checkName(state.profiles, action.name, action.id);
+      if ('reason' in checked) return notify(state, checked.reason);
+      return {
+        ...state,
+        profiles: state.profiles.map((profile) =>
+          profile.id === action.id ? { ...profile, name: checked.name } : profile,
+        ),
+      };
+    }
+
+    case 'profile/delete': {
+      const permission = canEditProfiles(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      if (action.id === VALET_PROFILE_ID) return state;
+      const drivers = state.profiles.filter(isDriverProfile);
+      if (drivers.length <= 1) return notify(state, "The last driver can't be deleted");
+      const profiles = state.profiles.filter((profile) => profile.id !== action.id);
+      if (action.id !== state.activeProfileId) return { ...state, profiles };
+      if (!isParked(state)) return notify(state, 'Shift to Park to delete the current driver');
+      return loadProfile({ ...state, profiles }, profiles[0].id);
+    }
+
+    case 'cabin/set': {
+      const permission = canEditProfiles(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      return { ...state, cabin: { ...state.cabin, ...action.patch } };
+    }
+
+    case 'valet/enter': {
+      const permission = canEnterValet(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      if (!isValidPin(action.pin)) return notify(state, 'Choose a 4-digit PIN');
+      const saved = saveActiveProfile(state);
+      return notify(
+        {
+          ...saved,
+          valet: { pin: action.pin, returnProfileId: state.activeProfileId },
+          activeProfileId: VALET_PROFILE_ID,
+          easyEntryActive: false,
+        },
+        'Valet Mode on',
+      );
+    }
+
+    case 'valet/exit': {
+      if (!state.valet) return state;
+      const permission = canExitValet(state);
+      if (!permission.allowed) return notify(state, permission.reason);
+      if (action.pin !== state.valet.pin) return notify(state, 'Incorrect PIN');
+      const back = loadProfile({ ...state, valet: null }, state.valet.returnProfileId);
+      return notify(back, 'Valet Mode off');
+    }
 
     case 'dock/move':
       return moveDockItem(state, action.item, action.delta);

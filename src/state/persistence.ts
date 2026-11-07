@@ -39,6 +39,7 @@ import {
   type MeterBaseline,
   type Preferences,
   type TripMeter,
+  type ValetSession,
   type VehicleSettings,
 } from './carState';
 import {
@@ -54,6 +55,18 @@ import {
   type SeatHeat,
   type SeatId,
 } from './climate';
+import {
+  DEFAULT_PROFILES,
+  isDriverProfile,
+  MAX_PROFILES,
+  PROFILE_SETTING_KEYS,
+  profileImage,
+  VALET_PROFILE_ID,
+  type CabinPosition,
+  type Profile,
+  type ProfileSettings,
+  type ProfileSnapshot,
+} from './profiles';
 
 const STORAGE_KEY = 'tesla-car-state';
 const SCHEMA_VERSION = 1;
@@ -77,6 +90,9 @@ type Persisted = {
   | 'tripStartKwh'
   | 'sinceChargeBaseline'
   | 'tripMeters'
+  | 'profiles'
+  | 'valet'
+  | 'cabin'
 >;
 
 const pickPersisted = ({
@@ -93,6 +109,9 @@ const pickPersisted = ({
   tripStartKwh,
   sinceChargeBaseline,
   tripMeters,
+  profiles,
+  valet,
+  cabin,
 }: CarState): Persisted => ({
   climate: climatePreferences(climate),
   volume,
@@ -107,6 +126,9 @@ const pickPersisted = ({
   tripStartKwh,
   sinceChargeBaseline,
   tripMeters,
+  profiles,
+  valet,
+  cabin,
 });
 
 const inRange = (value: unknown, min: number, max: number): value is number =>
@@ -324,6 +346,7 @@ const isSuperchargerFilters = (value: unknown): boolean =>
 // mergeKnown only checks a value's type, so anything narrower than that is checked here.
 const SETTING_RULES: { [K in keyof VehicleSettings]?: (value: unknown) => boolean } = {
   wipers: isValidWipers,
+  acceleration: oneOf('chill', 'standard', 'sport'),
   mapUnits: oneOf('mi', 'km'),
   arrivalChargeTarget: between(0, 50),
   superchargerFilters: isSuperchargerFilters,
@@ -367,6 +390,77 @@ const isTripMeter = (value: unknown): value is TripMeter =>
 const restoreTripMeters = (saved: unknown, defaults: TripMeter[]): TripMeter[] =>
   Array.isArray(saved) ? saved.filter(isTripMeter).slice(0, MAX_TRIP_METERS) : defaults;
 
+const restoreCabin = (saved: unknown, defaults: CabinPosition): CabinPosition => {
+  const merged = mergeKnown(defaults, saved);
+  const entries = Object.entries(merged) as [keyof CabinPosition, number][];
+  return Object.fromEntries(
+    entries.map(([key, value]) => [key, inRange(value, 0, 100) ? value : defaults[key]]),
+  ) as unknown as CabinPosition;
+};
+
+const restoreProfileSettings = (saved: unknown, defaults: VehicleSettings): ProfileSettings => {
+  const profileDefaults = Object.fromEntries(
+    PROFILE_SETTING_KEYS.map((key) => [key, defaults[key]]),
+  ) as unknown as ProfileSettings;
+  return applySettingRules(mergeKnown(profileDefaults, saved), profileDefaults);
+};
+
+const restoreSnapshot = (saved: unknown, defaults: CarState): ProfileSnapshot | null => {
+  if (!isRecord(saved)) return null;
+  const display = mergeKnown(defaults.display, saved.display);
+  return {
+    cabin: restoreCabin(saved.cabin, defaults.cabin),
+    temperature: inRange(saved.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE)
+      ? saved.temperature
+      : defaults.temperature,
+    volume: inRange(saved.volume, 0, 100) ? saved.volume : defaults.volume,
+    display: inRange(display.brightness, 0, 100) ? display : defaults.display,
+    settings: restoreProfileSettings(saved.settings, defaults.settings),
+  };
+};
+
+// Drivers come from the save; Valet is always the car's own entry, and always there.
+function restoreProfiles(saved: unknown, defaults: CarState): Profile[] {
+  if (!Array.isArray(saved)) return defaults.profiles;
+  const drivers = saved
+    .filter(
+      (profile): profile is Record<string, unknown> =>
+        isRecord(profile) &&
+        Number.isInteger(profile.id) &&
+        profile.id !== VALET_PROFILE_ID &&
+        isName(profile.name),
+    )
+    .slice(0, MAX_PROFILES - 1)
+    .map((profile) => ({
+      id: profile.id as number,
+      name: profile.name as string,
+      image: profileImage(profile.id as number),
+      saved: restoreSnapshot(profile.saved, defaults),
+    }));
+  if (drivers.length === 0) return defaults.profiles;
+  return [...drivers, ...DEFAULT_PROFILES.filter((profile) => !isDriverProfile(profile))];
+}
+
+const isValetSession = (value: unknown): value is ValetSession =>
+  isRecord(value) &&
+  typeof value.pin === 'string' &&
+  isValidPin(value.pin) &&
+  typeof value.returnProfileId === 'number';
+
+// Valet is only ever active with a session behind it, so a save from before there was a PIN
+// can't start a visit locked in with no way out.
+function restoreActiveProfile(
+  saved: unknown,
+  profiles: Profile[],
+  valet: ValetSession | null,
+  fallback: number,
+): number {
+  if (valet) return VALET_PROFILE_ID;
+  const drivers = profiles.filter(isDriverProfile);
+  const match = drivers.find(({ id }) => id === saved) ?? drivers.find(({ id }) => id === fallback);
+  return (match ?? drivers[0]).id;
+}
+
 // A mode that needs a PIN can't be on without one, or nothing could ever turn it off.
 const withPinModesIntact = (settings: VehicleSettings): VehicleSettings => ({
   ...settings,
@@ -393,6 +487,8 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
     defaults.display,
     DISPLAY_CHOICES,
   );
+  const profiles = restoreProfiles(saved.profiles, defaults);
+  const valet = isValetSession(saved.valet) ? saved.valet : null;
 
   return {
     ...defaults,
@@ -417,8 +513,15 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
       ? saved.sinceChargeBaseline
       : defaults.sinceChargeBaseline,
     tripMeters: restoreTripMeters(saved.tripMeters, defaults.tripMeters),
-    activeProfileId:
-      typeof saved.activeProfileId === 'number' ? saved.activeProfileId : defaults.activeProfileId,
+    activeProfileId: restoreActiveProfile(
+      saved.activeProfileId,
+      profiles,
+      valet,
+      defaults.activeProfileId,
+    ),
+    profiles,
+    valet,
+    cabin: restoreCabin(saved.cabin, defaults.cabin),
     dockByProfile: restoreDock(saved.dockByProfile),
     settings: withPinModesIntact(
       applySettingRules(restoreSettings(defaults.settings, saved.settings), defaults.settings),

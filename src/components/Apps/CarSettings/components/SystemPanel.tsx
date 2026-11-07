@@ -22,7 +22,7 @@ export function Section({
 }: {
   title?: string;
   hint?: string;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <section className={styles.section}>

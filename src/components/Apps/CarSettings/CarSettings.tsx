@@ -18,6 +18,7 @@ import { Software } from './components/Software';
 import { Wifi } from './components/Wifi';
 import { Notifications } from './components/Notifications';
 import { Audio } from './components/Audio';
+import { Profiles } from './components/Profiles';
 import { getImagePath } from '../../../utils/assetPaths';
 import { SettingsSearch } from './SettingsSearch';
 import type { SettingEntry } from './settingsIndex';
@@ -54,6 +55,7 @@ const leftPanelItems: { icon: string; alt: string; label: SettingsPanel }[] = [
   { icon: 'wifi', alt: 'Wifi', label: 'Wifi' },
   { icon: 'notifications', alt: 'Notifications', label: 'Notifications' },
   { icon: 'audio', alt: 'Audio', label: 'Audio' },
+  { icon: 'profiles', alt: 'Profiles', label: 'Profiles' },
 ];
 
 function UnreadDot() {
@@ -158,6 +160,7 @@ export const CarSettings = () => {
             {activePanel === 'Wifi' && <Wifi />}
             {activePanel === 'Notifications' && <Notifications />}
             {activePanel === 'Audio' && <Audio />}
+            {activePanel === 'Profiles' && <Profiles />}
           </div>
         </div>
       </div>

@@ -24,10 +24,11 @@
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: var(--color-card);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-radius: calc(8 * var(--u));
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--color-text-strong) 10%, transparent);
   z-index: 1000;
   width: min(calc(209 * var(--u)), 90cqw);
 }
@@ -40,6 +41,7 @@
   border: none;
   color: inherit;
   font: inherit;
+  min-height: var(--tap-target);
   padding: calc(10 * var(--u));
   cursor: pointer;
   flex-direction: row;
@@ -48,7 +50,7 @@
 }
 
 .profile-option:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-card-hover);
 }
 
 .profile-option img {
@@ -71,9 +73,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  min-height: var(--tap-target);
   padding: calc(10 * var(--u));
+  background: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
-  border-top: 1px solid rgb(182, 182, 182);
+  border: none;
+  border-top: 1px solid var(--color-border);
 }
 
 .driver-profile-settings img {
