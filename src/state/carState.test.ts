@@ -19,6 +19,8 @@ import {
   isPanelOpen,
   isSimulationActive,
   leftSignalLit,
+  MAX_TEMPERATURE,
+  MIN_TEMPERATURE,
   rightSignalLit,
   sentryState,
   sessionKwh,
@@ -231,9 +233,14 @@ describe('modals', () => {
 
 describe('values stay in range', () => {
   test('temperature stays between 60 and 90', () => {
-    expect(reduce({ type: 'temperature/step', delta: 100 }).temperature).toBe(90);
-    expect(reduce({ type: 'temperature/step', delta: -100 }).temperature).toBe(60);
-    expect(reduce({ type: 'temperature/step', delta: 1 }).temperature).toBe(71);
+    const step = (delta: number): CarAction => ({
+      type: 'climate/temperature',
+      zone: 'driver',
+      delta,
+    });
+    expect(reduce(step(100)).climate.driverTemp).toBe(90);
+    expect(reduce(step(-100)).climate.driverTemp).toBe(60);
+    expect(reduce(step(1)).climate.driverTemp).toBe(71);
   });
 
   test('volume stays between 0 and 100', () => {
@@ -806,6 +813,25 @@ describe('invariants', () => {
     { type: 'settings/set', patch: { sentry: true } },
     { type: 'sentry/alarm' },
     { type: 'sim/tick', seconds: 1 },
+    { type: 'climate/temperature', zone: 'driver', delta: 4 },
+    { type: 'climate/temperature', zone: 'passenger', delta: -4 },
+    { type: 'climate/cabin', patch: { isOn: false } },
+    { type: 'climate/cabin', patch: { isOn: true } },
+    { type: 'climate/cabin', patch: { isAuto: true } },
+    { type: 'climate/cabin', patch: { fanSpeed: 7 } },
+    { type: 'climate/cabin', patch: { airflow: 'feet' } },
+    { type: 'climate/cabin', patch: { recirculate: true } },
+    { type: 'climate/options', options: { isSplit: true } },
+    { type: 'climate/options', options: { isSplit: false } },
+    { type: 'climate/defrost', window: 'front' },
+    { type: 'climate/defrost', window: 'rear' },
+    { type: 'climate/seat', seat: 'driver', kind: 'heat' },
+    { type: 'climate/seat', seat: 'passenger', kind: 'cool' },
+    { type: 'climate/seat', seat: 'rear-left', kind: 'cool' },
+    { type: 'climate/heat-auto' },
+    { type: 'climate/mode', mode: 'keep' },
+    { type: 'climate/mode', mode: 'dog' },
+    { type: 'climate/mode', mode: 'camp' },
   ];
 
   const random = (seed: number) => () => {
@@ -838,6 +864,18 @@ describe('invariants', () => {
         }
         if (state.overlayMode !== 'car-wash') expect(state.carWashRestore).toBe(null);
         if (state.chargeState !== 'unplugged') expect(state.gear).toBe('P');
+
+        const { climate } = state;
+        if (state.gear !== 'P') expect(climate.mode).toBe(null);
+        if (climate.mode) expect(climate.cabin.isOn).toBe(true);
+        if (climate.mode && climate.beforeDefrost) expect(climate.beforeDefrost.isOn).toBe(true);
+        if (!climate.isSplit) expect(climate.passengerTemp).toBe(climate.driverTemp);
+        if (climate.beforeDefrost) expect(climate.cabin.airflow).toBe('windshield');
+        expect(climate.driverTemp).toBeGreaterThanOrEqual(MIN_TEMPERATURE);
+        expect(climate.driverTemp).toBeLessThanOrEqual(MAX_TEMPERATURE);
+        expect(climate.passengerTemp).toBeGreaterThanOrEqual(MIN_TEMPERATURE);
+        expect(climate.passengerTemp).toBeLessThanOrEqual(MAX_TEMPERATURE);
+        expect(['auto', 0, 1, 2, 3]).toContain(climate.seats['rear-left']);
       }
     }
   });

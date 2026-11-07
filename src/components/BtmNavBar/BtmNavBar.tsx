@@ -45,14 +45,14 @@ function ShelfButton() {
 }
 
 function ClimateControl() {
-  const temperature = useCar((state) => state.temperature);
+  const temperature = useCar((state) => state.climate.driverTemp);
   const { stepTemperature } = useCarActions();
 
   return (
     <TemperatureControl
       temperature={temperature}
-      onIncrement={() => stepTemperature(1)}
-      onDecrement={() => stepTemperature(-1)}
+      onIncrement={() => stepTemperature('driver', 1)}
+      onDecrement={() => stepTemperature('driver', -1)}
     />
   );
 }

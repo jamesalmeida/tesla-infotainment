@@ -33,15 +33,30 @@ import {
   type Preferences,
   type VehicleSettings,
 } from './carState';
+import {
+  AIRFLOWS,
+  climatePreferences,
+  COOLED_SEATS,
+  MAX_FAN_SPEED,
+  MIN_FAN_SPEED,
+  OVERHEAT_PROTECTION,
+  SEATS,
+  WHEEL_HEAT,
+  type ClimateState,
+  type SeatHeat,
+  type SeatId,
+} from './climate';
 
 const STORAGE_KEY = 'tesla-car-state';
 const SCHEMA_VERSION = 1;
 const SAVE_DELAY_MS = 250;
 
-// Preferences only. Gear, open apps and closures are transient: a visit always starts in Park.
-type Persisted = Pick<
+// Preferences only. Gear, open apps, closures, defrost and climate modes are transient: a
+// visit always starts in Park with nothing running.
+type Persisted = {
+  climate: ReturnType<typeof climatePreferences>;
+} & Pick<
   CarState,
-  | 'temperature'
   | 'volume'
   | 'activeProfileId'
   | 'settings'
@@ -52,7 +67,7 @@ type Persisted = Pick<
 >;
 
 const pickPersisted = ({
-  temperature,
+  climate,
   volume,
   activeProfileId,
   settings,
@@ -61,7 +76,7 @@ const pickPersisted = ({
   odometerMiles,
   tripMiles,
 }: CarState): Persisted => ({
-  temperature,
+  climate: climatePreferences(climate),
   volume,
   activeProfileId,
   settings,
@@ -195,6 +210,60 @@ function restoreSettings(defaults: VehicleSettings, saved: unknown): VehicleSett
   };
 }
 
+const oneOf = <T>(options: readonly T[], value: unknown, fallback: T): T =>
+  options.includes(value as T) ? (value as T) : fallback;
+
+const isValidSeat = (seat: SeatId, heat: unknown): heat is SeatHeat => {
+  if (heat === 'auto') return true;
+  if (typeof heat !== 'number' || !Number.isInteger(heat)) return false;
+  return inRange(heat, COOLED_SEATS.includes(seat) ? -3 : 0, 3);
+};
+
+const isTemperature = (value: unknown): value is number =>
+  inRange(value, MIN_TEMPERATURE, MAX_TEMPERATURE);
+
+// `legacyTemperature` is the single value saved before split temperature existed.
+function restoreClimate(
+  defaults: ClimateState,
+  saved: unknown,
+  legacyTemperature: unknown,
+): ClimateState {
+  const climate = isRecord(saved) ? saved : {};
+  const seats = isRecord(climate.seats) ? climate.seats : {};
+  const cabin = mergeKnown(defaults.cabin, climate.cabin);
+  const isSplit = climate.isSplit === true;
+  const driverTemp =
+    [climate.driverTemp, legacyTemperature].find(isTemperature) ?? defaults.driverTemp;
+
+  return {
+    ...defaults,
+    cabin: {
+      ...cabin,
+      fanSpeed:
+        Number.isInteger(cabin.fanSpeed) && inRange(cabin.fanSpeed, MIN_FAN_SPEED, MAX_FAN_SPEED)
+          ? cabin.fanSpeed
+          : defaults.cabin.fanSpeed,
+      airflow: oneOf(AIRFLOWS, cabin.airflow, defaults.cabin.airflow),
+    },
+    driverTemp,
+    passengerTemp:
+      isSplit && isTemperature(climate.passengerTemp) ? climate.passengerTemp : driverTemp,
+    isSplit,
+    seats: Object.fromEntries(
+      SEATS.map((seat) => {
+        const heat = seats[seat];
+        return [seat, isValidSeat(seat, heat) ? heat : defaults.seats[seat]];
+      }),
+    ) as ClimateState['seats'],
+    wheel: oneOf(WHEEL_HEAT, climate.wheel, defaults.wheel),
+    overheatProtection: oneOf(
+      OVERHEAT_PROTECTION,
+      climate.overheatProtection,
+      defaults.overheatProtection,
+    ),
+  };
+}
+
 // Corrupt or outdated data must never reach the reducer, so anything invalid is dropped
 // and the default for that value stays.
 export function restoreState(defaults: CarState, raw: string | null): CarState {
@@ -217,9 +286,7 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
 
   return {
     ...defaults,
-    temperature: inRange(saved.temperature, MIN_TEMPERATURE, MAX_TEMPERATURE)
-      ? saved.temperature
-      : defaults.temperature,
+    climate: restoreClimate(defaults.climate, saved.climate, saved.temperature),
     volume: inRange(saved.volume, 0, 100) ? saved.volume : defaults.volume,
     batteryPercent: inRange(saved.batteryPercent, 0, 100)
       ? saved.batteryPercent
@@ -251,10 +318,13 @@ export const loadPersistedState = (defaults: CarState): CarState =>
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let lastSaved = '';
 
+export const serializeState = (state: CarState): string =>
+  JSON.stringify({ version: SCHEMA_VERSION, state: pickPersisted(state) });
+
 export function savePersistedState(state: CarState) {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    const serialized = JSON.stringify({ version: SCHEMA_VERSION, state: pickPersisted(state) });
+    const serialized = serializeState(state);
     if (serialized === lastSaved) return;
     lastSaved = serialized;
     safeStorage.setItem(STORAGE_KEY, serialized);

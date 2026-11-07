@@ -5,17 +5,24 @@ import {
   initialCarState,
   type AppId,
   type Autopilot,
+  type CabinSettings,
   type CarAction,
   type CarState,
+  type ClimateMode,
+  type ClimateOptions,
   type ClipSource,
   type Compartment,
+  type DefrostWindow,
   type DisplaySettings,
   type Gear,
   type ModalId,
   type OverlayMode,
   type Pedal,
+  type SeatId,
+  type SeatKind,
   type SettingsPanel,
   type Surface,
+  type TemperatureZone,
   type VehicleSettings,
 } from './carState';
 import { loadPersistedState, savePersistedState } from './persistence';
@@ -36,7 +43,13 @@ export interface CarActions {
   toggleLeftSignal: () => void;
   toggleRightSignal: () => void;
   toggleHazards: () => void;
-  stepTemperature: (delta: number) => void;
+  stepTemperature: (zone: TemperatureZone, delta: number) => void;
+  setCabin: (patch: Partial<CabinSettings>) => void;
+  setClimateOptions: (options: ClimateOptions) => void;
+  toggleDefrost: (window: DefrostWindow) => void;
+  cycleSeat: (seat: SeatId, kind: SeatKind) => void;
+  toggleHeatAuto: () => void;
+  toggleClimateMode: (mode: ClimateMode) => void;
   setVolume: (volume: number) => void;
   selectProfile: (id: number) => void;
   showNotice: (message: string) => void;
@@ -101,7 +114,13 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   toggleLeftSignal: () => dispatch({ type: 'signal/left' }),
   toggleRightSignal: () => dispatch({ type: 'signal/right' }),
   toggleHazards: () => dispatch({ type: 'signal/hazards' }),
-  stepTemperature: (delta) => dispatch({ type: 'temperature/step', delta }),
+  stepTemperature: (zone, delta) => dispatch({ type: 'climate/temperature', zone, delta }),
+  setCabin: (patch) => dispatch({ type: 'climate/cabin', patch }),
+  setClimateOptions: (options) => dispatch({ type: 'climate/options', options }),
+  toggleDefrost: (window) => dispatch({ type: 'climate/defrost', window }),
+  cycleSeat: (seat, kind) => dispatch({ type: 'climate/seat', seat, kind }),
+  toggleHeatAuto: () => dispatch({ type: 'climate/heat-auto' }),
+  toggleClimateMode: (mode) => dispatch({ type: 'climate/mode', mode }),
   setVolume: (volume) => dispatch({ type: 'volume/set', volume }),
   selectProfile: (id) => dispatch({ type: 'profile/select', id }),
   showNotice: (message) => dispatch({ type: 'notice/show', message }),

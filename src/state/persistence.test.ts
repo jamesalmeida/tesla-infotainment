@@ -1,5 +1,6 @@
-import { initialCarState } from './carState';
-import { restoreState } from './persistence';
+import { carReducer, initialCarState, type CarAction } from './carState';
+import { initialClimate } from './climate';
+import { restoreState, serializeState } from './persistence';
 
 const saved = (state: unknown, version = 1) => JSON.stringify({ version, state });
 
@@ -7,7 +8,7 @@ test('restores saved preferences', () => {
   const restored = restoreState(
     initialCarState,
     saved({
-      temperature: 72,
+      climate: { driverTemp: 72 },
       volume: 30,
       activeProfileId: 2,
       settings: { ...initialCarState.settings, sentry: true, wipers: { mode: 'manual', speed: 2 } },
@@ -15,7 +16,8 @@ test('restores saved preferences', () => {
     }),
   );
 
-  expect(restored.temperature).toBe(72);
+  expect(restored.climate.driverTemp).toBe(72);
+  expect(restored.climate.passengerTemp).toBe(72);
   expect(restored.volume).toBe(30);
   expect(restored.activeProfileId).toBe(2);
   expect(restored.settings.sentry).toBe(true);
@@ -46,14 +48,14 @@ test('invalid values are dropped one at a time', () => {
   const restored = restoreState(
     initialCarState,
     saved({
-      temperature: 900,
+      climate: { driverTemp: 900 },
       volume: 'loud',
       settings: { sentry: 'yes', dashcam: true, wipers: { mode: 'manual', speed: 9 } },
       display: { brightness: -4 },
     }),
   );
 
-  expect(restored.temperature).toBe(initialCarState.temperature);
+  expect(restored.climate.driverTemp).toBe(initialClimate.driverTemp);
   expect(restored.volume).toBe(initialCarState.volume);
   expect(restored.settings.sentry).toBe(false);
   expect(restored.settings.dashcam).toBe(true);
@@ -129,5 +131,87 @@ describe('settings added by the panels', () => {
     expect(restored.overlayMode).toBe(null);
     expect(restored.chargeState).toBe('unplugged');
     expect(restored.autopilot).toBe('off');
+  });
+});
+
+describe('climate', () => {
+  const roundTrip = (...actions: CarAction[]) =>
+    restoreState(initialCarState, serializeState(actions.reduce(carReducer, initialCarState)));
+
+  test('a temperature saved before split becomes both temperatures', () => {
+    const restored = restoreState(initialCarState, saved({ temperature: 72 }));
+    expect(restored.climate).toMatchObject({ driverTemp: 72, passengerTemp: 72, isSplit: false });
+  });
+
+  test('preferences come back after a reload', () => {
+    const restored = roundTrip(
+      { type: 'climate/options', options: { isSplit: true, overheatProtection: 'no-ac' } },
+      { type: 'climate/temperature', zone: 'passenger', delta: 5 },
+      { type: 'climate/cabin', patch: { fanSpeed: 8, airflow: 'face-feet', recirculate: true } },
+      { type: 'climate/seat', seat: 'driver', kind: 'cool' },
+      { type: 'climate/seat', seat: 'rear-right', kind: 'heat' },
+      { type: 'climate/options', options: { wheel: 'on' } },
+    );
+
+    expect(restored.climate).toMatchObject({
+      isSplit: true,
+      driverTemp: 70,
+      passengerTemp: 75,
+      overheatProtection: 'no-ac',
+      wheel: 'on',
+    });
+    expect(restored.climate.cabin).toMatchObject({
+      isAuto: false,
+      fanSpeed: 8,
+      airflow: 'face-feet',
+      recirculate: true,
+    });
+    expect(restored.climate.seats).toMatchObject({ driver: -3, 'rear-right': 3 });
+  });
+
+  test('climate modes and defrost never come back', () => {
+    const restored = roundTrip(
+      { type: 'climate/mode', mode: 'dog' },
+      { type: 'climate/defrost', window: 'rear' },
+    );
+    expect(restored.climate.mode).toBe(null);
+    expect(restored.climate.rearDefrost).toBe(false);
+  });
+
+  test('a reload during front defrost returns the settings from before it', () => {
+    const restored = roundTrip(
+      { type: 'climate/cabin', patch: { fanSpeed: 2, airflow: 'feet' } },
+      { type: 'climate/defrost', window: 'front' },
+    );
+    expect(restored.climate.beforeDefrost).toBe(null);
+    expect(restored.climate.cabin).toMatchObject({ fanSpeed: 2, airflow: 'feet' });
+  });
+
+  test.each([
+    ['a wild fan', { cabin: { fanSpeed: 40 } }],
+    ['a fractional fan', { cabin: { fanSpeed: 2.5 } }],
+    ['an unknown airflow', { cabin: { airflow: 'ceiling' } }],
+    ['a level off the scale', { seats: { driver: 9 } }],
+    ['a fractional level', { seats: { driver: 1.5 } }],
+    ['cooling on a rear seat', { seats: { 'rear-left': -2 } }],
+    ['an unknown wheel setting', { wheel: 'warm' }],
+    ['an unknown overheat setting', { overheatProtection: 'sometimes' }],
+    ['the wrong shape', 'hot'],
+  ])('%s is dropped', (_name, climate) => {
+    expect(restoreState(initialCarState, saved({ climate })).climate).toEqual(initialClimate);
+  });
+
+  test('a passenger temperature only counts when split', () => {
+    const notSplit = restoreState(
+      initialCarState,
+      saved({ climate: { driverTemp: 65, passengerTemp: 80 } }),
+    );
+    expect(notSplit.climate.passengerTemp).toBe(65);
+
+    const badPassenger = restoreState(
+      initialCarState,
+      saved({ climate: { isSplit: true, driverTemp: 65, passengerTemp: 900 } }),
+    );
+    expect(badPassenger.climate.passengerTemp).toBe(65);
   });
 });

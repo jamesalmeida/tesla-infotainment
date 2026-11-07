@@ -1,9 +1,43 @@
 import { isAppId, isParkedOnly, pausesOutOfPark, APPS, type AppId } from '../apps/registry';
+import {
+  CLIMATE_MODE_LABELS,
+  cycleSeat,
+  endMode,
+  initialClimate,
+  setCabin,
+  setOptions,
+  startMode,
+  stepTemperature,
+  toggleDefrost,
+  toggleHeatAuto,
+  type CabinSettings,
+  type ClimateMode,
+  type ClimateOptions,
+  type ClimateState,
+  type DefrostWindow,
+  type SeatId,
+  type SeatKind,
+  type TemperatureZone,
+} from './climate';
 
 export type { AppId };
+export type {
+  Airflow,
+  CabinSettings,
+  ClimateMode,
+  ClimateOptions,
+  ClimateState,
+  DefrostWindow,
+  OverheatProtection,
+  SeatHeat,
+  SeatId,
+  SeatKind,
+  SeatLevel,
+  TemperatureZone,
+  WheelHeat,
+} from './climate';
+export { MAX_TEMPERATURE, MIN_TEMPERATURE } from './climate';
 
-export const MIN_TEMPERATURE = 60;
-export const MAX_TEMPERATURE = 90;
 // Above this speed the car refuses Park and Reverse.
 export const MAX_SHIFT_SPEED = 5;
 export const MAX_SPEED = 90;
@@ -74,7 +108,7 @@ export type Surface =
   | { kind: 'settings'; panel: SettingsPanel }
   | { kind: 'camera' };
 
-export type ModalId = 'app-shelf' | 'shortcuts';
+export type ModalId = 'app-shelf' | 'climate' | 'shortcuts';
 
 export type Compartment = 'frunk' | 'trunk';
 
@@ -260,7 +294,7 @@ export interface CarState {
   signal: TurnSignal;
   // Hazards sit on top of the signal instead of replacing it.
   hazards: boolean;
-  temperature: number;
+  climate: ClimateState;
   volume: number;
   activeProfileId: number;
   settings: VehicleSettings;
@@ -304,7 +338,13 @@ export type CarAction =
   | { type: 'signal/left' }
   | { type: 'signal/right' }
   | { type: 'signal/hazards' }
-  | { type: 'temperature/step'; delta: number }
+  | { type: 'climate/temperature'; zone: TemperatureZone; delta: number }
+  | { type: 'climate/cabin'; patch: Partial<CabinSettings> }
+  | { type: 'climate/options'; options: ClimateOptions }
+  | { type: 'climate/defrost'; window: DefrostWindow }
+  | { type: 'climate/seat'; seat: SeatId; kind: SeatKind }
+  | { type: 'climate/heat-auto' }
+  | { type: 'climate/mode'; mode: ClimateMode }
   | { type: 'volume/set'; volume: number }
   | { type: 'profile/select'; id: number }
   | { type: 'notice/show'; message: string }
@@ -334,7 +374,7 @@ export const initialCarState: CarState = {
   isLocked: true,
   signal: 'off',
   hazards: false,
-  temperature: 70,
+  climate: initialClimate,
   volume: 50,
   activeProfileId: 1,
   settings: {
@@ -593,6 +633,14 @@ export function canAdjustSteering(state: CarState): Permission {
   return ALLOWED;
 }
 
+// Keep Climate, Dog and Camp hold the cabin for someone left in a stationary car.
+export function canStartClimateMode(state: CarState): Permission {
+  if (!isParked(state)) {
+    return { allowed: false, reason: 'Shift to Park to keep the climate running' };
+  }
+  return ALLOWED;
+}
+
 export function canWalkAwayLock(state: CarState): Permission {
   if (!state.settings.walkAwayLock) {
     return { allowed: false, reason: 'Turn on Walk-Away Door Lock first' };
@@ -621,6 +669,9 @@ const notify = (state: CarState, message: string): CarState => {
     notifications: [notice, ...state.notifications].slice(0, MAX_NOTIFICATIONS),
   };
 };
+
+const announceModeEnd = (state: CarState, mode: ClimateMode, reason: string): CarState =>
+  notify(state, `${CLIMATE_MODE_LABELS[mode]} is off: ${reason}`);
 
 // The one door every surface change goes through: nothing replaces the forced camera.
 const setSurface = (state: CarState, surface: Surface): CarState =>
@@ -694,6 +745,12 @@ function shift(state: CarState, gear: Gear): CarState {
 
   if (gear === 'D' && state.settings.driveAwayLock) next = { ...next, isLocked: true };
   if (gear === 'P' && state.settings.unlockOnPark) next = { ...next, isLocked: false };
+
+  // Climate modes only hold a parked cabin, so leaving Park ends them.
+  const { mode } = state.climate;
+  if (mode && gear !== 'P') {
+    next = announceModeEnd({ ...next, climate: endMode(next.climate) }, mode, 'the car left Park');
+  }
 
   // An app that only runs in Park can't survive leaving it, unless it can wait paused.
   const app = surfaceApp(next.surface);
@@ -1000,14 +1057,43 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     case 'signal/hazards':
       return { ...state, hazards: !state.hazards };
 
-    case 'temperature/step':
+    case 'climate/temperature':
       return {
         ...state,
-        temperature: Math.min(
-          MAX_TEMPERATURE,
-          Math.max(MIN_TEMPERATURE, state.temperature + action.delta),
-        ),
+        climate: stepTemperature(state.climate, action.zone, action.delta),
       };
+
+    case 'climate/cabin': {
+      const { mode } = state.climate;
+      const climate = setCabin(state.climate, action.patch);
+      return mode && !climate.mode
+        ? announceModeEnd({ ...state, climate }, mode, 'the climate was turned off')
+        : { ...state, climate };
+    }
+
+    case 'climate/options':
+      return { ...state, climate: setOptions(state.climate, action.options) };
+
+    case 'climate/defrost':
+      return { ...state, climate: toggleDefrost(state.climate, action.window) };
+
+    case 'climate/seat': {
+      const climate = cycleSeat(state.climate, action.seat, action.kind);
+      return climate === state.climate ? state : { ...state, climate };
+    }
+
+    case 'climate/heat-auto':
+      return { ...state, climate: toggleHeatAuto(state.climate) };
+
+    case 'climate/mode': {
+      if (state.climate.mode === action.mode) {
+        return { ...state, climate: endMode(state.climate) };
+      }
+      const permission = canStartClimateMode(state);
+      return permission.allowed
+        ? { ...state, climate: startMode(state.climate, action.mode) }
+        : notify(state, permission.reason);
+    }
 
     case 'volume/set':
       return { ...state, volume: Math.min(100, Math.max(0, action.volume)) };
