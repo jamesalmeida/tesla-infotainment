@@ -221,3 +221,110 @@ test('touch: signals and hazards are reachable without a keyboard', async ({ bro
   await expect(page.locator('.turnSignal.active')).toHaveCount(2);
   await context.close();
 });
+
+test.describe('the URL follows the display', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('a deep link opens the app, and Back closes it', async ({ page }) => {
+    await openApp(page, '#/settings/wifi');
+    await expectPanelOpen(page, true);
+    await expect(page.locator('[class*="left-scroll-panel-item"][class*="active"]')).toHaveText(
+      /wi-?fi/i,
+    );
+
+    await page.goBack();
+
+    await expectPanelOpen(page, false);
+    expect(new URL(page.url()).hash).toBe('#/');
+  });
+
+  test('opening an app changes the URL, and Back and Forward follow it', async ({ page }) => {
+    await openApp(page);
+    await dockIcon(page, 'bluetooth').click();
+    await expect(page).toHaveURL(/#\/bluetooth$/);
+
+    await page.goBack();
+    await expectPanelOpen(page, false);
+
+    await page.goForward();
+    await expectPanelOpen(page, true);
+  });
+
+  test('switching apps stays one Back away from the map', async ({ page }) => {
+    await openApp(page);
+    await dockIcon(page, 'bluetooth').click();
+    await dockIcon(page, 'podcasts').click();
+    await expect(page).toHaveURL(/#\/podcasts$/);
+
+    await page.goBack();
+
+    await expectPanelOpen(page, false);
+  });
+
+  test('closing an app on screen steps back off its entry', async ({ page }) => {
+    await openApp(page);
+    await dockIcon(page, 'bluetooth').click();
+    await dockIcon(page, 'bluetooth').click();
+    await expectPanelOpen(page, false);
+    await expect(page).not.toHaveURL(/bluetooth/);
+
+    // Forward still has the app, which only happens if closing went back rather than adding.
+    await page.goForward();
+    await expectPanelOpen(page, true);
+  });
+
+  test('Back closes a modal before anything else', async ({ page }) => {
+    await openApp(page);
+    await dockIcon(page, 'bluetooth').click();
+    await page.keyboard.press('Shift+?');
+    await expect(page.getByRole('dialog')).toBeVisible();
+
+    await page.goBack();
+
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await expectPanelOpen(page, true);
+  });
+
+  test('a link to a Park-only app is refused while in Drive', async ({ page }) => {
+    await openApp(page);
+    await page.keyboard.press('d');
+    await page.evaluate(() => {
+      location.hash = '#/theater';
+    });
+
+    await expect(
+      page.getByRole('status').filter({ hasText: 'only available in Park' }),
+    ).toBeVisible();
+    await expectPanelOpen(page, false);
+    await expect(page).not.toHaveURL(/theater/);
+  });
+
+  test('a shared demo in Drive refuses a Park-only link too', async ({ page }) => {
+    await openApp(page, '?demo=driving#/theater');
+    await expectPanelOpen(page, false);
+    await expect(page).not.toHaveURL(/theater/);
+    await expect(page).toHaveURL(/demo=driving/);
+  });
+
+  test('a mistyped link lands on the map', async ({ page }) => {
+    await openApp(page, '#/not-an-app');
+    await expectPanelOpen(page, false);
+    await expect(page).not.toHaveURL(/not-an-app/);
+  });
+
+  test('Reverse adds no history, and the URL catches up afterwards', async ({ page }) => {
+    await openApp(page);
+    await dockIcon(page, 'bluetooth').click();
+    const before = await page.evaluate(() => history.length);
+
+    await page.keyboard.press('r');
+    await expect(page).toHaveURL(/#\/bluetooth$/);
+    await page.goBack();
+    await expectPanelOpen(page, true);
+    expect(await page.evaluate(() => history.length)).toBe(before);
+
+    await page.keyboard.press('p');
+    await expect(page).toHaveURL(/#\/bluetooth$/);
+    await expectPanelOpen(page, true);
+  });
+});

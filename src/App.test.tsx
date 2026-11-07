@@ -41,6 +41,8 @@ const cameraIsActive = () =>
 beforeEach(() => {
   vi.useFakeTimers();
   localStorage.clear();
+  // The URL holds what's open now, so each test needs a fresh one.
+  window.history.replaceState(null, '', '/');
 });
 
 afterEach(() => {

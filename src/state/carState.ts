@@ -284,6 +284,20 @@ export interface TripMeter extends MeterBaseline {
   name: string;
 }
 
+// Shareable starting points for `?demo=`, each a list of ordinary actions.
+export const DEMOS = {
+  driving: [
+    { type: 'gear/select', gear: 'D' },
+    { type: 'speed/set', speed: 45 },
+  ],
+  charging: [{ type: 'charge/plug' }],
+  reverse: [{ type: 'gear/select', gear: 'R' }],
+} satisfies Record<string, CarAction[]>;
+
+export type DemoId = keyof typeof DEMOS;
+
+export const isDemoId = (id: string): id is DemoId => Object.hasOwn(DEMOS, id);
+
 // Vehicle settings live here rather than in their panels, so they outlive the panel
 // and anything else in the app can read them.
 export interface VehicleSettings {
@@ -558,6 +572,7 @@ export type CarAction =
   | { type: 'app/toggle'; app: AppId }
   | { type: 'surface/close' }
   | { type: 'surface/restore'; surface: Surface }
+  | { type: 'demo/apply'; demo: DemoId }
   | { type: 'camera/toggle' }
   | { type: 'settings/open'; panel: SettingsPanel }
   | { type: 'settings/set'; patch: Partial<VehicleSettings> }
@@ -1830,9 +1845,14 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     // Back and forward in the browser. Guards still apply: a link can't bypass Park.
     case 'surface/restore': {
       const app = surfaceApp(action.surface);
-      if (app && !canOpenApp(state, app).allowed) return state;
-      return setSurface(state, action.surface);
+      const permission = app ? canOpenApp(state, app) : ALLOWED;
+      return permission.allowed
+        ? setSurface(state, action.surface)
+        : notify(state, permission.reason);
     }
+
+    case 'demo/apply':
+      return (DEMOS[action.demo] as CarAction[]).reduce(carReducer, state);
 
     case 'camera/toggle':
       return setSurface(

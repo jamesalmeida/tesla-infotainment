@@ -104,6 +104,23 @@ describe('reverse', () => {
     expect(carReducer(reverse, action).activeModal).toBe(null);
   });
 
+  test('a link to a Park-only app is refused with the reason outside Park', () => {
+    const state = reduce(gear('D'), {
+      type: 'surface/restore',
+      surface: { kind: 'app', app: 'theater' },
+    });
+    expect(state.surface).toEqual({ kind: 'closed' });
+    expect(state.notice?.message).toBe('Theater is only available in Park');
+  });
+
+  test.each([
+    ['driving', { gear: 'D', speed: 45 }],
+    ['charging', { chargeState: 'charging' }],
+    ['reverse', { gear: 'R', surface: { kind: 'camera' } }],
+  ] as const)('the %s demo goes through the normal rules', (demo, expected) => {
+    expect(reduce({ type: 'demo/apply', demo })).toMatchObject(expected);
+  });
+
   test('leaving Reverse returns to what was open before it', () => {
     const state = reduce({ type: 'app/toggle', app: 'bluetooth' }, gear('R'), gear('D'));
     expect(state.surface).toEqual(BLUETOOTH);

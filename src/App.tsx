@@ -22,6 +22,7 @@ import { useBoot } from './hooks/useBoot';
 import { useLayout } from './hooks/useLayout';
 import { useSchedule } from './hooks/useSchedule';
 import { useSimulation } from './hooks/useSimulation';
+import { useUrlSync } from './hooks/useUrlSync';
 import {
   Group,
   Panel,
@@ -326,6 +327,7 @@ function Display() {
 
   useKeyboardShortcuts();
   useSimulation();
+  useUrlSync();
   useSchedule();
   useCarSounds();
   const { target: keyboardTarget, close: closeKeyboard } = useOnScreenKeyboard();

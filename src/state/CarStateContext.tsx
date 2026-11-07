@@ -14,6 +14,7 @@ import {
   type ClipSource,
   type Compartment,
   type DefrostWindow,
+  type DemoId,
   type DockItem,
   type DisplaySettings,
   type Gear,
@@ -35,6 +36,7 @@ export interface CarActions {
   toggleApp: (app: AppId) => void;
   closeSurface: () => void;
   restoreSurface: (surface: Surface) => void;
+  applyDemo: (demo: DemoId) => void;
   toggleCamera: () => void;
   openSettings: (panel: SettingsPanel) => void;
   setSettings: (patch: Partial<VehicleSettings>) => void;
@@ -153,6 +155,7 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   toggleApp: (app) => dispatch({ type: 'app/toggle', app }),
   closeSurface: () => dispatch({ type: 'surface/close' }),
   restoreSurface: (surface) => dispatch({ type: 'surface/restore', surface }),
+  applyDemo: (demo) => dispatch({ type: 'demo/apply', demo }),
   toggleCamera: () => dispatch({ type: 'camera/toggle' }),
   openSettings: (panel) => dispatch({ type: 'settings/open', panel }),
   setSettings: (patch) => dispatch({ type: 'settings/set', patch }),
@@ -280,3 +283,6 @@ export const useCar = <T,>(selector: (state: CarState) => T): T => {
 };
 
 export const useCarActions = (): CarActions => useCarContext().actions;
+
+// For code that has to see the state an action just produced, before React renders it.
+export const useGetCarState = (): (() => CarState) => useCarContext().store.getState;
