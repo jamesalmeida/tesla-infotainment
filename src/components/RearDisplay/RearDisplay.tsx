@@ -19,18 +19,13 @@ const SEAT_LABELS = {
 
 export function RearDisplay() {
   const [snapshot, setSnapshot] = useState<RearSnapshot | null>(null);
-  const [supported, setSupported] = useState(true);
-  const [ready, setReady] = useState(false);
+  const [supported] = useState(() => typeof BroadcastChannel !== 'undefined');
   const channelRef = useRef<BroadcastChannel | null>(null);
 
   useEffect(() => {
     const channel = createRearChannel();
-    if (!channel) {
-      setSupported(false);
-      return;
-    }
+    if (!channel) return;
     channelRef.current = channel;
-    setReady(true);
     channel.onmessage = (event) => {
       const message = event.data;
       if (isRearMessage(message) && message.type === 'snapshot') setSnapshot(message.snapshot);
@@ -54,7 +49,7 @@ export function RearDisplay() {
     );
   }
 
-  if (!ready || !snapshot) {
+  if (!snapshot) {
     return (
       <div className={styles.rear}>
         <p className={styles.empty}>Waiting for the car screen…</p>

@@ -37,8 +37,8 @@ test.each([
 });
 
 test.each([
-  ['F', '65°F'],
-  ['C', '18°C'],
+  ['F', '72°F'],
+  ['C', '22°C'],
 ] as const)('the outside temperature reads in %s', async (temperature, expected) => {
   render(
     <CarStateProvider initialState={withPreferences({ temperature })}>

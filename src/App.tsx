@@ -254,10 +254,6 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
   const visibleView = isOpen ? 'map' : stackedView;
   const showParkView = parkView && parked && !isStacked && !isOpen;
 
-  useEffect(() => {
-    if (!parked) setParkView(false);
-  }, [parked]);
-
   // The same tree serves every mode, with only the sizes changing. Rendering a different one
   // would remount the map and the audio, so rotating or folding would lose the route and
   // stop playback.

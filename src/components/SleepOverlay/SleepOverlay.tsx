@@ -75,7 +75,7 @@ export function SleepOverlay() {
     return () => clearInterval(timer);
   }, [sleeping]);
 
-  useEffect(() => () => clearTimers(), []);
+  useEffect(() => () => clearTimers(), [clearTimers]);
 
   const startHold = () => {
     didHold.current = false;

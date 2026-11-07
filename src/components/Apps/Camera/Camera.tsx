@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useCar } from '../../../state/CarStateContext';
 import { BackupCam } from '../BackupCam/BackupCam';
 import styles from './Camera.module.css';
@@ -27,11 +27,9 @@ function SimulatedView({ view }: { view: Exclude<CameraView, 'rear'> }) {
 // because a laptop or phone only has one camera.
 export function Camera() {
   const gear = useCar((state) => state.gear);
-  const [view, setView] = useState<CameraView>('rear');
-
-  useEffect(() => {
-    if (gear === 'R') setView('rear');
-  }, [gear]);
+  const [selectedView, setView] = useState<CameraView>('rear');
+  // Reverse always shows the rear camera, whatever was selected before.
+  const view = gear === 'R' ? 'rear' : selectedView;
 
   return (
     <div className={styles.camera}>

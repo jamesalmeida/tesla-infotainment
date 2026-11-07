@@ -35,8 +35,11 @@ export function RearSync() {
   const mediaRef = useRef(media);
   const channelRef = useRef<BroadcastChannel | null>(null);
 
-  stateRef.current = state;
-  mediaRef.current = media;
+  // Keep the latest values where the message handler can read them without re-subscribing.
+  useEffect(() => {
+    stateRef.current = state;
+    mediaRef.current = media;
+  }, [state, media]);
 
   useEffect(() => {
     const channel = createRearChannel();
