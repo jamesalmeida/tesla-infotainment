@@ -10,7 +10,12 @@
   flex: 0 0 auto;
 }
 
+.temperature-open {
+  flex: 0 0 auto;
+}
+
 .temperature-display {
+  display: inline-block;
   position: relative;
   bottom: calc(3 * var(--u));
 }
@@ -19,4 +24,9 @@
   font-size: calc(28 * var(--u));
   padding: 0px;
   max-width: calc(70 * var(--u));
+}
+
+/* The number stays readable with the climate off, and shows that the setting isn't running. */
+.temperature-display[data-off='true'] {
+  opacity: 0.4;
 }

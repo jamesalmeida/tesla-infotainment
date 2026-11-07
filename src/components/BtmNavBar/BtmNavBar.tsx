@@ -3,7 +3,7 @@ import TemperatureControl from '../TemperatureControl/TemperatureControl';
 import VolumeControl from '../VolumeControl/VolumeControl';
 import { getImagePath } from '../../utils/assetPaths';
 import { useCar, useCarActions } from '../../state/CarStateContext';
-import { activeApp, isCameraForced } from '../../state/carState';
+import { activeApp, isCameraForced, type TemperatureZone } from '../../state/carState';
 import styles from './BtmNavBar.module.css';
 
 function DockIcon({ app }: { app: AppId }) {
@@ -44,15 +44,24 @@ function ShelfButton() {
   );
 }
 
-function ClimateControl() {
-  const temperature = useCar((state) => state.climate.driverTemp);
-  const { stepTemperature } = useCarActions();
+function ClimateControl({ zone }: { zone: TemperatureZone }) {
+  const temperature = useCar((state) =>
+    zone === 'driver' ? state.climate.driverTemp : state.climate.passengerTemp,
+  );
+  const isSplit = useCar((state) => state.climate.isSplit);
+  const isClimateOn = useCar((state) => state.climate.cabin.isOn);
+  const isPanelOpen = useCar((state) => state.activeModal === 'climate');
+  const { stepTemperature, toggleModal } = useCarActions();
 
   return (
     <TemperatureControl
       temperature={temperature}
-      onIncrement={() => stepTemperature('driver', 1)}
-      onDecrement={() => stepTemperature('driver', -1)}
+      zone={isSplit ? zone : undefined}
+      isClimateOn={isClimateOn}
+      isPanelOpen={isPanelOpen}
+      onOpenPanel={() => toggleModal('climate')}
+      onIncrement={() => stepTemperature(zone, 1)}
+      onDecrement={() => stepTemperature(zone, -1)}
     />
   );
 }
@@ -71,11 +80,12 @@ function AudioControl() {
 }
 
 const BtmNavBar = () => {
+  const isSplit = useCar((state) => state.climate.isSplit);
   const { toggleApp } = useCarActions();
 
   return (
     <div className={styles.btmNavBar}>
-      <div className={`${styles.btmNavItems} no-select`}>
+      <div className={`${styles.btmNavItems} no-select`} data-split={isSplit}>
         <div className={styles['car-settings']}>
           <button
             type="button"
@@ -89,12 +99,17 @@ const BtmNavBar = () => {
             />
           </button>
         </div>
-        <ClimateControl />
+        <ClimateControl zone="driver" />
         <div className={styles.dockApps}>
           {DOCK.map((item) =>
             item === 'open-shelf' ? <ShelfButton key={item} /> : <DockIcon key={item} app={item} />,
           )}
         </div>
+        {isSplit && (
+          <div className={styles.passenger}>
+            <ClimateControl zone="passenger" />
+          </div>
+        )}
         <AudioControl />
       </div>
     </div>

@@ -39,11 +39,21 @@
   justify-self: start;
 }
 
+/* Split takes the passenger control's room from the dock and the audio column. */
+.btmNavItems[data-split='true'] {
+  grid-template-columns: 8% 19% 37% 18% 18%;
+}
+
 /* Compact drops the dock to one short row. */
 :global(:root[data-layout='compact']) .btmNavItems {
   grid-template-columns: auto auto minmax(0, 1fr) auto;
   gap: 4px;
   padding: 0 4px;
+}
+
+/* The dock already scrolls, so it gives up the width. */
+:global(:root[data-layout='compact']) .btmNavItems[data-split='true'] {
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
 }
 
 /* Stacked has no width for one row, so the dock gets its own and scrolls. */
@@ -52,6 +62,18 @@
   grid-template-rows: 1fr 1fr;
   padding: 0 8px;
   column-gap: 8px;
+}
+
+:global(:root[data-layout='stacked']) .btmNavItems[data-split='true'] {
+  grid-template-columns: auto 1fr auto 1fr;
+  column-gap: 4px;
+}
+
+/* A phone can't fit a second pair of arrows, so the number opens the panel, which has them. */
+@media (max-width: 479px) {
+  :global(:root[data-layout='stacked']) .passenger button:not([aria-haspopup]) {
+    display: none;
+  }
 }
 
 :global(:root[data-layout='stacked']) .dockApps {

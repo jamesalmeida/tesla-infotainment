@@ -26,6 +26,8 @@ import CarWashMode from './components/Apps/CarSettings/components/CarWashMode/Ca
 import { CarStatus } from './components/CarStatus/CarStatus';
 import { ChargeStatus } from './components/ChargeStatus/ChargeStatus';
 import { CompartmentControls } from './components/CarStatus/CompartmentControls';
+import { ClimatePanel } from './components/Climate/ClimatePanel';
+import { DogModeDisplay } from './components/Climate/DogModeDisplay';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { CarUnavailable, DisplayCrashed } from './components/ErrorBoundary/Fallbacks';
 import { DisplayEffects } from './components/DisplayEffects/DisplayEffects';
@@ -137,6 +139,7 @@ function ActiveModal() {
   return (
     <Modal isVisible={activeModal !== null} onClose={closeModal} modalType={activeModal}>
       {activeModal === 'app-shelf' && <AppShelf />}
+      {activeModal === 'climate' && <ClimatePanel />}
       {activeModal === 'shortcuts' && <ShortcutsHelp />}
     </Modal>
   );
@@ -262,6 +265,7 @@ function Display() {
           <CarWashMode />
           <SentryOverlay />
           <DisplayEffects />
+          <DogModeDisplay />
           <BrightnessOverlay />
           <ScreenClean />
         </div>
