@@ -1,0 +1,85 @@
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(110px, calc(130 * var(--u))), 1fr));
+  gap: calc(8 * var(--u));
+}
+
+.tile {
+  min-width: 0;
+  padding: calc(8 * var(--u)) calc(12 * var(--u));
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+}
+
+.tileValue {
+  color: var(--color-text-strong);
+  font-size: max(16px, calc(26 * var(--u)));
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tileUnit {
+  color: var(--color-text-muted);
+  font-size: var(--app-text-small);
+  font-weight: 400;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--app-gap);
+}
+
+.shares {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--app-text-small);
+}
+
+.share {
+  display: grid;
+  grid-template-columns: minmax(calc(80 * var(--u)), 1fr) 2fr auto;
+  align-items: center;
+  gap: calc(8 * var(--u));
+}
+
+.shareLabel {
+  color: var(--color-text-strong);
+}
+
+.shareTrack {
+  height: calc(8 * var(--u));
+  min-height: 6px;
+  border-radius: calc(4 * var(--u));
+  background-color: var(--color-panel);
+}
+
+.shareBar {
+  display: block;
+  height: 100%;
+  border-radius: calc(4 * var(--u));
+  background-color: var(--color-accent);
+}
+
+.shareValue {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.tripRow {
+  flex-wrap: wrap;
+}
+
+.milesInput {
+  flex: 0 1 calc(100 * var(--u));
+}
+
+@container (max-width: 620px) {
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,5 +1,6 @@
 import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
+import { AppOverlays } from './apps/AppOverlays';
 import { CarStateProvider, useCar, useCarActions } from './state/CarStateContext';
 import { activeApp, isCameraForced, isDriving, isPanelOpen, vehiclePose } from './state/carState';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -261,6 +262,7 @@ function Display() {
           <Panels onCarSettled={onContentSettled} />
           <BtmNavBar />
           <ActiveModal />
+          <AppOverlays />
           <Notice />
           <CarWashMode />
           <SentryOverlay />

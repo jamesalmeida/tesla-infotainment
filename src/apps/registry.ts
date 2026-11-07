@@ -57,6 +57,11 @@ export const APPS = {
     load: named(() => import('../components/Apps/Dashcam/Dashcam'), 'Dashcam'),
     parkedOnly: true,
   },
+  energy: {
+    label: 'Energy',
+    icon: 'app-energy.svg',
+    load: named(() => import('../components/Apps/Energy/Energy'), 'Energy'),
+  },
   podcasts: {
     label: 'Podcasts',
     icon: 'app-podcasts.svg',
@@ -103,7 +108,6 @@ export const SHELF_PLACEHOLDERS = [
   { id: 'spotify', label: 'Spotify' },
   { id: 'browser', label: 'Browser' },
   { id: 'radio', label: 'Radio' },
-  { id: 'energy', label: 'Energy' },
   { id: 'audible', label: 'Audible' },
   { id: 'nav', label: 'Nav' },
   { id: 'phone', label: 'Phone' },
