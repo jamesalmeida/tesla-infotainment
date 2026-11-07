@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from 'react';
 import { pauseLibraryPlayback } from '../../apps/mediaLibrary';
 import { setMediaTransport } from '../../state/mediaTransport';
+import { FullMediaPlayer, type PlayerTab } from '../FullMediaPlayer/FullMediaPlayer';
 import { getImagePath } from '../../utils/assetPaths';
 import { ProgressBar } from './ProgressBar';
 import { usePlayback } from './usePlayback';
@@ -49,12 +50,22 @@ function AlbumArt({ src }: { src: string }) {
   return <img alt="" src={src} onError={() => setFailed(true)} />;
 }
 
-export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number }) {
+interface MusicPanelProps {
+  volume: number;
+  // Optional, so the player can be tested without the car store.
+  onOpenAudioSettings?: () => void;
+}
+
+export const MusicPanel = memo(function MusicPanel({
+  volume,
+  onOpenAudioSettings,
+}: MusicPanelProps) {
   const { playback, timeline, togglePlayPause, play, pause, next, previous, seek } = usePlayback(
     audioUrls,
     chooseRandomTrack,
     volume,
   );
+  const [playerTab, setPlayerTab] = useState<PlayerTab | null>(null);
   const track = tracks[playback.track];
   const isBuffering = playback.status === 'loading';
   const showPause = playback.status === 'playing' || isBuffering;
@@ -79,67 +90,87 @@ export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number 
   }, [playback.status]);
 
   return (
-    <div className={styles.musicPanel}>
-      <div className={styles.albumArt}>
-        <AlbumArt key={track.art} src={track.art} />
+    <>
+      <div className={styles.musicPanel}>
+        <div className={styles.albumArt}>
+          <AlbumArt key={track.art} src={track.art} />
+        </div>
+        <div className={styles.musicText}>
+          <div className={styles.title}>{track.title}</div>
+          <img
+            className={styles.sourceIcon}
+            src={getImagePath('icon-music-bluetooth.svg')}
+            alt="Bluetooth"
+          />
+          {playback.status === 'error' ? (
+            <div className={`${styles.albumTitle} ${styles.errorText}`} role="alert">
+              {playback.message}
+            </div>
+          ) : (
+            <div className={styles.albumTitle}>{track.album}</div>
+          )}
+        </div>
+        <ProgressBar timeline={timeline} onSeek={seek} />
+        <div className={styles.musicBtnBar}>
+          <button className={styles.musicBtn} onClick={previous}>
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath('icon-music-previous.svg')}
+              alt="Previous Track"
+            />
+          </button>
+          <button
+            className={`${styles.musicBtn} ${isBuffering ? styles.buffering : ''}`}
+            onClick={togglePlayPause}
+            aria-busy={isBuffering}
+          >
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath(showPause ? 'icon-music-pause.svg' : 'icon-music-play.svg')}
+              alt={showPause ? 'Pause' : 'Play'}
+            />
+          </button>
+          <button className={styles.musicBtn} onClick={next}>
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath('icon-music-next.svg')}
+              alt="Next Track"
+            />
+          </button>
+          <button
+            className={styles.musicBtn}
+            aria-label="Audio settings"
+            onClick={onOpenAudioSettings}
+          >
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath('icon-settings.svg')}
+              alt="Settings"
+            />
+          </button>
+          <button
+            className={styles.musicBtn}
+            aria-label="Search media"
+            onClick={() => setPlayerTab('search')}
+          >
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath('icon-search.svg')}
+              alt="Search"
+            />
+          </button>
+          <button
+            className={styles.musicBtn}
+            aria-label="Open full media player"
+            onClick={() => setPlayerTab('browse')}
+          >
+            <svg className={styles.musicIcon} viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <div className={styles.musicText}>
-        <div className={styles.title}>{track.title}</div>
-        <img
-          className={styles.sourceIcon}
-          src={getImagePath('icon-music-bluetooth.svg')}
-          alt="Bluetooth"
-        />
-        {playback.status === 'error' ? (
-          <div className={`${styles.albumTitle} ${styles.errorText}`} role="alert">
-            {playback.message}
-          </div>
-        ) : (
-          <div className={styles.albumTitle}>{track.album}</div>
-        )}
-      </div>
-      <ProgressBar timeline={timeline} onSeek={seek} />
-      <div className={styles.musicBtnBar}>
-        <button className={styles.musicBtn} onClick={previous}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath('icon-music-previous.svg')}
-            alt="Previous Track"
-          />
-        </button>
-        <button
-          className={`${styles.musicBtn} ${isBuffering ? styles.buffering : ''}`}
-          onClick={togglePlayPause}
-          aria-busy={isBuffering}
-        >
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath(showPause ? 'icon-music-pause.svg' : 'icon-music-play.svg')}
-            alt={showPause ? 'Pause' : 'Play'}
-          />
-        </button>
-        <button className={styles.musicBtn} onClick={next}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath('icon-music-next.svg')}
-            alt="Next Track"
-          />
-        </button>
-        <button className={styles.musicBtn}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath('icon-settings.svg')}
-            alt="Settings"
-          />
-        </button>
-        <button className={styles.musicBtn}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath('icon-search.svg')}
-            alt="Search"
-          />
-        </button>
-      </div>
-    </div>
+      {playerTab && <FullMediaPlayer initialTab={playerTab} onClose={() => setPlayerTab(null)} />}
+    </>
   );
 });

@@ -7,6 +7,7 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 ### Added
 
 - Media, tire-pressure and trip cards under the car, a swipe-to-shift drive strip, and a full-width Park View with a park scene.
+- A full-screen media player with source tabs, queue, favourites and search, opened from the media card.
 - A stylised driving scene with lanes, traffic and a route line, animated car lamps and wheels, and a Paint Shop for paint, wheels and a plate.
 - Live weather and air quality from Open-Meteo, with a clearly-labelled sample fallback.
 - Voice control through the browser's speech recognition, plus a typed fallback, mapped onto real car actions.

@@ -1,5 +1,5 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
-import { useCar } from '../../state/CarStateContext';
+import { useCar, useCarActions } from '../../state/CarStateContext';
 import { LOW_TIRE_PSI, TIRE_CORNERS, TIRE_CORNER_LABELS } from '../../state/carState';
 import { RECOMMENDED_TIRE_PSI } from '../../state/sampleData';
 import {
@@ -118,6 +118,7 @@ function TripCard() {
 // move between them; a horizontal drag is the shortcut the car itself uses.
 export function CarCards() {
   const volume = useCar((state) => state.volume);
+  const { openSettings } = useCarActions();
   const [index, setIndex] = useState(0);
   const [dragX, setDragX] = useState(0);
   const dragStart = useRef<{ x: number; y: number } | null>(null);
@@ -197,7 +198,7 @@ export function CarCards() {
             inert={card.id !== 'media'}
           >
             <div className={styles.mediaCard}>
-              <MusicPanel volume={volume} />
+              <MusicPanel volume={volume} onOpenAudioSettings={() => openSettings('Audio')} />
             </div>
           </div>
           <div
