@@ -1,4 +1,4 @@
-import { isAppId, isParkedOnly, APPS, type AppId } from '../apps/registry';
+import { isAppId, isParkedOnly, pausesOutOfPark, APPS, type AppId } from '../apps/registry';
 
 export type { AppId };
 
@@ -322,9 +322,9 @@ function shift(state: CarState, gear: Gear): CarState {
   if (gear === 'D' && state.settings.driveAwayLock) next = { ...next, isLocked: true };
   if (gear === 'P' && state.settings.unlockOnPark) next = { ...next, isLocked: false };
 
-  // An app that only runs in Park can't survive leaving it.
+  // An app that only runs in Park can't survive leaving it, unless it can wait paused.
   const app = surfaceApp(next.surface);
-  if (app) {
+  if (app && !pausesOutOfPark(app)) {
     const permission = canOpenApp(next, app);
     if (!permission.allowed) {
       return notify({ ...next, surface: { kind: 'closed' } }, permission.reason);

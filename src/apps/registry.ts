@@ -7,6 +7,8 @@ export interface AppDefinition {
   load: () => Promise<{ default: ComponentType }>;
   // Real cars only allow these while in Park.
   parkedOnly?: boolean;
+  // Stays open and pauses on leaving Park, rather than closing.
+  pausesOutOfPark?: boolean;
 }
 
 const named =
@@ -27,6 +29,7 @@ export const APPS = {
     icon: 'app-arcade.svg',
     load: named(() => import('../components/Apps/Arcade/Arcade'), 'Arcade'),
     parkedOnly: true,
+    pausesOutOfPark: true,
   },
   bluetooth: {
     label: 'Bluetooth',
@@ -78,6 +81,9 @@ export const isAppId = (id: string): id is AppId => id in APPS;
 
 export const isParkedOnly = (app: AppId): boolean =>
   (APPS[app] as AppDefinition).parkedOnly === true;
+
+export const pausesOutOfPark = (app: AppId): boolean =>
+  (APPS[app] as AppDefinition).pausesOutOfPark === true;
 
 // Bottom bar, left to right. 'open-shelf' marks where the shelf button sits.
 export const DOCK: (AppId | 'open-shelf')[] = [

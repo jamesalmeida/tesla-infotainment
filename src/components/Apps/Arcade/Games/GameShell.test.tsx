@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
-import { isKeyboardClaimed } from '../keyboardClaim';
+import { isKeyboardClaimed } from '../../../../hooks/keyboardClaim';
 import { GameShell } from './GameShell';
 import { STEP_SECONDS, type GameDefinition, type GameInput } from './runtime';
 

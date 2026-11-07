@@ -5,7 +5,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type SyntheticEvent,
 } from 'react';
-import { claimKeyboard, releaseKeyboard } from '../keyboardClaim';
+import { claimKeyboard, releaseKeyboard } from '../../../../hooks/keyboardClaim';
 import { startGameSession, type GameSession, type SessionView } from './gameSession';
 import type { GameDefinition, GameProps, TouchControl } from './runtime';
 import styles from './GameShell.module.css';

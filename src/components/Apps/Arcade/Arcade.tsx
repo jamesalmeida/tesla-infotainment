@@ -1,5 +1,6 @@
 import { lazy, Suspense, useReducer, useState } from 'react';
-import { useCarState } from '../../../state/CarStateContext';
+import { useCar } from '../../../state/CarStateContext';
+import { isParked as selectIsParked } from '../../../state/carState';
 import { getImagePath } from '../../../utils/assetPaths';
 import LoadingSpinner from '../../LoadingSpinner/LoadingSpinner';
 import { arcadeReducer, type ArcadeView } from './arcadeView';
@@ -29,8 +30,7 @@ const playLabel = (game: ArcadeGame, isParked: boolean): string => {
 };
 
 export const Arcade = () => {
-  const { gear } = useCarState();
-  const isParked = gear === 'P';
+  const isParked = useCar(selectIsParked);
   const [view, dispatch] = useReducer(arcadeReducer, {
     kind: 'browse',
     selected: games[0].id,

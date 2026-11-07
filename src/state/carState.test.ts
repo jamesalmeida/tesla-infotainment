@@ -116,9 +116,14 @@ describe('gears', () => {
   });
 
   test('a parked-only app closes with a message on leaving Park', () => {
-    const state = reduce({ type: 'app/toggle', app: 'arcade' }, gear('D'));
+    const state = reduce({ type: 'app/toggle', app: 'theater' }, gear('D'));
     expect(state.surface).toEqual({ kind: 'closed' });
-    expect(state.notice?.message).toBe('Arcade is only available in Park');
+    expect(state.notice?.message).toBe('Theater is only available in Park');
+  });
+
+  test('Arcade waits, paused, instead of closing on leaving Park', () => {
+    const state = reduce({ type: 'app/toggle', app: 'arcade' }, gear('D'));
+    expect(activeApp(state)).toBe('arcade');
   });
 
   test('a parked-only app is refused outside Park, with a reason', () => {
@@ -128,9 +133,9 @@ describe('gears', () => {
   });
 
   test('Reverse from a parked-only app returns to it only in Park', () => {
-    const toPark = reduce({ type: 'app/toggle', app: 'arcade' }, gear('R'), gear('P'));
-    expect(activeApp(toPark)).toBe('arcade');
-    const toDrive = reduce({ type: 'app/toggle', app: 'arcade' }, gear('R'), gear('D'));
+    const toPark = reduce({ type: 'app/toggle', app: 'theater' }, gear('R'), gear('P'));
+    expect(activeApp(toPark)).toBe('theater');
+    const toDrive = reduce({ type: 'app/toggle', app: 'theater' }, gear('R'), gear('D'));
     expect(activeApp(toDrive)).toBe(null);
   });
 
@@ -335,12 +340,12 @@ describe('invariants', () => {
     { type: 'speed/set', speed: 0 },
     { type: 'speed/set', speed: 50 },
     { type: 'app/toggle', app: 'bluetooth' },
-    { type: 'app/toggle', app: 'arcade' },
+    { type: 'app/toggle', app: 'theater' },
     { type: 'app/toggle', app: 'camera' },
     { type: 'app/toggle', app: 'car-settings' },
     { type: 'surface/close' },
     { type: 'surface/restore', surface: { kind: 'closed' } },
-    { type: 'surface/restore', surface: { kind: 'app', app: 'arcade' } },
+    { type: 'surface/restore', surface: { kind: 'app', app: 'theater' } },
     { type: 'camera/toggle' },
     { type: 'settings/open', panel: 'Wifi' },
     { type: 'modal/toggle', modal: 'app-shelf' },
@@ -371,7 +376,7 @@ describe('invariants', () => {
         }
         if (state.gear !== 'P') {
           expect(state.openCompartment).toBe(null);
-          expect(activeApp(state)).not.toBe('arcade');
+          expect(activeApp(state)).not.toBe('theater');
         }
         expect(isPanelOpen(state)).toBe(activeApp(state) !== null);
       }

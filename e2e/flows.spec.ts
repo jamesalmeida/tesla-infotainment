@@ -87,6 +87,27 @@ test('Reverse holds the camera, and leaving it restores what was open', async ({
   await expect(page.getByRole('heading', { name: 'Bluetooth' })).toBeVisible();
 });
 
+test('a running game keeps the keyboard, and pauses on leaving Park', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openApp(page);
+  await dockIcon(page, 'arcade').click();
+  await page.getByRole('button', { name: 'Play Game' }).click();
+  // The 3D car has a canvas too, so the second one is the game.
+  await expect(page.locator('canvas')).toHaveCount(2);
+
+  const gear = (name: string) => page.getByRole('button', { name, exact: true });
+
+  await page.keyboard.press('d');
+  await expect(gear('P')).toHaveAttribute('aria-pressed', 'true');
+
+  await gear('D').click();
+  await expect(page.getByText('Shift to Park to keep playing.')).toBeVisible();
+
+  await page.keyboard.press('p');
+  await expect(gear('P')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText('Shift to Park to keep playing.')).toHaveCount(0);
+});
+
 test('the handle dismisses an app with a drag', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openApp(page);
