@@ -13,6 +13,8 @@ import {
 } from './state/carState';
 import { useBlink } from './hooks/useBlink';
 import { useCarSounds } from './hooks/useCarSounds';
+import { useOnScreenKeyboard } from './hooks/useOnScreenKeyboard';
+import { OnScreenKeyboard } from './components/OnScreenKeyboard/OnScreenKeyboard';
 import { carLightState } from './components/VehicleModel/vehicleLights';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useBoot } from './hooks/useBoot';
@@ -281,6 +283,7 @@ function Display() {
   useSimulation();
   useSchedule();
   useCarSounds();
+  const { target: keyboardTarget, close: closeKeyboard } = useOnScreenKeyboard();
 
   return (
     <>
@@ -302,6 +305,7 @@ function Display() {
           <SleepOverlay />
           <PwaUpdate />
           <RearSync />
+          <OnScreenKeyboard target={keyboardTarget} onClose={closeKeyboard} />
         </div>
       </div>
     </>

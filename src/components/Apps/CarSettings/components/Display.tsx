@@ -52,6 +52,7 @@ const PET_MODE: Choice<PetMode>[] = [
 
 export const Display = () => {
   const display = useCar((state) => state.display);
+  const settings = useCar((state) => state.settings);
   const preferences = useCar((state) => state.settings.preferences);
   const petMode = useCar((state) => state.settings.petMode);
   const { enterMode, setDisplay, setSettings } = useCarActions();
@@ -103,6 +104,13 @@ export const Display = () => {
         >
           <ActionButton onClick={() => enterMode('screen-clean')}>Clean Screen</ActionButton>
         </ActionRow>
+        <Toggle
+          setting="on-screen-keyboard"
+          label="On-Screen Keyboard"
+          description="A themed keyboard for desktop kiosks. Phones and tablets use their own."
+          checked={settings.onScreenKeyboard}
+          onChange={(onScreenKeyboard) => setSettings({ onScreenKeyboard })}
+        />
         <ActionRow
           setting="rear-display"
           label="Rear Display"

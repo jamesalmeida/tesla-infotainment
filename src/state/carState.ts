@@ -301,6 +301,7 @@ export interface VehicleSettings {
   walkAwayLock: boolean;
   lockSound: boolean;
   soundsEnabled: boolean;
+  onScreenKeyboard: boolean;
   keys: CarKey[];
   acceleration: Acceleration;
   steeringMode: SteeringMode;
@@ -708,6 +709,7 @@ export const initialCarState: CarState = {
     walkAwayLock: true,
     lockSound: true,
     soundsEnabled: true,
+    onScreenKeyboard: false,
     keys: [
       { id: 1, kind: 'phone', name: 'Phone key' },
       { id: 2, kind: 'card', name: 'Key card' },
