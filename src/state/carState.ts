@@ -57,6 +57,9 @@ export const MAX_ADJUSTMENT = 10;
 export const MAX_DASHCAM_CLIPS = 20;
 const MAX_TRACK_SPEED = 120;
 
+// More than this at once would cover the car.
+export const MAX_TOASTS = 3;
+
 // mph per second.
 const ACCELERATION_RATE = { chill: 6, standard: 10, sport: 14 } as const;
 const TRACK_ACCELERATION_RATE = 16;
@@ -97,6 +100,7 @@ export const SETTINGS_PANELS = [
   'Service',
   'Software',
   'Wifi',
+  'Notifications',
 ] as const;
 
 export type SettingsPanel = (typeof SETTINGS_PANELS)[number];
@@ -305,8 +309,12 @@ export interface CarState {
   display: DisplaySettings;
   // The newest message, on screen for a moment.
   notice: Notice | null;
+  // Every message on screen right now, newest first.
+  toasts: Notice[];
   // Everything shown recently, newest first, for the bell in Settings.
   notifications: Notice[];
+  // The newest id the driver has seen in the panel, for the dot on the bell.
+  notificationsSeenId: number;
 }
 
 export type CarAction =
@@ -353,8 +361,10 @@ export type CarAction =
   | { type: 'profile/select'; id: number }
   | { type: 'dock/move'; item: DockItem; delta: -1 | 1 }
   | { type: 'notice/show'; message: string }
-  | { type: 'notice/dismiss' }
-  | { type: 'notifications/clear' };
+  // Without an id, clears every toast.
+  | { type: 'notice/dismiss'; id?: number }
+  | { type: 'notifications/clear' }
+  | { type: 'notifications/seen' };
 
 export const initialCarState: CarState = {
   gear: 'P',
@@ -440,7 +450,9 @@ export const initialCarState: CarState = {
   },
   display: { brightness: 100, autoBrightness: false, appearance: 'light', blueLightReduction: 0 },
   notice: null,
+  toasts: [],
   notifications: [],
+  notificationsSeenId: 0,
 };
 
 /* -------------------- Selectors -------------------- */
@@ -459,6 +471,9 @@ export const vehiclePose = (state: CarState): 'park' | 'drive' | Compartment =>
 
 export const dockOrder = (state: CarState): DockItem[] =>
   state.dockByProfile[state.activeProfileId] ?? DOCK;
+
+export const hasUnreadNotifications = (state: CarState): boolean =>
+  (state.notifications[0]?.id ?? 0) > state.notificationsSeenId;
 
 export const rangeMiles = (state: CarState): number =>
   Math.round((state.batteryPercent / 100) * FULL_RANGE_MILES);
@@ -675,6 +690,11 @@ const notify = (state: CarState, message: string): CarState => {
   return {
     ...state,
     notice,
+    // Pressing the same refused control again shouldn't stack copies of one message.
+    toasts: [notice, ...state.toasts.filter((toast) => toast.message !== message)].slice(
+      0,
+      MAX_TOASTS,
+    ),
     notifications: [notice, ...state.notifications].slice(0, MAX_NOTIFICATIONS),
   };
 };
@@ -1125,11 +1145,21 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     case 'notice/show':
       return notify(state, action.message);
 
-    case 'notice/dismiss':
-      return { ...state, notice: null };
+    case 'notice/dismiss': {
+      const toasts =
+        action.id === undefined ? [] : state.toasts.filter((toast) => toast.id !== action.id);
+      return { ...state, toasts, notice: toasts[0] ?? null };
+    }
 
     case 'notifications/clear':
-      return { ...state, notice: null, notifications: [] };
+      return { ...state, notice: null, toasts: [], notifications: [], notificationsSeenId: 0 };
+
+    case 'notifications/seen': {
+      const newest = state.notifications[0]?.id ?? 0;
+      return newest === state.notificationsSeenId
+        ? state
+        : { ...state, notificationsSeenId: newest };
+    }
 
     default: {
       // Unreachable for typed callers; still guards against untyped dispatches.

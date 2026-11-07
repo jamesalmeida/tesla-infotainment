@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import UserProfile from '../../UserProfile/UserProfile';
 import { Pressable } from '../../Pressable/Pressable';
 import { useCar, useCarActions } from '../../../state/CarStateContext';
-import type { SettingsPanel } from '../../../state/carState';
+import { hasUnreadNotifications, type SettingsPanel } from '../../../state/carState';
 import { Controls } from './components/Controls';
 import { Dynamics } from './components/Dynamics';
 import { Charging } from './components/Charging';
@@ -16,6 +16,7 @@ import { Safety } from './components/Safety';
 import { Service } from './components/Service';
 import { Software } from './components/Software';
 import { Wifi } from './components/Wifi';
+import { Notifications } from './components/Notifications';
 import { getImagePath } from '../../../utils/assetPaths';
 import { SettingsSearch } from './SettingsSearch';
 import type { SettingEntry } from './settingsIndex';
@@ -26,13 +27,14 @@ const HIGHLIGHT_MS = 1600;
 interface TopBarItem {
   icon: string;
   alt: string;
+  panel: SettingsPanel;
 }
 
 const topBarItems: TopBarItem[] = [
-  { icon: 'homelink', alt: 'Garage' },
-  { icon: 'notifications', alt: 'Notifications' },
-  { icon: 'bluetooth', alt: 'Bluetooth' },
-  { icon: 'wifi', alt: 'Wifi' },
+  { icon: 'homelink', alt: 'Garage', panel: 'Wifi' },
+  { icon: 'notifications', alt: 'Notifications', panel: 'Notifications' },
+  { icon: 'bluetooth', alt: 'Bluetooth', panel: 'Wifi' },
+  { icon: 'wifi', alt: 'Wifi', panel: 'Wifi' },
 ];
 
 const leftPanelItems: { icon: string; alt: string; label: SettingsPanel }[] = [
@@ -49,7 +51,13 @@ const leftPanelItems: { icon: string; alt: string; label: SettingsPanel }[] = [
   { icon: 'service', alt: 'Service', label: 'Service' },
   { icon: 'software', alt: 'Software', label: 'Software' },
   { icon: 'wifi', alt: 'Wifi', label: 'Wifi' },
+  { icon: 'notifications', alt: 'Notifications', label: 'Notifications' },
 ];
+
+function UnreadDot() {
+  const hasUnread = useCar(hasUnreadNotifications);
+  return hasUnread ? <span className={styles['red-dot']} role="img" aria-label="Unread" /> : null;
+}
 
 export const CarSettings = () => {
   const activePanel = useCar((state) =>
@@ -95,21 +103,16 @@ export const CarSettings = () => {
         <SettingsSearch onPick={handleSearchPick} />
         <div className={styles['top-bar-right-icons']}>
           <UserProfile />
-          {topBarItems.map((item) =>
-            item.icon === 'wifi' ? (
-              <Pressable
-                key={item.icon}
-                className={styles['top-bar-item']}
-                onPress={() => openSettings('Wifi')}
-              >
-                <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
-              </Pressable>
-            ) : (
-              <div key={item.icon} className={styles['top-bar-item']}>
-                <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
-              </div>
-            ),
-          )}
+          {topBarItems.map((item) => (
+            <Pressable
+              key={item.icon}
+              className={styles['top-bar-item']}
+              onPress={() => openSettings(item.panel)}
+            >
+              <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
+              {item.icon === 'notifications' && <UnreadDot />}
+            </Pressable>
+          ))}
         </div>
       </div>
       <div className={styles['car-settings-panel']} data-view={isDetailOpen ? 'detail' : 'list'}>
@@ -151,6 +154,7 @@ export const CarSettings = () => {
             {activePanel === 'Service' && <Service />}
             {activePanel === 'Software' && <Software />}
             {activePanel === 'Wifi' && <Wifi />}
+            {activePanel === 'Notifications' && <Notifications />}
           </div>
         </div>
       </div>

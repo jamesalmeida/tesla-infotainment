@@ -1,25 +1,35 @@
 import { useEffect } from 'react';
 import { useCar, useCarActions } from '../../state/CarStateContext';
+import type { Notice as NoticeData } from '../../state/carState';
 import styles from './Notice.module.css';
 
 const NOTICE_MS = 3000;
 
-// A short message for things the car refused to do, or did on its own.
-export function Notice() {
-  const notice = useCar((state) => state.notice);
+function Toast({ toast }: { toast: NoticeData }) {
   const { dismissNotice } = useCarActions();
 
+  // Each toast has its own clock, so a new one doesn't keep the older ones on screen.
   useEffect(() => {
-    if (!notice) return;
-    const timer = setTimeout(dismissNotice, NOTICE_MS);
+    const timer = setTimeout(() => dismissNotice(toast.id), NOTICE_MS);
     return () => clearTimeout(timer);
-  }, [notice, dismissNotice]);
-
-  if (!notice) return null;
+  }, [toast.id, dismissNotice]);
 
   return (
-    <div className={styles.notice} role="status">
-      {notice.message}
+    <button type="button" className={styles.notice} onClick={() => dismissNotice(toast.id)}>
+      {toast.message}
+    </button>
+  );
+}
+
+// Short messages for things the car refused to do, or did on its own.
+export function Notice() {
+  const toasts = useCar((state) => state.toasts);
+
+  return (
+    <div className={styles.stack} role="status">
+      {toasts.map((toast) => (
+        <Toast key={toast.id} toast={toast} />
+      ))}
     </div>
   );
 }

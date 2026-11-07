@@ -55,8 +55,10 @@ export interface CarActions {
   selectProfile: (id: number) => void;
   moveDockItem: (item: DockItem, delta: -1 | 1) => void;
   showNotice: (message: string) => void;
-  dismissNotice: () => void;
+  // Without an id, clears every toast.
+  dismissNotice: (id?: number) => void;
   clearNotifications: () => void;
+  markNotificationsSeen: () => void;
   setPedal: (pedal: Pedal) => void;
   tick: (seconds: number) => void;
   plugIn: () => void;
@@ -127,8 +129,9 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   selectProfile: (id) => dispatch({ type: 'profile/select', id }),
   moveDockItem: (item, delta) => dispatch({ type: 'dock/move', item, delta }),
   showNotice: (message) => dispatch({ type: 'notice/show', message }),
-  dismissNotice: () => dispatch({ type: 'notice/dismiss' }),
+  dismissNotice: (id) => dispatch({ type: 'notice/dismiss', id }),
   clearNotifications: () => dispatch({ type: 'notifications/clear' }),
+  markNotificationsSeen: () => dispatch({ type: 'notifications/seen' }),
   setPedal: (pedal) => dispatch({ type: 'pedal/set', pedal }),
   tick: (seconds) => dispatch({ type: 'sim/tick', seconds }),
   plugIn: () => dispatch({ type: 'charge/plug' }),
