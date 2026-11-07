@@ -24,6 +24,11 @@
   text-align: center;
 }
 
+.modal-content.sos {
+  padding: 0;
+  background: transparent;
+}
+
 .modal-content.shortcuts {
   max-width: 80%;
   max-height: 80%;

@@ -157,7 +157,7 @@ export type Surface =
   | { kind: 'settings'; panel: SettingsPanel }
   | { kind: 'camera' };
 
-export type ModalId = 'app-shelf' | 'climate' | 'shortcuts' | 'drive-pin';
+export type ModalId = 'app-shelf' | 'climate' | 'shortcuts' | 'drive-pin' | 'sos';
 
 export type DockItem = (typeof DOCK)[number];
 

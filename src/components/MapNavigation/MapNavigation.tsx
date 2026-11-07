@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
+import { useCarActions } from '../../state/CarStateContext';
 import { getImagePath } from '../../utils/assetPaths';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
@@ -24,6 +25,7 @@ interface MapNavigationProps {
 export function MapNavigation({ onWifiClick }: MapNavigationProps) {
   const apiKey = usableMapsKey(import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
   const [failure, setFailure] = useState<MapsFailure | null>(null);
+  const { toggleModal } = useCarActions();
 
   const handleLoadError = useCallback((error: unknown) => {
     console.error('The Google Maps JavaScript API failed to load', error);
@@ -61,6 +63,14 @@ export function MapNavigation({ onWifiClick }: MapNavigationProps) {
             PASSENGER AIRBAG&nbsp;<span className={styles.airbagStatusOff}>OFF</span>
           </div>
         </div>
+        <button
+          type="button"
+          className={styles.sosButton}
+          aria-label="Emergency SOS"
+          onClick={() => toggleModal('sos')}
+        >
+          SOS
+        </button>
       </div>
       {/* No APIProvider without a key: it would still load Google's script. */}
       {apiKey && !failure ? (

@@ -35,6 +35,7 @@ import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { CarUnavailable, DisplayCrashed } from './components/ErrorBoundary/Fallbacks';
 import { DisplayEffects } from './components/DisplayEffects/DisplayEffects';
 import { DrivePinPrompt } from './components/DrivePinPrompt/DrivePinPrompt';
+import { Emergency } from './components/Emergency/Emergency';
 import { Notice } from './components/Notice/Notice';
 import { RestartOverlay } from './components/RestartOverlay/RestartOverlay';
 import { StatusIndicators } from './components/StatusIndicators/StatusIndicators';
@@ -145,6 +146,7 @@ function ActiveModal() {
       {activeModal === 'climate' && <ClimatePanel />}
       {activeModal === 'shortcuts' && <ShortcutsHelp />}
       {activeModal === 'drive-pin' && <DrivePinPrompt />}
+      {activeModal === 'sos' && <Emergency />}
     </Modal>
   );
 }

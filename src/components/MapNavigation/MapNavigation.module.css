@@ -235,6 +235,21 @@
   padding-left: calc(10 * var(--u));
 }
 
+.sosButton {
+  min-height: var(--tap-target);
+  min-width: var(--tap-target);
+  margin-left: calc(10 * var(--u));
+  padding: 0 calc(7 * var(--u));
+  border: none;
+  border-radius: calc(8 * var(--u));
+  background: #c62828;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  font-size: max(var(--text-min), 0.7em);
+  cursor: pointer;
+}
+
 .airbagStatus {
   margin-left: auto;
   background-color: rgb(250, 250, 250, 80%);
