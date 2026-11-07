@@ -4,6 +4,7 @@ import {
   useReducer,
   useRef,
   type ChangeEvent,
+  type FocusEvent,
   type FormEvent,
   type KeyboardEvent,
 } from 'react';
@@ -18,6 +19,8 @@ import {
   type PlaceSearchState,
   type SearchStatus,
 } from './placeSearchState';
+import type { SavedPlaces } from './savedPlaces';
+import { SavedPlacesList, type SavedPlacesActions } from './SavedPlacesList';
 import styles from './PlaceSearch.module.css';
 
 const SUGGESTION_DELAY_MS = 200;
@@ -59,6 +62,9 @@ interface PlaceSearchProps {
   onClear: () => void;
   getLocationBias: () => google.maps.LatLngLiteral;
   disabled?: boolean;
+  /** Offered while the box is empty. Leave out to offer nothing. */
+  saved?: SavedPlaces;
+  savedActions?: SavedPlacesActions;
 }
 
 // Search box with place suggestions from the Places API (New). Replaces the legacy
@@ -71,8 +77,10 @@ export function PlaceSearch({
   onClear,
   getLocationBias,
   disabled = false,
+  saved,
+  savedActions,
 }: PlaceSearchProps) {
-  const [{ status, requestId }, dispatch] = useReducer<
+  const [{ status, requestId, sheetOpen }, dispatch] = useReducer<
     PlaceSearchState<PlaceSuggestion>,
     [PlaceSearchAction<PlaceSuggestion>]
   >(placeSearchReducer, initialPlaceSearchState<PlaceSuggestion>());
@@ -175,9 +183,11 @@ export function PlaceSearch({
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       e.preventDefault();
       dispatch({ type: 'highlightMoved', by: e.key === 'ArrowDown' ? 1 : -1 });
-    } else if (e.key === 'Escape') {
-      dispatch({ type: 'dismissed' });
     }
+  };
+
+  const handleContainerKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') dispatch({ type: 'dismissed' });
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -185,7 +195,9 @@ export function PlaceSearch({
     dispatch({ type: 'submitted', input: query });
   };
 
-  const handleBlur = () => {
+  const handleBlur = (e: FocusEvent<HTMLDivElement>) => {
+    // Tabbing from the box to a saved place is still using the search.
+    if (e.currentTarget.contains(e.relatedTarget)) return;
     // A committed choice finishes on its own and ends the session then.
     if (!isCommitted(status)) sessionTokenRef.current = null;
     dispatch({ type: 'blurred' });
@@ -196,7 +208,7 @@ export function PlaceSearch({
   const message = statusMessage(status);
 
   return (
-    <div className={styles.placeSearch}>
+    <div className={styles.placeSearch} onBlur={handleBlur} onKeyDown={handleContainerKeyDown}>
       <form className={`floatingBtn ${styles.navBtn}`} onSubmit={handleSubmit}>
         <img className={styles.searchIcon} src={getImagePath('icon-search.svg')} alt="Search Map" />
         <input
@@ -213,9 +225,9 @@ export function PlaceSearch({
           aria-activedescendant={highlighted >= 0 ? optionId(highlighted) : undefined}
           disabled={disabled}
           value={query}
+          onFocus={() => dispatch({ type: 'focused' })}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
         />
         {query && (
           <button type="button" className={styles.clearInput} onClick={clear}>
@@ -224,6 +236,13 @@ export function PlaceSearch({
         )}
       </form>
       <div className={styles.searchPopover}>
+        {sheetOpen && !query.trim() && saved && savedActions && (
+          <SavedPlacesList
+            saved={saved}
+            actions={savedActions}
+            onPick={(place) => dispatch({ type: 'placePicked', place })}
+          />
+        )}
         {/* Stays in the DOM, empty and hidden, so the input's aria-controls always resolves. */}
         <ul
           id={LIST_ID}

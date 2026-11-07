@@ -98,6 +98,7 @@ function VehicleView({ onSettled }: { onSettled: () => void }) {
   const rightLit = useCar(rightSignalLit);
   const blinkOn = useBlink(leftLit || rightLit);
   const lights = carLightState(state, blinkOn);
+  const { toggleDoor } = useCarActions();
   const [canRender] = useState(hasWebGL);
 
   // With no WebGL there is nothing to wait for.
@@ -114,6 +115,8 @@ function VehicleView({ onSettled }: { onSettled: () => void }) {
         <Suspense fallback={null}>
           <VehicleModel
             pose={pose}
+            doors={state.doors}
+            onDoorToggle={toggleDoor}
             onReady={onSettled}
             lights={lights}
             paint={paint}
@@ -320,6 +323,17 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
 
 function Display() {
   const { isLoading, onContentSettled } = useBoot();
+  const { showNotice } = useCarActions();
+
+  // One quiet tip on the first visit, once the loading screen is gone.
+  useEffect(() => {
+    if (isLoading || safeStorage.getItem('tesla-tips-seen') === '1') return;
+    const timer = setTimeout(() => {
+      showNotice('Press Shift + ? for keyboard shortcuts. Swipe the drive strip to shift.');
+      safeStorage.setItem('tesla-tips-seen', '1');
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [isLoading, showNotice]);
 
   useKeyboardShortcuts();
   useSimulation();

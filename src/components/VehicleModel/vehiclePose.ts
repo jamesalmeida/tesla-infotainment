@@ -1,17 +1,14 @@
 // The model is Z-up: +X is the car's right, +Y its front. Each animated part is a node
 // with an identity rest rotation, so an angle here is the node's rotation on one axis.
 
+import { CLOSED_DOORS, DOOR_IDS, type DoorId, type DoorStates } from '../../state/doors';
+
+export type { DoorId, DoorStates };
+export { CLOSED_DOORS, DOOR_IDS };
+
 export type VehiclePose = 'park' | 'drive' | 'frunk' | 'trunk';
 
-export type DoorId = 'lf' | 'lr' | 'rf' | 'rr';
-
-export type DoorStates = Record<DoorId, boolean>;
-
 export type CarPart = 'rotation' | 'frunk' | 'trunk' | DoorId;
-
-export const DOOR_IDS: readonly DoorId[] = ['lf', 'lr', 'rf', 'rr'];
-
-export const CLOSED_DOORS: DoorStates = { lf: false, lr: false, rf: false, rr: false };
 
 // Where the camera rests around the car, in radians. A drag orbits away and eases back.
 export const DEFAULT_AZIMUTH = 0.6;

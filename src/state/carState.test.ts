@@ -945,3 +945,11 @@ describe('tire pressure warnings', () => {
     expect(hasTirePressureWarning(state)).toBe(false);
   });
 });
+
+test('doors open and close through the car state', () => {
+  const opened = carReducer(initialCarState, { type: 'door/toggle', door: 'lf' });
+  expect(opened.doors.lf).toBe(true);
+  const closed = carReducer(opened, { type: 'door/toggle', door: 'lf' });
+  expect(closed.doors.lf).toBe(false);
+  expect(closed.doors.rf).toBe(false);
+});

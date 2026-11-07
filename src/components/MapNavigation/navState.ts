@@ -1,11 +1,7 @@
 import type { Place } from './place';
+import type { Route } from './routeData';
 
-export interface Route {
-  path: google.maps.LatLngLiteral[];
-  viewport: google.maps.LatLngBounds | null;
-  distanceMeters: number;
-  durationSeconds: number;
-}
+export type { Route };
 
 export interface Trip {
   place: Place;
@@ -25,7 +21,8 @@ export type NavState =
   | { kind: 'placeSelected'; place: Place }
   | { kind: 'routing'; place: Place; requestId: number; activeTrip: Trip | null }
   | { kind: 'navigating'; place: Place; route: Route; candidate: Place | null }
-  | { kind: 'routeFailed'; place: Place; reason: string; activeTrip: Trip | null };
+  | { kind: 'routeFailed'; place: Place; reason: string; activeTrip: Trip | null }
+  | { kind: 'arrived'; place: Place };
 
 export type NavAction =
   | { type: 'placeChosen'; place: Place }
@@ -33,7 +30,8 @@ export type NavAction =
   | { type: 'navigatePressed'; requestId: number }
   | { type: 'routeFound'; requestId: number; route: Route }
   | { type: 'routeNotFound'; requestId: number; reason: string }
-  | { type: 'navigationEnded' };
+  | { type: 'navigationEnded' }
+  | { type: 'arrived' };
 
 export const initialNavState: NavState = { kind: 'idle' };
 
@@ -79,7 +77,8 @@ export function navReducer(state: NavState, action: NavAction): NavState {
       return withTrip(activeTripOf(state), action.place);
 
     case 'searchCleared':
-      return state.kind === 'idle' ? state : withTrip(activeTripOf(state), null);
+      if (state.kind === 'idle') return state;
+      return state.kind === 'arrived' ? initialNavState : withTrip(activeTripOf(state), null);
 
     case 'navigatePressed': {
       const place = navigateTarget(state);
@@ -107,5 +106,11 @@ export function navReducer(state: NavState, action: NavAction): NavState {
 
     case 'navigationEnded':
       return initialNavState;
+
+    // Anything lined up in the search box is dropped: the trip it would have changed is over.
+    case 'arrived': {
+      const trip = activeTripOf(state);
+      return trip ? { kind: 'arrived', place: trip.place } : state;
+    }
   }
 }

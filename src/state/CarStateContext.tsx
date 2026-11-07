@@ -29,6 +29,7 @@ import {
   type TemperatureZone,
   type VehicleSettings,
 } from './carState';
+import type { DoorId } from './doors';
 import { loadPersistedState, savePersistedState } from './persistence';
 
 export interface CarActions {
@@ -44,6 +45,7 @@ export interface CarActions {
   toggleModal: (modal: ModalId) => void;
   closeModal: () => void;
   toggleCompartment: (compartment: Compartment) => void;
+  toggleDoor: (door: DoorId) => void;
   toggleLock: () => void;
   toggleLeftSignal: () => void;
   toggleRightSignal: () => void;
@@ -125,7 +127,7 @@ export interface CarActions {
   startChargeNow: () => void;
 }
 
-interface CarStore {
+export interface CarStore {
   getState: () => CarState;
   subscribe: (listener: () => void) => () => void;
   dispatch: (action: CarAction) => void;
@@ -163,6 +165,7 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   toggleModal: (modal) => dispatch({ type: 'modal/toggle', modal }),
   closeModal: () => dispatch({ type: 'modal/close' }),
   toggleCompartment: (compartment) => dispatch({ type: 'compartment/toggle', compartment }),
+  toggleDoor: (door) => dispatch({ type: 'door/toggle', door }),
   toggleLock: () => dispatch({ type: 'lock/toggle' }),
   toggleLeftSignal: () => dispatch({ type: 'signal/left' }),
   toggleRightSignal: () => dispatch({ type: 'signal/right' }),
@@ -286,3 +289,7 @@ export const useCarActions = (): CarActions => useCarContext().actions;
 
 // For code that has to see the state an action just produced, before React renders it.
 export const useGetCarState = (): (() => CarState) => useCarContext().store.getState;
+
+// For code that follows the car without rendering each change, such as the map tracking
+// movement. Anything that displays a value should use `useCar`.
+export const useCarStore = (): CarStore => useCarContext().store;

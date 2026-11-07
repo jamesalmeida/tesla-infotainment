@@ -80,10 +80,18 @@
   position: absolute;
   top: calc(90 * var(--u));
   left: calc(25 * var(--u));
+  bottom: calc(10 * var(--u));
   width: 35%;
+  overflow-y: auto;
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   gap: calc(8 * var(--u));
+}
+
+.navPanel > * {
+  flex: none;
+  pointer-events: auto;
 }
 
 .navStatus {
@@ -142,6 +150,30 @@
   height: calc(14 * var(--u));
 }
 
+.placeActions {
+  display: flex;
+  gap: calc(6 * var(--u));
+}
+
+.placeAction {
+  flex: 1;
+  min-height: var(--tap-target);
+  padding: calc(6 * var(--u)) calc(8 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(5 * var(--u));
+  font: inherit;
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  color: var(--color-text);
+  background-color: var(--color-card);
+  cursor: pointer;
+}
+
+.placeAction[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+  background-color: var(--color-accent);
+}
+
 .navigateBtn,
 .endNavigateBtn {
   width: 100%;
@@ -171,6 +203,71 @@
 .navigateBtn:disabled {
   opacity: 0.7;
   cursor: progress;
+}
+
+.recenterBtn {
+  position: absolute;
+  bottom: calc(24 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: var(--tap-target);
+  padding: calc(8 * var(--u)) calc(20 * var(--u));
+  border: none;
+  border-radius: calc(5 * var(--u));
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  color: var(--color-text-strong);
+  background-color: var(--color-card);
+  cursor: pointer;
+}
+
+.mapOptions {
+  position: absolute;
+  top: 0;
+  right: calc(100% + calc(10 * var(--u)));
+  box-sizing: border-box;
+  width: calc(260 * var(--u));
+  min-width: 200px;
+  max-height: calc(100cqh - calc(120 * var(--u)));
+  padding: calc(12 * var(--u));
+  overflow-y: auto;
+  border-radius: calc(10 * var(--u));
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  color: var(--color-text);
+  background-color: var(--color-card);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.mapOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8 * var(--u));
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: calc(6 * var(--u)) 0;
+  border: none;
+  font: inherit;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.mapOption:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.mapOption[aria-checked='true']::after {
+  content: 'On';
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.mapOption[aria-checked='false']::after {
+  content: 'Off';
+  color: var(--color-text-muted);
 }
 
 .floatingRightBtnsWrapper {

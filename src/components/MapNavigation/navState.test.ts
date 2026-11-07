@@ -14,18 +14,19 @@ import type { Place } from './place';
 const home: Place = { name: 'Home', location: { lat: 1, lng: 1 } };
 const work: Place = { name: 'Work', location: { lat: 2, lng: 2 } };
 const gym: Place = { name: 'Gym', location: { lat: 3, lng: 3 } };
-const homeRoute: Route = {
-  path: [{ lat: 1, lng: 1 }],
+const routeTo = (location: google.maps.LatLngLiteral): Route => ({
+  path: [location],
   viewport: null,
-  distanceMeters: 1200,
-  durationSeconds: 300,
-};
-const workRoute: Route = {
-  path: [{ lat: 2, lng: 2 }],
-  viewport: null,
-  distanceMeters: 2400,
-  durationSeconds: 600,
-};
+  distanceMeters: 0,
+  pathMeters: 0,
+  durationMs: null,
+  legs: [],
+  steps: [],
+  tolls: null,
+  description: null,
+});
+const homeRoute = routeTo(home.location);
+const workRoute = routeTo(work.location);
 const trip: Trip = { place: home, route: homeRoute };
 
 const idle: NavState = { kind: 'idle' };
@@ -35,6 +36,7 @@ const failed: NavState = { kind: 'routeFailed', place: home, reason: 'nope', act
 const navigating: NavState = { kind: 'navigating', ...trip, candidate: null };
 const withCandidate: NavState = { kind: 'navigating', ...trip, candidate: work };
 const rerouting: NavState = { kind: 'routing', place: work, requestId: 7, activeTrip: trip };
+const arrived: NavState = { kind: 'arrived', place: home };
 const rerouteFailed: NavState = {
   kind: 'routeFailed',
   place: work,
@@ -46,6 +48,7 @@ const CHOOSE_WORK: NavAction = { type: 'placeChosen', place: work };
 const CHOOSE_GYM: NavAction = { type: 'placeChosen', place: gym };
 const CLEAR: NavAction = { type: 'searchCleared' };
 const END: NavAction = { type: 'navigationEnded' };
+const ARRIVED: NavAction = { type: 'arrived' };
 const NAVIGATE: NavAction = { type: 'navigatePressed', requestId: 8 };
 const FOUND: NavAction = { type: 'routeFound', requestId: 7, route: workRoute };
 const NOT_FOUND: NavAction = { type: 'routeNotFound', requestId: 7, reason: 'no road' };
@@ -155,6 +158,15 @@ describe('navReducer', () => {
       { kind: 'routeFailed', place: home, reason: 'no road', activeTrip: null },
     ],
 
+    // Arriving
+    ['reaching the end finishes the trip', navigating, ARRIVED, arrived],
+    ['a candidate goes with it', withCandidate, ARRIVED, arrived],
+    ['arriving during a reroute finishes the old trip', rerouting, ARRIVED, arrived],
+    ['arriving after a failed reroute too', rerouteFailed, ARRIVED, arrived],
+    ['End clears the arrival', arrived, END, idle],
+    ['clear clears the arrival', arrived, CLEAR, idle],
+    ['a new search moves on from it', arrived, CHOOSE_WORK, { kind: 'placeSelected', place: work }],
+
     // Ending
     ['End stops navigation', navigating, END, idle],
     ['End also drops the candidate', withCandidate, END, idle],
@@ -188,6 +200,10 @@ describe('navReducer', () => {
     ['a route after failure', failed, FOUND],
 
     ['clear when idle', idle, CLEAR],
+
+    ['arriving with no trip', idle, ARRIVED],
+    ['arriving again', arrived, ARRIVED],
+    ['arriving with only a place selected', selected, ARRIVED],
   ];
 
   test.each(ignored)('ignores %s', (_name, from, action) => {

@@ -4,13 +4,12 @@ import {
   Map,
   Pin,
   Polyline,
+  RenderingType,
   useMap,
   useMapsLibrary,
 } from '@vis.gl/react-google-maps';
-import { useCar } from '../../state/CarStateContext';
-import { FULL_RANGE_MILES } from '../../state/carState';
 import { getImagePath } from '../../utils/assetPaths';
-import { formatDistanceFixed, formatDuration } from '../../utils/units';
+import { CarMarker } from './CarMarker';
 import { MapButtons } from './MapButtons';
 import { DEFAULT_CAR_POSITION, initialMapLayers, mapLayersReducer } from './mapLayers';
 import {
@@ -23,7 +22,14 @@ import {
 } from './navState';
 import type { Place } from './place';
 import { PlaceSearch } from './PlaceSearch';
+import { PlaceActions } from './PlaceActions';
+import { readRoute, ROUTE_FIELDS } from './routeData';
 import { TrafficLayer } from './TrafficLayer';
+import { TripPanel } from './TripPanel';
+import { useCarTracking } from './useCarTracking';
+import { useFollowCamera } from './useFollowCamera';
+import { useSavedPlaces } from './useSavedPlaces';
+import { useTripProgress } from './useTripProgress';
 import styles from './MapNavigation.module.css';
 
 const containerStyle = {
@@ -71,20 +77,25 @@ export function MapStage() {
   const [query, setQuery] = useState('');
   const [nav, dispatchNav] = useReducer(navReducer, initialNavState);
   const routeRequestIdRef = useRef(0);
+  const [saved, dispatchSaved] = useSavedPlaces();
 
-  // Voice commands reach the map through one event, so they don't need a shared context.
-  useEffect(() => {
-    const handleNavigate = (event: Event) => {
-      const detail = (event as CustomEvent<{ query?: string }>).detail;
-      if (detail?.query) setQuery(detail.query);
-    };
-    window.addEventListener('tesla:navigate', handleNavigate);
-    return () => window.removeEventListener('tesla:navigate', handleNavigate);
-  }, []);
+  const activeTrip = activeTripOf(nav);
+  const activeRoute: Route | null = activeTrip?.route ?? null;
+  const tracker = useCarTracking({
+    carPosition,
+    routePath: activeRoute?.path ?? null,
+    liveLocation: layers.liveLocation,
+    onLiveFix: () => dispatchLayers({ type: 'liveFixReceived' }),
+    onLiveError: (code) => dispatchLayers({ type: 'liveLocationFailed', code }),
+  });
+  useFollowCamera(map, tracker, layers.following);
+  useTripProgress(tracker, activeRoute, () => dispatchNav({ type: 'arrived' }));
+  const livePosition = () => tracker.getLivePose().position;
 
   const handlePlaceSelect = (place: Place) => {
     setQuery(place.name);
     dispatchNav({ type: 'placeChosen', place });
+    dispatchLayers({ type: 'followStopped' });
     if (map) {
       map.panTo(place.location);
       map.setZoom(16);
@@ -98,7 +109,7 @@ export function MapStage() {
 
   // Read on demand rather than held in state: the map owns its viewport, and this way
   // panning around doesn't re-render everything.
-  const viewportCenter = () => map?.getCenter()?.toJSON() ?? carPosition;
+  const viewportCenter = () => map?.getCenter()?.toJSON() ?? livePosition();
 
   useEffect(() => {
     if (map && carPosition !== DEFAULT_CAR_POSITION) {
@@ -154,26 +165,17 @@ export function MapStage() {
         dispatchNav({ type: 'routeNotFound', requestId, reason });
       try {
         const { routes } = await library.Route.computeRoutes({
-          origin: carPosition,
+          origin: livePosition(),
           destination: place.location,
           travelMode: 'DRIVING',
-          fields: ['path', 'viewport', 'distanceMeters', 'durationMillis'],
+          fields: ROUTE_FIELDS,
         });
-        const route = routes?.[0];
-        if (!route?.path?.length) {
+        const route = routes?.[0] ? readRoute(routes[0]) : null;
+        if (!route) {
           notFound(`No route found to ${place.name}.`);
           return;
         }
-        dispatchNav({
-          type: 'routeFound',
-          requestId,
-          route: {
-            path: route.path.map(({ lat, lng }) => ({ lat, lng })),
-            viewport: route.viewport ?? null,
-            distanceMeters: route.distanceMeters ?? 0,
-            durationSeconds: (route.durationMillis ?? 0) / 1000,
-          },
-        });
+        dispatchNav({ type: 'routeFound', requestId, route });
       } catch (error) {
         console.error('Error fetching directions', error);
         notFound(`Couldn't get directions to ${place.name}.`);
@@ -186,35 +188,23 @@ export function MapStage() {
     if (routing && routesLibrary) fetchRoute(routesLibrary, routing.place, routing.requestId);
   }, [routing, routesLibrary]);
 
-  const activeTrip = activeTripOf(nav);
-  const activeRoute: Route | null = activeTrip?.route ?? null;
   useEffect(() => {
     if (map && activeRoute?.viewport) map.fitBounds(activeRoute.viewport);
   }, [map, activeRoute]);
 
+  const tripPlace = activeTrip?.place ?? null;
+  useEffect(() => {
+    if (tripPlace) dispatchSaved({ type: 'recentAdded', place: tripPlace });
+  }, [tripPlace, dispatchSaved]);
+
   const endNavigation = () => {
     setQuery('');
     dispatchNav({ type: 'navigationEnded' });
-
-    // Center the map on the current location
-    if (map) {
-      map.panTo(carPosition);
-      map.setZoom(16);
-    }
+    dispatchLayers({ type: 'followResumed' });
   };
 
   const toggleChargers = () => dispatchLayers({ type: 'chargersToggled' });
   const searchedPlace = searchedPlaceOf(nav);
-  const batteryPercent = useCar((state) => state.batteryPercent);
-  const arrivalTarget = useCar((state) => state.settings.arrivalChargeTarget);
-  const preferences = useCar((state) => state.settings.preferences);
-  const tripRoute = activeTrip?.route ?? null;
-  const tripMiles = tripRoute ? tripRoute.distanceMeters / 1609.344 : 0;
-  const arrivalPercent = Math.max(
-    0,
-    Math.round(batteryPercent - (tripMiles / FULL_RANGE_MILES) * 100),
-  );
-  const needsCharge = tripRoute !== null && arrivalPercent < arrivalTarget;
 
   return (
     <>
@@ -226,6 +216,11 @@ export function MapStage() {
           onSelect={handlePlaceSelect}
           onClear={clearSearch}
           getLocationBias={viewportCenter}
+          saved={saved}
+          savedActions={{
+            onToggleFavorite: (place) => dispatchSaved({ type: 'favoriteToggled', place }),
+            onRemoveRecent: (place) => dispatchSaved({ type: 'recentRemoved', place }),
+          }}
         />
         <div className={styles.navPanel}>
           {/* A live region has to exist before its text does for the change to be announced. */}
@@ -236,20 +231,19 @@ export function MapStage() {
             {nav.kind === 'navigating' && (
               <p className={styles.navStatus}>Navigating to {nav.place.name}</p>
             )}
+            {nav.kind === 'arrived' && (
+              <p className={styles.navStatus}>You have arrived at {nav.place.name}</p>
+            )}
           </div>
-          {tripRoute && (
-            <div className={styles.routeSummary} role="status">
-              <span>{formatDistanceFixed(tripMiles, preferences.distance, 1)}</span>
-              <span>{formatDuration(tripRoute.durationSeconds / 3600)}</span>
-              <span>Arrival {arrivalPercent}%</span>
-              {needsCharge && <span className={styles.chargeStop}>Charge stop suggested</span>}
-            </div>
-          )}
+          {activeRoute && <TripPanel route={activeRoute} tracker={tracker} />}
           {nav.kind === 'routeFailed' && (
             <p role="alert" className={`${styles.navStatus} ${styles.navError}`}>
               {nav.reason}
               {activeTrip && ` Still navigating to ${activeTrip.place.name}.`}
             </p>
+          )}
+          {searchedPlace && nav.kind !== 'routing' && (
+            <PlaceActions place={searchedPlace} saved={saved} dispatch={dispatchSaved} />
           )}
           {(navigateTarget(nav) || nav.kind === 'routing') && (
             <button
@@ -267,6 +261,11 @@ export function MapStage() {
           {activeTrip && (
             <button className={`floatingBtn ${styles.endNavigateBtn}`} onClick={endNavigation}>
               End Navigation
+            </button>
+          )}
+          {nav.kind === 'arrived' && (
+            <button className={`floatingBtn ${styles.navigateBtn}`} onClick={endNavigation}>
+              Done
             </button>
           )}
           {layers.locationError && (
@@ -288,15 +287,28 @@ export function MapStage() {
             </MapNotice>
           )}
         </div>
+        {!layers.following && (
+          <button
+            className={`floatingBtn ${styles.recenterBtn}`}
+            onClick={() => dispatchLayers({ type: 'followResumed' })}
+          >
+            Recenter
+          </button>
+        )}
         <MapButtons
           layers={layers}
           actions={{
-            onCompass: () => map?.setHeading(0),
+            onCompass: () => map?.moveCamera({ heading: 0 }),
             onToggleMapStyle: () => dispatchLayers({ type: 'mapStyleToggled' }),
             onToggleTraffic: () => dispatchLayers({ type: 'trafficToggled' }),
             onLocate: () =>
               dispatchLayers({ type: 'locatePressed', supported: Boolean(navigator.geolocation) }),
             onToggleChargers: toggleChargers,
+            onToggleLiveLocation: () =>
+              dispatchLayers({
+                type: 'liveLocationToggled',
+                supported: Boolean(navigator.geolocation),
+              }),
           }}
         />
       </div>
@@ -309,11 +321,11 @@ export function MapStage() {
           mapTypeId={layers.mapStyle}
           disableDefaultUI
           gestureHandling="greedy"
+          renderingType={RenderingType.VECTOR}
+          onDragstart={() => dispatchLayers({ type: 'followStopped' })}
         >
           {layers.traffic && <TrafficLayer />}
-          <AdvancedMarker position={carPosition}>
-            <MarkerIcon name="icon-car-marker.svg" size={40} />
-          </AdvancedMarker>
+          <CarMarker tracker={tracker} />
           {searchedPlace && (
             <AdvancedMarker position={searchedPlace.location}>
               <MarkerIcon name="icon-map-marker.svg" size={40} />

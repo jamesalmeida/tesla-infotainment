@@ -20,6 +20,7 @@ import {
   type SeatKind,
   type TemperatureZone,
 } from './climate';
+import { CLOSED_DOORS, type DoorId, type DoorStates } from './doors';
 
 import {
   DEFAULT_PROFILES,
@@ -508,6 +509,7 @@ export interface CarState {
   driveUnlocked: boolean;
   // Only one can be open at a time.
   openCompartment: Compartment | null;
+  doors: DoorStates;
   isLocked: boolean;
   signal: TurnSignal;
   // Hazards sit on top of the signal instead of replacing it.
@@ -580,6 +582,7 @@ export type CarAction =
   | { type: 'modal/toggle'; modal: ModalId }
   | { type: 'modal/close' }
   | { type: 'compartment/toggle'; compartment: Compartment }
+  | { type: 'door/toggle'; door: DoorId }
   | { type: 'lock/toggle' }
   | { type: 'signal/left' }
   | { type: 'signal/right' }
@@ -668,6 +671,7 @@ export const initialCarState: CarState = {
   activeModal: null,
   driveUnlocked: false,
   openCompartment: null,
+  doors: CLOSED_DOORS,
   isLocked: true,
   signal: 'off',
   hazards: false,
@@ -2166,6 +2170,12 @@ export function carReducer(state: CarState, action: CarAction): CarState {
         ? { ...state, openCompartment: action.compartment }
         : notify(state, permission.reason);
     }
+
+    case 'door/toggle':
+      return {
+        ...state,
+        doors: { ...state.doors, [action.door]: !state.doors[action.door] },
+      };
 
     // Coming back to the car and unlocking it stands Sentry down.
     case 'lock/toggle':
