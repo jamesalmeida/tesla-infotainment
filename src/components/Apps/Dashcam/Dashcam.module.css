@@ -1,20 +1,124 @@
-.dashcam-container {
-  text-align: center;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(150px, calc(210 * var(--u))), 1fr));
+  gap: calc(8 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
   display: flex;
   flex-direction: column;
-  align-content: center;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: nowrap;
-  height: 90%;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-.dashcam-container h2 {
-  margin-bottom: 0px;
-  margin-top: 0px;
+.thumb {
+  display: block;
+  aspect-ratio: 16 / 9;
 }
 
-.dashcam-video {
+.cardText {
+  display: flex;
+  flex-direction: column;
+  padding: calc(6 * var(--u)) calc(10 * var(--u));
+}
+
+.canvas {
+  display: block;
   width: 100%;
   height: 100%;
+}
+
+.player {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  min-height: 0;
+}
+
+.playerBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(8 * var(--u));
+}
+
+.playerTitle {
+  flex: 1 1 calc(120 * var(--u));
+  min-width: 0;
+}
+
+.stage {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: calc(4 * var(--u));
+  min-height: 0;
+}
+
+.stageFocused {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.view {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  border-radius: calc(6 * var(--u));
+  background-color: var(--color-panel);
+  cursor: pointer;
+}
+
+.view .canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.viewLabel {
+  position: absolute;
+  top: calc(4 * var(--u));
+  left: calc(4 * var(--u));
+  padding: calc(1 * var(--u)) calc(6 * var(--u));
+  border-radius: calc(4 * var(--u));
+  background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
+  color: var(--color-text-strong);
+  font-size: var(--text-min);
+  font-variant-numeric: tabular-nums;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+}
+
+.time {
+  flex: 0 0 auto;
+  color: var(--color-text);
+  font-size: var(--app-text-small);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Too short for a two by two grid, so the cameras sit in one row. */
+:global(:root[data-layout='compact']) .stage {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+:global(:root[data-layout='compact']) .stageFocused {
+  grid-template-columns: minmax(0, 1fr);
 }
