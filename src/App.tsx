@@ -48,6 +48,7 @@ import { DrivePinPrompt } from './components/DrivePinPrompt/DrivePinPrompt';
 import { Emergency } from './components/Emergency/Emergency';
 import { Notice } from './components/Notice/Notice';
 import { PwaUpdate } from './components/PwaUpdate/PwaUpdate';
+import { RearSync } from './components/RearDisplay/RearSync';
 import { RestartOverlay } from './components/RestartOverlay/RestartOverlay';
 import { StatusIndicators } from './components/StatusIndicators/StatusIndicators';
 import { ScreenClean } from './components/ScreenClean/ScreenClean';
@@ -298,6 +299,7 @@ function Display() {
           <ScreenClean />
           <SleepOverlay />
           <PwaUpdate />
+          <RearSync />
         </div>
       </div>
     </>

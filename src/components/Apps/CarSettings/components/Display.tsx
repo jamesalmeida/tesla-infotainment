@@ -1,3 +1,4 @@
+import { openRearWindow } from '../../../../apps/rearDisplay';
 import { useCar, useCarActions } from '../../../../state/CarStateContext';
 import type { Appearance, PetMode, Preferences } from '../../../../state/carState';
 import {
@@ -101,6 +102,13 @@ export const Display = () => {
           description="Darkens the screen and ignores touches so you can wipe it. Park only."
         >
           <ActionButton onClick={() => enterMode('screen-clean')}>Clean Screen</ActionButton>
+        </ActionRow>
+        <ActionRow
+          setting="rear-display"
+          label="Rear Display"
+          description="Open a second window with rear climate and media controls."
+        >
+          <ActionButton onClick={openRearWindow}>Open</ActionButton>
         </ActionRow>
       </Section>
 
