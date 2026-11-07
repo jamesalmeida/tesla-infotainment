@@ -1,0 +1,28 @@
+.pads {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(max(100px, calc(150 * var(--u))), 1fr));
+  gap: calc(8 * var(--u));
+}
+
+.pad {
+  min-height: max(var(--tap-target), calc(72 * var(--u)));
+  padding: calc(6 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pad:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.padActive {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}

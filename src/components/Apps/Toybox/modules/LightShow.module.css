@@ -1,0 +1,63 @@
+.show {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--app-gap);
+  min-height: 0;
+}
+
+.car {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
+.body {
+  fill: var(--color-panel);
+  stroke: var(--color-border);
+  stroke-width: 2px;
+}
+
+.glass {
+  fill: var(--color-card);
+}
+
+.lamp {
+  fill: var(--color-border);
+  transition:
+    r 0.08s linear,
+    fill 0.08s linear;
+}
+
+.lit {
+  fill: var(--color-warning);
+}
+
+.controls {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(8 * var(--u));
+  min-width: 0;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+@container (max-width: 480px) {
+  .show {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .car {
+    flex: 1 1 calc(160 * var(--u));
+    min-height: 0;
+  }
+
+  .controls {
+    flex: 0 0 auto;
+    max-height: 55%;
+  }
+}
