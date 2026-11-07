@@ -1,3 +1,4 @@
+import { DOCK } from '../apps/registry';
 import {
   activeApp,
   autopilotTargetSpeed,
@@ -13,6 +14,7 @@ import {
   chargeHoursRemaining,
   chargeKilowatts,
   dashcamState,
+  dockOrder,
   initialCarState,
   isCameraForced,
   isHolding,
@@ -28,6 +30,7 @@ import {
   vehiclePower,
   type CarAction,
   type CarState,
+  type DockItem,
   type Gear,
   type Surface,
   type VehicleSettings,
@@ -778,6 +781,29 @@ describe('notifications', () => {
   });
 });
 
+describe('dock', () => {
+  const move = (item: DockItem, delta: -1 | 1): CarAction => ({ type: 'dock/move', item, delta });
+
+  test('moves an item one place', () => {
+    expect(dockOrder(reduce(move('arcade', -1))).slice(0, 2)).toEqual(['arcade', 'camera']);
+  });
+
+  test('stops at either end', () => {
+    expect(reduce(move(DOCK[0], -1))).toBe(initialCarState);
+    expect(reduce(move(DOCK[DOCK.length - 1], 1))).toBe(initialCarState);
+  });
+
+  test('each profile keeps its own order, and the default stays untouched', () => {
+    const moved = reduce(move('arcade', -1));
+    const other = carReducer(moved, { type: 'profile/select', id: 2 });
+    expect(dockOrder(other)).toEqual(DOCK);
+    expect(dockOrder(carReducer(other, { type: 'profile/select', id: 1 }))).toEqual(
+      dockOrder(moved),
+    );
+    expect(DOCK[0]).toBe('camera');
+  });
+});
+
 // Random walks through every action. A fixed seed keeps failures reproducible.
 describe('invariants', () => {
   const ACTIONS: CarAction[] = [
@@ -832,6 +858,8 @@ describe('invariants', () => {
     { type: 'climate/mode', mode: 'keep' },
     { type: 'climate/mode', mode: 'dog' },
     { type: 'climate/mode', mode: 'camp' },
+    { type: 'dock/move', item: 'arcade', delta: 1 },
+    { type: 'dock/move', item: 'podcasts', delta: -1 },
   ];
 
   const random = (seed: number) => () => {
@@ -864,6 +892,8 @@ describe('invariants', () => {
         }
         if (state.overlayMode !== 'car-wash') expect(state.carWashRestore).toBe(null);
         if (state.chargeState !== 'unplugged') expect(state.gear).toBe('P');
+
+        expect([...dockOrder(state)].sort()).toEqual([...DOCK].sort());
 
         const { climate } = state;
         if (state.gear !== 'P') expect(climate.mode).toBe(null);

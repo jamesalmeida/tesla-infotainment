@@ -1,3 +1,4 @@
+import { DOCK } from '../apps/registry';
 import { carReducer, initialCarState, type CarAction } from './carState';
 import { initialClimate } from './climate';
 import { restoreState, serializeState } from './persistence';
@@ -213,5 +214,24 @@ describe('climate', () => {
       saved({ climate: { isSplit: true, driverTemp: 65, passengerTemp: 900 } }),
     );
     expect(badPassenger.climate.passengerTemp).toBe(65);
+  });
+});
+
+describe('dock', () => {
+  const moved = carReducer(initialCarState, { type: 'dock/move', item: 'arcade', delta: -1 });
+
+  test('a customized dock comes back after a reload', () => {
+    const restored = restoreState(initialCarState, serializeState(moved));
+    expect(restored.dockByProfile).toEqual(moved.dockByProfile);
+  });
+
+  test.each([
+    ['an unknown app', ['spaceship']],
+    ['a missing app', DOCK.slice(1)],
+    ['a duplicate app', [...DOCK.slice(1), DOCK[1]]],
+    ['the wrong shape', 'camera'],
+  ])('%s falls back to the default dock', (_name, order) => {
+    const restored = restoreState(initialCarState, saved({ dockByProfile: { 1: order } }));
+    expect(restored.dockByProfile).toEqual({});
   });
 });

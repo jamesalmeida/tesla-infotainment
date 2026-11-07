@@ -1,3 +1,4 @@
+import { DOCK } from '../apps/registry';
 import { safeStorage } from '../utils/safeStorage';
 import {
   ACCELERATION_MODES,
@@ -59,6 +60,7 @@ type Persisted = {
   CarState,
   | 'volume'
   | 'activeProfileId'
+  | 'dockByProfile'
   | 'settings'
   | 'display'
   | 'batteryPercent'
@@ -70,6 +72,7 @@ const pickPersisted = ({
   climate,
   volume,
   activeProfileId,
+  dockByProfile,
   settings,
   display,
   batteryPercent,
@@ -79,6 +82,7 @@ const pickPersisted = ({
   climate: climatePreferences(climate),
   volume,
   activeProfileId,
+  dockByProfile,
   settings,
   display,
   batteryPercent,
@@ -264,6 +268,20 @@ function restoreClimate(
   };
 }
 
+// A saved order only counts if it holds exactly today's dock, so an app added or removed since
+// falls back to the default instead of vanishing.
+const isDockOrder = (order: unknown): boolean =>
+  Array.isArray(order) &&
+  order.length === DOCK.length &&
+  DOCK.every((item) => order.includes(item));
+
+const restoreDock = (saved: unknown): CarState['dockByProfile'] =>
+  isRecord(saved)
+    ? (Object.fromEntries(
+        Object.entries(saved).filter(([, order]) => isDockOrder(order)),
+      ) as CarState['dockByProfile'])
+    : {};
+
 // Corrupt or outdated data must never reach the reducer, so anything invalid is dropped
 // and the default for that value stays.
 export function restoreState(defaults: CarState, raw: string | null): CarState {
@@ -299,6 +317,7 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
       : defaults.tripMiles,
     activeProfileId:
       typeof saved.activeProfileId === 'number' ? saved.activeProfileId : defaults.activeProfileId,
+    dockByProfile: restoreDock(saved.dockByProfile),
     settings: restoreSettings(defaults.settings, saved.settings),
     display: {
       ...display,

@@ -13,6 +13,7 @@ import {
   type ClipSource,
   type Compartment,
   type DefrostWindow,
+  type DockItem,
   type DisplaySettings,
   type Gear,
   type ModalId,
@@ -52,6 +53,7 @@ export interface CarActions {
   toggleClimateMode: (mode: ClimateMode) => void;
   setVolume: (volume: number) => void;
   selectProfile: (id: number) => void;
+  moveDockItem: (item: DockItem, delta: -1 | 1) => void;
   showNotice: (message: string) => void;
   dismissNotice: () => void;
   clearNotifications: () => void;
@@ -123,6 +125,7 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   toggleClimateMode: (mode) => dispatch({ type: 'climate/mode', mode }),
   setVolume: (volume) => dispatch({ type: 'volume/set', volume }),
   selectProfile: (id) => dispatch({ type: 'profile/select', id }),
+  moveDockItem: (item, delta) => dispatch({ type: 'dock/move', item, delta }),
   showNotice: (message) => dispatch({ type: 'notice/show', message }),
   dismissNotice: () => dispatch({ type: 'notice/dismiss' }),
   clearNotifications: () => dispatch({ type: 'notifications/clear' }),

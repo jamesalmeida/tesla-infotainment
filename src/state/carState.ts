@@ -1,4 +1,4 @@
-import { isAppId, isParkedOnly, pausesOutOfPark, APPS, type AppId } from '../apps/registry';
+import { DOCK, isAppId, isParkedOnly, pausesOutOfPark, APPS, type AppId } from '../apps/registry';
 import {
   CLIMATE_MODE_LABELS,
   cycleSeat,
@@ -109,6 +109,8 @@ export type Surface =
   | { kind: 'camera' };
 
 export type ModalId = 'app-shelf' | 'climate' | 'shortcuts';
+
+export type DockItem = (typeof DOCK)[number];
 
 export type Compartment = 'frunk' | 'trunk';
 
@@ -297,6 +299,8 @@ export interface CarState {
   climate: ClimateState;
   volume: number;
   activeProfileId: number;
+  // Only the profiles that have changed their dock; the rest use the default.
+  dockByProfile: Record<number, DockItem[]>;
   settings: VehicleSettings;
   display: DisplaySettings;
   // The newest message, on screen for a moment.
@@ -347,6 +351,7 @@ export type CarAction =
   | { type: 'climate/mode'; mode: ClimateMode }
   | { type: 'volume/set'; volume: number }
   | { type: 'profile/select'; id: number }
+  | { type: 'dock/move'; item: DockItem; delta: -1 | 1 }
   | { type: 'notice/show'; message: string }
   | { type: 'notice/dismiss' }
   | { type: 'notifications/clear' };
@@ -377,6 +382,7 @@ export const initialCarState: CarState = {
   climate: initialClimate,
   volume: 50,
   activeProfileId: 1,
+  dockByProfile: {},
   settings: {
     headlights: 'auto',
     highBeams: false,
@@ -450,6 +456,9 @@ export const rightSignalLit = (state: CarState): boolean =>
 
 export const vehiclePose = (state: CarState): 'park' | 'drive' | Compartment =>
   isDriving(state) ? 'drive' : (state.openCompartment ?? 'park');
+
+export const dockOrder = (state: CarState): DockItem[] =>
+  state.dockByProfile[state.activeProfileId] ?? DOCK;
 
 export const rangeMiles = (state: CarState): number =>
   Math.round((state.batteryPercent / 100) * FULL_RANGE_MILES);
@@ -828,6 +837,15 @@ function chargeTick(state: CarState, seconds: number): CarState {
   );
 }
 
+function moveDockItem(state: CarState, item: DockItem, delta: -1 | 1): CarState {
+  const order = [...dockOrder(state)];
+  const from = order.indexOf(item);
+  const to = from + delta;
+  if (from < 0 || to < 0 || to >= order.length) return state;
+  [order[from], order[to]] = [order[to], order[from]];
+  return { ...state, dockByProfile: { ...state.dockByProfile, [state.activeProfileId]: order } };
+}
+
 function tick(state: CarState, seconds: number): CarState {
   if (state.chargeState === 'charging') return chargeTick(state, seconds);
   if (state.chargeState === 'scheduled') {
@@ -1100,6 +1118,9 @@ export function carReducer(state: CarState, action: CarAction): CarState {
 
     case 'profile/select':
       return { ...state, activeProfileId: action.id };
+
+    case 'dock/move':
+      return moveDockItem(state, action.item, action.delta);
 
     case 'notice/show':
       return notify(state, action.message);

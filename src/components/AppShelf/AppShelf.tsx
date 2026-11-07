@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { APPS, SHELF_PLACEHOLDERS, type AppId } from '../../apps/registry';
 import { SeatLevel } from '../Climate/SeatLevel';
 import { useCar, useCarActions } from '../../state/CarStateContext';
-import type { SeatId, Wipers } from '../../state/carState';
+import { dockOrder, type DockItem, type SeatId, type Wipers } from '../../state/carState';
 import { isFrontDefrostOn, nextFanSpeed, seatHeatLabel } from '../../state/climate';
 import { getImagePath } from '../../utils/assetPaths';
 import styles from './AppShelf.module.css';
@@ -16,8 +16,10 @@ const WIPER_CYCLE: { value: Wipers; label: string }[] = [
   { value: { mode: 'manual', speed: 4 }, label: 'Speed 4' },
 ];
 
-const wiperIndex = (wipers: Wipers) =>
-  WIPER_CYCLE.findIndex(({ value }) => JSON.stringify(value) === JSON.stringify(wipers));
+const wiperIndex = (wipers: Wipers) => {
+  if (wipers.mode === 'manual') return wipers.speed + 1;
+  return wipers.mode === 'auto' ? 1 : 0;
+};
 
 const SHELF_APPS: AppId[] = [
   'bluetooth',
@@ -144,8 +146,48 @@ function FanControl() {
   );
 }
 
+const dockLabel = (item: DockItem) => (item === 'open-shelf' ? 'All Apps' : APPS[item].label);
+const dockIcon = (item: DockItem) =>
+  item === 'open-shelf' ? 'icon-open-shelf.svg' : APPS[item].icon;
+
+// Buttons rather than dragging, so the order can be changed by touch and by keyboard alike.
+function DockCustomizer() {
+  const dock = useCar(dockOrder);
+  const { moveDockItem } = useCarActions();
+
+  return (
+    <ol className={styles.dockOrder} aria-label="Dock order">
+      {dock.map((item, index) => (
+        <li key={item} className={styles.dockItem}>
+          <img src={getImagePath(dockIcon(item))} alt="" />
+          <span className={styles.dockLabel}>{dockLabel(item)}</span>
+          <span className={styles.dockMoves}>
+            <button
+              type="button"
+              disabled={index === 0}
+              aria-label={`Move ${dockLabel(item)} left`}
+              onClick={() => moveDockItem(item, -1)}
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              disabled={index === dock.length - 1}
+              aria-label={`Move ${dockLabel(item)} right`}
+              onClick={() => moveDockItem(item, 1)}
+            >
+              ›
+            </button>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function AppShelf() {
   const { toggleApp, closeModal, showNotice } = useCarActions();
+  const [isCustomizing, setIsCustomizing] = useState(false);
 
   const launch = (app: AppId) => {
     closeModal();
@@ -184,6 +226,15 @@ export function AppShelf() {
           />
         ))}
       </div>
+      <button
+        type="button"
+        className={styles.customize}
+        aria-expanded={isCustomizing}
+        onClick={() => setIsCustomizing(!isCustomizing)}
+      >
+        {isCustomizing ? 'Done' : 'Customize'}
+      </button>
+      {isCustomizing && <DockCustomizer />}
     </div>
   );
 }
