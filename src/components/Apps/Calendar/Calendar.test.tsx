@@ -27,8 +27,14 @@ const event = (id: string, startHour: number, endHour: number): CalendarEvent =>
   allDay: false,
 });
 
-const renderInCar = (ui: React.ReactNode, gear: 'P' | 'D' = 'P') =>
-  render(<CarStateProvider initialState={{ ...initialCarState, gear }}>{ui}</CarStateProvider>);
+const renderInCar = (
+  ui: React.ReactNode,
+  gear: 'P' | 'D' = 'P',
+  surface = initialCarState.surface,
+) =>
+  render(
+    <CarStateProvider initialState={{ ...initialCarState, gear, surface }}>{ui}</CarStateProvider>,
+  );
 
 beforeEach(() => localStorage.clear());
 
@@ -184,7 +190,12 @@ describe('screens', () => {
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     parked.unmount();
 
-    renderInCar(<UpcomingCard />, 'D');
+    const driving = renderInCar(<UpcomingCard />, 'D');
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    driving.unmount();
+
+    // It must not sit on top of an open app.
+    renderInCar(<UpcomingCard />, 'P', { kind: 'app', app: 'energy' });
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     vi.useRealTimers();
   });

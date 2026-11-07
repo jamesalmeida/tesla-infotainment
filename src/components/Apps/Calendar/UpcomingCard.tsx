@@ -2,18 +2,20 @@ import { useState } from 'react';
 import { navigateToPlace } from '../../../apps/navigation';
 import { ui } from '../../../apps/ui/AppScreen';
 import { useCar, useCarActions } from '../../../state/CarStateContext';
-import { isParked } from '../../../state/carState';
+import { isPanelOpen, isParked } from '../../../state/carState';
 import { allEvents, formatRange, nextUpcoming } from './calendarEvents';
 import styles from './UpcomingCard.module.css';
 
-// The card the real car shows when you get in. It stays until dismissed or the car leaves Park.
+// The card the real car shows when you get in. It lasts until dismissed or the car leaves Park.
 export function UpcomingCard() {
   const [event] = useState(() => nextUpcoming(allEvents(Date.now()), Date.now()));
   const [dismissed, setDismissed] = useState(false);
   const parked = useCar(isParked);
+  // An open app has the screen: the card waits until it closes rather than covering it.
+  const covered = useCar(isPanelOpen);
   const actions = useCarActions();
 
-  if (!event || dismissed || !parked) return null;
+  if (!event || dismissed || !parked || covered) return null;
 
   return (
     <aside className={styles.card} aria-label="Upcoming event">
