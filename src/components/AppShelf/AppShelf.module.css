@@ -3,16 +3,23 @@
   position: relative;
   width: 100%;
   height: 100%;
-  font-size: 0.5em;
+}
+
+/* The modal reaches behind the bottom bar here, so the last row has to scroll clear of it. */
+:global(:root[data-layout='compact']) .appShelfContainer,
+:global(:root[data-layout='stacked']) .appShelfContainer {
+  padding-bottom: calc(var(--dock-height) - 7.5cqh);
+}
+
+.appTopShelf,
+.appShelf {
+  display: grid;
+  gap: calc(2 * var(--u));
 }
 
 .appTopShelf {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-evenly;
-  align-items: center;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: start;
   border-bottom: 1px solid grey;
   padding: calc(10 * var(--u));
 }
@@ -20,21 +27,20 @@
 .appShelf {
   border-radius: calc(10 * var(--u));
   padding: calc(10 * var(--u));
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-evenly;
-  align-items: stretch;
+  grid-template-columns: repeat(auto-fill, minmax(max(calc(76 * var(--u)), 62px), 1fr));
 }
 
 .appShelfIcon {
-  padding: calc(5 * var(--u));
-  width: 13%;
-  background: none;
+  box-sizing: border-box;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: calc(5 * var(--u)) 2px;
   border: none;
+  border-radius: calc(8 * var(--u));
+  background: none;
   color: inherit;
   font: inherit;
+  font-size: max(var(--text-min), calc(11 * var(--u)));
   cursor: pointer;
 }
 
@@ -42,6 +48,17 @@
   margin-top: 2px;
 }
 
+.quickStatus {
+  color: var(--color-text-muted);
+}
+
+.appShelfIcon[data-active='true'] .quickStatus {
+  color: var(--color-accent);
+}
+
 .appShelfIcon img {
-  width: 50%;
+  display: block;
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
+  margin: 0 auto;
 }
