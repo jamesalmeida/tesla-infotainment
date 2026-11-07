@@ -2,18 +2,22 @@
 
 Experience a simulated Tesla infotainment system in your browser!
 
+> Unofficial fan project, not affiliated with or endorsed by Tesla, Inc. Tesla and all related names, logos and trademarks belong to their respective owners.
+
 [Live Demo](https://jamesalmeida.github.io/tesla-infotainment/)
 
 ![App Preview](public/app-preview.png)
 
 ## Features to try out
 
-- Realistic 3D model of Tesla Model Y. Try opening the trunk and frunk!
+- Realistic 3D model of a Tesla Model 3. Try opening the trunk and frunk!
 - Interactive infotainment system simulation. Play a podcast, adjust the volume, etc.
 - Put the car in reverse (Click the R) and see what's behind you!
 - Try searching on the map. Turn on traffic or different map styles.
 - Check out the keyboard shortcuts below for more controls.
-- Working on more responsive design for various screen sizes. Works best on desktop but you can try it out on your phone in landscape mode too.
+- Adapts to desktop, laptop, iPad, foldable and phone sizes, including a full-width Park View and a rear-display window.
+- Try the voice control, live weather, Paint Shop and the animated car lamps.
+- The app can be installed to a home screen and starts offline after the first visit.
 - Adding features periodically. Leave a feature request in the issues section ^_^
 
 ## Keyboard Shortcuts
@@ -28,14 +32,14 @@ Experience a simulated Tesla infotainment system in your browser!
 
 ### Gear Selection
 
-- P: Park
-- R: Reverse
-- N: Neutral
-- D: Drive
+- P or 1: Park
+- R or 2: Reverse
+- N or 3: Neutral
+- D or 4: Drive
 
 ### Music Controls
 
-- Space: Play/Pause
+- Shift + Space: Play/Pause
 - Shift + <: Previous track
 - Shift + >: Next track
 
@@ -44,7 +48,7 @@ Experience a simulated Tesla infotainment system in your browser!
 ```
 src/components/   screen chrome, apps, panels and the 3D vehicle
 src/state/        reducer and context for the car and UI state
-src/hooks/        shared hooks (media queries, keyboard, assets)
+src/hooks/        shared hooks (keyboard shortcuts, loading screen)
 src/styles/       shared CSS; per-component styles are CSS Modules
 ```
 
@@ -148,18 +152,30 @@ npx @gltf-transform/cli optimize input.glb output.glb \
 
 The `false` flags keep the node names and hierarchy that `VehicleModel.tsx` looks up (`bonnet_dummy`, `boot_dummy`, `door_*_dummy`) and keep the glass textures intact.
 
+## Public assets
+
+Everything in `public/` is deployed with the site. The [MIT License](LICENSE) covers only the rows marked MIT below. Where a source or licence is not known, the table says so rather than guessing.
+
+| Path                                                    | What it is                                                                                     | Source                                                                                                                  | Licence                                                       |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `public/` (`favicon.ico`, `logo192.png`, `logo512.png`) | Site and PWA icons                                                                             | Unknown                                                                                                                 | Unknown; they show the Tesla logo, a trademark of Tesla, Inc. |
+| `public/` (`app-preview.png`, `app-preview-02.png`)     | Screenshots of this app. The README uses the first; the second is unused                       | This project                                                                                                            | Screenshots of this project; they show the Tesla-style UI     |
+| `public/` (`manifest.json`, `robots.txt`)               | PWA manifest and crawler rules                                                                 | This project                                                                                                            | MIT                                                           |
+| `public/audio/`                                         | Five car sound effects (hazards, door, horn, two seatbelt alarms). Not used yet; kept for #118 | Unknown. The file names look like stock sound-library IDs plus a build hash, but nothing confirms that                  | Unknown; confirm before wiring them in                        |
+| `public/car-models/`                                    | Tesla Model 3 3D model                                                                         | [Ameer Studio on Sketchfab](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f)        | CC-BY (#4)                                                    |
+| `public/img/` (`app-*`, `icon-*`, `profile*`, `logo-*`) | UI icons, mostly SVGs exported from Affinity Designer                                          | Unknown. Several reproduce third-party logos (Spotify, Apple Music, Tidal, Audible, Amazon Music, YouTube Music, Tesla) | Unknown; those logos are trademarks of their owners           |
+| `public/img/games/`                                     | Arcade box art                                                                                 | Third-party titles (#170)                                                                                               | Unknown                                                       |
+
 ### Thanks
 
 - Want to thank Ameer Studio for sharing the [3D model of the Tesla Model 3](https://sketchfab.com/3d-models/tesla-2018-model-3-5ef9b845aaf44203b6d04e2c677e444f) I'm using in the simulator.
-- Also thanks to Vasilj Miloevi for the [loading screen circle animations](https://codepen.io/eboye/pen/ANPxVX) that I used for the loading screen.
 - Thanks to Patrick Stillhart for sharing the [OutRun video game on Codepen](https://codepen.io/arcs/pen/aGzNKY) that I refactored to work inside of the Arcade in this project.
 
 ## License
 
 This repository's code is licensed under the [MIT License](LICENSE). Anyone may use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, provided the copyright notice and permission notice are retained.
 
-Third-party assets credited above still have their own terms until replaced (issues #4, #5, #6). MIT covers James's code only — not these assets:
+Third-party assets credited above still have their own terms until replaced (issues #4, #6). MIT covers James's code only — not these assets:
 
 - Sketchfab Tesla 2018 Model 3 by Ameer Studio (CC-BY) — `public/car-models/tesla-model-3-2018.glb`
-- Loading-screen circles from CodePen (eboye/ANPxVX)
 - OutRun arcade from CodePen (arcs/aGzNKY) plus hotlinked S3 assets

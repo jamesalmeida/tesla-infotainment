@@ -1,52 +1,169 @@
-import styles from '../CarSettings.module.css';
+import { useState } from 'react';
+import changelog from '../../../../../CHANGELOG.md?raw';
+import { useCar, useCarActions } from '../../../../state/CarStateContext';
+import { MAX_NAME_LENGTH, type UpdatePreference } from '../../../../state/carState';
+import { VEHICLE_INFO } from '../../../../state/sampleData';
+import { parseReleaseNotes } from '../../../../utils/releaseNotes';
+import { formatDistanceFixed } from '../../../../utils/units';
+import {
+  Button,
+  Choice,
+  DemoNote,
+  NameForm,
+  Page,
+  ProgressBar,
+  Row,
+  Section,
+  Stat,
+  Stats,
+  panelStyles,
+} from './SystemPanel';
 
-export const Software = () => {
+const PREFERENCE_OPTIONS: { value: UpdatePreference; label: string }[] = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'advanced', label: 'Advanced' },
+];
+
+const RELEASES = parseReleaseNotes(changelog);
+
+function VehicleDetails() {
+  const name = useCar((state) => state.settings.vehicleName);
+  const odometer = useCar((state) => state.odometerMiles);
+  const units = useCar((state) => state.settings.preferences.distance);
+  const installed = useCar((state) => state.installedUpdate);
+  const { setSettings } = useCarActions();
+
   return (
-    <div className={styles['buttons-container']}>
-      <div className="description">
-        <h3>Tesla Infotainment Simulator (WIP)</h3>
-        <p>Experience a simulated Tesla infotainment system in your browser!</p>
+    <Section title={name}>
+      <Stats>
+        <Stat label="Version" value={__APP_VERSION__} />
+        <Stat label="Build" value={__GIT_SHA__} />
+        <Stat label="Odometer" value={formatDistanceFixed(odometer, units, 0)} />
+        <Stat label="VIN" value={VEHICLE_INFO.vin} />
+        {installed && <Stat label="Simulated Update" value={installed} />}
+      </Stats>
+      <NameForm
+        key={name}
+        label="Name Your Vehicle"
+        submitLabel="Save"
+        initialValue={name}
+        maxLength={MAX_NAME_LENGTH}
+        onSubmit={(vehicleName) => setSettings({ vehicleName })}
+      />
+    </Section>
+  );
+}
 
-        <h3>Features to try out:</h3>
-        <ul>
-          <li>Realistic 3D model of Tesla Model Y. Try opening the trunk and frunk!</li>
-          <li>
-            Interactive infotainment system simulation. Play a podcast, adjust the volume, etc.
-          </li>
-          <li>Put the car in reverse (Click the R) and see what's behind you!</li>
-          <li>Try searching on the map. Turn on traffic or different map styles.</li>
-          <li>Check out the keyboard shortcuts for more controls.</li>
-          <li>
-            Responsive design for various screen sizes. Works best on desktop but you can try it out
-            on your phone in landscape mode too.
-          </li>
-        </ul>
+function UpdateProgress() {
+  const update = useCar((state) => state.softwareUpdate);
+  const { checkForUpdate, downloadUpdate, installUpdate } = useCarActions();
 
-        <h3>Keyboard Shortcuts:</h3>
-        <ul>
-          <li>Shift + Left Arrow: Toggle left turn signal</li>
-          <li>Shift + Right Arrow: Toggle right turn signal</li>
-          <li>Shift + H: Toggle hazard lights</li>
-          <li>Shift + F: Toggle frunk (front trunk)</li>
-          <li>Shift + T: Toggle trunk</li>
-          <li>Shift + M: Focus on Navigate Input</li>
-          <li>Shift + C: Backup Camera</li>
-        </ul>
+  switch (update.phase) {
+    case 'idle':
+      return <Button onPress={checkForUpdate}>Check for Updates</Button>;
+    case 'checking':
+      return (
+        <>
+          <Row label="Checking for updates…" />
+          <ProgressBar label="Checking for updates" percent={update.progress} />
+        </>
+      );
+    case 'available':
+      return (
+        <Row label={`${update.version} is available`}>
+          <Button variant="primary" onPress={downloadUpdate}>
+            Download
+          </Button>
+        </Row>
+      );
+    case 'downloading':
+      return (
+        <>
+          <Row label={`Downloading ${update.version}…`} />
+          <ProgressBar label="Download progress" percent={update.progress} />
+        </>
+      );
+    case 'ready':
+      return (
+        <Row label={`${update.version} is ready`} hint="The car has to stay in Park to install.">
+          <Button variant="primary" onPress={installUpdate}>
+            Install Now
+          </Button>
+        </Row>
+      );
+    case 'installing':
+      return (
+        <>
+          <Row
+            label={`Installing ${update.version}…`}
+            hint="The car can't leave Park until done."
+          />
+          <ProgressBar label="Install progress" percent={update.progress} />
+        </>
+      );
+  }
+}
 
-        <h4>Gear Selection:</h4>
-        <ul>
-          <li>P: Park</li>
-          <li>R: Reverse</li>
-          <li>N: Neutral</li>
-          <li>D: Drive</li>
-        </ul>
+function Updates() {
+  const preference = useCar((state) => state.settings.updatePreference);
+  const { setSettings } = useCarActions();
 
-        <h4>Music Controls:</h4>
-        <ul>
-          <li>Space: Play/Pause</li>
-          <li>Shift + &lt;: Previous track</li>
-          <li>Shift + &gt;: Next track</li>
-        </ul>
+  return (
+    <Section title="Software Update">
+      <DemoNote>Demo only: nothing is downloaded, and this app stays on the same build.</DemoNote>
+      <Choice
+        label="Update Preference"
+        hint="Advanced gets new software sooner."
+        value={preference}
+        options={PREFERENCE_OPTIONS}
+        onChange={(updatePreference) => setSettings({ updatePreference })}
+      />
+      <UpdateProgress />
+    </Section>
+  );
+}
+
+function ReleaseNotes() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Section title="Release Notes">
+      <div>
+        <Button onPress={() => setIsOpen(!isOpen)}>{isOpen ? 'Hide' : 'Show'} Release Notes</Button>
+      </div>
+      {isOpen && (
+        <div className={panelStyles.prose}>
+          {RELEASES.map((release) => (
+            <div key={release.title}>
+              <h3>{release.title}</h3>
+              {release.groups.map((group) => (
+                <div key={group.title}>
+                  <h4>{group.title}</h4>
+                  <ul>
+                    {group.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </Section>
+  );
+}
+
+// Project credits, kept apart from the car's own screens above.
+const About = () => {
+  return (
+    <div className={panelStyles.section}>
+      <div className={panelStyles.prose}>
+        <h3>About:</h3>
+        <p>
+          Unofficial fan project, not affiliated with or endorsed by Tesla, Inc. Tesla and all
+          related names, logos and trademarks belong to their respective owners.
+        </p>
 
         <h3>Contributing:</h3>
         <p>
@@ -73,20 +190,19 @@ export const Software = () => {
               3D model of the Tesla Model 3
             </a>
           </li>
-          <li>
-            Vasilj Miloevi for the{' '}
-            <a href="https://codepen.io/eboye/pen/ANPxVX" target="_blank" rel="noopener noreferrer">
-              loading screen circle animations
-            </a>
-          </li>
-          <li>
-            Patrick Stillhart for sharing the{' '}
-            <a href="https://codepen.io/arcs/pen/aGzNKY" target="_blank" rel="noopener noreferrer">
-              OutRun video game on Codepen
-            </a>
-          </li>
         </ul>
       </div>
     </div>
   );
 };
+
+export const Software = () => (
+  <Page title="Software">
+    <div className={panelStyles.twoColumns}>
+      <VehicleDetails />
+      <Updates />
+    </div>
+    <ReleaseNotes />
+    <About />
+  </Page>
+);

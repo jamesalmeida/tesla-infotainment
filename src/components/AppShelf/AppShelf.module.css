@@ -1,51 +1,117 @@
 /* Moved from App.css. */
 .appShelfContainer {
   position: relative;
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
-  font-size: 0.5em;
+  /* The modal reaches behind the bottom bar, so the last row has to scroll clear of it. */
+  padding-bottom: max(0px, calc(var(--dock-height) - 7.5cqh));
+}
+
+.appTopShelf,
+.appShelf {
+  display: grid;
+  gap: calc(2 * var(--u));
 }
 
 .appTopShelf {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-evenly;
-  align-items: center;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: start;
   border-bottom: 1px solid grey;
-  padding: 10px;
+  padding: calc(10 * var(--u));
 }
 
 .appShelf {
-  border-radius: 10px;
-  padding: 10px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-evenly;
-  align-items: stretch;
+  border-radius: calc(10 * var(--u));
+  padding: calc(10 * var(--u));
+  grid-template-columns: repeat(auto-fill, minmax(max(calc(76 * var(--u)), 62px), 1fr));
 }
 
 .appShelfIcon {
-  padding: 5px;
-  width: 13%;
+  box-sizing: border-box;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: calc(5 * var(--u)) 2px;
+  border: none;
+  border-radius: calc(8 * var(--u));
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: max(var(--text-min), calc(11 * var(--u)));
+  cursor: pointer;
+}
+
+.appShelfIconText {
+  margin-top: 2px;
+}
+
+.quickStatus {
+  color: var(--color-text-muted);
+}
+
+.appShelfIcon[data-active='true'] .quickStatus {
+  color: var(--color-accent);
 }
 
 .appShelfIcon img {
-  width: 50%;
+  display: block;
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
+  margin: 0 auto;
 }
 
-.customizeBtn {
-  position: absolute;
-  top: -53px;
-  right: calc(50% - 66px);
-  z-index: 10;
-  background-color: black;
-  padding: 10px 30px;
-  border-radius: 10px;
+.customize {
+  min-height: max(calc(32 * var(--u)), var(--tap-target));
+  padding: 0 calc(16 * var(--u));
+  border: 1px solid var(--color-text-muted);
+  border-radius: calc(8 * var(--u));
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: max(var(--text-min), calc(12 * var(--u)));
   cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 600;
+}
+
+.dockOrder {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(calc(76 * var(--u)), 90px), 1fr));
+  gap: calc(6 * var(--u));
+  margin: calc(10 * var(--u)) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dockItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(2 * var(--u));
+  font-size: max(var(--text-min), calc(11 * var(--u)));
+}
+
+.dockItem img {
+  width: calc(32 * var(--u));
+  height: calc(32 * var(--u));
+}
+
+.dockMoves {
+  display: flex;
+}
+
+.dockMoves button {
+  min-width: max(calc(30 * var(--u)), var(--tap-target));
+  min-height: max(calc(30 * var(--u)), var(--tap-target));
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: max(var(--text-min), calc(18 * var(--u)));
+  cursor: pointer;
+}
+
+.dockMoves button:disabled {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+  cursor: default;
 }

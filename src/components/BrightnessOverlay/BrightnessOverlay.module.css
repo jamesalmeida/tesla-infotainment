@@ -1,0 +1,8 @@
+.brightnessOverlay {
+  position: absolute;
+  inset: 0;
+  /* Above the bottom bar, which is part of the screen too. */
+  z-index: 100000000;
+  background-color: #000000;
+  pointer-events: none;
+}

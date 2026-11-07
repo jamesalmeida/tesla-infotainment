@@ -1,0 +1,50 @@
+.display {
+  position: absolute;
+  inset: 0;
+  /* Level with the bottom bar and later in the tree, and still under the brightness overlay. */
+  z-index: 99999999;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2cqh;
+  padding: 4cqh 4cqw;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-text-strong);
+  text-align: center;
+}
+
+.temperature {
+  margin: 0;
+  font-size: min(44cqh, 34cqw);
+  font-weight: 300;
+  line-height: 1;
+}
+
+.message {
+  margin: 0;
+  font-size: max(var(--text-min), min(7cqh, 5cqw));
+  font-weight: 600;
+}
+
+.detail {
+  margin: 0;
+  color: var(--color-text);
+  font-size: max(var(--text-min), min(4.5cqh, 3.2cqw));
+}
+
+.exit {
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  margin-top: 1cqh;
+  padding: calc(8 * var(--u)) calc(20 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font: inherit;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  cursor: pointer;
+}

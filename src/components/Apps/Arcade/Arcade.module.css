@@ -52,6 +52,7 @@
 }
 
 .play-button {
+  flex: none;
   padding: 15px 55px;
   font-size: 14px;
   background-color: #007bff;
@@ -63,11 +64,21 @@
   min-width: 72px;
 }
 
+.play-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
 .gameInfo {
   font-size: 30px;
   font-weight: 700;
   color: white;
   padding: 0px 10px;
+}
+
+.gameTitle {
+  font-size: 22px;
+  line-height: 1.2;
 }
 
 .gameDescription {
@@ -96,6 +107,51 @@
 }
 
 .game-container {
-  flex-grow: 1;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
+}
+
+.loadFailed {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Short screens: the banner takes what is left and the box art shrinks to fit. */
+@media (max-height: 480px) {
+  .main-game-banner {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+
+  .gradient {
+    height: 80%;
+  }
+
+  .game-carousel {
+    flex: none;
+    padding: 4px 10px;
+  }
+
+  .game-carousel img {
+    width: 42px;
+    height: 56px;
+  }
+
+  .play-button {
+    padding: 10px 28px;
+  }
+
+  .gameTitle {
+    font-size: 16px;
+  }
+
+  .gameDescription {
+    font-size: 11px;
+  }
 }

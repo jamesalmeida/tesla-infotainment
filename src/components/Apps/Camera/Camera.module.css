@@ -1,0 +1,103 @@
+.camera {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: #000000;
+}
+
+.views {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: #111111;
+}
+
+.views button {
+  flex: 1;
+  min-height: var(--tap-target);
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c9c9c9;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.views button.active {
+  background: #ffffff;
+  color: #111111;
+}
+
+.feed {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.simulated {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #b9c9d6 0%, #e6edf2 45%, #8b969e 100%);
+}
+
+.horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 42%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.road {
+  position: absolute;
+  left: 50%;
+  bottom: -10%;
+  width: 140%;
+  height: 72%;
+  transform: translateX(-50%);
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, #59636b, #2f363b);
+}
+
+.lane {
+  position: absolute;
+  left: 49.5%;
+  bottom: 0;
+  width: 1%;
+  height: 70%;
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0 8%, transparent 8% 16%);
+}
+
+.left {
+  background: linear-gradient(180deg, #c9d7e2 0%, #eef3f6 45%, #8e9aa2 100%);
+}
+
+.right {
+  background: linear-gradient(180deg, #c6d4df 0%, #e9eff3 45%, #88949c 100%);
+}
+
+.left .road,
+.right .road {
+  transform: translateX(-50%) rotate(8deg);
+}
+
+.right .road {
+  transform: translateX(-50%) rotate(-8deg);
+}
+
+.label {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+}

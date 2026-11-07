@@ -1,0 +1,81 @@
+.strip {
+  position: absolute;
+  left: calc(2 * var(--u));
+  top: 36%;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(4 * var(--u));
+  width: max(calc(30 * var(--u)), var(--tap-target));
+  min-height: max(calc(112 * var(--u)), calc(3 * var(--tap-target)));
+  padding: calc(4 * var(--u)) 0;
+  border-radius: calc(16 * var(--u));
+  background: rgba(0, 0, 0, 0.06);
+  color: #6b6b6b;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline-offset: 2px;
+}
+
+.strip:active {
+  cursor: grabbing;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.chevron {
+  font-size: max(var(--text-min), calc(9 * var(--u)));
+  line-height: 1;
+  opacity: 0.6;
+}
+
+.knob {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(2 * var(--u));
+  width: max(calc(24 * var(--u)), calc(var(--tap-target) * 0.6));
+  padding: calc(3 * var(--u)) 0;
+  border-radius: calc(10 * var(--u));
+  background: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 2px 5px;
+  transition: background-color 0.15s ease-out;
+}
+
+.knob svg {
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.knob strong {
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  color: #2b2b2b;
+}
+
+.strip[data-target='D'] .knob,
+.strip[data-target='R'] .knob {
+  background: #e8f2ff;
+}
+
+.strip[data-target='D'] .knob strong,
+.strip[data-target='R'] .knob strong {
+  color: #0b57d0;
+}
+
+/* A phone on its side keeps the letters as the compact option, so the strip steps aside. */
+:global(:root[data-layout='compact']) .strip {
+  top: 30%;
+  width: var(--tap-target);
+  min-height: calc(2 * var(--tap-target));
+}
+
+:global(:root[data-layout='compact']) .chevron {
+  display: none;
+}

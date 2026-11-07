@@ -1,0 +1,68 @@
+/*
+ * One unit for the whole display. 1u is one design pixel on a 1280-wide screen, and it is
+ * registered as a length so it resolves once on the display: an unregistered value would
+ * re-resolve against whichever container query surrounds each element that reads it.
+ */
+@property --u {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 1px;
+}
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+
+  /* Colours. Use these rather than literals, so dark mode reaches everything. */
+  --color-bg: #f1f1f1;
+  --color-panel: #e2e2e2;
+  --color-card: #ffffff;
+  --color-card-hover: #e0e0e0;
+  --color-text: #4e4e4e;
+  --color-text-strong: #000000;
+  --color-text-muted: #8a8a8a;
+  --color-border: #cccccc;
+  --color-accent: #007bff;
+  --color-on-accent: #ffffff;
+  --color-danger: #e31937;
+  --color-success: #2ca02c;
+  --color-warning: #e69f59;
+  /* The same in both themes: a screen that is off, and what is drawn on it. */
+  --color-screen-off: #000000;
+  --color-on-screen-off: #ffffff;
+  /* What blue-light reduction lays over the screen. */
+  --color-night-tint: #ff9a3c;
+
+  /* The real screen is 1920x1200. */
+  --display-ratio: 1.6;
+
+  /* Apple's minimum, applied wherever touch is the main input. */
+  --tap-target: 0px;
+  /* Nothing should render smaller than this. */
+  --text-min: 11px;
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #151617;
+  --color-panel: #1f2022;
+  --color-card: #2a2b2e;
+  --color-card-hover: #36373a;
+  --color-text: #c8c8c8;
+  --color-text-strong: #ffffff;
+  --color-text-muted: #8f8f8f;
+  --color-border: #3d3e41;
+}
+
+/* Phones have no room to scale a car display down, so these modes use real pixels. */
+:root[data-layout='compact'],
+:root[data-layout='stacked'] {
+  --tap-target: 44px;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --tap-target: 44px;
+  }
+}

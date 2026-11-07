@@ -1,116 +1,71 @@
-import { lazy, Suspense, useState, useRef, type ComponentType } from 'react';
-import type { AppId } from '../../state/carState';
+import { lazy, Suspense, useRef, useState } from 'react';
+import { APPS, type AppId } from '../../apps/registry';
+import { useDragToDismiss } from '../../hooks/useDragToDismiss';
+import { AppFailed } from '../ErrorBoundary/Fallbacks';
+import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
 import styles from './VerticalSliderPanel.module.css';
 
-// Each app is its own chunk, downloaded the first time it is opened.
-const lazyNamed = <M, K extends keyof M>(load: () => Promise<M>, name: K) =>
-  lazy(() => load().then((module) => ({ default: module[name] as ComponentType })));
+function AppContent({ app }: { app: AppId }) {
+  const [attempt, setAttempt] = useState(0);
+  // React.lazy remembers a failed import forever, so a retry needs a fresh lazy component.
+  const [Component, setComponent] = useState(() => lazy(APPS[app].load));
 
-const AppleMusic = lazyNamed(() => import('../Apps/AppleMusic/AppleMusic'), 'AppleMusic');
-const Arcade = lazyNamed(() => import('../Apps/Arcade/Arcade'), 'Arcade');
-const BackupCam = lazyNamed(() => import('../Apps/BackupCam/BackupCam'), 'BackupCam');
-const Bluetooth = lazyNamed(() => import('../Apps/Bluetooth/Bluetooth'), 'Bluetooth');
-const Calendar = lazyNamed(() => import('../Apps/Calendar/Calendar'), 'Calendar');
-const CarSettings = lazyNamed(() => import('../Apps/CarSettings/CarSettings'), 'CarSettings');
-const Dashcam = lazyNamed(() => import('../Apps/Dashcam/Dashcam'), 'Dashcam');
-const Podcasts = lazyNamed(() => import('../Apps/Podcasts/Podcasts'), 'Podcasts');
-const Toybox = lazyNamed(() => import('../Apps/Toybox/Toybox'), 'Toybox');
+  return (
+    <ErrorBoundary
+      key={attempt}
+      fallback={() => (
+        <AppFailed
+          onRetry={() => {
+            setComponent(() => lazy(APPS[app].load));
+            setAttempt((count) => count + 1);
+          }}
+        />
+      )}
+    >
+      <Suspense fallback={<LoadingSpinner />}>
+        <Component />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
 
 interface VerticalSliderPanelProps {
   isOpen: boolean;
-  activeIcon?: AppId | null;
+  activeApp?: AppId | null;
+  // False while the surface can't be closed, which is the camera in Reverse.
+  canDismiss?: boolean;
   onClose: () => void;
 }
 
-const VerticalSliderPanel = ({ isOpen, activeIcon, onClose }: VerticalSliderPanelProps) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [currentY, setCurrentY] = useState(0);
+const VerticalSliderPanel = ({
+  isOpen,
+  activeApp,
+  canDismiss = true,
+  onClose,
+}: VerticalSliderPanelProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
+  const { isDragging, handleProps } = useDragToDismiss(panelRef, onClose);
 
-  const getPanelClassName = () => {
-    let className = `${styles['vertical-slider-panel']} ${isOpen ? styles.open : ''} ${isDragging ? styles.dragging : ''}`;
-    if (isOpen) {
-      className += ` ${styles.open}`;
-    }
-    if (activeIcon === 'camera') {
-      className += ` ${styles['camera-background']}`;
-    }
-    return className;
-  };
-
-  const handleStart = (clientY: number) => {
-    if (isOpen) {
-      setIsDragging(true);
-      setStartY(clientY);
-      setCurrentY(0);
-    }
-  };
-
-  const handleMove = (clientY: number) => {
-    if (isDragging) {
-      const deltaY = clientY - startY;
-      setCurrentY(Math.max(0, deltaY));
-    }
-  };
-
-  const handleEnd = () => {
-    if (isDragging) {
-      setIsDragging(false);
-      if (currentY > 50) {
-        // If dragged down more than 50px
-        onClose(); // Trigger closing animation
-      }
-      setCurrentY(0);
-    }
-  };
-
-  const renderContent = () => {
-    switch (activeIcon) {
-      case 'apple-music':
-        return <AppleMusic />;
-      case 'arcade':
-        return <Arcade />;
-      case 'bluetooth':
-        return <Bluetooth />;
-      case 'calendar':
-        return <Calendar />;
-      case 'camera':
-        return <BackupCam />;
-      case 'car-settings':
-        return <CarSettings />;
-      case 'dashcam':
-        return <Dashcam />;
-      case 'podcasts':
-        return <Podcasts />;
-      case 'toybox':
-        return <Toybox />;
-      default:
-        return null;
-    }
-  };
-
-  const panelStyle = isDragging ? { transform: `translateY(${currentY}px)` } : {};
+  const className = [
+    styles['vertical-slider-panel'],
+    isOpen ? styles.open : '',
+    isDragging ? styles.dragging : '',
+    activeApp === 'camera' ? styles['camera-background'] : '',
+  ].join(' ');
 
   return (
-    <div
-      ref={panelRef}
-      className={getPanelClassName()}
-      style={panelStyle}
-      onTouchStart={(e) => handleStart(e.touches[0].clientY)}
-      onTouchMove={(e) => handleMove(e.touches[0].clientY)}
-      onTouchEnd={handleEnd}
-      onMouseDown={(e) => handleStart(e.clientY)}
-      onMouseMove={(e) => handleMove(e.clientY)}
-      onMouseUp={handleEnd}
-      onMouseLeave={handleEnd}
-    >
-      <div className={styles['slider-handle']}></div>
+    <div ref={panelRef} className={className}>
+      {canDismiss ? (
+        <div className={styles['slider-handle-area']} {...handleProps}>
+          <div className={styles['slider-handle']}></div>
+        </div>
+      ) : (
+        <div className={styles['slider-handle-spacer']}></div>
+      )}
       <div className={styles['slider-content']}>
-        <Suspense fallback={<LoadingSpinner />}>{renderContent()}</Suspense>
+        {activeApp && <AppContent key={activeApp} app={activeApp} />}
       </div>
-      {/* {!isCameraForced && <button onClick={handleClose}>Close</button>} */}
     </div>
   );
 };

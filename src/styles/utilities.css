@@ -20,26 +20,33 @@
   box-sizing: content-box;
 }
 
-.ctaBtn:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
-  transition:
-    transform 0.1s ease-in-out,
-    filter 0.1s ease-in-out;
+/* Hover only where a pointer can hover, or it sticks after a tap. */
+@media (hover: hover) {
+  .ctaBtn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+    transition:
+      transform 0.1s ease-in-out,
+      filter 0.1s ease-in-out;
+  }
+
+  .navIcons:hover {
+    transform: scale(1.05);
+  }
 }
 
 /* -------------------- Floating map buttons -------------------- */
 
 .floatingBtn {
-  font-size: 16px;
+  font-size: calc(16 * var(--u));
   font-weight: bold;
   color: #a1a1a1;
   height: auto;
   width: 35%;
-  padding: 10px 10px;
+  padding: calc(10 * var(--u)) calc(10 * var(--u));
   background-color: rgb(250, 250, 250, 90%);
   border: none;
-  border-radius: 10px;
+  border-radius: calc(10 * var(--u));
   box-shadow:
     rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
@@ -59,7 +66,7 @@
 }
 
 .icon {
-  width: 30px;
+  width: calc(30 * var(--u));
 }
 
 .btnGroup {
@@ -72,12 +79,19 @@
 .navIconWrapper {
   position: relative;
   display: inline-block;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .navIconWrapper.active::after {
   content: '';
   position: absolute;
-  bottom: -5px;
+  bottom: calc(-5 * var(--u));
   left: 32%;
   width: 35%;
   height: 2px;
@@ -94,16 +108,12 @@
 }
 
 .navIcons {
-  height: 45%;
-  width: 45%;
-  padding: 0 15px;
+  height: calc(40 * var(--u));
+  width: calc(40 * var(--u));
+  padding: 0 calc(15 * var(--u));
   transition:
     transform 0.1s ease-in-out,
     filter 0.1s ease-in-out;
-}
-
-.navIcons:hover {
-  transform: scale(1.05);
 }
 
 .navIcons:active {
@@ -117,13 +127,52 @@
  * (width 12%), which both applied to both controls; the later 12% width won.
  */
 .navIcons.arrows {
-  width: 12%;
+  width: calc(24 * var(--u));
+  height: calc(24 * var(--u));
   opacity: 20%;
   padding: 0px;
 }
 
-@media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  .navIcons.arrows {
-    width: 25px !important;
+:root[data-layout='compact'] .navIcons,
+:root[data-layout='stacked'] .navIcons {
+  height: 28px;
+  width: 28px;
+  padding: 0 8px;
+}
+
+:root[data-layout='compact'] .navIcons.arrows,
+:root[data-layout='stacked'] .navIcons.arrows {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+}
+
+/* -------------------- Touch and motion -------------------- */
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Taps stay immediate, and pinch zoom stays available for accessibility. */
+button,
+[role='button'],
+.navIcons {
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 2px solid rgb(0 157 255);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

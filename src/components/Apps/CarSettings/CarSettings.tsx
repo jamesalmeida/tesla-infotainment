@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import UserProfile from '../../UserProfile/UserProfile';
-import { useCarActions, useCarState } from '../../../state/CarStateContext';
+import { Pressable } from '../../Pressable/Pressable';
+import { useCar, useCarActions } from '../../../state/CarStateContext';
+import { hasUnreadNotifications, type SettingsPanel } from '../../../state/carState';
 import { Controls } from './components/Controls';
 import { Dynamics } from './components/Dynamics';
 import { Charging } from './components/Charging';
@@ -14,23 +16,34 @@ import { Safety } from './components/Safety';
 import { Service } from './components/Service';
 import { Software } from './components/Software';
 import { Wifi } from './components/Wifi';
+import { Notifications } from './components/Notifications';
+import { Audio } from './components/Audio';
+import { Profiles } from './components/Profiles';
+import { BluetoothDevices } from '../Bluetooth/BluetoothDevices';
+import { Schedule } from './components/Schedule';
+import { Upgrades } from './components/Upgrades';
+import { HomeLink } from './components/HomeLink';
 import { getImagePath } from '../../../utils/assetPaths';
+import { SettingsSearch } from './SettingsSearch';
+import type { SettingEntry } from './settingsIndex';
 import styles from './CarSettings.module.css';
+
+const HIGHLIGHT_MS = 1600;
 
 interface TopBarItem {
   icon: string;
   alt: string;
-  text?: string;
+  panel: SettingsPanel;
 }
 
 const topBarItems: TopBarItem[] = [
-  { icon: 'homelink', alt: 'Garage' },
-  { icon: 'notifications', alt: 'Notifications' },
-  { icon: 'bluetooth', alt: 'Bluetooth' },
-  { icon: 'wifi', alt: 'Wifi' },
+  { icon: 'homelink', alt: 'Garage', panel: 'HomeLink' },
+  { icon: 'notifications', alt: 'Notifications', panel: 'Notifications' },
+  { icon: 'bluetooth', alt: 'Bluetooth', panel: 'Bluetooth' },
+  { icon: 'wifi', alt: 'Wifi', panel: 'Wifi' },
 ];
 
-const leftPanelItems = [
+const leftPanelItems: { icon: string; alt: string; label: SettingsPanel }[] = [
   { icon: 'controls', alt: 'Controls', label: 'Controls' },
   { icon: 'dynamics', alt: 'Dynamics', label: 'Dynamics' },
   { icon: 'charging', alt: 'Charging', label: 'Charging' },
@@ -44,60 +57,101 @@ const leftPanelItems = [
   { icon: 'service', alt: 'Service', label: 'Service' },
   { icon: 'software', alt: 'Software', label: 'Software' },
   { icon: 'wifi', alt: 'Wifi', label: 'Wifi' },
+  { icon: 'notifications', alt: 'Notifications', label: 'Notifications' },
+  { icon: 'audio', alt: 'Audio', label: 'Audio' },
+  { icon: 'profiles', alt: 'Profiles', label: 'Profiles' },
+  { icon: 'bluetooth', alt: 'Bluetooth', label: 'Bluetooth' },
+  { icon: 'schedule', alt: 'Schedule', label: 'Schedule' },
+  { icon: 'upgrades', alt: 'Upgrades', label: 'Upgrades' },
+  { icon: 'homelink', alt: 'HomeLink', label: 'HomeLink' },
 ];
 
+function UnreadDot() {
+  const hasUnread = useCar(hasUnreadNotifications);
+  return hasUnread ? <span className={styles['red-dot']} role="img" aria-label="Unread" /> : null;
+}
+
 export const CarSettings = () => {
-  const { isWifiMenuOpen } = useCarState();
-  const { leaveWifiSettings } = useCarActions();
-  const [selectedPanel, setSelectedPanel] = useState('Controls');
+  const activePanel = useCar((state) =>
+    state.surface.kind === 'settings' ? state.surface.panel : 'Controls',
+  );
+  const { openSettings } = useCarActions();
+  const detailRef = useRef<HTMLDivElement>(null);
+  const [jumpTarget, setJumpTarget] = useState<string | null>(null);
 
-  // Opening Settings from the map's wifi icon jumps straight to the Wifi panel.
-  const activePanel = isWifiMenuOpen ? 'Wifi' : selectedPanel;
+  // Only narrow panels use this, showing the list or one panel. CSS decides when that applies.
+  const [isDetailOpen, setIsDetailOpen] = useState(activePanel !== 'Controls');
+  const [shownPanel, setShownPanel] = useState(activePanel);
+  // Anything that picks a panel lands on it, including jumps from outside Settings.
+  if (shownPanel !== activePanel) {
+    setShownPanel(activePanel);
+    setIsDetailOpen(true);
+  }
 
-  const selectPanel = (panel: string) => {
-    setSelectedPanel(panel);
-    if (isWifiMenuOpen) leaveWifiSettings();
-  };
+  useEffect(() => {
+    if (!jumpTarget) return;
+    const target = detailRef.current?.querySelector<HTMLElement>(`[data-setting="${jumpTarget}"]`);
+    target?.scrollIntoView({ block: 'center' });
+    target?.setAttribute('data-highlighted', '');
+    const timer = setTimeout(() => {
+      target?.removeAttribute('data-highlighted');
+      setJumpTarget(null);
+    }, HIGHLIGHT_MS);
+    return () => {
+      clearTimeout(timer);
+      target?.removeAttribute('data-highlighted');
+    };
+  }, [jumpTarget]);
 
-  const handleWifiClick = () => {
-    selectPanel('Wifi');
+  const handleSearchPick = (entry: SettingEntry) => {
+    openSettings(entry.panel);
+    setIsDetailOpen(true);
+    setJumpTarget(entry.id);
   };
 
   return (
     <div className={styles['car-settings-wrapper']}>
       <div className={styles['top-bar']}>
-        <div className={`${styles['top-bar-item']} ${styles['search-bar']}`}>
-          <img src={getImagePath('icon-search.svg')} alt="Search" />
-          <input type="text" placeholder="Search settings" />
-        </div>
+        <SettingsSearch onPick={handleSearchPick} />
         <div className={styles['top-bar-right-icons']}>
           <UserProfile />
-          {topBarItems.map((item, index) => (
-            <div
-              key={index}
+          {topBarItems.map((item) => (
+            <Pressable
+              key={item.icon}
               className={styles['top-bar-item']}
-              onClick={item.icon === 'wifi' ? handleWifiClick : undefined}
+              onPress={() => openSettings(item.panel)}
             >
               <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
-              {item.text && item.text}
-            </div>
+              {item.icon === 'notifications' && <UnreadDot />}
+            </Pressable>
           ))}
         </div>
       </div>
-      <div className={styles['car-settings-panel']}>
+      <div className={styles['car-settings-panel']} data-view={isDetailOpen ? 'detail' : 'list'}>
         <div className={styles['left-scroll-panel']}>
-          {leftPanelItems.map((item, index) => (
-            <div
-              key={index}
+          {leftPanelItems.map((item) => (
+            <Pressable
+              key={item.label}
               className={`${styles['left-scroll-panel-item']} ${activePanel === item.label ? styles.active : ''}`}
-              onClick={() => selectPanel(item.label)}
+              pressed={activePanel === item.label}
+              onPress={() => {
+                openSettings(item.label);
+                setIsDetailOpen(true);
+              }}
             >
-              <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt={item.alt} />
+              <img src={getImagePath(`icon-settings-${item.icon}.svg`)} alt="" />
               {item.label}
-            </div>
+            </Pressable>
           ))}
         </div>
-        <div className={styles['settings-right-panel']}>
+        <div ref={detailRef} className={styles['settings-right-panel']}>
+          <button
+            type="button"
+            className={styles['back-button']}
+            onClick={() => setIsDetailOpen(false)}
+          >
+            <span aria-hidden="true">‹</span> {activePanel}
+          </button>
           <div className={`${styles['buttons-grid']} ${activePanel.toLowerCase()}`}>
             {activePanel === 'Controls' && <Controls />}
             {activePanel === 'Dynamics' && <Dynamics />}
@@ -112,6 +166,13 @@ export const CarSettings = () => {
             {activePanel === 'Service' && <Service />}
             {activePanel === 'Software' && <Software />}
             {activePanel === 'Wifi' && <Wifi />}
+            {activePanel === 'Notifications' && <Notifications />}
+            {activePanel === 'Audio' && <Audio />}
+            {activePanel === 'Profiles' && <Profiles />}
+            {activePanel === 'Bluetooth' && <BluetoothDevices />}
+            {activePanel === 'Schedule' && <Schedule />}
+            {activePanel === 'Upgrades' && <Upgrades />}
+            {activePanel === 'HomeLink' && <HomeLink />}
           </div>
         </div>
       </div>

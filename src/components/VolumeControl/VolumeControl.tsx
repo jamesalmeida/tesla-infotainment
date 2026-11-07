@@ -1,7 +1,9 @@
-import { useState, useRef } from 'react';
+import { useAutoHide } from '../../hooks/useAutoHide';
 import { getImagePath } from '../../utils/assetPaths';
 import VolumeModal from '../VolumeModal/VolumeModal';
 import styles from './VolumeControl.module.css';
+
+const VOLUME_STEP = 10;
 
 interface VolumeControlProps {
   volume: number;
@@ -10,53 +12,60 @@ interface VolumeControlProps {
 }
 
 const VolumeControl = ({ volume, onVolumeChange, onOpenAudioSettings }: VolumeControlProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const volumeControlRef = useRef<HTMLDivElement>(null);
+  const { phase, show, hide } = useAutoHide();
 
-  const handleVolumeClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleVolumeChange = (newVolume: number) => {
+  const changeVolume = (newVolume: number) => {
     onVolumeChange(newVolume);
+    show();
   };
 
   const adjustVolume = (increment: number) => {
-    const newVolume = Math.max(0, Math.min(100, volume + increment));
-    handleVolumeChange(newVolume);
-    setIsModalOpen(true);
+    changeVolume(Math.max(0, Math.min(100, volume + increment)));
   };
 
   return (
-    <div className={styles['volume-control']} ref={volumeControlRef}>
-      <img
-        className={`navIcons arrows`}
-        src={getImagePath('icon-vol-down.svg')}
-        alt="Decrease volume"
-        onClick={() => adjustVolume(-10)}
-      />
-      <img
-        className={`navIcons ${styles['volume-display']}`}
-        src={getImagePath('icon-volume.svg')}
-        alt="Volume"
-        onClick={handleVolumeClick}
-      />
-      <img
-        className={`navIcons arrows`}
-        src={getImagePath('icon-vol-up.svg')}
-        alt="Increase volume"
-        onClick={() => adjustVolume(10)}
-      />
-      {isModalOpen && (
+    <div className={styles['volume-control']}>
+      <button
+        type="button"
+        className={`navIconWrapper ${styles['volume-btn']}`}
+        onClick={() => adjustVolume(-VOLUME_STEP)}
+      >
+        <img
+          className="navIcons arrows"
+          src={getImagePath('icon-vol-down.svg')}
+          alt="Decrease volume"
+        />
+      </button>
+      <button
+        type="button"
+        className={`navIconWrapper ${styles['volume-btn']}`}
+        aria-expanded={phase !== 'hidden'}
+        onClick={phase === 'visible' ? hide : show}
+      >
+        <img
+          className={`navIcons ${styles['volume-display']}`}
+          src={getImagePath('icon-volume.svg')}
+          alt="Volume"
+        />
+      </button>
+      <button
+        type="button"
+        className={`navIconWrapper ${styles['volume-btn']}`}
+        onClick={() => adjustVolume(VOLUME_STEP)}
+      >
+        <img
+          className="navIcons arrows"
+          src={getImagePath('icon-vol-up.svg')}
+          alt="Increase volume"
+        />
+      </button>
+      {phase !== 'hidden' && (
         <div className={styles['volume-modal-container']}>
           <VolumeModal
             volume={volume}
-            onVolumeChange={handleVolumeChange}
-            onClose={handleCloseModal}
+            isFading={phase === 'fading'}
+            onVolumeChange={changeVolume}
+            onActivity={show}
             onOpenAudioSettings={onOpenAudioSettings}
           />
         </div>

@@ -17,10 +17,10 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@react-spring/three": "^10.1.2",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@vis.gl/react-google-maps": "^1.10.1",
@@ -29,10 +29,12 @@
     "react-resizable-panels": "^4.14.8",
     "react-webcam": "^7.2.0",
     "react-youtube": "^10.1.0",
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "workbox-window": "^7.4.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
@@ -49,6 +51,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.5"
   },
   "pnpm": {

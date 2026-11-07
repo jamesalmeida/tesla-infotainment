@@ -1,0 +1,76 @@
+.bar {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  min-width: 0;
+}
+
+.home {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.bookmarks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(120px, calc(170 * var(--u))), 1fr));
+  gap: calc(8 * var(--u));
+}
+
+.bookmark {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(2 * var(--u));
+  min-width: 0;
+  padding: calc(10 * var(--u));
+  border: none;
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .bookmark:hover {
+    background-color: var(--color-card-hover);
+  }
+}
+
+.letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max(28px, calc(36 * var(--u)));
+  height: max(28px, calc(36 * var(--u)));
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 700;
+}
+
+.why {
+  margin: 0;
+  font-size: var(--app-text-small);
+}
+
+.page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  min-height: 0;
+}
+
+.frame {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: none;
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+}

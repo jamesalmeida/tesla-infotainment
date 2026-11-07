@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import { vi } from 'vitest';
 import App from './App';
 
@@ -40,6 +40,9 @@ const cameraIsActive = () =>
 
 beforeEach(() => {
   vi.useFakeTimers();
+  localStorage.clear();
+  // The URL holds what's open now, so each test needs a fresh one.
+  window.history.replaceState(null, '', '/');
 });
 
 afterEach(() => {
@@ -48,8 +51,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// The app hides its content behind the loading screen until images report as
-// loaded (which never happens in jsdom), so advance to the fallback timer.
+// The loading screen waits for the 3D car, which is stubbed here, so advance to the fallback.
 const renderApp = () => {
   render(<App />);
   act(() => {
@@ -71,7 +73,7 @@ test('bottom bar icon opens the slide-up panel and clicking it again closes it',
   fireEvent.click(navIcon('bluetooth'));
   await waitForLazyApp();
   expect(panelIsOpen()).toBe(true);
-  expect(screen.getByText('Bluetooth')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Bluetooth' })).toBeInTheDocument();
 
   fireEvent.click(navIcon('bluetooth'));
   expect(panelIsOpen()).toBe(false);
@@ -93,6 +95,74 @@ test('map wifi icon opens Settings on Wifi, and reopening returns to Controls', 
   await waitForLazyApp();
   expect(panelIsOpen()).toBe(true);
   expect(activeSettingsPanel()).toBe('Controls');
+});
+
+const openAudioSettings = async () => {
+  // A press on the icon closes the popup if it's still showing from last time.
+  if (!screen.queryByAltText('Audio Settings')) fireEvent.click(screen.getByAltText('Volume'));
+  fireEvent.click(screen.getByAltText('Audio Settings'));
+  await waitForLazyApp();
+};
+
+test('the volume popup opens the Audio panel, with Settings closed or already open', async () => {
+  renderApp();
+
+  await openAudioSettings();
+  expect(panelIsOpen()).toBe(true);
+  expect(activeSettingsPanel()).toBe('Audio');
+
+  fireEvent.click(screen.getByText('Dynamics'));
+  await openAudioSettings();
+  expect(panelIsOpen()).toBe(true);
+  expect(activeSettingsPanel()).toBe('Audio');
+});
+
+test('the Settings top bar opens HomeLink, the bell and Bluetooth', async () => {
+  renderApp();
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+
+  const topBar = within(document.querySelector<HTMLElement>('.top-bar')!);
+  fireEvent.click(topBar.getByAltText('Garage'));
+  expect(activeSettingsPanel()).toBe('HomeLink');
+  fireEvent.click(topBar.getByAltText('Notifications'));
+  expect(activeSettingsPanel()).toBe('Notifications');
+  fireEvent.click(topBar.getByAltText('Bluetooth'));
+  expect(activeSettingsPanel()).toBe('Bluetooth');
+});
+
+test('restarting the touchscreen replays the boot screen, then returns to the map', async () => {
+  renderApp();
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Service'));
+  fireEvent.click(screen.getByRole('button', { name: 'Restart' }));
+
+  expect(screen.getByAltText('Tesla Logo')).toBeInTheDocument();
+  expect(panelIsOpen()).toBe(false);
+
+  act(() => {
+    vi.advanceTimersByTime(4000);
+  });
+  expect(screen.queryByAltText('Tesla Logo')).not.toBeInTheDocument();
+});
+
+test('PIN to Drive asks for the PIN over everything when the car would leave Park', () => {
+  localStorage.setItem(
+    'tesla-car-state',
+    JSON.stringify({ version: 1, state: { settings: { pinToDrive: true, drivePin: '1234' } } }),
+  );
+  renderApp();
+
+  fireEvent.click(gearIcon('D'));
+  expect(activeGear()).toBe('P');
+
+  fireEvent.change(screen.getByLabelText('Drive PIN'), { target: { value: '1234' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Unlock' }));
+  expect(screen.queryByLabelText('Drive PIN')).not.toBeInTheDocument();
+
+  fireEvent.click(gearIcon('D'));
+  expect(activeGear()).toBe('D');
 });
 
 test('reverse gear forces the backup camera and blocks closing until Park', () => {
@@ -152,8 +222,95 @@ test('Shift+Arrow and Shift+H control the turn signals', () => {
   fireEvent.keyDown(document.body, { key: 'H', shiftKey: true });
   expect(document.querySelectorAll('.turnSignal.active')).toHaveLength(2);
 
+  // Hazards off brings the right signal back rather than losing it.
   fireEvent.keyDown(document.body, { key: 'H', shiftKey: true });
+  expect(document.querySelectorAll('.turnSignal.active')).toHaveLength(1);
+
+  fireEvent.keyDown(document.body, { key: 'ArrowRight', shiftKey: true });
   expect(document.querySelectorAll('.turnSignal.active')).toHaveLength(0);
+});
+
+test('the shelf closes from the backdrop and Escape, and the dock icon stays in sync', () => {
+  renderApp();
+  const shelfIsOpen = () => Boolean(screen.queryByRole('dialog'));
+
+  fireEvent.click(screen.getByAltText('Open Menu'));
+  expect(shelfIsOpen()).toBe(true);
+
+  fireEvent.keyDown(window, { key: 'Escape' });
+  expect(shelfIsOpen()).toBe(false);
+  expect(screen.getByAltText('Open Menu')).toBeInTheDocument();
+
+  fireEvent.click(screen.getByAltText('Open Menu'));
+  const overlay = screen.getByRole('dialog').parentElement;
+  if (!overlay) throw new Error('Modal has no overlay');
+  fireEvent.click(overlay);
+  expect(shelfIsOpen()).toBe(false);
+});
+
+test('the shelf launches apps', async () => {
+  renderApp();
+
+  fireEvent.click(screen.getByAltText('Open Menu'));
+  fireEvent.click(screen.getByAltText('Calendar icon'));
+  await waitForLazyApp();
+
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(panelIsOpen()).toBe(true);
+  expect(screen.getByRole('heading', { name: 'Calendar' })).toBeInTheDocument();
+});
+
+test('? opens the shortcut list', () => {
+  renderApp();
+
+  fireEvent.keyDown(document.body, { key: '?', shiftKey: true });
+
+  expect(screen.getByRole('heading', { name: 'Keyboard shortcuts' })).toBeInTheDocument();
+});
+
+test('Settings survive leaving the panel and closing the app', async () => {
+  renderApp();
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Sentry'));
+  expect(screen.getByText('Sentry').className).toContain('active');
+
+  fireEvent.click(screen.getByText('Dynamics'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Controls'));
+  expect(screen.getByText('Sentry').className).toContain('active');
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  expect(screen.getByText('Sentry').className).toContain('active');
+});
+
+test('brightness survives closing Settings, and Auto restores the manual value', async () => {
+  renderApp();
+  const overlay = () => document.querySelector<HTMLElement>('.brightnessOverlay');
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.change(screen.getByLabelText('Brightness'), { target: { value: '40' } });
+  expect(overlay()?.style.opacity).toBe('0.6');
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  expect(overlay()?.style.opacity).toBe('0.6');
+
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  expect(screen.getByLabelText('Brightness')).toHaveValue('40');
+
+  const auto = document.querySelector('.brightness-auto-btn');
+  if (!auto) throw new Error('Auto brightness button did not render');
+  fireEvent.click(auto);
+  expect(overlay()?.style.opacity).toBe('0');
+
+  fireEvent.click(auto);
+  expect(overlay()?.style.opacity).toBe('0.6');
+  expect(screen.getByLabelText('Brightness')).toHaveValue('40');
 });
 
 test('Shift+M focuses the navigate input', () => {
@@ -162,4 +319,114 @@ test('Shift+M focuses the navigate input', () => {
   const input = document.getElementById('navigateTo');
   fireEvent.keyDown(document.body, { key: 'M', shiftKey: true });
   expect(document.activeElement).toBe(input);
+});
+
+describe('modes outlive Settings', () => {
+  const openControls = async () => {
+    renderApp();
+    fireEvent.click(screen.getByAltText('car settings icon'));
+    await waitForLazyApp();
+  };
+  const carWash = () => screen.queryByRole('dialog', { name: 'Car Wash Mode' });
+
+  test('Car Wash covers the display, stays through closing Settings, and restores on exit', async () => {
+    await openControls();
+    fireEvent.click(screen.getByText('Sentry'));
+    fireEvent.click(screen.getByText('Car Wash'));
+    expect(carWash()).toBeInTheDocument();
+    expect(screen.getByText('Sentry off')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByAltText('car settings icon'));
+    expect(carWash()).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exit Car Wash Mode' }));
+    expect(carWash()).toBeNull();
+
+    fireEvent.click(screen.getByAltText('car settings icon'));
+    await waitForLazyApp();
+    expect(screen.getByText('Sentry').className).toContain('active');
+  });
+
+  test('Free Roll shows Neutral, and shifting to Drive ends the mode', async () => {
+    await openControls();
+    fireEvent.click(screen.getByText('Car Wash'));
+    fireEvent.click(screen.getByRole('button', { name: 'Free Roll' }));
+    expect(activeGear()).toBe('N');
+    expect(screen.getByRole('button', { name: 'Free Roll' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+
+    fireEvent.click(gearIcon('D'));
+    expect(carWash()).toBeNull();
+  });
+
+  test('Car Wash is refused in Drive, with the reason on screen', async () => {
+    await openControls();
+    fireEvent.click(gearIcon('D'));
+    fireEvent.click(screen.getByText('Car Wash'));
+    expect(carWash()).toBeNull();
+    expect(screen.getByRole('status')).toHaveTextContent('Shift to Park to use Car Wash Mode');
+  });
+
+  test('a Sentry alarm frames the display until it is dismissed', async () => {
+    await openControls();
+    fireEvent.click(screen.getByText('Sentry'));
+    fireEvent.click(screen.getByRole('button', { name: 'Simulate a Break-In' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Sentry Mode alarm');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+});
+
+test('units reach the battery display and are saved', async () => {
+  renderApp();
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Display'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByRole('radio', { name: 'Kilometers' }));
+  fireEvent.click(screen.getByRole('radio', { name: 'Distance' }));
+
+  expect(screen.getByRole('button', { name: /^Battery/ })).toHaveTextContent('344 km');
+  act(() => {
+    vi.advanceTimersByTime(1000);
+  });
+
+  const saved = JSON.parse(localStorage.getItem('tesla-car-state') ?? '{}');
+  expect(saved.state.settings.preferences).toMatchObject({
+    distance: 'km',
+    energyDisplay: 'distance',
+  });
+});
+
+test('the charge status sits with the car while a cable is in', async () => {
+  renderApp();
+  fireEvent.click(screen.getByAltText('car settings icon'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByText('Charging'));
+  await waitForLazyApp();
+  fireEvent.click(screen.getByRole('button', { name: 'Plug In Cable' }));
+
+  const status = document.querySelector('.chargeStatus');
+  expect(status).toHaveTextContent(/Charging/);
+  expect(status).toHaveTextContent(/remaining/);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Unlock and Unplug' }));
+  expect(document.querySelector('.chargeStatus')).toBeNull();
+});
+
+test('Park View can be opened and closed from the car panel', () => {
+  renderApp();
+  fireEvent.click(screen.getByRole('button', { name: 'Park View' }));
+  expect(screen.getByRole('button', { name: 'Exit Park View' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Exit Park View' }));
+  expect(screen.getByRole('button', { name: 'Park View' })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
 });

@@ -6,27 +6,41 @@
   align-items: center;
 }
 
+.temperature-btn {
+  flex: 0 0 auto;
+}
+
+.temperature-open {
+  flex: 0 0 auto;
+}
+
 .temperature-display {
+  display: inline-block;
   position: relative;
-  bottom: 3px;
+  bottom: calc(3 * var(--u));
 }
 
 :global(.navIcons).temperature-display {
-  font-size: 28px;
+  font-size: calc(28 * var(--u));
   padding: 0px;
-  max-width: 70px;
+  max-width: calc(70 * var(--u));
 }
 
-@media (max-width: 768px) {
-  :global(.navIcons).temperature-display {
-    font-size: 15px;
+/* The number stays readable with the climate off, and shows that the setting isn't running. */
+.temperature-display[data-off='true'] {
+  opacity: 0.4;
+}
+
+/* A phone can't fit every pair of arrows beside the volume. The number still opens the panel,
+   which has them. Zones are only named when split. */
+@media (max-width: 479px) {
+  :global(:root[data-layout='stacked']) [data-zone='passenger'] .temperature-btn {
+    display: none;
   }
 }
 
-@media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  :global(.navIcons).temperature-display {
-    font-size: 20px;
-    max-width: 40px;
-    padding-top: 4px;
+@media (max-width: 379px) {
+  :global(:root[data-layout='stacked']) [data-zone] .temperature-btn {
+    display: none;
   }
 }

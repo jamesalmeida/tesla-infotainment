@@ -1,0 +1,28 @@
+.garage {
+  position: relative;
+  overflow: hidden;
+  width: min(100%, calc(240 * var(--u)));
+  height: max(70px, calc(120 * var(--u)));
+  border: calc(4 * var(--u)) solid var(--color-text-muted);
+  border-bottom: none;
+  border-radius: calc(6 * var(--u)) calc(6 * var(--u)) 0 0;
+  background-color: var(--color-bg);
+  box-sizing: border-box;
+}
+
+/* Rolls up into the header, with panel lines drawn across it. */
+.door {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--color-panel);
+  background-image: repeating-linear-gradient(
+    to top,
+    var(--color-border) 0,
+    var(--color-border) 1px,
+    transparent 1px,
+    transparent calc(24 * var(--u))
+  );
+  background-position: bottom;
+}

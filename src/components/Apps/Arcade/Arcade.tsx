@@ -1,138 +1,122 @@
-import { useState } from 'react';
+import { lazy, Suspense, useReducer, useState } from 'react';
+import { useCar } from '../../../state/CarStateContext';
+import { isParked as selectIsParked } from '../../../state/carState';
 import { getImagePath } from '../../../utils/assetPaths';
-import { Theater } from '../Theater/Theater';
-import { Toybox } from '../Toybox/Toybox';
-import { Outrun } from './Games/Outrun/Outrun';
+import LoadingSpinner from '../../LoadingSpinner/LoadingSpinner';
+import { arcadeReducer, type ArcadeView } from './arcadeView';
+import { ChunkBoundary } from './ChunkBoundary';
+import { games, type ArcadeGame } from './games';
 import styles from './Arcade.module.css';
 
+const Theater = lazy(() =>
+  import('../Theater/Theater').then((module) => ({ default: module.Theater })),
+);
+const Toybox = lazy(() =>
+  import('../Toybox/Toybox').then((module) => ({ default: module.Toybox })),
+);
+
+const TABS = ['Theater', 'Arcade', 'Toybox'] as const;
+type ArcadeTab = (typeof TABS)[number];
+
+const gameById = (id: ArcadeGame['id']): ArcadeGame => {
+  const game = games.find((candidate) => candidate.id === id);
+  if (!game) throw new Error(`Unknown game: ${id}`);
+  return game;
+};
+
+const playLabel = (game: ArcadeGame, isParked: boolean): string => {
+  if (!game.component) return 'Coming soon';
+  return isParked ? 'Play Game' : 'Shift to Park';
+};
+
 export const Arcade = () => {
-  const games = [
-    {
-      name: 'Outrun',
-      boxArt: 'outrun.jpg',
-      description:
-        '(Keyboard required) Race against time and other cars to complete the course before time runs out! Thanks to Patrick Stillhart for sharing this on Codepen. Link in the README.',
-    },
-    {
-      name: 'DOOM',
-      boxArt: 'doom.jpg',
-      description: 'Can it run DOOM? Coming soon, if I can get it to work.',
-    },
-    {
-      name: 'Asteroids',
-      boxArt: 'asteroids.jpg',
-      description:
-        'Coming Soon! Asteroids is a space combat game where you navigate a spaceship and destroy asteroids and enemy ships.',
-    },
-    {
-      name: 'Centipede',
-      boxArt: 'centipede.jpg',
-      description:
-        'Coming Soon! Centipede is a shooter game where you control a centipede and shoot at enemies and avoid their attacks.',
-    },
-    {
-      name: 'Missile Command',
-      boxArt: 'missile-command.jpg',
-      description:
-        'Coming Soon! Missile Command is a classic arcade game where you control a missile defense system and shoot at incoming missiles.',
-    },
-  ];
+  const isParked = useCar(selectIsParked);
+  const [view, dispatch] = useReducer(arcadeReducer, {
+    kind: 'browse',
+    selected: games[0].id,
+  } satisfies ArcadeView);
+  const [activeTab, setActiveTab] = useState<ArcadeTab>('Arcade');
+  const close = () => dispatch({ type: 'close' });
 
-  const [activeGame, setActiveGame] = useState(games[0].name);
-  const [showGame, setShowGame] = useState(false);
-  const [currentGame, setCurrentGame] = useState<string | null>(null);
-
-  const [activeTab, setActiveTab] = useState('Arcade');
-
-  const handleGameClick = (gameName: string) => {
-    setActiveGame(gameName);
-    setShowGame(false);
+  const handleTabClick = (tab: ArcadeTab) => {
+    setActiveTab(tab);
+    close();
   };
 
-  const handlePlayClick = () => {
-    setShowGame(true);
-    setCurrentGame(activeGame);
+  const renderBrowse = (selectedId: ArcadeGame['id']) => {
+    const selected = gameById(selectedId);
+    const canPlay = Boolean(selected.component) && isParked;
+
+    return (
+      <>
+        <div className={styles['main-game-banner']}>
+          <img src={getImagePath(`games/${selected.id}-banner.svg`)} alt="" />
+          <div className={styles.gradient}></div>
+          <div className={styles.activeGameBannerOverlay}>
+            <button
+              type="button"
+              className={`${styles['play-button']} ctaBtn`}
+              disabled={!canPlay}
+              onClick={() => dispatch({ type: 'play', canPlay })}
+            >
+              {playLabel(selected, isParked)}
+            </button>
+            <div className={styles.gameInfo}>
+              <div className={styles.gameTitle}>{selected.name}</div>
+              <div className={styles.gameDescription}>{selected.description}</div>
+            </div>
+          </div>
+        </div>
+        <div className={styles['game-carousel']}>
+          {games.map((game) => (
+            <img
+              key={game.id}
+              src={getImagePath(`games/${game.id}.svg`)}
+              alt={game.name}
+              onClick={() => dispatch({ type: 'select', game: game.id })}
+              className={selected.id === game.id ? styles.active : ''}
+            />
+          ))}
+        </div>
+      </>
+    );
   };
 
-  const closeGame = () => {
-    setShowGame(false);
-    setCurrentGame(null);
-  };
-
-  const handleTabClick = (tabName: string) => {
-    setActiveTab(tabName);
-    setShowGame(false);
-    setCurrentGame(null);
+  const renderGame = (gameId: ArcadeGame['id']) => {
+    const Game = gameById(gameId).component;
+    return (
+      <div className={styles['game-container']}>
+        {Game && <Game onClose={close} suspended={!isParked} />}
+      </div>
+    );
   };
 
   return (
     <div className={styles.arcadeWrapper}>
       <div className={styles['arcade-header']}>
-        <div
-          className={activeTab === 'Theater' ? styles.active : ''}
-          onClick={() => handleTabClick('Theater')}
-        >
-          Theater
-        </div>
-        <div
-          className={activeTab === 'Arcade' ? styles.active : ''}
-          onClick={() => handleTabClick('Arcade')}
-        >
-          Arcade
-        </div>
-        <div
-          className={activeTab === 'Toybox' ? styles.active : ''}
-          onClick={() => handleTabClick('Toybox')}
-        >
-          Toybox
-        </div>
-      </div>
-
-      {activeTab === 'Arcade' &&
-        (!showGame ? (
-          <>
-            <div className={styles['main-game-banner']}>
-              <img
-                src={getImagePath(
-                  `games/${activeGame.toLowerCase().replace(/\s+/g, '-')}-banner.jpg`,
-                )}
-                alt={activeGame}
-              />
-              <div className={styles.gradient}></div>
-              <div className={styles.activeGameBannerOverlay}>
-                <div className={`${styles['play-button']} ctaBtn`} onClick={handlePlayClick}>
-                  Play Game
-                </div>
-                <div className={styles.gameInfo}>
-                  {/* <div className="gameTitle">{activeGame}</div> */}
-                  <div className={styles.gameDescription}>
-                    {games.find((game) => game.name === activeGame)?.description}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className={styles['game-carousel']}>
-              {games.map((game) => (
-                <img
-                  key={game.name}
-                  src={getImagePath(`games/${game.boxArt}`)}
-                  alt={game.name}
-                  onClick={() => handleGameClick(game.name)}
-                  className={activeGame === game.name ? styles.active : ''}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className={styles['game-container']}>
-            {currentGame === 'Outrun' && <Outrun onClose={closeGame} />}
-            {/* Add other game components here when they're available */}
+        {TABS.map((tab) => (
+          <div
+            key={tab}
+            className={activeTab === tab ? styles.active : ''}
+            onClick={() => handleTabClick(tab)}
+          >
+            {tab}
           </div>
         ))}
+      </div>
 
-      {activeTab === 'Theater' && <Theater />}
-
-      {activeTab === 'Toybox' && <Toybox />}
+      {/* Keyed so that going Back from a failed download clears the failure. */}
+      <ChunkBoundary
+        key={`${activeTab}-${view.kind}`}
+        onBack={() => (view.kind === 'playing' ? close() : setActiveTab('Arcade'))}
+      >
+        <Suspense fallback={<LoadingSpinner />}>
+          {activeTab === 'Arcade' &&
+            (view.kind === 'browse' ? renderBrowse(view.selected) : renderGame(view.game))}
+          {activeTab === 'Theater' && <Theater />}
+          {activeTab === 'Toybox' && <Toybox />}
+        </Suspense>
+      </ChunkBoundary>
     </div>
   );
 };

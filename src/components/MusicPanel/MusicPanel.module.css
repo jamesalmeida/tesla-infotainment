@@ -1,15 +1,17 @@
 .musicPanel {
   font-family: 'Open Sans';
   font-weight: 600;
+  flex: none;
   display: grid;
-  grid-template-columns: 15% 1fr;
-  grid-template-rows: 50% 2px calc(50% - 2px);
+  grid-template-columns: calc(64 * var(--u)) minmax(0, 1fr);
+  grid-template-rows: calc(64 * var(--u)) 2px minmax(
+      max(calc(48 * var(--u)), var(--tap-target)),
+      auto
+    );
   background-color: white;
-  height: 40%;
   width: 96%;
-  max-width: 569px;
-  margin: 0px auto 10px;
-  border-radius: 5px;
+  margin: 0px auto calc(10 * var(--u));
+  border-radius: calc(5 * var(--u));
   box-shadow:
     rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
@@ -20,11 +22,24 @@
   grid-row: 1 / 3;
 }
 
-.albumArt img {
+.albumArt img,
+.artPlaceholder {
   height: 100%;
   width: 100%;
-  max-width: 62px;
   border-top-left-radius: 5px;
+}
+
+.artPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e4e4e4;
+  color: #9c9c9c;
+}
+
+.artPlaceholder svg {
+  width: 50%;
+  height: 50%;
 }
 
 .musicText {
@@ -33,7 +48,7 @@
   grid-template-rows: 50% 50%;
   grid-column: 2 / 3;
   grid-row: 1 / 2;
-  padding: 6px;
+  padding: calc(6 * var(--u));
   align-content: center;
   justify-content: start;
   align-items: center;
@@ -41,27 +56,32 @@
 }
 
 .title {
-  text-overflow: clip;
   grid-column: 1 / 3;
   grid-row: 1 / 2;
-  overflow-y: scroll;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  width: 100%;
   color: #505050;
-  font-size: 14px;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
 }
 
 .sourceIcon {
   grid-column: 1 / 2;
   grid-row: 2 / 3;
   height: auto;
-  width: 18px;
+  width: calc(18 * var(--u));
 }
 
 .albumTitle {
   grid-column: 2 / 3;
   grid-row: 2 / 3;
   color: #9c9c9c;
-  font-size: 14px;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+}
+
+.errorText {
+  color: #c62828;
 }
 
 .musicProgressBar {
@@ -78,18 +98,14 @@
 }
 
 .musicBtn {
-  font-size: 16px;
+  font-size: calc(16 * var(--u));
   font-weight: bold;
   color: #a1a1a1;
   height: auto;
   width: 100%;
   background-color: rgb(255, 255, 255, 90%);
   border: none;
-  border-radius: 12px;
-}
-
-.musicBtn:focus {
-  outline: none;
+  border-radius: calc(12 * var(--u));
 }
 
 .musicBtn::-moz-focus-inner {
@@ -97,12 +113,70 @@
 }
 
 .musicIcon {
-  height: 20px;
+  height: calc(20 * var(--u));
+}
+
+/* The ring waits a moment so that a quick resume doesn't flash it. */
+.buffering {
+  position: relative;
+}
+
+.buffering::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  width: calc(30 * var(--u));
+  height: calc(30 * var(--u));
+  margin: auto;
+  border: 2px solid #ddd;
+  border-top-color: #4e4e4e;
+  border-radius: 50%;
+  pointer-events: none;
+  animation:
+    bufferingSpin 0.9s linear infinite,
+    bufferingReveal 0s linear 0.25s backwards;
+}
+
+@keyframes bufferingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bufferingReveal {
+  from {
+    opacity: 0;
+  }
 }
 
 .musicProgressBar {
+  position: relative;
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: calc(10 * var(--u));
+}
+
+/* Grows upward over the text, which has no controls, so the transport buttons
+   keep their full height. The bar stays a thin line along its bottom edge. */
+.progressHitArea {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: calc(16 * var(--u));
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (pointer: coarse) {
+  .progressHitArea {
+    height: calc(44 * var(--u));
+  }
 }
 
 .progressBackground {
@@ -120,58 +194,42 @@
 }
 
 .progressIndicator {
-  width: 10px;
-  height: 10px;
+  width: calc(10 * var(--u));
+  height: calc(10 * var(--u));
   background-color: #4e4e4e;
   border-radius: 50%;
   position: absolute;
-  right: -6px;
-  top: -5px;
+  right: calc(-6 * var(--u));
+  top: calc(-5 * var(--u));
 }
 
 .timeCode {
-  font-size: 12px;
+  font-size: calc(12 * var(--u));
   color: #777;
   text-align: right;
-  margin-top: 5px;
+  margin-top: calc(5 * var(--u));
   position: relative;
-  bottom: 6px;
-  right: 3px;
+  bottom: calc(6 * var(--u));
+  right: calc(3 * var(--u));
   display: none;
 }
 
-@media screen and (max-width: 768px) {
-  .musicPanel {
-    height: 62%;
-  }
-  .musicIcon {
-    width: 17px;
-  }
-  .sourceIcon {
-    width: 10px;
-  }
-  .title {
-    font-size: 10px;
-  }
-  .albumTitle {
-    font-size: 10px;
-  }
+/* A phone on its side: art and title in one short row above the controls. */
+:global(:root[data-layout='compact']) .musicPanel {
+  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-rows: 30px 2px 44px;
+  margin-bottom: 4px;
 }
 
-@media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  .musicIcon {
-    width: 17px;
-  }
-  .sourceIcon {
-    width: 10px;
-  }
-  /* .albumTitle {} */
+:global(:root[data-layout='compact']) .musicText {
+  padding: 0 6px;
+}
 
-  /* Moved from App.css. */
-  .musicPanel {
-    height: 30% !important;
-    max-width: 322px !important;
-    position: relative;
-    left: -2px;
-  }
+:global(:root[data-layout='compact']) .albumTitle,
+:global(:root[data-layout='compact']) .sourceIcon {
+  display: none;
+}
+
+:global(:root[data-layout='compact']) .title {
+  grid-row: 1 / 3;
 }

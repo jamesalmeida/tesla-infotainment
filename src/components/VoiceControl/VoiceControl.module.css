@@ -1,0 +1,135 @@
+.mic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max(var(--tap-target), calc(28 * var(--u)));
+  height: max(var(--tap-target), calc(28 * var(--u)));
+  margin-left: calc(8 * var(--u));
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: #4e4e4e;
+  cursor: pointer;
+}
+
+.mic svg {
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.mic[aria-expanded='true'] {
+  background: #2b2b2b;
+  color: #ffffff;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.panel {
+  width: min(92vw, calc(420 * var(--u)));
+  padding: calc(18 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background: #ffffff;
+  color: #2b2b2b;
+  box-shadow: rgba(0, 0, 0, 0.35) 0 16px 40px -8px;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(10 * var(--u));
+}
+
+.kicker {
+  margin: 0;
+  color: #888;
+  font-size: max(var(--text-min), calc(10 * var(--u)));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.close {
+  min-height: var(--tap-target);
+  padding: 0 calc(10 * var(--u));
+  border: none;
+  border-radius: calc(6 * var(--u));
+  background: rgba(0, 0, 0, 0.08);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.note {
+  margin: calc(8 * var(--u)) 0;
+  padding: calc(7 * var(--u));
+  border-left: calc(3 * var(--u)) solid #0b57d0;
+  background: rgba(11, 87, 208, 0.08);
+  font-size: max(var(--text-min), calc(11 * var(--u)));
+}
+
+.message {
+  min-height: calc(34 * var(--u));
+  margin: calc(10 * var(--u)) 0;
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  font-weight: 600;
+}
+
+.form {
+  margin: 0;
+}
+
+.label {
+  display: block;
+  margin-bottom: calc(4 * var(--u));
+  color: #777;
+  font-size: max(var(--text-min), calc(10 * var(--u)));
+}
+
+.inputRow {
+  display: flex;
+  gap: calc(6 * var(--u));
+}
+
+.inputRow input {
+  flex: 1;
+  min-height: var(--tap-target);
+  min-width: 0;
+  padding: 0 calc(8 * var(--u));
+  border: 1px solid #ccc;
+  border-radius: calc(6 * var(--u));
+  font: inherit;
+  /* 16px stops iOS zooming the page when the field gets focus. */
+  font-size: 16px;
+}
+
+.send {
+  flex: none;
+  min-height: var(--tap-target);
+  padding: 0 calc(12 * var(--u));
+  border: none;
+  border-radius: calc(6 * var(--u));
+  background: #0b57d0;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.examples {
+  margin: calc(10 * var(--u)) 0 0;
+  color: #777;
+  font-size: max(var(--text-min), calc(10 * var(--u)));
+}

@@ -1,0 +1,191 @@
+.deck {
+  flex: none;
+  width: 96%;
+  margin: 0 auto calc(10 * var(--u));
+  color: #4e4e4e;
+}
+
+.tabs {
+  display: flex;
+  gap: calc(4 * var(--u));
+  margin-bottom: calc(4 * var(--u));
+}
+
+.tabs button {
+  flex: 1;
+  min-height: max(calc(24 * var(--u)), var(--tap-target));
+  border: none;
+  border-radius: calc(5 * var(--u));
+  background: rgba(0, 0, 0, 0.06);
+  color: #777;
+  font: inherit;
+  font-size: max(var(--text-min), calc(11 * var(--u)));
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabs button.activeTab {
+  background: #ffffff;
+  color: #2b2b2b;
+  box-shadow: rgba(0, 0, 0, 0.16) 0 1px 4px;
+}
+
+.viewport {
+  overflow: hidden;
+  border-radius: calc(5 * var(--u));
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  background: #ffffff;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.track {
+  display: flex;
+  transition: transform 0.25s ease-out;
+  will-change: transform;
+}
+
+.slide {
+  flex: 0 0 100%;
+  min-width: 100%;
+}
+
+.card,
+.mediaCard {
+  width: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+  padding: calc(8 * var(--u));
+}
+
+.mediaCard {
+  padding: 0;
+}
+
+/* The player brings its own frame, so take away its outside spacing inside the deck. */
+.mediaCard > div {
+  width: 100%;
+  margin: 0;
+}
+
+.cardHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(8 * var(--u));
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  font-weight: 600;
+}
+
+.cardNote {
+  margin: 0;
+  color: #9c9c9c;
+  font-size: max(var(--text-min), calc(10 * var(--u)));
+}
+
+.tireGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(4 * var(--u));
+  margin-top: calc(6 * var(--u));
+}
+
+.tireReading,
+.tripReading {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--u));
+  padding: calc(4 * var(--u)) calc(6 * var(--u));
+  border-radius: calc(4 * var(--u));
+  background: rgba(0, 0, 0, 0.04);
+  font-size: max(var(--text-min), calc(10 * var(--u)));
+}
+
+.tireReading strong,
+.tripReading strong {
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  color: #2b2b2b;
+}
+
+.tireReading.low {
+  background: rgba(198, 40, 40, 0.12);
+}
+
+.tireReading.low strong {
+  color: #c62828;
+}
+
+.warning {
+  margin: calc(6 * var(--u)) 0 0;
+  color: #c62828;
+  font-size: max(var(--text-min), calc(11 * var(--u)));
+}
+
+.tripGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(4 * var(--u));
+  margin-top: calc(6 * var(--u));
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: calc(6 * var(--u));
+  margin-top: calc(4 * var(--u));
+}
+
+.dots span {
+  width: calc(6 * var(--u));
+  height: calc(6 * var(--u));
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dots span.activeDot {
+  background: #4e4e4e;
+}
+
+/* A phone on its side has less room: keep the readings in one compact row. */
+:global(:root[data-layout='compact']) .deck {
+  margin-bottom: 4px;
+}
+
+:global(:root[data-layout='compact']) .tabs {
+  display: none;
+}
+
+:global(:root[data-layout='compact']) .card {
+  padding: 4px 6px;
+}
+
+:global(:root[data-layout='compact']) .tireGrid,
+:global(:root[data-layout='compact']) .tripGrid {
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 2px;
+}
+
+:global(:root[data-layout='compact']) .tripGrid {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+:global(:root[data-layout='compact']) .tireReading,
+:global(:root[data-layout='compact']) .tripReading {
+  padding: 2px 3px;
+}
+
+:global(:root[data-layout='compact']) .warning,
+:global(:root[data-layout='compact']) .cardNote {
+  display: none;
+}
+
+:global(:root[data-layout='compact']) .dots {
+  margin-top: 2px;
+}

@@ -1,0 +1,59 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(100px, calc(150 * var(--u))), 1fr));
+  gap: calc(10 * var(--u));
+}
+
+.tile {
+  min-width: 0;
+  padding: calc(8 * var(--u));
+  border: none;
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .tile:hover {
+    background-color: var(--color-card-hover);
+  }
+}
+
+.art {
+  width: 100%;
+  height: auto;
+  margin-bottom: calc(4 * var(--u));
+  aspect-ratio: 1;
+}
+
+.block {
+  display: block;
+}
+
+.collectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  margin-bottom: calc(8 * var(--u));
+}
+
+.headerArt {
+  width: max(44px, calc(72 * var(--u)));
+  height: max(44px, calc(72 * var(--u)));
+}
+
+.collectionTitle {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: max(15px, calc(20 * var(--u)));
+  font-weight: 600;
+}
+
+/* The tiles stay usable in a short panel by going smaller rather than scrolling for ever. */
+:global(:root[data-layout='compact']) .grid {
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+}

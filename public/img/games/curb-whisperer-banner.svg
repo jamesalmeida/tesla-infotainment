@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="600" fill="#343a40"/>
+  <rect y="0" width="1600" height="22" fill="#fcc419"/>
+  <g stroke="#f1f3f5" stroke-width="10">
+    <path d="M200 22 V330 M500 22 V330 M800 22 V330 M1100 22 V330 M1400 22 V330"/>
+  </g>
+  <g>
+    <g transform="translate(350 170) rotate(-90)">
+      <rect x="-120" y="-60" width="240" height="120" rx="34" fill="#5c7cfa"/>
+      <rect x="-64" y="-46" width="130" height="92" rx="20" fill="#1d2733"/>
+      <rect x="-30" y="-36" width="60" height="72" rx="12" fill="#5c7cfa"/>
+    </g>
+    <g transform="translate(650 170) rotate(90)">
+      <rect x="-120" y="-60" width="240" height="120" rx="34" fill="#e8590c"/>
+      <rect x="-64" y="-46" width="130" height="92" rx="20" fill="#1d2733"/>
+      <rect x="-30" y="-36" width="60" height="72" rx="12" fill="#e8590c"/>
+    </g>
+    <g transform="translate(950 170) rotate(-90)">
+      <rect x="-120" y="-60" width="240" height="120" rx="34" fill="#868e96"/>
+      <rect x="-64" y="-46" width="130" height="92" rx="20" fill="#1d2733"/>
+      <rect x="-30" y="-36" width="60" height="72" rx="12" fill="#868e96"/>
+    </g>
+  </g>
+  <rect x="1110" y="26" width="280" height="300" fill="#74c0fc" opacity="0.18"/>
+  <rect x="1110" y="26" width="280" height="300" fill="none" stroke="#74c0fc" stroke-width="8"/>
+  <circle cx="1250" cy="60" r="28" fill="#212529"/>
+  <path d="M1256 38 L1236 66 H1250 L1244 86 L1266 56 H1252Z" fill="#ffd43b"/>
+  <g transform="translate(1250 420) rotate(-90)">
+    <rect x="-120" y="-60" width="240" height="120" rx="34" fill="#f1f3f5"/>
+    <rect x="-64" y="-46" width="130" height="92" rx="20" fill="#1d2733"/>
+    <rect x="-30" y="-36" width="60" height="72" rx="12" fill="#f1f3f5"/>
+  </g>
+  <path d="M1250 280 V200" stroke="#ffd43b" stroke-width="10" stroke-dasharray="4 22" stroke-linecap="round"/>
+</svg>

@@ -1,5 +1,10 @@
-import { useState, useEffect, useRef, useCallback, type MouseEvent } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { pauseLibraryPlayback } from '../../apps/mediaLibrary';
+import { setMediaTransport } from '../../state/mediaTransport';
+import { FullMediaPlayer, type PlayerTab } from '../FullMediaPlayer/FullMediaPlayer';
 import { getImagePath } from '../../utils/assetPaths';
+import { ProgressBar } from './ProgressBar';
+import { usePlayback } from './usePlayback';
 import styles from './MusicPanel.module.css';
 
 const tracks = [
@@ -26,191 +31,146 @@ const tracks = [
   // Add more tracks here
 ];
 
-const getRandomIndex = (max: number) => Math.floor(Math.random() * max);
+const audioUrls = tracks.map((track) => track.audio);
 
-export function MusicPanel({ volume }: { volume: number }) {
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(() => getRandomIndex(tracks.length));
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const audioRef = useRef(new Audio(tracks[currentTrackIndex].audio));
-  const lastTapTimeRef = useRef(0);
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const currentTimeRef = useRef(0);
+const chooseRandomTrack = () => Math.floor(Math.random() * tracks.length);
 
-  const updateProgress = () => {
-    currentTimeRef.current = audioRef.current.currentTime;
-    setCurrentTime(currentTimeRef.current);
-  };
+function AlbumArt({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    audio.addEventListener('timeupdate', updateProgress);
-    const updateDuration = () => setDuration(audio.duration);
-    audio.addEventListener('loadedmetadata', updateDuration);
-    return () => {
-      audio.removeEventListener('timeupdate', updateProgress);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-    };
-  }, []);
+  if (failed) {
+    return (
+      <div className={styles.artPlaceholder} role="img" aria-label="No album art">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z" />
+        </svg>
+      </div>
+    );
+  }
+  return <img alt="" src={src} onError={() => setFailed(true)} />;
+}
 
-  useEffect(() => {
-    audioRef.current.src = tracks[currentTrackIndex].audio;
-    if (isPlaying) {
-      audioRef.current.play().catch((error) => console.error('Playback failed:', error));
-    } else {
-      audioRef.current.pause();
-    }
-    audioRef.current.currentTime = currentTimeRef.current;
-  }, [currentTrackIndex, isPlaying]);
+interface MusicPanelProps {
+  volume: number;
+  // Optional, so the player can be tested without the car store.
+  onOpenAudioSettings?: () => void;
+}
 
-  useEffect(() => {
-    audioRef.current.volume = volume / 100;
-  }, [volume]);
-
-  const togglePlayPause = useCallback(() => {
-    setIsPlaying((prevIsPlaying) => !prevIsPlaying);
-  }, []);
-
-  const handlePrevious = useCallback(() => {
-    const now = Date.now();
-    if (now - lastTapTimeRef.current < 1000) {
-      setCurrentTrackIndex((prevIndex) => (prevIndex === 0 ? tracks.length - 1 : prevIndex - 1));
-    } else {
-      audioRef.current.currentTime = 0;
-    }
-    lastTapTimeRef.current = now;
-  }, []);
-
-  const handleNext = useCallback(() => {
-    setCurrentTrackIndex((prevIndex) => (prevIndex === tracks.length - 1 ? 0 : prevIndex + 1));
-  }, []);
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const handleProgressBarClick = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      const progressBar = progressBarRef.current;
-      if (!progressBar) return;
-      const clickPosition =
-        (event.clientX - progressBar.getBoundingClientRect().left) / progressBar.offsetWidth;
-      audioRef.current.currentTime = clickPosition * duration;
-    },
-    [duration],
+export const MusicPanel = memo(function MusicPanel({
+  volume,
+  onOpenAudioSettings,
+}: MusicPanelProps) {
+  const { playback, timeline, togglePlayPause, play, pause, next, previous, seek } = usePlayback(
+    audioUrls,
+    chooseRandomTrack,
+    volume,
   );
-  const handleProgressBarDrag = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      if (event.buttons === 1) {
-        handleProgressBarClick(event);
-      }
-    },
-    [handleProgressBarClick],
-  );
+  const [playerTab, setPlayerTab] = useState<PlayerTab | null>(null);
+  const track = tracks[playback.track];
+  const isBuffering = playback.status === 'loading';
+  const showPause = playback.status === 'playing' || isBuffering;
 
+  // Keyboard shortcuts, kept apart from playback: these move to a shared handler.
+  // Lets the shortcut table and other apps drive the player without owning it.
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.shiftKey) {
-        switch (event.key) {
-          case ' ':
-            event.preventDefault();
-            togglePlayPause();
-            break;
-          case '>':
-            event.preventDefault();
-            handleNext();
-            break;
-          case '<':
-            event.preventDefault();
-            handlePrevious();
-            break;
-          default:
-            break;
-        }
-      }
-    };
+    setMediaTransport({
+      togglePlayPause,
+      play,
+      pause,
+      next,
+      previous,
+      isPlaying: () => playback.status === 'playing',
+    });
+    return () => setMediaTransport(null);
+  }, [togglePlayPause, play, pause, next, previous, playback.status]);
 
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [togglePlayPause, handleNext, handlePrevious]);
+  // One source at a time: starting this player pauses anything from the media apps.
+  useEffect(() => {
+    if (playback.status === 'playing') pauseLibraryPlayback();
+  }, [playback.status]);
 
   return (
-    <div className={styles.musicPanel}>
-      <div className={styles.albumArt}>
-        <img alt="" src={tracks[currentTrackIndex].art} />
-      </div>
-      <div className={styles.musicText}>
-        <div className={styles.title}>{tracks[currentTrackIndex].title}</div>
-        <img
-          className={styles.sourceIcon}
-          src={getImagePath('icon-music-bluetooth.svg')}
-          alt="Bluetooth"
-        />
-        <div className={styles.albumTitle}>{tracks[currentTrackIndex].album}</div>
-      </div>
-      <div className={styles.musicProgressBar}>
-        <div
-          className={styles.progressBackground}
-          ref={progressBarRef}
-          onClick={handleProgressBarClick}
-          onMouseMove={handleProgressBarDrag}
-        >
-          <div
-            className={styles.progressForeground}
-            style={{ width: `${(currentTime / duration) * 100}%` }}
+    <>
+      <div className={styles.musicPanel}>
+        <div className={styles.albumArt}>
+          <AlbumArt key={track.art} src={track.art} />
+        </div>
+        <div className={styles.musicText}>
+          <div className={styles.title}>{track.title}</div>
+          <img
+            className={styles.sourceIcon}
+            src={getImagePath('icon-music-bluetooth.svg')}
+            alt="Bluetooth"
+          />
+          {playback.status === 'error' ? (
+            <div className={`${styles.albumTitle} ${styles.errorText}`} role="alert">
+              {playback.message}
+            </div>
+          ) : (
+            <div className={styles.albumTitle}>{track.album}</div>
+          )}
+        </div>
+        <ProgressBar timeline={timeline} onSeek={seek} />
+        <div className={styles.musicBtnBar}>
+          <button className={styles.musicBtn} onClick={previous}>
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath('icon-music-previous.svg')}
+              alt="Previous Track"
+            />
+          </button>
+          <button
+            className={`${styles.musicBtn} ${isBuffering ? styles.buffering : ''}`}
+            onClick={togglePlayPause}
+            aria-busy={isBuffering}
           >
-            <div className={`${styles.progressIndicator} ctaBtn`}></div>
-          </div>
-        </div>
-        <div className={styles.timeCode}>
-          {formatTime(currentTime)} / {formatTime(duration)}
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath(showPause ? 'icon-music-pause.svg' : 'icon-music-play.svg')}
+              alt={showPause ? 'Pause' : 'Play'}
+            />
+          </button>
+          <button className={styles.musicBtn} onClick={next}>
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath('icon-music-next.svg')}
+              alt="Next Track"
+            />
+          </button>
+          <button
+            className={styles.musicBtn}
+            aria-label="Audio settings"
+            onClick={onOpenAudioSettings}
+          >
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath('icon-settings.svg')}
+              alt="Settings"
+            />
+          </button>
+          <button
+            className={styles.musicBtn}
+            aria-label="Search media"
+            onClick={() => setPlayerTab('search')}
+          >
+            <img
+              className={`${styles.musicIcon} ctaBtn`}
+              src={getImagePath('icon-search.svg')}
+              alt="Search"
+            />
+          </button>
+          <button
+            className={styles.musicBtn}
+            aria-label="Open full media player"
+            onClick={() => setPlayerTab('browse')}
+          >
+            <svg className={styles.musicIcon} viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+            </svg>
+          </button>
         </div>
       </div>
-      <div className={styles.musicBtnBar}>
-        <button className={styles.musicBtn} onClick={handlePrevious}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath('icon-music-previous.svg')}
-            alt="Previous Track"
-          />
-        </button>
-        <button className={styles.musicBtn} onClick={togglePlayPause}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={
-              isPlaying ? getImagePath('icon-music-pause.svg') : getImagePath('icon-music-play.svg')
-            }
-            alt="Play & Pause"
-          />
-        </button>
-        <button className={styles.musicBtn} onClick={handleNext}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath('icon-music-next.svg')}
-            alt="Next Track"
-          />
-        </button>
-        <button className={styles.musicBtn}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath('icon-settings.svg')}
-            alt="Settings"
-          />
-        </button>
-        <button className={styles.musicBtn}>
-          <img
-            className={`${styles.musicIcon} ctaBtn`}
-            src={getImagePath('icon-search.svg')}
-            alt="Search"
-          />
-        </button>
-      </div>
-    </div>
+      {playerTab && <FullMediaPlayer initialTab={playerTab} onClose={() => setPlayerTab(null)} />}
+    </>
   );
-}
+});

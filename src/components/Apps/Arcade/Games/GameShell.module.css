@@ -1,0 +1,209 @@
+.shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #101418;
+  color: white;
+  user-select: none;
+  -webkit-user-select: none;
+  container-type: size;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  flex: none;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barButton {
+  min-height: 32px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  background: rgba(255, 255, 255, 0.14);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template: 'left screen right' minmax(0, 1fr) / auto minmax(0, 1fr) auto;
+}
+
+.leftPad {
+  grid-area: left;
+}
+
+.rightPad {
+  grid-area: right;
+}
+
+.touchPad {
+  width: 92px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 10px;
+  box-sizing: border-box;
+}
+
+.touchPad:empty {
+  display: none;
+}
+
+.touchButton {
+  flex: 0 1 72px;
+  min-height: 44px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.touchButton:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.screen {
+  grid-area: screen;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  text-align: center;
+  background: rgba(8, 11, 14, 0.72);
+}
+
+.headline {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.detail {
+  max-width: 460px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.overlayActions {
+  display: flex;
+  gap: 10px;
+}
+
+.primaryButton {
+  min-height: 40px;
+  padding: 0 28px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: #007bff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.primaryButton:disabled {
+  background: #4a5560;
+  cursor: not-allowed;
+}
+
+/* Squarer panels have height to spare and the game needs the width, so the buttons go below. */
+@container (max-aspect-ratio: 2/1) {
+  .stage {
+    grid-template:
+      'screen screen' minmax(0, 1fr)
+      'left right' auto / 1fr 1fr;
+  }
+
+  .touchPad {
+    width: auto;
+    flex-direction: row;
+  }
+
+  .leftPad {
+    justify-content: flex-start;
+  }
+
+  .rightPad {
+    justify-content: flex-end;
+  }
+
+  .touchButton {
+    flex: 0 0 88px;
+    min-height: 52px;
+  }
+}
+
+/* Short panels: every pixel of height goes to the game. */
+@container (max-height: 260px) {
+  .topBar {
+    padding: 2px 8px;
+  }
+
+  .barButton {
+    min-height: 28px;
+  }
+
+  .touchPad {
+    width: 72px;
+    gap: 6px;
+    padding: 4px 6px;
+  }
+
+  .touchButton {
+    min-height: 36px;
+    font-size: 13px;
+  }
+
+  .headline {
+    font-size: 18px;
+  }
+
+  .detail {
+    font-size: 12px;
+  }
+
+  .primaryButton {
+    min-height: 32px;
+  }
+}
