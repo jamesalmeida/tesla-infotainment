@@ -2,71 +2,138 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  color: gray;
-  font-size: 0.8rem;
   width: 100%;
+  background-color: var(--color-panel);
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(13 * var(--u)));
 }
 
+/* Wide panels show the list and the setting side by side; narrow ones show one at a time. */
 .car-settings-panel {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 3fr;
-  grid-template-rows: 1fr;
-  height: 100%;
-  overflow: auto;
-  padding-left: 20px;
+  grid-template-columns: minmax(calc(150 * var(--u)), 1fr) 3fr;
+  grid-template-rows: minmax(0, 1fr);
+  padding-left: calc(20 * var(--u));
 }
 
 .top-bar {
+  flex: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #ccc;
-  grid-column: 1 / 3;
-  grid-row: 1 / 2;
-  max-height: 30px;
-  padding: 5px 10px 10px;
+  gap: calc(10 * var(--u));
+  min-height: var(--tap-target);
+  padding: calc(5 * var(--u)) calc(10 * var(--u)) calc(10 * var(--u));
+  border-bottom: 1px solid var(--color-border);
+}
+
+.top-bar-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
 }
 
 .top-bar-item img {
-  width: 20px;
-  height: 20px;
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
 }
 
 .search-bar {
-  padding: 0px 10px;
+  position: relative;
+  flex: 1;
+  justify-content: flex-start;
+  gap: calc(8 * var(--u));
+  min-width: 0;
+  max-width: calc(320 * var(--u));
+  padding: 0 calc(10 * var(--u));
 }
 
 .search-bar img {
-  height: 12px;
-  width: 12px;
+  flex: none;
+  width: calc(12 * var(--u));
+  height: calc(12 * var(--u));
 }
 
 .search-bar input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-target);
+  padding: 0;
   border: none;
   outline: none;
-  position: relative;
-  bottom: 1px;
-  background-color: rgb(226, 226, 226);
+  background: none;
+  color: var(--color-text-strong);
+  font: inherit;
+}
+
+.search-bar input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  width: max(100%, calc(240 * var(--u)));
+  max-width: 90cqw;
+  max-height: calc(260 * var(--u));
+  margin: calc(4 * var(--u)) 0 0;
+  padding: calc(4 * var(--u));
+  box-sizing: border-box;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+}
+
+.search-results li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+  min-height: var(--tap-target);
+  padding: calc(8 * var(--u)) calc(10 * var(--u));
+  border-radius: calc(6 * var(--u));
+  cursor: pointer;
+}
+
+.search-results .search-result-active {
+  background-color: var(--color-card-hover);
+}
+
+.search-result-path {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.search-results .search-empty {
+  color: var(--color-text-muted);
+  cursor: default;
 }
 
 .top-bar-right-icons {
+  flex: none;
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding-right: 13px;
+  gap: calc(20 * var(--u));
+  padding-right: calc(13 * var(--u));
 }
 
 .left-scroll-panel {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 21px);
-  grid-column: 1 / 2;
-  grid-row: 1 / 2;
+  min-height: 0;
   overflow: auto;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
-  padding-top: 15px;
-  padding-right: 15px;
+  padding: calc(15 * var(--u)) calc(15 * var(--u)) calc(15 * var(--u)) 0;
 }
 
 .left-scroll-panel::-webkit-scrollbar {
@@ -74,41 +141,74 @@
 }
 
 .left-scroll-panel-item {
-  padding: 5%;
-  margin-bottom: 5px;
-  cursor: pointer;
+  flex: none;
   display: flex;
   align-items: center;
-  border-radius: 5px;
+  min-height: var(--tap-target);
+  padding: calc(9 * var(--u)) calc(10 * var(--u));
+  margin-bottom: calc(5 * var(--u));
+  box-sizing: border-box;
+  border-radius: calc(5 * var(--u));
+  cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .left-scroll-panel-item img {
-  margin-right: 10px;
-  width: 20px;
-  height: 20px;
+  margin-right: calc(10 * var(--u));
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
 }
 
-.left-scroll-panel-item:hover {
-  background-color: #f0f0f0;
+@media (hover: hover) {
+  .left-scroll-panel-item:hover {
+    background-color: var(--color-card-hover);
+  }
 }
 
 .left-scroll-panel-item.active {
-  background-color: #ffffff;
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
   font-weight: bold;
 }
 
 .settings-right-panel {
-  /* padding: 20px; */
   width: 100%;
-  padding: 3% 5% 0% 0%;
+  min-width: 0;
+  padding: calc(15 * var(--u)) calc(20 * var(--u)) 0 0;
   overflow: auto;
   box-sizing: border-box;
 }
 
+.back-button {
+  display: none;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  min-height: var(--tap-target);
+  margin-bottom: calc(6 * var(--u));
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-strong);
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.back-button span {
+  font-size: 1.5em;
+  line-height: 1;
+}
+
 .buttons-grid {
   display: grid;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: calc(10 * var(--u));
+}
+
+/* Where search lands, so the eye goes to the right row. */
+.settings-right-panel [data-highlighted] {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
 }
 
 /* CONTROLS */
@@ -116,28 +216,38 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* padding: 10px; */
   width: 100%;
 }
 
 .gap-row {
-  /* height: 20px; */
-  height: 2vh;
+  flex: none;
+  height: calc(14 * var(--u));
 }
 
 .flex-row {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
+  gap: calc(6 * var(--u)) 0;
   width: 100%;
   text-align: center;
-  border-radius: 5px;
+  border-radius: calc(5 * var(--u));
 }
 
-.btn:hover {
-  background-color: #e0e0e0;
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-target);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .btn:hover {
+    background-color: var(--color-card-hover);
+  }
 }
 
 .flex-column {
@@ -146,69 +256,70 @@
   justify-content: space-between;
   align-items: stretch;
   flex: 1;
-  background-color: #f0f0f0;
+  background-color: var(--color-card);
   text-align: center;
-  border-radius: 5px;
-  border: 1px solid grey;
+  border-radius: calc(5 * var(--u));
+  border: 1px solid var(--color-border);
 }
 
 .flex-column div:first-child {
-  border-bottom: 1px solid grey;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .flex-row div:first-child,
 .row-5 div:last-child {
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
+  border-top-left-radius: calc(5 * var(--u));
+  border-bottom-left-radius: calc(5 * var(--u));
 }
 
 .flex-row div:last-child,
 .row-1 > div:nth-child(4) {
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
+  border-top-right-radius: calc(5 * var(--u));
+  border-bottom-right-radius: calc(5 * var(--u));
 }
 
 .row-1 div,
 .row-2 div,
 .row-3 div,
 .row-5 div {
-  padding: 5% 0%;
-  background-color: #f0f0f0;
+  padding: calc(10 * var(--u)) calc(4 * var(--u));
+  background-color: var(--color-card);
   flex: 1;
-  border: 1px solid gray;
+  border: 1px solid var(--color-border);
 }
 
 .row-5 {
-  margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-bottom: calc(10 * var(--u));
 }
 
 .flex-column div:first-child {
-  border-bottom-left-radius: 0px;
+  border-bottom-left-radius: 0;
 }
 
 .auto-high-beams-btn {
-  width: 20%;
+  flex: 1 0 calc(80 * var(--u));
   margin-left: 4%;
-  border-radius: 5px;
+  border-radius: calc(5 * var(--u));
 }
 
 .row-2 div {
-  padding: 0px;
+  flex: 1 0 calc(90 * var(--u));
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80px;
+  min-height: calc(64 * var(--u));
+  box-sizing: border-box;
   flex-direction: column;
 }
 
-#wipers-on-off-btn,
-#wipers-auto-btn {
-  padding-left: 4%;
-  padding-right: 4%;
+.row-4 {
+  flex-wrap: nowrap;
 }
 
 .row-4 div div {
-  padding: 25% 0%;
+  padding: calc(16 * var(--u)) calc(4 * var(--u));
 }
 
 .gap-column {
@@ -216,123 +327,191 @@
   flex: unset !important;
 }
 
-.brightness-slider {
+.row-5 .brightness-slider {
   flex: 1;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 5px;
-  background-color: #ffffff;
+  min-width: 0;
+  padding: calc(5 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
 }
 
 .brightness-slider input {
-  width: 97%;
+  display: block;
+  width: 100%;
+  min-height: var(--tap-target);
+  margin: 0;
+  accent-color: var(--color-accent);
 }
 
-.brightness-auto-btn {
-  /* width: 20%; */
-  max-width: 100px;
+.row-5 .brightness-auto-btn {
+  flex: none;
+  min-width: calc(80 * var(--u));
   margin-left: 4%;
 }
-
-/* .row-4 button {
-    margin: 0px;
-    padding: 45px 50px;
-} */
-
-/* .row-5 button {
-    margin: 0px;
-    padding: 25px 11px;
-} */
 
 .flex-row div {
   flex: 1;
 }
 
-.btn.active {
-  background-color: #007bff;
-  color: white;
+.btn.active,
+.row-1 .btn.active,
+.row-2 .btn.active,
+.row-3 .btn.active,
+.row-5 .btn.active {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .red-dot {
   display: inline-block;
-  margin-left: 5px;
-  width: 8px;
-  height: 8px;
-  background-color: red;
+  margin-left: calc(5 * var(--u));
+  width: calc(8 * var(--u));
+  height: calc(8 * var(--u));
+  background-color: var(--color-danger);
   border-radius: 50%;
 }
 
+/* Both are placed against the slide-up panel, the nearest positioned ancestor, so they stay
+   put and aren't clipped when the settings column scrolls. */
 .child-lock-popup {
   position: absolute;
-  top: 50%;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
   display: flex;
-  gap: 10px;
-  /* justify-content: space-around; */
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 6px;
-  border: 1px solid;
-  /* Additional styling as needed */
+  flex-wrap: wrap;
+  gap: calc(10 * var(--u));
+  background-color: var(--color-card);
+  padding: calc(14 * var(--u));
+  border-radius: calc(6 * var(--u));
+  border: 1px solid var(--color-border);
+}
+
+.child-lock-popup .btn {
+  min-width: calc(56 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(5 * var(--u));
 }
 
 .subtext {
-  font-size: 8px;
-  /* border-top-right-radius: none !important; */
-  /* border-bottom-right-radius: none !important; */
+  font-size: var(--text-min);
 }
 
-/* Both fill the slide-up panel, which is their positioned ancestor. */
-.car-wash-mode-popup {
-  position: absolute;
-  top: 0;
-  left: 0;
+.controls-sections {
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--u));
   width: 100%;
-  height: 100%;
-  background-color: #fff;
-  /* Additional styling for overlay effect */
+  padding-bottom: calc(20 * var(--u));
 }
 
 .modal {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  z-index: 10;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  padding: calc(10 * var(--u));
+  box-sizing: border-box;
+  background-color: color-mix(in srgb, var(--color-screen-off) 50%, transparent);
 }
 
 .adjustment-modal {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
+  width: min(100%, calc(420 * var(--u)));
+  max-height: 100%;
+  padding: calc(16 * var(--u));
+  box-sizing: border-box;
+  overflow-y: auto;
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
   text-align: center;
+  outline: none;
+}
+
+.adjustment-modal h2 {
+  margin: 0 0 calc(10 * var(--u));
+  color: var(--color-text-strong);
+  font-size: max(var(--text-min), calc(18 * var(--u)));
+  font-weight: 500;
+}
+
+.adjustment-sides {
+  display: flex;
+  gap: calc(6 * var(--u));
+}
+
+.adjustment-sides button {
+  flex: 1;
+  min-height: max(var(--tap-target), calc(32 * var(--u)));
+  border: 1px solid var(--color-border);
+  border-radius: calc(5 * var(--u));
+  background-color: var(--color-panel);
+  color: var(--color-text-strong);
+  font: inherit;
+  cursor: pointer;
+}
+
+.adjustment-sides button.active {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.adjustment-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(20 * var(--u));
+  margin: calc(10 * var(--u)) 0;
+}
+
+.adjustment-view {
+  position: relative;
+  flex: none;
+  width: calc(110 * var(--u));
+  height: calc(110 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-panel);
+}
+
+.adjustment-dot {
+  position: absolute;
+  width: calc(14 * var(--u));
+  height: calc(14 * var(--u));
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  transform: translate(-50%, -50%);
 }
 
 .adjustment-controls {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin: 20px 0;
+  grid-template-columns: repeat(3, max(var(--tap-target), calc(40 * var(--u))));
+  grid-template-rows: repeat(3, max(var(--tap-target), calc(40 * var(--u))));
+  gap: calc(4 * var(--u));
 }
 
 .adjustment-btn {
-  padding: 10px;
-  font-size: 18px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 0;
+  font-size: max(var(--text-min), calc(18 * var(--u)));
+  background-color: var(--color-panel);
+  border: 1px solid var(--color-border);
+  border-radius: calc(5 * var(--u));
+  color: var(--color-text-strong);
   cursor: pointer;
 }
 
 .adjustment-btn:nth-child(1) {
   grid-column: 2;
+  grid-row: 1;
 }
 .adjustment-btn:nth-child(2) {
   grid-column: 2;
+  grid-row: 3;
 }
 .adjustment-btn:nth-child(3) {
   grid-column: 1;
@@ -343,11 +522,95 @@
   grid-row: 2;
 }
 
+.adjustment-hint {
+  margin: 0 0 calc(10 * var(--u));
+  color: var(--color-text-muted);
+}
+
 .close-btn {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
+  min-height: var(--tap-target);
+  padding: calc(8 * var(--u)) calc(20 * var(--u));
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
   border: none;
-  border-radius: 5px;
+  border-radius: calc(5 * var(--u));
+  font: inherit;
   cursor: pointer;
+}
+
+/* The settings icons are dark artwork, which would vanish on the dark panel. */
+:global(:root[data-theme='dark']) .left-scroll-panel-item img,
+:global(:root[data-theme='dark']) .top-bar-item img {
+  filter: invert(1);
+}
+
+/* A phone on its side is too short to stack these, so the pad moves beside the rest. */
+:global(:root[data-layout='compact']) .adjustment-modal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  width: min(100%, 560px);
+  padding: 8px 12px;
+}
+
+:global(:root[data-layout='compact']) .adjustment-modal > * {
+  grid-column: 1;
+  margin: 0;
+}
+
+:global(:root[data-layout='compact']) .adjustment-modal > .adjustment-body {
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  gap: 12px;
+}
+
+:global(:root[data-layout='compact']) .adjustment-hint {
+  display: none;
+}
+
+/* Too narrow for two columns: a list that drills into one panel, with a way back. */
+@container (max-width: 640px) {
+  .car-settings-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: calc(12 * var(--u));
+  }
+
+  .car-settings-panel[data-view='list'] .settings-right-panel,
+  .car-settings-panel[data-view='detail'] .left-scroll-panel {
+    display: none;
+  }
+
+  .left-scroll-panel {
+    padding-right: calc(12 * var(--u));
+  }
+
+  .settings-right-panel {
+    padding: calc(6 * var(--u)) calc(12 * var(--u)) 0 0;
+  }
+
+  .back-button {
+    display: flex;
+  }
+
+  .top-bar {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .top-bar-right-icons {
+    gap: calc(6 * var(--u));
+    padding-right: 0;
+  }
+
+  .row-4 {
+    flex-wrap: wrap;
+  }
+}
+
+@container (max-width: 420px) {
+  /* Search needs the room more than the status shortcuts do. */
+  .top-bar-right-icons > .top-bar-item:not(:last-child) {
+    display: none;
+  }
 }
