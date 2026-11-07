@@ -3,6 +3,7 @@
 }
 
 .temperature {
+  min-width: var(--tap-target);
   min-height: var(--tap-target);
   padding: 0 calc(4 * var(--u));
   border: none;

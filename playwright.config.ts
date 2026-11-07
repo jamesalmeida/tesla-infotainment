@@ -12,6 +12,9 @@ export default defineConfig({
   timeout: 45_000,
   use: {
     baseURL: `http://localhost:${PORT}/tesla-infotainment/`,
+    // The service worker would answer chunk requests from its cache, hiding the failure
+    // routes these tests set up. Offline behaviour is checked separately.
+    serviceWorkers: 'block',
     launchOptions: {
       // Lets a machine with a browser already installed skip the download.
       executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
