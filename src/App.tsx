@@ -12,6 +12,7 @@ import {
   vehiclePose,
 } from './state/carState';
 import { useBlink } from './hooks/useBlink';
+import { useCarSounds } from './hooks/useCarSounds';
 import { carLightState } from './components/VehicleModel/vehicleLights';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useBoot } from './hooks/useBoot';
@@ -279,6 +280,7 @@ function Display() {
   useKeyboardShortcuts();
   useSimulation();
   useSchedule();
+  useCarSounds();
 
   return (
     <>

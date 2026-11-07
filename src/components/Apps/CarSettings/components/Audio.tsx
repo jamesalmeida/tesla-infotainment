@@ -61,6 +61,20 @@ export const Audio = () => {
             onChange={(navVolume) => setSettings({ navVolume })}
           />
         </Section>
+        <Section title="Car Sounds" hint="Short chimes for the car itself, separate from media.">
+          <Toggle
+            label="Car Sounds"
+            hint="Indicator ticks, door sounds and the seat belt reminder."
+            checked={settings.soundsEnabled}
+            onChange={(soundsEnabled) => setSettings({ soundsEnabled })}
+          />
+          <Toggle
+            label="Lock Sound"
+            hint="A short chime when the car locks."
+            checked={settings.lockSound}
+            onChange={(lockSound) => setSettings({ lockSound })}
+          />
+        </Section>
         <Section title="Tone">
           <Slider
             label="Bass"

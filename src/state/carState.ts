@@ -300,6 +300,7 @@ export interface VehicleSettings {
   unlockOnPark: boolean;
   walkAwayLock: boolean;
   lockSound: boolean;
+  soundsEnabled: boolean;
   keys: CarKey[];
   acceleration: Acceleration;
   steeringMode: SteeringMode;
@@ -706,6 +707,7 @@ export const initialCarState: CarState = {
     unlockOnPark: true,
     walkAwayLock: true,
     lockSound: true,
+    soundsEnabled: true,
     keys: [
       { id: 1, kind: 'phone', name: 'Phone key' },
       { id: 2, kind: 'card', name: 'Key card' },
