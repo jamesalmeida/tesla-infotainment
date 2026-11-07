@@ -37,6 +37,12 @@ const SHELF_APPS: AppId[] = [
   'messages',
   'caraoke',
   'browser',
+  'radio',
+  'spotify',
+  'tidal',
+  'youtube-music',
+  'amazon-music',
+  'audible',
 ];
 
 function ShelfIcon({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {

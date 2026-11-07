@@ -178,6 +178,7 @@ export const MANUAL_TOPICS: ManualTopic[] = [
     links: [
       { label: 'Open Music', app: 'apple-music' },
       { label: 'Open Podcasts', app: 'podcasts' },
+      { label: 'Open Radio', app: 'radio' },
     ],
   },
   {

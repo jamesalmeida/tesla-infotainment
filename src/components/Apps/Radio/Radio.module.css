@@ -1,0 +1,40 @@
+.content {
+  flex: 1;
+  min-height: 0;
+  margin-bottom: calc(6 * var(--u));
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.station {
+  display: flex;
+  align-items: stretch;
+  gap: calc(4 * var(--u));
+  min-width: 0;
+}
+
+.art {
+  width: max(32px, calc(40 * var(--u)));
+  height: max(32px, calc(40 * var(--u)));
+}
+
+.block {
+  display: block;
+}
+
+.current {
+  color: var(--color-accent);
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--app-gap);
+  max-width: calc(620 * var(--u));
+}
+
+.placeholderArt {
+  width: max(56px, calc(110 * var(--u)));
+  height: max(56px, calc(110 * var(--u)));
+}

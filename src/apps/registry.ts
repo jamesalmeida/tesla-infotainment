@@ -16,6 +16,11 @@ const named =
   () =>
     load().then((module) => ({ default: module[name] as ComponentType }));
 
+const loadMusicPlaceholder = named(
+  () => import('../components/Apps/Radio/StreamingPlaceholder'),
+  'MusicStreamingPlaceholder',
+);
+
 // Every app that opens in the slide-up panel. Adding an app means adding one entry here;
 // the AppId type, the panel, the dock and the shelf all read from this list.
 export const APPS = {
@@ -93,6 +98,39 @@ export const APPS = {
     icon: 'app-podcasts.svg',
     load: named(() => import('../components/Apps/Podcasts/Podcasts'), 'Podcasts'),
   },
+  radio: {
+    label: 'Radio',
+    icon: 'app-radio.svg',
+    load: named(() => import('../components/Apps/Radio/Radio'), 'Radio'),
+  },
+  spotify: {
+    label: 'Spotify',
+    icon: 'app-spotify.svg',
+    load: loadMusicPlaceholder,
+  },
+  tidal: {
+    label: 'Tidal',
+    icon: 'app-tidal.svg',
+    load: loadMusicPlaceholder,
+  },
+  'youtube-music': {
+    label: 'YouTube Music',
+    icon: 'app-youtube-music.svg',
+    load: loadMusicPlaceholder,
+  },
+  'amazon-music': {
+    label: 'Amazon Music',
+    icon: 'app-amazon-music.svg',
+    load: loadMusicPlaceholder,
+  },
+  audible: {
+    label: 'Audible',
+    icon: 'app-audible.svg',
+    load: named(
+      () => import('../components/Apps/Radio/StreamingPlaceholder'),
+      'AudiobooksPlaceholder',
+    ),
+  },
   theater: {
     label: 'Theater',
     icon: 'app-theater.svg',
@@ -128,12 +166,4 @@ export const DOCK: (AppId | 'open-shelf')[] = [
 ];
 
 // Shelf entries with no app yet still show, so the shelf matches the real car.
-export const SHELF_PLACEHOLDERS = [
-  { id: 'amazon-music', label: 'Amazon Music' },
-  { id: 'youtube-music', label: 'YouTube Music' },
-  { id: 'spotify', label: 'Spotify' },
-  { id: 'radio', label: 'Radio' },
-  { id: 'audible', label: 'Audible' },
-  { id: 'nav', label: 'Nav' },
-  { id: 'tidal', label: 'Tidal' },
-];
+export const SHELF_PLACEHOLDERS = [{ id: 'nav', label: 'Nav' }];
