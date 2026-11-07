@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useCar } from '../../state/CarStateContext';
+import { formatTemperature } from '../../utils/units';
 
 const OutsideTemp = () => {
   const [temperature, setTemperature] = useState<number | null>(null);
+  const unit = useCar((state) => state.settings.preferences.temperature);
 
   // Simulated API call to get temperature
   const fetchTemperature = () => {
@@ -39,7 +42,7 @@ const OutsideTemp = () => {
 
   return (
     <div className="no-select" onClick={handleTempClick}>
-      {temperature}°F
+      {formatTemperature(temperature, unit)}
     </div>
   );
 };

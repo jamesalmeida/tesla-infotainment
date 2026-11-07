@@ -1,22 +1,29 @@
-import { useState } from 'react';
-import { useCar } from '../../state/CarStateContext';
+import { useCar, useCarActions } from '../../state/CarStateContext';
 import { rangeMiles } from '../../state/carState';
+import { formatDistance } from '../../utils/units';
 import styles from './BatteryStatus.module.css';
 
 const BatteryStatus = () => {
   const batteryPercent = useCar((state) => Math.round(state.batteryPercent));
   const miles = useCar(rangeMiles);
   const isCharging = useCar((state) => state.chargeState === 'charging');
-  const [showMiles, setShowMiles] = useState(false);
+  const preferences = useCar((state) => state.settings.preferences);
+  const { setSettings } = useCarActions();
+  const range = formatDistance(miles, preferences);
+  const showsPercent = preferences.energyDisplay === 'percent';
 
   return (
     <button
       type="button"
       className={`${styles.batteryStatus} no-select`}
-      aria-label={`Battery ${batteryPercent}%, ${miles} miles`}
-      onClick={() => setShowMiles((isShowing) => !isShowing)}
+      aria-label={`Battery ${batteryPercent}%, ${range}`}
+      onClick={() =>
+        setSettings({
+          preferences: { ...preferences, energyDisplay: showsPercent ? 'distance' : 'percent' },
+        })
+      }
     >
-      <span>{showMiles ? `${miles} mi` : `${batteryPercent}%`}</span>
+      <span>{showsPercent ? `${batteryPercent}%` : range}</span>
       <svg className="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
         <rect
           x="2"
@@ -34,7 +41,7 @@ const BatteryStatus = () => {
           y="8"
           width={`${(batteryPercent * 16) / 100}`}
           height="8"
-          fill={isCharging ? '#2ca02c' : 'currentColor'}
+          fill={isCharging ? 'var(--color-success)' : 'currentColor'}
           className={styles['battery-fill']}
         />
         <rect x="23" y="10" width="2" height="4" fill="currentColor" />

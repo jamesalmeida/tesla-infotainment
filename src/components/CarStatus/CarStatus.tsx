@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useCar, useCarActions } from '../../state/CarStateContext';
-import { isDriving, leftSignalLit, rightSignalLit, type Pedal } from '../../state/carState';
+import {
+  isDriving,
+  leftSignalLit,
+  rightSignalLit,
+  SPEED_LIMIT_MPH,
+  type Pedal,
+} from '../../state/carState';
 import { getImagePath } from '../../utils/assetPaths';
+import { formatSpeed, speedUnit } from '../../utils/units';
 import BatteryStatus from '../BatteryStatus/BatteryStatus';
 import GearSelect from '../GearSelect/GearSelect';
 import { Telltales } from './Telltales';
@@ -87,18 +94,20 @@ function HazardButton() {
 function Speedometer() {
   const driving = useCar(isDriving);
   const speed = useCar((state) => state.speed);
+  const preferences = useCar((state) => state.settings.preferences);
 
   return (
     <div className={`speedometer ${driving ? 'fade-in' : 'fade-out'}`}>
-      {Math.round(speed)}
+      {formatSpeed(speed, preferences)}
       <br />
-      <span>MPH</span>
+      <span>{speedUnit(preferences).toUpperCase()}</span>
     </div>
   );
 }
 
 function SpeedLimit() {
   const driving = useCar(isDriving);
+  const preferences = useCar((state) => state.settings.preferences);
 
   return (
     <div className={`speedLimit ${driving ? 'fade-in' : 'fade-out'}`}>
@@ -106,7 +115,7 @@ function SpeedLimit() {
       <br />
       LIMIT
       <br />
-      <span>30</span>
+      <span>{formatSpeed(SPEED_LIMIT_MPH, preferences)}</span>
     </div>
   );
 }
