@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { getImagePath } from '../../utils/assetPaths';
+import { getMediaTransport } from '../../state/mediaTransport';
 import { MusicPanel } from './MusicPanel';
 
 vi.mock('../../utils/assetPaths', () => ({
@@ -423,31 +424,34 @@ describe('previous', () => {
   });
 });
 
-describe('keyboard shortcuts', () => {
-  const press = (key: string, shiftKey = true) =>
-    inAct(() => fireEvent.keyDown(window, { key, shiftKey }));
+describe('the shared transport', () => {
+  const transport = () => {
+    const current = getMediaTransport();
+    if (!current) throw new Error('The player did not register its transport');
+    return current;
+  };
 
-  it('keeps Shift+Space, Shift+> and Shift+<', async () => {
+  it('lets shortcuts and other apps drive the player', async () => {
     render(<MusicPanel volume={50} />);
 
-    await press(' ');
+    await inAct(() => transport().togglePlayPause());
     expect(audio().playCalls).toBe(1);
     await inAct(() => audio().emit('playing'));
-    await press(' ');
+    await inAct(() => transport().togglePlayPause());
     expect(audio().paused).toBe(true);
 
-    await press('>');
+    await inAct(() => transport().next());
     expect(audio().src).toContain(TRACK_FILES[1]);
-    await press('<');
+    await inAct(() => transport().previous());
     expect(audio().src).toContain(TRACK_FILES[0]);
   });
 
-  it('ignores the same keys without Shift', async () => {
-    render(<MusicPanel volume={50} />);
+  it('is gone once the player unmounts', () => {
+    const { unmount } = render(<MusicPanel volume={50} />);
 
-    await press(' ', false);
+    unmount();
 
-    expect(audio().playCalls).toBe(0);
+    expect(getMediaTransport()).toBe(null);
   });
 });
 

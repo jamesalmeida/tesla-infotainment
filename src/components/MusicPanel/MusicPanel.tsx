@@ -1,4 +1,5 @@
 import { memo, useEffect, useState } from 'react';
+import { setMediaTransport } from '../../state/mediaTransport';
 import { getImagePath } from '../../utils/assetPaths';
 import { ProgressBar } from './ProgressBar';
 import { usePlayback } from './usePlayback';
@@ -58,33 +59,10 @@ export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number 
   const showPause = playback.status === 'playing' || isBuffering;
 
   // Keyboard shortcuts, kept apart from playback: these move to a shared handler.
+  // Lets the shortcut table and other apps drive the player without owning it.
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.shiftKey) {
-        switch (event.key) {
-          case ' ':
-            event.preventDefault();
-            togglePlayPause();
-            break;
-          case '>':
-            event.preventDefault();
-            next();
-            break;
-          case '<':
-            event.preventDefault();
-            previous();
-            break;
-          default:
-            break;
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    setMediaTransport({ togglePlayPause, next, previous });
+    return () => setMediaTransport(null);
   }, [togglePlayPause, next, previous]);
 
   return (

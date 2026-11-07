@@ -47,6 +47,11 @@ test('a running game owns the keyboard', () => {
   expect(press('d')?.description).toBe('Drive');
 });
 
+test('media keys stay with a text field while typing', () => {
+  expect(press('>', { shiftKey: true })?.description).toBe('Next track');
+  expect(press('>', { shiftKey: true }, input('text'))).toBeUndefined();
+});
+
 test('only text entry counts as typing', () => {
   expect(isTextEntry(input('search'))).toBe(true);
   expect(isTextEntry(input('checkbox'))).toBe(false);

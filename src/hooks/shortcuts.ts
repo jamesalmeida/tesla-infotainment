@@ -1,10 +1,11 @@
 import type { CarActions } from '../state/CarStateContext';
 import type { Gear } from '../state/carState';
+import { getMediaTransport } from '../state/mediaTransport';
 import { isKeyboardClaimed } from './keyboardClaim';
 
 export type KeyboardMode = 'normal' | 'text' | 'game';
 
-export type ShortcutGroup = 'Gears' | 'Driving' | 'Display';
+export type ShortcutGroup = 'Gears' | 'Driving' | 'Media' | 'Display';
 
 export interface Shortcut {
   // Compared against event.key, with letters uppercased.
@@ -70,6 +71,30 @@ export const SHORTCUTS: Shortcut[] = [
     description: 'Trunk',
     group: 'Driving',
     run: (actions) => actions.toggleCompartment('trunk'),
+  },
+  {
+    keys: [' '],
+    shift: true,
+    label: 'Shift + Space',
+    description: 'Play or pause',
+    group: 'Media',
+    run: () => getMediaTransport()?.togglePlayPause(),
+  },
+  {
+    keys: ['>'],
+    shift: true,
+    label: 'Shift + >',
+    description: 'Next track',
+    group: 'Media',
+    run: () => getMediaTransport()?.next(),
+  },
+  {
+    keys: ['<'],
+    shift: true,
+    label: 'Shift + <',
+    description: 'Previous track',
+    group: 'Media',
+    run: () => getMediaTransport()?.previous(),
   },
   {
     keys: ['C'],

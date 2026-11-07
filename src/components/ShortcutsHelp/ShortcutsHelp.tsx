@@ -1,7 +1,7 @@
 import { SHORTCUTS, type ShortcutGroup } from '../../hooks/shortcuts';
 import styles from './ShortcutsHelp.module.css';
 
-const GROUPS: ShortcutGroup[] = ['Gears', 'Driving', 'Display'];
+const GROUPS: ShortcutGroup[] = ['Gears', 'Driving', 'Media', 'Display'];
 
 export function ShortcutsHelp() {
   return (
