@@ -47,6 +47,7 @@ import { DisplayEffects } from './components/DisplayEffects/DisplayEffects';
 import { DrivePinPrompt } from './components/DrivePinPrompt/DrivePinPrompt';
 import { Emergency } from './components/Emergency/Emergency';
 import { Notice } from './components/Notice/Notice';
+import { PwaUpdate } from './components/PwaUpdate/PwaUpdate';
 import { RestartOverlay } from './components/RestartOverlay/RestartOverlay';
 import { StatusIndicators } from './components/StatusIndicators/StatusIndicators';
 import { ScreenClean } from './components/ScreenClean/ScreenClean';
@@ -296,6 +297,7 @@ function Display() {
           <BrightnessOverlay />
           <ScreenClean />
           <SleepOverlay />
+          <PwaUpdate />
         </div>
       </div>
     </>

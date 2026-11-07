@@ -17,11 +17,12 @@
     />
     <!-- Start the 3D model now rather than after the lazy VehicleModel chunk loads. -->
     <link rel="preload" as="fetch" href="%BASE_URL%car-models/tesla-model-3-2018.glb" crossorigin />
-    <link rel="manifest" href="/manifest.json" />
     <title>Tesla Infotainment Simulator</title>
 
     <!-- Sets the status bar style to transparent -->
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Tesla UI" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   </head>

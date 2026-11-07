@@ -29,7 +29,8 @@
     "react-resizable-panels": "^4.14.8",
     "react-webcam": "^7.2.0",
     "react-youtube": "^10.1.0",
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "workbox-window": "^7.4.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -50,6 +51,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.5"
   },
   "pnpm": {

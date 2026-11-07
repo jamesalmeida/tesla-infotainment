@@ -1,4 +1,6 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
+/// <reference types="vite-plugin-pwa/react" />
 
 // From package.json and git, filled in at build time by vite.config.mjs.
 declare const __APP_VERSION__: string;
