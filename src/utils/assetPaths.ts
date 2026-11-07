@@ -4,6 +4,10 @@ export function getImagePath(imageName: string) {
   return `${baseUrl}/img/${imageName}`;
 }
 
+export function getTouchscreenPath(path: string) {
+  return `${baseUrl}/touchscreen/${path}`;
+}
+
 export function getCarModelPath(modelName: string) {
   return `${baseUrl}/car-models/${modelName}`;
 }

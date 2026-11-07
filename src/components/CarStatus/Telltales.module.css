@@ -15,18 +15,24 @@
   stroke-linejoin: round;
 }
 
+.dashcam {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  border-radius: 50%;
+}
+
 .green {
-  color: #2ca02c;
+  color: var(--color-success);
 }
 
 .blue {
-  color: #2f6fed;
+  color: var(--color-accent);
 }
 
 .amber {
-  color: #e69f59;
+  color: var(--color-warning);
 }
 
 .red {
-  color: #e31937;
+  color: var(--color-danger);
 }
