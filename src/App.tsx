@@ -41,6 +41,7 @@ import { RestartOverlay } from './components/RestartOverlay/RestartOverlay';
 import { StatusIndicators } from './components/StatusIndicators/StatusIndicators';
 import { ScreenClean } from './components/ScreenClean/ScreenClean';
 import { SentryOverlay } from './components/SentryOverlay/SentryOverlay';
+import { SleepOverlay } from './components/SleepOverlay/SleepOverlay';
 import { ShortcutsHelp } from './components/ShortcutsHelp/ShortcutsHelp';
 import { safeStorage } from './utils/safeStorage';
 import { hasWebGL } from './utils/webgl';
@@ -277,6 +278,7 @@ function Display() {
           <RestartOverlay />
           <BrightnessOverlay />
           <ScreenClean />
+          <SleepOverlay />
         </div>
       </div>
     </>

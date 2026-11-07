@@ -55,10 +55,16 @@ const ChargeRing = () => (
   </svg>
 );
 
-const LoadingScreen = () => {
-  const [loadingText] = useState(
+interface LoadingScreenProps {
+  // 'wake' reuses the boot visuals for the welcome animation after the car wakes.
+  variant?: 'boot' | 'wake';
+}
+
+const LoadingScreen = ({ variant = 'boot' }: LoadingScreenProps) => {
+  const [bootText] = useState(
     () => loadingMessages[Math.floor(Math.random() * loadingMessages.length)],
   );
+  const loadingText = variant === 'wake' ? 'Welcome back' : bootText;
   const dots = useDots();
 
   return (
