@@ -5,14 +5,13 @@ import './index.css';
 import './styles/utilities.css';
 import App from './App';
 import { RearDisplay } from './components/RearDisplay/RearDisplay';
-
-const isRearHash = () => window.location.hash.replace(/^#\/?/, '') === 'rear';
+import { isRearHash } from './state/urlState';
 
 function Root() {
-  const [isRear, setIsRear] = useState(isRearHash);
+  const [isRear, setIsRear] = useState(() => isRearHash(window.location.hash));
 
   useEffect(() => {
-    const handleHash = () => setIsRear(isRearHash());
+    const handleHash = () => setIsRear(isRearHash(window.location.hash));
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
