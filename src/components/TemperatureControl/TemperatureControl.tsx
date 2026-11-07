@@ -24,7 +24,7 @@ const TemperatureControl = ({
   const name = zone ? `${zone} temperature` : 'temperature';
 
   return (
-    <div className={styles['temperature-control']}>
+    <div className={styles['temperature-control']} data-zone={zone}>
       <button
         type="button"
         className={`navIconWrapper ${styles['temperature-btn']}`}

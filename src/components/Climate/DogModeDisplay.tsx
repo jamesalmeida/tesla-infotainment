@@ -17,7 +17,7 @@ export function DogModeDisplay() {
       <button
         type="button"
         className={styles.exit}
-        // Whoever turned this on has their hands on the screen, not the keyboard focus behind it.
+        // Otherwise keyboard focus stays on a control hidden behind this display.
         autoFocus
         onClick={() => toggleClimateMode('dog')}
       >

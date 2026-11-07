@@ -51,15 +51,24 @@ const MODE_HINTS: Record<ClimateMode, string> = {
 
 function Toggle({
   isOn,
+  label,
   onPress,
   children,
 }: {
   isOn: boolean;
+  // For when the visible text alone wouldn't say what is being switched.
+  label?: string;
   onPress: () => void;
   children: ReactNode;
 }) {
   return (
-    <button type="button" className={styles.toggle} aria-pressed={isOn} onClick={onPress}>
+    <button
+      type="button"
+      className={styles.toggle}
+      aria-label={label}
+      aria-pressed={isOn}
+      onClick={onPress}
+    >
       {children}
     </button>
   );
@@ -82,7 +91,7 @@ function PanelHeader() {
   return (
     <header className={styles.header}>
       <h2 className={styles.title}>Climate</h2>
-      <Toggle isOn={isOn} onPress={() => setCabin({ isOn: !isOn })}>
+      <Toggle isOn={isOn} label="Climate power" onPress={() => setCabin({ isOn: !isOn })}>
         {isOn ? 'On' : 'Off'}
       </Toggle>
       <Toggle isOn={isOn && isAuto} onPress={() => setCabin({ isAuto: !(isOn && isAuto) })}>
