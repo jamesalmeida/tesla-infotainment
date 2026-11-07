@@ -59,6 +59,8 @@ const MAX_TRACK_SPEED = 120;
 
 // More than this at once would cover the car.
 export const MAX_TOASTS = 3;
+export const MAX_TRIP_METERS = 6;
+export const MAX_NAME_LENGTH = 24;
 
 // mph per second.
 const ACCELERATION_RATE = { chill: 6, standard: 10, sport: 14 } as const;
@@ -205,6 +207,20 @@ export interface DashcamClip {
 // Takes over the whole display, so only one can be up at a time.
 export type OverlayMode = 'car-wash' | 'screen-clean';
 
+
+export type MapUnits = 'mi' | 'km';
+
+// Where a meter started counting. Odometer and energy only rise, so a meter is a subtraction.
+export interface MeterBaseline {
+  miles: number;
+  kwh: number;
+}
+
+export interface TripMeter extends MeterBaseline {
+  id: number;
+  name: string;
+}
+
 // Vehicle settings live here rather than in their panels, so they outlive the panel
 // and anything else in the app can read them.
 export interface VehicleSettings {
@@ -253,6 +269,7 @@ export interface VehicleSettings {
   steeringWheel: Adjustment;
   petMode: PetMode;
   preferences: Preferences;
+  mapUnits: MapUnits;
 }
 
 export interface DisplaySettings {
@@ -278,6 +295,12 @@ export interface CarState {
   batteryPercent: number;
   odometerMiles: number;
   tripMiles: number;
+  // Everything the car has used, the counter trip meters read their energy from.
+  energyUsedKwh: number;
+  // Where the current trip's energy started; its distance is tripMiles.
+  tripStartKwh: number;
+  sinceChargeBaseline: MeterBaseline;
+  tripMeters: TripMeter[];
   chargeState: ChargeState;
   chargePortOpen: boolean;
   // The current session, or the last one once the cable is out.
@@ -336,6 +359,11 @@ export type CarAction =
   | { type: 'glovebox/toggle' }
   | { type: 'lock/walk-away' }
   | { type: 'trip/reset' }
+  | { type: 'trip/add'; name: string }
+  | { type: 'trip/rename'; id: number; name: string }
+  | { type: 'trip/resetMeter'; id: number }
+  | { type: 'trip/remove'; id: number }
+  | { type: 'trip/move'; id: number; offset: -1 | 1 }
   | { type: 'app/toggle'; app: AppId }
   | { type: 'surface/close' }
   | { type: 'surface/restore'; surface: Surface }
@@ -373,6 +401,13 @@ export const initialCarState: CarState = {
   batteryPercent: 69,
   odometerMiles: 12480,
   tripMiles: 0,
+  energyUsedKwh: 3020,
+  tripStartKwh: 3020,
+  sinceChargeBaseline: { miles: 12460, kwh: 3015 },
+  tripMeters: [
+    { id: 1, name: 'Trip A', miles: 12100, kwh: 2928 },
+    { id: 2, name: 'Trip B', miles: 12480, kwh: 3020 },
+  ],
   chargeState: 'unplugged',
   chargePortOpen: false,
   chargeSession: null,
@@ -447,6 +482,7 @@ export const initialCarState: CarState = {
       energyDisplay: 'percent',
       timeFormat: '12h',
     },
+    mapUnits: 'mi',
   },
   display: { brightness: 100, autoBrightness: false, appearance: 'light', blueLightReduction: 0 },
   notice: null,
@@ -850,9 +886,11 @@ function chargeTick(state: CarState, seconds: number): CarState {
     percentAdded: session.percentAdded + added,
     hours: session.hours + percentToKwh(added) / chargeKilowatts(state),
   };
-  if (batteryPercent < chargeLimit) return { ...state, batteryPercent, chargeSession };
+  // Only charge that actually went in restarts the meter, not a plug pulled straight out.
+  const charged = { ...state, batteryPercent, chargeSession, sinceChargeBaseline: meterBaseline(state) };
+  if (batteryPercent < chargeLimit) return charged;
   return notify(
-    { ...state, batteryPercent, chargeSession, chargeState: 'complete' },
+    { ...charged, chargeState: 'complete' },
     'Charging complete',
   );
 }
@@ -865,6 +903,11 @@ function moveDockItem(state: CarState, item: DockItem, delta: -1 | 1): CarState 
   [order[from], order[to]] = [order[to], order[from]];
   return { ...state, dockByProfile: { ...state.dockByProfile, [state.activeProfileId]: order } };
 }
+
+const meterBaseline = (state: CarState): MeterBaseline => ({
+  miles: state.odometerMiles,
+  kwh: state.energyUsedKwh,
+});
 
 function tick(state: CarState, seconds: number): CarState {
   if (state.chargeState === 'charging') return chargeTick(state, seconds);
@@ -886,6 +929,7 @@ function tick(state: CarState, seconds: number): CarState {
     batteryPercent,
     odometerMiles: state.odometerMiles + miles,
     tripMiles: state.tripMiles + miles,
+    energyUsedKwh: state.energyUsedKwh + miles * PERCENT_PER_MILE * (PACK_KWH / 100),
   };
 }
 
@@ -912,6 +956,31 @@ function allowedAutopilot(state: CarState): Autopilot {
   if (state.autopilot === 'off') return 'off';
   if (canEngageAutopilot(state, state.autopilot).allowed) return state.autopilot;
   return canEngageAutopilot(state, 'cruise').allowed ? 'cruise' : 'off';
+}
+
+const nextId = (items: { id: number }[]) => Math.max(0, ...items.map((item) => item.id)) + 1;
+
+// A name the driver can tell apart from the others, or the reason it can't be used.
+function checkName(
+  items: { id: number; name: string }[],
+  name: string,
+  ownId?: number,
+): { name: string } | { reason: string } {
+  const trimmed = name.trim().slice(0, MAX_NAME_LENGTH);
+  if (!trimmed) return { reason: 'Enter a name' };
+  const taken = items.some(
+    (item) => item.id !== ownId && item.name.toLowerCase() === trimmed.toLowerCase(),
+  );
+  return taken ? { reason: `${trimmed} is already in use` } : { name: trimmed };
+}
+
+function moveItem<T extends { id: number }>(items: T[], id: number, offset: number): T[] {
+  const from = items.findIndex((item) => item.id === id);
+  const to = from + offset;
+  if (from < 0 || to < 0 || to >= items.length) return items;
+  const moved = [...items];
+  [moved[from], moved[to]] = [moved[to], moved[from]];
+  return moved;
 }
 
 export function carReducer(state: CarState, action: CarAction): CarState {
@@ -1020,7 +1089,45 @@ export function carReducer(state: CarState, action: CarAction): CarState {
     }
 
     case 'trip/reset':
-      return { ...state, tripMiles: 0 };
+      return { ...state, tripMiles: 0, tripStartKwh: state.energyUsedKwh };
+
+    case 'trip/add': {
+      if (state.tripMeters.length >= MAX_TRIP_METERS) {
+        return notify(state, `Up to ${MAX_TRIP_METERS} trip meters`);
+      }
+      const checked = checkName(state.tripMeters, action.name);
+      if ('reason' in checked) return notify(state, checked.reason);
+      const meter = { id: nextId(state.tripMeters), name: checked.name, ...meterBaseline(state) };
+      return { ...state, tripMeters: [...state.tripMeters, meter] };
+    }
+
+    case 'trip/rename': {
+      const checked = checkName(state.tripMeters, action.name, action.id);
+      if ('reason' in checked) return notify(state, checked.reason);
+      return {
+        ...state,
+        tripMeters: state.tripMeters.map((meter) =>
+          meter.id === action.id ? { ...meter, name: checked.name } : meter,
+        ),
+      };
+    }
+
+    case 'trip/resetMeter':
+      return {
+        ...state,
+        tripMeters: state.tripMeters.map((meter) =>
+          meter.id === action.id ? { ...meter, ...meterBaseline(state) } : meter,
+        ),
+      };
+
+    case 'trip/remove':
+      return {
+        ...state,
+        tripMeters: state.tripMeters.filter((meter) => meter.id !== action.id),
+      };
+
+    case 'trip/move':
+      return { ...state, tripMeters: moveItem(state.tripMeters, action.id, action.offset) };
 
     // A bottom bar app icon: opens that app, or closes it if it is already showing.
     case 'app/toggle': {

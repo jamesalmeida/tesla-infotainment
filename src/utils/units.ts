@@ -72,3 +72,14 @@ export function formatDuration(hours: number) {
   if (wholeHours === 0) return `${minutes} min`;
   return minutes === 0 ? `${wholeHours} hr` : `${wholeHours} hr ${minutes} min`;
 }
+
+export const unitLabel = (units: Preferences['distance']) => (units === 'km' ? 'km' : 'mi');
+
+export const toDisplayDistance = (miles: number, units: Preferences['distance']) =>
+  units === 'km' ? miles * KM_PER_MILE : miles;
+
+export const formatDistanceFixed = (miles: number, units: Preferences['distance'], digits = 1) =>
+  `${toDisplayDistance(miles, units).toLocaleString(LOCALE, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  })} ${unitLabel(units)}`;

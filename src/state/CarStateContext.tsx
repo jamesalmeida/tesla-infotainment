@@ -75,6 +75,11 @@ export interface CarActions {
   exitMode: () => void;
   toggleGlovebox: () => void;
   walkAway: () => void;
+  addTripMeter: (name: string) => void;
+  renameTripMeter: (id: number, name: string) => void;
+  resetTripMeter: (id: number) => void;
+  removeTripMeter: (id: number) => void;
+  moveTripMeter: (id: number, offset: -1 | 1) => void;
 }
 
 interface CarStore {
@@ -148,6 +153,11 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   exitMode: () => dispatch({ type: 'mode/exit' }),
   toggleGlovebox: () => dispatch({ type: 'glovebox/toggle' }),
   walkAway: () => dispatch({ type: 'lock/walk-away' }),
+  addTripMeter: (name) => dispatch({ type: 'trip/add', name }),
+  renameTripMeter: (id, name) => dispatch({ type: 'trip/rename', id, name }),
+  resetTripMeter: (id) => dispatch({ type: 'trip/resetMeter', id }),
+  removeTripMeter: (id) => dispatch({ type: 'trip/remove', id }),
+  moveTripMeter: (id, offset) => dispatch({ type: 'trip/move', id, offset }),
 });
 
 interface CarContextValue {

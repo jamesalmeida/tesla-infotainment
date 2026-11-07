@@ -15,8 +15,10 @@ import {
   MAX_CHARGE_AMPS,
   MAX_CHARGE_LIMIT,
   MAX_FOLLOWING_DISTANCE,
+  MAX_NAME_LENGTH,
   MAX_SPEED_OFFSET,
   MAX_TEMPERATURE,
+  MAX_TRIP_METERS,
   MIN_CHARGE_AMPS,
   MIN_CHARGE_LIMIT,
   MIN_FOLLOWING_DISTANCE,
@@ -31,7 +33,9 @@ import {
   type CarKey,
   type CarState,
   type DisplaySettings,
+  type MeterBaseline,
   type Preferences,
+  type TripMeter,
   type VehicleSettings,
 } from './carState';
 import {
@@ -66,6 +70,10 @@ type Persisted = {
   | 'batteryPercent'
   | 'odometerMiles'
   | 'tripMiles'
+  | 'energyUsedKwh'
+  | 'tripStartKwh'
+  | 'sinceChargeBaseline'
+  | 'tripMeters'
 >;
 
 const pickPersisted = ({
@@ -78,6 +86,10 @@ const pickPersisted = ({
   batteryPercent,
   odometerMiles,
   tripMiles,
+  energyUsedKwh,
+  tripStartKwh,
+  sinceChargeBaseline,
+  tripMeters,
 }: CarState): Persisted => ({
   climate: climatePreferences(climate),
   volume,
@@ -88,6 +100,10 @@ const pickPersisted = ({
   batteryPercent,
   odometerMiles,
   tripMiles,
+  energyUsedKwh,
+  tripStartKwh,
+  sinceChargeBaseline,
+  tripMeters,
 });
 
 const inRange = (value: unknown, min: number, max: number): value is number =>
@@ -282,6 +298,47 @@ const restoreDock = (saved: unknown): CarState['dockByProfile'] =>
       ) as CarState['dockByProfile'])
     : {};
 
+const oneOf =
+  (...options: unknown[]) =>
+  (value: unknown): boolean =>
+    options.includes(value);
+
+const between =
+  (min: number, max: number) =>
+  (value: unknown): boolean =>
+    inRange(value, min, max);
+
+// mergeKnown only checks a value's type, so anything narrower than that is checked here.
+const SETTING_RULES: { [K in keyof VehicleSettings]?: (value: unknown) => boolean } = {
+  wipers: isValidWipers,
+  mapUnits: oneOf('mi', 'km'),
+};
+
+function applySettingRules<T extends Partial<VehicleSettings>>(settings: T, defaults: T): T {
+  const checked = { ...settings };
+  for (const key of Object.keys(settings) as (keyof T & keyof VehicleSettings)[]) {
+    const rule = SETTING_RULES[key];
+    if (rule && !rule(settings[key])) checked[key] = defaults[key];
+  }
+  return checked;
+}
+
+const isName = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim() !== '' && value.length <= MAX_NAME_LENGTH;
+
+const isBaseline = (value: unknown): value is MeterBaseline =>
+  isRecord(value) &&
+  inRange(value.miles, 0, Number.MAX_SAFE_INTEGER) &&
+  inRange(value.kwh, 0, Number.MAX_SAFE_INTEGER);
+
+const isTripMeter = (value: unknown): value is TripMeter =>
+  isBaseline(value) &&
+  Number.isInteger((value as Partial<TripMeter>).id) &&
+  isName((value as Partial<TripMeter>).name);
+
+const restoreTripMeters = (saved: unknown, defaults: TripMeter[]): TripMeter[] =>
+  Array.isArray(saved) ? saved.filter(isTripMeter).slice(0, MAX_TRIP_METERS) : defaults;
+
 // Corrupt or outdated data must never reach the reducer, so anything invalid is dropped
 // and the default for that value stays.
 export function restoreState(defaults: CarState, raw: string | null): CarState {
@@ -315,10 +372,20 @@ export function restoreState(defaults: CarState, raw: string | null): CarState {
     tripMiles: inRange(saved.tripMiles, 0, Number.MAX_SAFE_INTEGER)
       ? saved.tripMiles
       : defaults.tripMiles,
+    energyUsedKwh: inRange(saved.energyUsedKwh, 0, Number.MAX_SAFE_INTEGER)
+      ? saved.energyUsedKwh
+      : defaults.energyUsedKwh,
+    tripStartKwh: inRange(saved.tripStartKwh, 0, Number.MAX_SAFE_INTEGER)
+      ? saved.tripStartKwh
+      : defaults.tripStartKwh,
+    sinceChargeBaseline: isBaseline(saved.sinceChargeBaseline)
+      ? saved.sinceChargeBaseline
+      : defaults.sinceChargeBaseline,
+    tripMeters: restoreTripMeters(saved.tripMeters, defaults.tripMeters),
     activeProfileId:
       typeof saved.activeProfileId === 'number' ? saved.activeProfileId : defaults.activeProfileId,
     dockByProfile: restoreDock(saved.dockByProfile),
-    settings: restoreSettings(defaults.settings, saved.settings),
+    settings: applySettingRules(restoreSettings(defaults.settings, saved.settings), defaults.settings),
     display: {
       ...display,
       brightness: inRange(display.brightness, 0, 100)
