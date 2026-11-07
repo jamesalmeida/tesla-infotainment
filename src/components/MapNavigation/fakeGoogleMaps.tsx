@@ -151,10 +151,14 @@ export function createFakeMaps() {
       } as unknown as FakeSuggestion;
     },
     /** Builds a computeRoutes response whose path runs through `points`. */
-    route(points: LatLng[], viewport: unknown = { fake: 'bounds' }) {
-      return { routes: [{ path: points, viewport }] } as unknown as {
+    route(points: LatLng[], viewport: unknown = { fake: 'bounds' }, extra: object = {}) {
+      return { routes: [{ path: points, viewport, ...extra }] } as unknown as {
         routes: google.maps.routes.Route[];
       };
+    },
+    /** One leg of steps as the Routes library returns them. */
+    leg(...steps: { instructions?: string; maneuver?: string; distanceMeters: number }[]) {
+      return { steps };
     },
     /** Builds a charger as returned by `Place.searchNearby`. */
     charger(id: string, location: LatLng) {

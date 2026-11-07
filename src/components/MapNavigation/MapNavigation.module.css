@@ -80,10 +80,18 @@
   position: absolute;
   top: calc(90 * var(--u));
   left: calc(25 * var(--u));
+  bottom: calc(10 * var(--u));
   width: 35%;
+  overflow-y: auto;
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   gap: calc(8 * var(--u));
+}
+
+.navPanel > * {
+  flex: none;
+  pointer-events: auto;
 }
 
 .navStatus {

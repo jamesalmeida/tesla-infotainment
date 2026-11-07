@@ -23,10 +23,13 @@ import {
 import type { Place } from './place';
 import { PlaceSearch } from './PlaceSearch';
 import { PlaceActions } from './PlaceActions';
+import { readRoute, ROUTE_FIELDS } from './routeData';
 import { TrafficLayer } from './TrafficLayer';
+import { TripPanel } from './TripPanel';
 import { useCarTracking } from './useCarTracking';
 import { useFollowCamera } from './useFollowCamera';
 import { useSavedPlaces } from './useSavedPlaces';
+import { useTripProgress } from './useTripProgress';
 import styles from './MapNavigation.module.css';
 
 const containerStyle = {
@@ -86,6 +89,7 @@ export function MapStage() {
     onLiveError: (code) => dispatchLayers({ type: 'liveLocationFailed', code }),
   });
   useFollowCamera(map, tracker, layers.following);
+  useTripProgress(tracker, activeRoute, () => dispatchNav({ type: 'arrived' }));
   const livePosition = () => tracker.getLivePose().position;
 
   const handlePlaceSelect = (place: Place) => {
@@ -164,21 +168,14 @@ export function MapStage() {
           origin: livePosition(),
           destination: place.location,
           travelMode: 'DRIVING',
-          fields: ['path', 'viewport'],
+          fields: ROUTE_FIELDS,
         });
-        const route = routes?.[0];
-        if (!route?.path?.length) {
+        const route = routes?.[0] ? readRoute(routes[0]) : null;
+        if (!route) {
           notFound(`No route found to ${place.name}.`);
           return;
         }
-        dispatchNav({
-          type: 'routeFound',
-          requestId,
-          route: {
-            path: route.path.map(({ lat, lng }) => ({ lat, lng })),
-            viewport: route.viewport ?? null,
-          },
-        });
+        dispatchNav({ type: 'routeFound', requestId, route });
       } catch (error) {
         console.error('Error fetching directions', error);
         notFound(`Couldn't get directions to ${place.name}.`);
@@ -234,7 +231,11 @@ export function MapStage() {
             {nav.kind === 'navigating' && (
               <p className={styles.navStatus}>Navigating to {nav.place.name}</p>
             )}
+            {nav.kind === 'arrived' && (
+              <p className={styles.navStatus}>You have arrived at {nav.place.name}</p>
+            )}
           </div>
+          {activeRoute && <TripPanel route={activeRoute} tracker={tracker} />}
           {nav.kind === 'routeFailed' && (
             <p role="alert" className={`${styles.navStatus} ${styles.navError}`}>
               {nav.reason}
@@ -260,6 +261,11 @@ export function MapStage() {
           {activeTrip && (
             <button className={`floatingBtn ${styles.endNavigateBtn}`} onClick={endNavigation}>
               End Navigation
+            </button>
+          )}
+          {nav.kind === 'arrived' && (
+            <button className={`floatingBtn ${styles.navigateBtn}`} onClick={endNavigation}>
+              Done
             </button>
           )}
           {layers.locationError && (

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { vi } from 'vitest';
 import { CarStateProvider, useCarActions, type CarActions } from '../../state/CarStateContext';
 import { initialCarState } from '../../state/carState';
@@ -814,6 +814,211 @@ describe('tracking the car (#161)', () => {
 
       expect(liveSwitch()).toHaveAttribute('aria-checked', 'true');
       expect(clearWatch).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('turn-by-turn (#153)', () => {
+  const START = { lat: 0, lng: 0 };
+  const TURN = { lat: 0, lng: 0.01 };
+  const END = { lat: 0.01, lng: 0.01 };
+  const NOW = new Date(2026, 10, 6, 9, 0).getTime();
+
+  let actions: CarActions;
+
+  function CaptureActions() {
+    actions = useCarActions();
+    return null;
+  }
+
+  const renderDriving = () =>
+    render(
+      <CarStateProvider
+        initialState={{ ...initialCarState, gear: 'D', speed: 60, pedal: 'accelerate' }}
+      >
+        <CaptureActions />
+        <MapNavigation onWifiClick={() => {}} />
+      </CarStateProvider>,
+    );
+
+  const drive = (seconds: number) =>
+    act(async () => {
+      actions.tick(seconds);
+      await vi.advanceTimersByTimeAsync(PUBLISH_INTERVAL_MS);
+    });
+
+  const nextTurn = () => screen.queryByTestId('next-turn');
+
+  async function startFullRoute(extra: object = {}) {
+    await choosePlace('Cafe', END);
+    await pressNavigate();
+    await settle(() =>
+      lastRouteCall().resolve(
+        fake.route([START, TURN, END], undefined, {
+          distanceMeters: 2224,
+          durationMillis: 600_000,
+          legs: [
+            fake.leg(
+              { instructions: 'Head east on Main St', maneuver: 'DEPART', distanceMeters: 1112 },
+              {
+                instructions: 'Turn left onto Oak Ave',
+                maneuver: 'TURN_LEFT',
+                distanceMeters: 1112,
+              },
+            ),
+          ],
+          ...extra,
+        }),
+      ),
+    );
+  }
+
+  beforeEach(() => {
+    vi.setSystemTime(NOW);
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'speechSynthesis');
+  });
+
+  test('asks only for the fields it shows', async () => {
+    renderDriving();
+    await choosePlace('Cafe', END);
+    await pressNavigate();
+
+    expect(lastRouteCall().request.fields).toEqual([
+      'path',
+      'viewport',
+      'distanceMeters',
+      'durationMillis',
+      'legs',
+    ]);
+  });
+
+  test('shows the next turn, arrival time, time left and distance', async () => {
+    renderDriving();
+    await startFullRoute();
+
+    expect(nextTurn()).toHaveTextContent('Head east on Main St');
+    expect(nextTurn()).toHaveTextContent('0.7 mi');
+    expect(screen.getByText('9:10 AM')).toBeInTheDocument();
+    expect(screen.getByText('10 min')).toBeInTheDocument();
+    expect(screen.getByText('1.4 mi')).toBeInTheDocument();
+  });
+
+  test('driving counts down and moves on to the next step', async () => {
+    renderDriving();
+    await startFullRoute();
+
+    await drive(20);
+    expect(nextTurn()).toHaveTextContent('Head east on Main St');
+    expect(nextTurn()).toHaveTextContent('0.3 mi');
+
+    await drive(30);
+    expect(nextTurn()).toHaveTextContent('Turn left onto Oak Ave');
+    expect(screen.getByText('2 min')).toBeInTheDocument();
+  });
+
+  test('the full list opens with the current step marked', async () => {
+    renderDriving();
+    await startFullRoute();
+    expect(screen.queryByRole('list', { name: 'Directions' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Directions' }));
+    const steps = within(screen.getByRole('list', { name: 'Directions' })).getAllByRole('listitem');
+
+    expect(steps).toHaveLength(2);
+    expect(steps[0]).toHaveAttribute('aria-current', 'step');
+    expect(steps[1]).toHaveTextContent('Turn left onto Oak Ave');
+
+    await drive(50);
+    expect(steps[1]).toHaveAttribute('aria-current', 'step');
+  });
+
+  test('reaching the end arrives, and Done goes back to the map', async () => {
+    renderDriving();
+    await startFullRoute();
+
+    await drive(600);
+
+    expect(screen.getByText('You have arrived at Cafe')).toBeInTheDocument();
+    expect(nextTurn()).not.toBeInTheDocument();
+    expect(endButton()).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    await flush();
+
+    expect(screen.queryByText('You have arrived at Cafe')).not.toBeInTheDocument();
+    expect(routeLine()).not.toBeInTheDocument();
+    expect(searchBox()).toHaveValue('');
+  });
+
+  test('a route with no steps or duration still navigates, showing what it can', async () => {
+    renderDriving();
+    await choosePlace('Cafe', END);
+    await pressNavigate();
+    await settle(() => lastRouteCall().resolve(fake.route([START, TURN, END])));
+
+    expect(nextTurn()).not.toBeInTheDocument();
+    expect(screen.queryByText('Arrive')).not.toBeInTheDocument();
+    expect(screen.getByText('Distance')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Directions' })).not.toBeInTheDocument();
+    expect(endButton()).toBeInTheDocument();
+  });
+
+  test('a single-point route does not arrive before the car has moved', async () => {
+    renderDriving();
+    await startTrip('Cafe', END);
+
+    await drive(5);
+
+    expect(screen.getByText('Navigating to Cafe')).toBeInTheDocument();
+  });
+
+  describe('voice', () => {
+    function stubSpeech() {
+      const speak = vi.fn();
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: { speak, cancel: vi.fn() },
+      });
+      vi.stubGlobal(
+        'SpeechSynthesisUtterance',
+        class {
+          constructor(public text: string) {}
+        },
+      );
+      return speak;
+    }
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    test('is off until asked for, then reads each new step once', async () => {
+      const speak = stubSpeech();
+      renderDriving();
+      await startFullRoute();
+      expect(speak).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Voice' }));
+      await flush();
+      expect(speak).toHaveBeenCalledOnce();
+      expect(speak.mock.lastCall?.[0].text).toBe('Head east on Main St');
+
+      await drive(20);
+      expect(speak).toHaveBeenCalledOnce();
+
+      await drive(30);
+      expect(speak).toHaveBeenCalledTimes(2);
+      expect(speak.mock.lastCall?.[0].text).toBe('Turn left onto Oak Ave');
+    });
+
+    test('is not offered where the browser has no speech', async () => {
+      renderDriving();
+      await startFullRoute();
+
+      expect(screen.queryByRole('button', { name: 'Voice' })).not.toBeInTheDocument();
     });
   });
 });

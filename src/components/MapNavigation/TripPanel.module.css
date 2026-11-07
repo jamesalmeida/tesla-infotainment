@@ -1,0 +1,138 @@
+.tripPanel {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  color: var(--color-text);
+}
+
+.card,
+.turnCard,
+.tripSummary {
+  box-sizing: border-box;
+  border-radius: calc(8 * var(--u));
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.card {
+  padding: calc(10 * var(--u)) calc(12 * var(--u));
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  background-color: var(--color-card);
+}
+
+.turnCard {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  padding: calc(10 * var(--u)) calc(12 * var(--u));
+  color: var(--color-on-accent);
+  background-color: var(--color-accent);
+}
+
+.arrow {
+  flex: none;
+  width: max(20px, calc(32 * var(--u)));
+  height: max(20px, calc(32 * var(--u)));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.turnText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  line-height: 1.25;
+}
+
+.turnText strong {
+  font-size: max(var(--text-min), calc(20 * var(--u)));
+}
+
+.tripSummary {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(8 * var(--u));
+  margin: 0;
+  padding: calc(8 * var(--u)) calc(12 * var(--u));
+  background-color: var(--color-card);
+}
+
+.tripSummary dt {
+  font-size: max(var(--text-min), calc(11 * var(--u)));
+  color: var(--color-text-muted);
+}
+
+.tripSummary dd {
+  margin: 0;
+  font-size: max(var(--text-min), calc(15 * var(--u)));
+  font-weight: 600;
+  color: var(--color-text-strong);
+  white-space: nowrap;
+}
+
+.tripTools {
+  display: flex;
+  gap: calc(6 * var(--u));
+}
+
+.tripTool {
+  flex: 1;
+  min-height: var(--tap-target);
+  padding: calc(6 * var(--u)) calc(8 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(5 * var(--u));
+  font: inherit;
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  color: var(--color-text);
+  background-color: var(--color-card);
+  cursor: pointer;
+}
+
+.tripTool[aria-pressed='true'],
+.tripTool[aria-expanded='true'] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.directions {
+  margin: 0;
+  padding: 0;
+  max-height: calc(260 * var(--u));
+  overflow-y: auto;
+  list-style: none;
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+}
+
+.direction {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  padding: calc(8 * var(--u)) calc(10 * var(--u));
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+}
+
+.direction + .direction {
+  border-top: 1px solid var(--color-border);
+}
+
+.direction[aria-current='step'] {
+  font-weight: 600;
+  color: var(--color-text-strong);
+}
+
+.direction .arrow {
+  width: max(16px, calc(18 * var(--u)));
+  height: max(16px, calc(18 * var(--u)));
+}
+
+.directionDistance {
+  margin-left: auto;
+  flex: none;
+  color: var(--color-text-muted);
+}
