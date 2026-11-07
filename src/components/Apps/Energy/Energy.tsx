@@ -120,7 +120,7 @@ function DriveTab({ history }: { history: EnergySample[] }) {
 
 function ConsumptionTab({ history }: { history: EnergySample[] }) {
   const [windowMiles, setWindowMiles] = useState(WINDOWS[0]);
-  const temperature = useCar((state) => state.temperature);
+  const temperature = useCar((state) => state.climate.driverTemp);
   const batteryPercent = useCar((state) => state.batteryPercent);
 
   const samples = lastMiles(history, windowMiles);

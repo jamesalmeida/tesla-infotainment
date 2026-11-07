@@ -1,4 +1,5 @@
 import { memo, useEffect, useState } from 'react';
+import { pauseLibraryPlayback } from '../../apps/mediaLibrary';
 import { setMediaTransport } from '../../state/mediaTransport';
 import { getImagePath } from '../../utils/assetPaths';
 import { ProgressBar } from './ProgressBar';
@@ -49,7 +50,7 @@ function AlbumArt({ src }: { src: string }) {
 }
 
 export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number }) {
-  const { playback, timeline, togglePlayPause, next, previous, seek } = usePlayback(
+  const { playback, timeline, togglePlayPause, pause, next, previous, seek } = usePlayback(
     audioUrls,
     chooseRandomTrack,
     volume,
@@ -61,9 +62,14 @@ export const MusicPanel = memo(function MusicPanel({ volume }: { volume: number 
   // Keyboard shortcuts, kept apart from playback: these move to a shared handler.
   // Lets the shortcut table and other apps drive the player without owning it.
   useEffect(() => {
-    setMediaTransport({ togglePlayPause, next, previous });
+    setMediaTransport({ togglePlayPause, pause, next, previous });
     return () => setMediaTransport(null);
-  }, [togglePlayPause, next, previous]);
+  }, [togglePlayPause, pause, next, previous]);
+
+  // One source at a time: starting this player pauses anything from the media apps.
+  useEffect(() => {
+    if (playback.status === 'playing') pauseLibraryPlayback();
+  }, [playback.status]);
 
   return (
     <div className={styles.musicPanel}>

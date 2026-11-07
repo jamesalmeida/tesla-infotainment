@@ -1,5 +1,6 @@
 export interface MediaTransport {
   togglePlayPause: () => void;
+  pause: () => void;
   next: () => void;
   previous: () => void;
 }

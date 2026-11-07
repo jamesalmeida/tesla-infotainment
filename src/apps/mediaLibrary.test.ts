@@ -1,5 +1,6 @@
 import { act } from '@testing-library/react';
 import { vi } from 'vitest';
+import { setMediaTransport } from '../state/mediaTransport';
 import {
   connectPlayback,
   formatMediaTime,
@@ -159,4 +160,25 @@ test('a catalogue can be replaced without touching the screens', async () => {
   await expect(getMediaSource('music').browse()).resolves.toEqual([]);
   setMediaSource('music', original);
   await expect(getMediaSource('music').browse()).resolves.not.toEqual([]);
+});
+
+describe('one source at a time', () => {
+  const item: MediaItem = {
+    id: 'exclusive',
+    title: 'Sample',
+    subtitle: 'Sample',
+    collectionId: 'sample',
+    durationSeconds: 100,
+  };
+
+  test('starting an item pauses the media card', () => {
+    const pause = vi.fn();
+    setMediaTransport({ togglePlayPause: vi.fn(), pause, next: vi.fn(), previous: vi.fn() });
+
+    playItem(item);
+
+    expect(pause).toHaveBeenCalledTimes(1);
+    setMediaTransport(null);
+    stopPlayback();
+  });
 });

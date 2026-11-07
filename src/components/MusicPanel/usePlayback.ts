@@ -100,6 +100,8 @@ export function usePlayback(urls: readonly string[], chooseTrack: () => number, 
     }
   }, [failed, getAudio, startPlaying]);
 
+  const pause = useCallback(() => getAudio().pause(), [getAudio]);
+
   const seek = useCallback(
     (time: number) => {
       const audio = getAudio();
@@ -121,5 +123,5 @@ export function usePlayback(urls: readonly string[], chooseTrack: () => number, 
     }
   }, [getAudio, seek]);
 
-  return { playback, timeline, togglePlayPause, next, previous, seek };
+  return { playback, timeline, togglePlayPause, pause, next, previous, seek };
 }

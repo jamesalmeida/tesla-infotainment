@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { getMediaTransport } from '../state/mediaTransport';
 import { safeStorage } from '../utils/safeStorage';
 
 /* -------------------- What the apps browse -------------------- */
@@ -412,6 +413,8 @@ export function connectPlayback(
 }
 
 export function playItem(item: MediaItem, queue: MediaItem[] = [item]) {
+  // One source at a time, so an app starting silences the media card.
+  getMediaTransport()?.pause();
   rememberPosition(true);
   const startAt = resumePosition(item);
   lastSavedPosition = startAt;
@@ -428,8 +431,16 @@ export function playItem(item: MediaItem, queue: MediaItem[] = [item]) {
 
 export function togglePlayback() {
   if (!nowPlaying.item) return;
+  if (nowPlaying.isPlaying) {
+    engine.pause();
+  } else {
+    getMediaTransport()?.pause();
+    engine.resume();
+  }
+}
+
+export function pauseLibraryPlayback() {
   if (nowPlaying.isPlaying) engine.pause();
-  else engine.resume();
 }
 
 export function seekPlayback(seconds: number) {
