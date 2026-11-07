@@ -1,0 +1,312 @@
+/*
+ * Shared by every app in the slide-up panel. Sizes are in --u so they follow the display,
+ * text is floored at --text-min, and controls are floored at --tap-target.
+ */
+.screen {
+  --app-text: max(var(--text-min), calc(15 * var(--u)));
+  --app-text-small: max(var(--text-min), calc(12.5 * var(--u)));
+  --app-text-title: max(15px, calc(22 * var(--u)));
+  --app-gap: calc(12 * var(--u));
+  --app-radius: calc(10 * var(--u));
+  --app-control: max(var(--tap-target), calc(40 * var(--u)));
+
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: calc(10 * var(--u));
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: calc(8 * var(--u)) calc(20 * var(--u)) calc(14 * var(--u));
+  overflow: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--app-text);
+  line-height: 1.35;
+}
+
+.screen *,
+.screen *::before,
+.screen *::after {
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(6 * var(--u)) calc(14 * var(--u));
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: var(--app-text-title);
+  font-weight: 600;
+  text-align: left;
+}
+
+.toolbar {
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(8 * var(--u));
+  min-width: min(100%, calc(180 * var(--u)));
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.fixedBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Phones have little height to spare, so the frame gives its padding back. */
+:global(:root[data-layout='compact']) .screen,
+:global(:root[data-layout='stacked']) .screen {
+  gap: 6px;
+  padding: 0 10px 8px;
+}
+
+/* -------------------- Tabs -------------------- */
+
+.tabs {
+  display: flex;
+  flex: 1 1 auto;
+  gap: calc(4 * var(--u));
+  min-width: 0;
+  padding: calc(3 * var(--u));
+  border-radius: var(--app-radius);
+  background-color: var(--color-panel);
+}
+
+.tab {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: var(--app-control);
+  padding: calc(4 * var(--u)) calc(8 * var(--u));
+  border: none;
+  border-radius: calc(8 * var(--u));
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--app-text-small);
+  font-weight: 500;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.tabActive {
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  font-weight: 600;
+}
+
+/* -------------------- Callouts -------------------- */
+
+.callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(8 * var(--u)) calc(12 * var(--u));
+  padding: calc(10 * var(--u)) calc(12 * var(--u));
+  border: 1px solid var(--color-border);
+  border-left-width: calc(4 * var(--u));
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font-size: var(--app-text-small);
+}
+
+.calloutText {
+  flex: 1 1 calc(160 * var(--u));
+  min-width: 0;
+}
+
+.info {
+  border-left-color: var(--color-accent);
+}
+
+.warning {
+  border-left-color: var(--color-warning);
+}
+
+.error {
+  border-left-color: var(--color-danger);
+}
+
+/* -------------------- Controls -------------------- */
+
+.button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: calc(6 * var(--u));
+  min-width: var(--app-control);
+  min-height: var(--app-control);
+  max-width: 100%;
+  padding: calc(4 * var(--u)) calc(14 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  font: inherit;
+  font-size: var(--app-text-small);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.primary {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.danger {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger);
+  color: var(--color-on-accent);
+}
+
+@media (hover: hover) {
+  .button:hover:not(:disabled, .primary, .danger) {
+    background-color: var(--color-card-hover);
+  }
+}
+
+.input {
+  flex: 1 1 calc(120 * var(--u));
+  width: 100%;
+  min-width: 0;
+  min-height: var(--app-control);
+  padding: calc(4 * var(--u)) calc(12 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  font: inherit;
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.range {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: var(--app-control);
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+/* -------------------- Lists and cards -------------------- */
+
+.card {
+  padding: calc(12 * var(--u));
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  width: 100%;
+  min-height: max(var(--tap-target), calc(52 * var(--u)));
+  padding: calc(6 * var(--u)) calc(10 * var(--u));
+  border: none;
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+}
+
+button.row {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  button.row:hover {
+    background-color: var(--color-card-hover);
+  }
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+}
+
+.strong {
+  color: var(--color-text-strong);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--app-text-small);
+  overflow-wrap: anywhere;
+}
+
+.sectionTitle {
+  margin: calc(10 * var(--u)) 0 calc(6 * var(--u));
+  color: var(--color-text-strong);
+  font-size: var(--app-text);
+  font-weight: 600;
+}
+
+.sectionTitle:first-child {
+  margin-top: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-gap);
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(8 * var(--u));
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
