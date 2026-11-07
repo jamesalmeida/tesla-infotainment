@@ -16,6 +16,7 @@ function readColors(canvas: HTMLCanvasElement): SceneColors {
     vehicle: token('text-muted'),
     taillight: token('danger'),
     person: token('text-strong'),
+    dusk: token('text-muted'),
   };
 }
 

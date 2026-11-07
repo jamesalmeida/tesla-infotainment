@@ -9,6 +9,8 @@ export interface SceneColors {
   vehicle: string;
   taillight: string;
   person: string;
+  // Mid-grey in both themes, so multiplying by it always darkens.
+  dusk: string;
 }
 
 export interface SceneFrame {
@@ -178,8 +180,9 @@ export function drawFrame(
 
   if (frame.isNight) {
     ctx.save();
-    ctx.globalAlpha = 0.55;
-    ctx.fillStyle = colors.person;
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = colors.dusk;
+    ctx.fillRect(0, 0, width, height);
     ctx.fillRect(0, 0, width, height);
     ctx.restore();
   }
