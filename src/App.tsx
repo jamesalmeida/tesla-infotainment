@@ -2,7 +2,17 @@ import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from '
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import { AppOverlays } from './apps/AppOverlays';
 import { CarStateProvider, useCar, useCarActions } from './state/CarStateContext';
-import { activeApp, isCameraForced, isDriving, isPanelOpen, vehiclePose } from './state/carState';
+import {
+  activeApp,
+  isCameraForced,
+  isDriving,
+  isPanelOpen,
+  leftSignalLit,
+  rightSignalLit,
+  vehiclePose,
+} from './state/carState';
+import { useBlink } from './hooks/useBlink';
+import { carLightState } from './components/VehicleModel/vehicleLights';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useBoot } from './hooks/useBoot';
 import { useLayout } from './hooks/useLayout';
@@ -73,6 +83,13 @@ function App() {
 
 function VehicleView({ onSettled }: { onSettled: () => void }) {
   const pose = useCar(vehiclePose);
+  const state = useCar((current) => current);
+  const paint = useCar((current) => current.settings.paint);
+  const speed = useCar((current) => current.speed);
+  const leftLit = useCar(leftSignalLit);
+  const rightLit = useCar(rightSignalLit);
+  const blinkOn = useBlink(leftLit || rightLit);
+  const lights = carLightState(state, blinkOn);
   const [canRender] = useState(hasWebGL);
 
   // With no WebGL there is nothing to wait for.
@@ -85,7 +102,7 @@ function VehicleView({ onSettled }: { onSettled: () => void }) {
   return (
     <ErrorBoundary fallback={() => <CarUnavailable />} onError={onSettled}>
       <Suspense fallback={null}>
-        <VehicleModel pose={pose} onReady={onSettled} />
+        <VehicleModel pose={pose} onReady={onSettled} lights={lights} paint={paint} speed={speed} />
       </Suspense>
     </ErrorBoundary>
   );

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { useCar, useCarActions } from '../../state/CarStateContext';
+import { useBlink } from '../../hooks/useBlink';
 import {
   isDriving,
   leftSignalLit,
@@ -12,27 +12,6 @@ import { formatSpeed, speedUnit } from '../../utils/units';
 import BatteryStatus from '../BatteryStatus/BatteryStatus';
 import GearSelect from '../GearSelect/GearSelect';
 import { Telltales } from './Telltales';
-
-const BLINK_MS = 500;
-
-const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-// One clock for both arrows, so they can't drift apart when started at different times.
-// With reduced motion the arrows stay lit: they still show state, without flashing.
-function useBlink(isActive: boolean) {
-  const [isOn, setIsOn] = useState(true);
-
-  useEffect(() => {
-    if (!isActive || prefersReducedMotion()) return;
-    const timer = setInterval(() => setIsOn((on) => !on), BLINK_MS);
-    return () => {
-      clearInterval(timer);
-      setIsOn(true);
-    };
-  }, [isActive]);
-
-  return isOn;
-}
 
 function TurnSignal({
   side,

@@ -255,6 +255,8 @@ describe('settings', () => {
     ['a PIN', { drivePin: 'abcd' }, 'drivePin'],
     ['update preference', { updatePreference: 'nightly' }, 'updatePreference'],
     ['wheels', { wheelConfig: 'square' }, 'wheelConfig'],
+    ['paint', { paint: 'chrome' }, 'paint'],
+    ['plate', { licensePlate: 'TOO LONG PLATE' }, 'licensePlate'],
     ['vehicle name', { vehicleName: '   ' }, 'vehicleName'],
     ['filters', { superchargerFilters: { minPowerKw: 3 } }, 'superchargerFilters'],
   ])('an invalid %s falls back to the default', (_name, patch, key) => {

@@ -34,7 +34,13 @@ import {
   type ProfileSettings,
   type ProfileSnapshot,
 } from './profiles';
-import { DEMO_UPDATES, findBluetoothDevice, findWifiNetwork, type WheelConfig } from './sampleData';
+import {
+  DEMO_UPDATES,
+  findBluetoothDevice,
+  findWifiNetwork,
+  type PaintColor,
+  type WheelConfig,
+} from './sampleData';
 
 export type { AppId };
 export type { CabinPosition, Profile };
@@ -361,6 +367,8 @@ export interface VehicleSettings {
   drivePin: string;
   easyEntry: boolean;
   vehicleName: string;
+  paint: PaintColor;
+  licensePlate: string;
   updatePreference: UpdatePreference;
   wheelConfig: WheelConfig;
   towMode: boolean;
@@ -766,6 +774,8 @@ export const initialCarState: CarState = {
     drivePin: '',
     easyEntry: false,
     vehicleName: 'Demo Car',
+    paint: 'pearl-white',
+    licensePlate: 'DEMO CAR',
     updatePreference: 'standard',
     wheelConfig: 'sport-19',
     towMode: false,

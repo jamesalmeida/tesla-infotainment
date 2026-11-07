@@ -73,6 +73,21 @@ export const WHEEL_OPTIONS = [
 
 export type WheelConfig = (typeof WHEEL_OPTIONS)[number]['value'];
 
+// Original paint choices for the simulator. The colours are deliberately close to a
+// familiar palette without copying any Tesla trade dress.
+export const PAINT_COLORS = [
+  { value: 'pearl-white', label: 'Pearl White', hex: '#f2f2f2' },
+  { value: 'midnight-silver', label: 'Midnight Silver', hex: '#4a4f55' },
+  { value: 'deep-blue', label: 'Deep Blue', hex: '#1d3a6e' },
+  { value: 'red', label: 'Red Multi-Coat', hex: '#a51c30' },
+  { value: 'solid-black', label: 'Solid Black', hex: '#111111' },
+] as const;
+
+export type PaintColor = (typeof PAINT_COLORS)[number]['value'];
+
+export const paintHex = (paint: PaintColor): string =>
+  PAINT_COLORS.find(({ value }) => value === paint)?.hex ?? PAINT_COLORS[0].hex;
+
 // Recommended cold pressure and a fixed sample reading for each corner. The rear right
 // is deliberately low, so the tire warning has something to show in the demo.
 export const RECOMMENDED_TIRE_PSI = 42;

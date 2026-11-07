@@ -73,7 +73,13 @@ import {
   type ProfileSettings,
   type ProfileSnapshot,
 } from './profiles';
-import { DEMO_UPDATES, findBluetoothDevice, findWifiNetwork, WHEEL_OPTIONS } from './sampleData';
+import {
+  DEMO_UPDATES,
+  findBluetoothDevice,
+  findWifiNetwork,
+  PAINT_COLORS,
+  WHEEL_OPTIONS,
+} from './sampleData';
 
 const STORAGE_KEY = 'tesla-car-state';
 const SCHEMA_VERSION = 1;
@@ -363,6 +369,9 @@ const between =
   (value: unknown): boolean =>
     inRange(value, min, max);
 
+const isPlate = (value: unknown): boolean =>
+  typeof value === 'string' && value.length <= 8 && /^[A-Za-z0-9 ]*$/.test(value);
+
 const isSavedPin = (value: unknown): boolean =>
   value === '' || (typeof value === 'string' && isValidPin(value));
 
@@ -393,6 +402,8 @@ const SETTING_RULES: { [K in keyof VehicleSettings]?: (value: unknown) => boolea
   speedLimitPin: isSavedPin,
   drivePin: isSavedPin,
   vehicleName: isName,
+  paint: oneOf(...PAINT_COLORS.map(({ value }) => value)),
+  licensePlate: isPlate,
   updatePreference: oneOf(...Object.keys(DEMO_UPDATES)),
   wheelConfig: oneOf(...WHEEL_OPTIONS.map(({ value }) => value)),
 };
