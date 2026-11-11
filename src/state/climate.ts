@@ -228,6 +228,14 @@ export function cycleSeat(climate: ClimateState, seat: SeatId, kind: SeatKind): 
   };
 }
 
+// Sets one seat to an exact level, for the bottom bar's seat popover. Cooling is refused on a
+// seat that has no ventilation, and the same level twice changes nothing.
+export function setSeatLevel(climate: ClimateState, seat: SeatId, level: SeatLevel): ClimateState {
+  if (level < 0 && !COOLED_SEATS.includes(seat)) return climate;
+  if (climate.seats[seat] === level) return climate;
+  return { ...climate, seats: { ...climate.seats, [seat]: level } };
+}
+
 // One switch for every seat and the wheel, which then stay individually adjustable.
 export function toggleHeatAuto(climate: ClimateState): ClimateState {
   const isAuto = isHeatAuto(climate);

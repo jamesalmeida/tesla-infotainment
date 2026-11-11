@@ -2,6 +2,7 @@ import { DOCK, isAppId, isParkedOnly, pausesOutOfPark, APPS, type AppId } from '
 import {
   CLIMATE_MODE_LABELS,
   cycleSeat,
+  setSeatLevel,
   endMode,
   initialClimate,
   setCabin,
@@ -18,6 +19,7 @@ import {
   type DefrostWindow,
   type SeatId,
   type SeatKind,
+  type SeatLevel,
   type TemperatureZone,
 } from './climate';
 import { CLOSED_DOORS, type DoorId, type DoorStates } from './doors';
@@ -593,6 +595,7 @@ export type CarAction =
   | { type: 'climate/options'; options: ClimateOptions }
   | { type: 'climate/defrost'; window: DefrostWindow }
   | { type: 'climate/seat'; seat: SeatId; kind: SeatKind }
+  | { type: 'climate/seat-level'; seat: SeatId; level: SeatLevel }
   | { type: 'climate/heat-auto' }
   | { type: 'climate/mode'; mode: ClimateMode }
   | { type: 'volume/set'; volume: number }
@@ -2223,6 +2226,11 @@ export function carReducer(state: CarState, action: CarAction): CarState {
 
     case 'climate/seat': {
       const climate = cycleSeat(state.climate, action.seat, action.kind);
+      return climate === state.climate ? state : { ...state, climate };
+    }
+
+    case 'climate/seat-level': {
+      const climate = setSeatLevel(state.climate, action.seat, action.level);
       return climate === state.climate ? state : { ...state, climate };
     }
 

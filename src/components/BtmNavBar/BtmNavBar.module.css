@@ -19,6 +19,13 @@
   border-radius: 0;
 }
 
+.climateGroup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
 .btmNavItems {
   color: white;
   display: grid;
