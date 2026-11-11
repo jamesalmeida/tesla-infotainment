@@ -15,10 +15,13 @@
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
+  transition: height 0.25s ease-out;
 }
 
 .track {
   display: flex;
+  /* Each card keeps its own height; the frame above follows the one showing. */
+  align-items: flex-start;
   transition: transform 0.25s ease-out;
   will-change: transform;
 }
@@ -40,10 +43,13 @@
   padding: 0;
 }
 
-/* The player brings its own frame, so take away its outside spacing inside the deck. */
+/* The deck is the frame, so the player inside it drops its own spacing and shadow. A second
+   shadow would show as a line across the middle of the card. */
 .mediaCard > div {
   width: 100%;
   margin: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .cardHeading {
