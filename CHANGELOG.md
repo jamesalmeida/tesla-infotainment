@@ -26,7 +26,8 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 ### Changed
 
 - The 3D model starts downloading straight after the HTML, and Open Sans loads through a stylesheet link with preconnect instead of an inline `@import`.
-- CI permissions are per job, so PR builds are read-only. Deploys run one at a time, and PR builds no longer upload a Pages artifact.
+- Hosting moved to Vercel, with the live app at https://tesla-infotainment-display.vercel.app/. The GitHub workflow runs checks only.
+- CI permissions are per job, so PR builds are read-only.
 - The loading screen has a new original animation, replacing the third-party CodePen circles, and it holds still for people who prefer reduced motion.
 - Migrated the app to TypeScript in strict mode; the UI state lives in a reducer instead of `App.jsx`, and component styles are scoped with CSS Modules.
 - Upgraded to React 19 with react-three-fiber 9, drei 10 and react-spring 10.
@@ -43,4 +44,4 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 ### Removed
 
 - Assets nothing used: the commercial Universal Sans font, `public/touchscreen/` (third-party logos of unknown origin), `logo512.svg` and an old car-settings icon. This cuts about 5 MB from the deployed site.
-- Create React App leftovers: the gh-pages deploy scripts (GitHub Actions deploys on push instead), the CRA sample manifest, the unused NavIcon and ShelfModal components, and the duplicate viewport meta tag.
+- Create React App leftovers: the gh-pages deploy scripts (Vercel builds on push instead), the CRA sample manifest, the unused NavIcon and ShelfModal components, and the duplicate viewport meta tag.

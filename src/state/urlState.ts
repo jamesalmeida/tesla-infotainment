@@ -12,7 +12,7 @@ export const layerOf = (state: CarState): HistoryLayer => {
   return state.surface.kind === 'closed' ? 0 : 1;
 };
 
-// Hashes rather than paths: GitHub Pages can't rewrite unknown paths back to the app.
+// Hashes rather than paths: a static host doesn't need to rewrite unknown paths back to the app.
 export function surfaceToHash(surface: Surface): string {
   switch (surface.kind) {
     case 'closed':

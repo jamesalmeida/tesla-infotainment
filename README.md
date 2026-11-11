@@ -4,7 +4,7 @@ Experience a simulated Tesla infotainment system in your browser!
 
 > Unofficial fan project, not affiliated with or endorsed by Tesla, Inc. Tesla and all related names, logos and trademarks belong to their respective owners.
 
-[Live Demo](https://jamesalmeida.github.io/tesla-infotainment/)
+[Live Demo](https://tesla-infotainment-display.vercel.app/)
 
 ![App Preview](public/app-preview.png)
 
@@ -52,7 +52,7 @@ src/hooks/        shared hooks (keyboard shortcuts, loading screen)
 src/styles/       shared CSS; per-component styles are CSS Modules
 ```
 
-The app is TypeScript (strict), and component styles are CSS Modules. `src/utils/assetPaths.ts` resolves asset URLs against the GitHub Pages base path.
+The app is TypeScript (strict), and component styles are CSS Modules. `src/utils/assetPaths.ts` resolves asset URLs against the app's base path.
 
 ## Dependency updates
 
@@ -135,7 +135,17 @@ Use `pnpm test:watch` while developing.
 
 ## Deployment
 
-Every push to `main` is linted, type-checked, tested, built and deployed to GitHub Pages by `.github/workflows/main.yml`. The GitHub Pages base path is configured in `vite.config.mjs`.
+The app is hosted on Vercel at https://tesla-infotainment-display.vercel.app/. The Vercel project is connected to this repository, so pushes and pull requests get preview deployments and `main` is the production deployment.
+
+Vercel settings:
+
+- Build command: `pnpm build`
+- Output directory: `dist`
+- Environment variables: `VITE_GOOGLE_MAPS_API_KEY` and `VITE_GOOGLE_MAPS_MAP_ID`
+
+Vercel builds with the root base path (`/`); local development and preview serve the app under `/tesla-infotainment/`.
+
+The GitHub workflow in `.github/workflows/main.yml` runs formatting, linting, type checking, unit tests and the build on every push and pull request, plus the browser suite on pull requests. It does not deploy; Vercel handles hosting.
 
 This project is built with [Vite](https://vite.dev/).
 

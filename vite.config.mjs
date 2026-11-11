@@ -17,8 +17,8 @@ const readGitSha = () => {
   }
 };
 
-// GitHub Pages serves the app under /tesla-infotainment/. Vercel previews are served at the
-// root, so the same branch can be tested without rewriting every asset URL.
+// Local dev and preview serve the app under /tesla-infotainment/. Vercel serves it at the
+// root, so a production build there uses / instead.
 const base = process.env.VERCEL ? '/' : '/tesla-infotainment/';
 
 export default defineConfig({
