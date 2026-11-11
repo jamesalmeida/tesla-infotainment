@@ -67,6 +67,7 @@ import {
   MAX_PROFILES,
   PROFILE_SETTING_KEYS,
   profileImage,
+  restoreDefaultName,
   VALET_PROFILE_ID,
   type CabinPosition,
   type Profile,
@@ -483,7 +484,7 @@ function restoreProfiles(saved: unknown, defaults: CarState): Profile[] {
     .slice(0, MAX_PROFILES - 1)
     .map((profile) => ({
       id: profile.id as number,
-      name: profile.name as string,
+      name: restoreDefaultName(profile.id as number, profile.name as string),
       image: profileImage(profile.id as number),
       saved: restoreSnapshot(profile.saved, defaults),
     }));

@@ -18,7 +18,7 @@ const renderTwoProfiles = () => {
       <UserProfile />
     </CarStateProvider>,
   );
-  return screen.getAllByRole('button', { name: /Alex/ });
+  return screen.getAllByRole('button', { name: /James/ });
 };
 
 test('only one profile menu can be open at a time', () => {
@@ -47,7 +47,7 @@ test('choosing a profile updates every profile button', () => {
   const [first] = renderTwoProfiles();
 
   press(first);
-  fireEvent.click(screen.getByRole('button', { name: /Sam/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Lauren/ }));
 
-  expect(screen.getAllByRole('button', { name: /Sam/ })).toHaveLength(2);
+  expect(screen.getAllByRole('button', { name: /Lauren/ })).toHaveLength(2);
 });

@@ -51,8 +51,14 @@ export const VALET_PROFILE_ID = 4;
 
 export const MAX_PROFILES = 8;
 
-export const profileImage = (id: number): string =>
-  getImagePath(id === VALET_PROFILE_ID ? 'icon-valet.svg' : 'icon-profile-default.svg');
+// The owner's own driver profile has their photo; everyone else gets the default icon.
+const OWNER_PROFILE_ID = 1;
+
+export const profileImage = (id: number): string => {
+  if (id === VALET_PROFILE_ID) return getImagePath('icon-valet.svg');
+  if (id === OWNER_PROFILE_ID) return getImagePath('profile01.svg');
+  return getImagePath('icon-profile-default.svg');
+};
 
 const defaultProfile = (id: number, name: string): Profile => ({
   id,
@@ -62,11 +68,23 @@ const defaultProfile = (id: number, name: string): Profile => ({
 });
 
 export const DEFAULT_PROFILES: Profile[] = [
-  defaultProfile(1, 'Alex'),
-  defaultProfile(2, 'Sam'),
+  defaultProfile(OWNER_PROFILE_ID, 'James'),
+  defaultProfile(2, 'Lauren'),
   defaultProfile(3, 'Guest'),
   defaultProfile(VALET_PROFILE_ID, 'Valet'),
 ];
+
+// For a week the defaults were renamed. A visit saved then keeps any name someone typed, but
+// the two untouched placeholders come back as the real names.
+const RENAMED_DEFAULTS: Record<number, [placeholder: string, name: string]> = {
+  1: ['Alex', 'James'],
+  2: ['Sam', 'Lauren'],
+};
+
+export const restoreDefaultName = (id: number, name: string): string => {
+  const renamed = RENAMED_DEFAULTS[id];
+  return renamed && renamed[0] === name ? renamed[1] : name;
+};
 
 export const isDriverProfile = (profile: Profile): boolean => profile.id !== VALET_PROFILE_ID;
 

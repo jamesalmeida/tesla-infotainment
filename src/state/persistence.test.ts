@@ -294,7 +294,7 @@ describe('settings', () => {
 });
 
 describe('profiles', () => {
-  const alex = { id: 1, name: 'Alex', saved: null };
+  const james = { id: 1, name: 'James', saved: null };
 
   test('drivers come back with their saved settings, and Valet is always there', () => {
     const restored = restoreState(
@@ -302,7 +302,7 @@ describe('profiles', () => {
       saved({
         activeProfileId: 7,
         profiles: [
-          alex,
+          james,
           {
             id: 7,
             name: 'Robin',
@@ -320,12 +320,37 @@ describe('profiles', () => {
     );
 
     expect(restored.activeProfileId).toBe(7);
-    expect(restored.profiles.map(({ name }) => name)).toEqual(['Alex', 'Robin', 'Valet']);
+    expect(restored.profiles.map(({ name }) => name)).toEqual(['James', 'Robin', 'Valet']);
     const robin = restored.profiles[1];
     expect(robin.image).not.toContain('example.com');
     expect(robin.saved?.cabin.seatPosition).toBe(12);
     expect(robin.saved?.settings.mapUnits).toBe('km');
     expect(robin.saved?.settings.eqBass).toBe(0);
+  });
+
+  test('the owner profile keeps its photo, and placeholder names saved last week come back', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({
+        profiles: [
+          { id: 1, name: 'Alex', saved: null },
+          { id: 2, name: 'Sam', saved: null },
+          { id: 5, name: 'Alex', saved: null },
+        ],
+      }),
+    );
+
+    expect(restored.profiles.map(({ name }) => name)).toEqual(['James', 'Lauren', 'Alex', 'Valet']);
+    expect(restored.profiles[0].image).toContain('profile01.svg');
+    expect(restored.profiles[1].image).toContain('icon-profile-default.svg');
+  });
+
+  test('a name someone typed is never replaced', () => {
+    const restored = restoreState(
+      initialCarState,
+      saved({ profiles: [{ id: 1, name: 'Jamie', saved: null }] }),
+    );
+    expect(restored.profiles[0].name).toBe('Jamie');
   });
 
   test.each([
