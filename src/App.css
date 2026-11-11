@@ -180,27 +180,70 @@ body {
   display: flex;
 }
 
-.parkViewBtn {
-  position: absolute;
-  top: calc(44 * var(--u));
-  right: calc(8 * var(--u));
-  z-index: 8;
-  min-height: var(--tap-target);
-  padding: 0 calc(10 * var(--u));
-  border: none;
-  border-radius: calc(7 * var(--u));
-  background: rgba(255, 255, 255, 0.78);
-  color: #4e4e4e;
-  font: inherit;
-  font-size: max(var(--text-min), calc(11 * var(--u)));
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: rgba(0, 0, 0, 0.12) 0 2px 6px;
+/* Under the car: the swipeable cards, and in Park view the navigation card beside them. */
+.carBottomRow {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: calc(12 * var(--u));
 }
 
-.parkViewBtn.active {
-  background: #2b2b2b;
-  color: #ffffff;
+/*
+ * Park view. The car panel lies over a full-width map instead of shrinking it, so the map
+ * shows through where the panel fades out at the top right. The status bar strip is cut out
+ * of the panel, so the map's lock, profile and clock stay where they are and still work.
+ */
+.horizontalPanelGroup.parkView {
+  --park-status-height: calc(44 * var(--u));
+  position: relative;
+}
+
+/* The panel library wraps each panel in an unclassed element that holds its flex size. */
+.horizontalPanelGroup.parkView > :has(> .leftPanel) {
+  position: absolute !important;
+  inset: 0;
+  z-index: 5;
+  width: 100% !important;
+  max-width: none !important;
+  flex: none !important;
+  box-shadow: none;
+  clip-path: polygon(
+    0 0,
+    42% 0,
+    42% var(--park-status-height),
+    100% var(--park-status-height),
+    100% 100%,
+    0 100%
+  );
+  -webkit-mask-image: radial-gradient(ellipse 32% 40% at 100% 0%, transparent 45%, #000000 100%);
+  mask-image: radial-gradient(ellipse 32% 40% at 100% 0%, transparent 45%, #000000 100%);
+}
+
+/* The map fills the screen underneath, with its status items moved clear of the car's. */
+.horizontalPanelGroup.parkView .leftPanel {
+  width: 100%;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.horizontalPanelGroup.parkView > :has(> .rightPanel) {
+  flex: 1 1 100% !important;
+  max-width: none !important;
+}
+
+.horizontalPanelGroup.parkView [class*='topMenuBar'] {
+  padding-left: 42%;
+}
+
+.horizontalPanelGroup.parkView .topBarCarStatusIcons {
+  max-width: 40%;
+}
+
+.horizontalPanelGroup.parkView .carBottomRow [class*='deck'] {
+  flex: 0 1 calc(560 * var(--u));
+  width: auto;
+  margin: 0 0 calc(12 * var(--u));
 }
 
 .carModelStatus {

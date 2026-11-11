@@ -1,0 +1,95 @@
+/* A narrow grip on the right edge of the full-width car panel. */
+.handle {
+  position: absolute;
+  top: 50%;
+  right: calc(4 * var(--u));
+  z-index: 7;
+  width: max(calc(16 * var(--u)), var(--tap-target));
+  height: calc(120 * var(--u));
+  transform: translateY(-50%);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.handle::before {
+  content: '';
+  display: block;
+  width: calc(5 * var(--u));
+  height: calc(100 * var(--u));
+  margin: 0 auto;
+  border-radius: calc(5 * var(--u));
+  background: #999999;
+}
+
+/* Covers the faded corner where the map shows through. It has no look of its own. */
+.mapCorner {
+  position: absolute;
+  top: var(--park-status-height);
+  right: 0;
+  z-index: 6;
+  width: 22%;
+  height: 26%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.navCard {
+  flex: 0 1 calc(320 * var(--u));
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: calc(5 * var(--u));
+  background: var(--color-card);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.navCard button {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  min-height: max(calc(48 * var(--u)), var(--tap-target));
+  padding: 0 calc(16 * var(--u));
+  border: none;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: max(var(--text-min), calc(15 * var(--u)));
+  cursor: pointer;
+}
+
+.navCard svg {
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.search {
+  color: var(--color-text-muted) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.shortcuts {
+  display: flex;
+}
+
+.shortcuts button {
+  flex: 1;
+  justify-content: center;
+}
+
+.shortcuts button + button {
+  border-left: 1px solid var(--color-border);
+}

@@ -416,17 +416,3 @@ test('the charge status sits with the car while a cable is in', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Unlock and Unplug' }));
   expect(document.querySelector('.chargeStatus')).toBeNull();
 });
-
-test('Park View can be opened and closed from the car panel', () => {
-  renderApp();
-  fireEvent.click(screen.getByRole('button', { name: 'Park View' }));
-  expect(screen.getByRole('button', { name: 'Exit Park View' })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  fireEvent.click(screen.getByRole('button', { name: 'Exit Park View' }));
-  expect(screen.getByRole('button', { name: 'Park View' })).toHaveAttribute(
-    'aria-pressed',
-    'false',
-  );
-});

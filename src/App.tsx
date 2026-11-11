@@ -36,6 +36,7 @@ import { MapNavigation } from './components/MapNavigation/MapNavigation';
 import { CarCards } from './components/CarCards/CarCards';
 import { DriveStrip } from './components/DriveStrip/DriveStrip';
 import { PedalDeck } from './components/PedalDeck/PedalDeck';
+import { ParkNavCard, ParkViewHandle, ParkViewMapCorner } from './components/ParkView/ParkView';
 import { DrivingVisualization } from './components/DrivingVisualization/DrivingVisualization';
 import { Modal } from './components/Modal/Modal';
 import { AppShelf } from './components/AppShelf/AppShelf';
@@ -79,6 +80,8 @@ const RIGHT_PANEL_SIZE = 100 - DEFAULT_LEFT_PANEL_SIZE;
 const STACKED_LEFT_PANEL_SIZE = 45;
 // A drag has to go this far past the default before it counts as making room for the car.
 const CLOSE_APP_DRAG_MARGIN = 3;
+// Dragged this far across in Park, the car panel takes the whole screen.
+const PARK_VIEW_ENTER_SIZE = 75;
 
 function App() {
   return (
@@ -129,29 +132,14 @@ function VehicleView({ onSettled }: { onSettled: () => void }) {
   );
 }
 
-function ParkViewButton({ isActive, onToggle }: { isActive: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      className={`parkViewBtn ${isActive ? 'active' : ''}`}
-      aria-pressed={isActive}
-      onClick={onToggle}
-    >
-      {isActive ? 'Exit Park View' : 'Park View'}
-    </button>
-  );
-}
-
 const LeftPanelContent = memo(function LeftPanelContent({
   onCarSettled,
-  canParkView,
   isParkView,
-  onToggleParkView,
+  onLeaveParkView,
 }: {
   onCarSettled: () => void;
-  canParkView: boolean;
   isParkView: boolean;
-  onToggleParkView: () => void;
+  onLeaveParkView: () => void;
 }) {
   return (
     <>
@@ -160,9 +148,17 @@ const LeftPanelContent = memo(function LeftPanelContent({
       <CompartmentControls />
       <ChargeStatus />
       <VehicleView onSettled={onCarSettled} />
-      <CarCards />
+      <div className="carBottomRow">
+        <CarCards />
+        {isParkView && <ParkNavCard onExit={onLeaveParkView} />}
+      </div>
       <DriveStrip />
-      {canParkView && <ParkViewButton isActive={isParkView} onToggle={onToggleParkView} />}
+      {isParkView && (
+        <>
+          <ParkViewMapCorner onExit={onLeaveParkView} />
+          <ParkViewHandle onExit={onLeaveParkView} />
+        </>
+      )}
     </>
   );
 });
@@ -266,8 +262,6 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
     if (!panel) return;
     if (hasViewSwitch) panel.resize(visibleView === 'car' ? '100%' : '0%');
     else if (isStacked) panel.resize(`${STACKED_LEFT_PANEL_SIZE}%`);
-    // Park View is the full-width scene, with no map beside it.
-    else if (showParkView) panel.resize('100%');
     // The split only widens in Drive, and an open app always gets the default width.
     else if (!driving || isOpen) panel.resize(`${DEFAULT_LEFT_PANEL_SIZE}%`);
   }, [driving, isOpen, isStacked, hasViewSwitch, visibleView, showParkView]);
@@ -281,7 +275,11 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
     if (meta.isUserInteraction && leftSize > DEFAULT_LEFT_PANEL_SIZE + CLOSE_APP_DRAG_MARGIN) {
       closeSurface();
     }
+    // Pulling the car panel most of the way across in Park opens the full Park view.
+    if (meta.isUserInteraction && parked && leftSize >= PARK_VIEW_ENTER_SIZE) setParkView(true);
   };
+
+  const leaveParkView = useCallback(() => setParkView(false), []);
 
   return (
     <>
@@ -290,7 +288,7 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
         defaultLayout={defaultLayout}
         onLayoutChanged={handleLayoutChanged}
         orientation={isStacked ? 'vertical' : 'horizontal'}
-        className="horizontalPanelGroup"
+        className={`horizontalPanelGroup ${showParkView ? 'parkView' : ''}`}
       >
         <Panel
           id={LEFT_PANEL_ID}
@@ -302,9 +300,8 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
         >
           <LeftPanelContent
             onCarSettled={onCarSettled}
-            canParkView={parked && !isStacked}
             isParkView={showParkView}
-            onToggleParkView={() => setParkView((open) => !open)}
+            onLeaveParkView={leaveParkView}
           />
         </Panel>
         {!isStacked && !showParkView && <Separator className="panelResizeHandle" />}
