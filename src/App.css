@@ -96,7 +96,7 @@ body {
 }
 
 .leftPanel {
-  background-color: #f1f1f1;
+  background-color: var(--color-bg);
   width: 100%;
   height: 100%;
   display: flex;
@@ -178,6 +178,21 @@ body {
   flex: 1;
   min-height: 0;
   display: flex;
+  /*
+   * The park scene: plain panel colour above, a floor that darkens towards the middle of the
+   * car and fades back out below it, with a soft pool of light where the car stands. Both
+   * ends are the panel's own colour, so the scene has no visible edge.
+   */
+  background:
+    radial-gradient(ellipse 46% 20% at 50% 66%, var(--scene-light), transparent 72%),
+    linear-gradient(
+      180deg,
+      var(--color-bg) 0%,
+      var(--color-bg) 24%,
+      var(--scene-floor) 62%,
+      var(--scene-floor-deep) 78%,
+      var(--color-bg) 100%
+    );
 }
 
 /* Under the car: the swipeable cards, and in Park view the navigation card beside them. */

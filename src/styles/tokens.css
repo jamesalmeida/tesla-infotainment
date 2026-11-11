@@ -47,6 +47,11 @@
   --color-toggle-on: #2d5be3;
   --color-on-toggle: #ffffff;
 
+  /* The floor of the park scene behind the car. */
+  --scene-floor: #e1e1e1;
+  --scene-floor-deep: #d6d6d6;
+  --scene-light: rgba(255, 255, 255, 0.7);
+
   /* The real screen is 1920x1200. */
   --display-ratio: 1.6;
 
@@ -61,6 +66,9 @@
 }
 
 :root[data-theme='dark'] {
+  --scene-floor: #22262a;
+  --scene-floor-deep: #1b1e21;
+  --scene-light: rgba(120, 128, 136, 0.25);
   --color-bg: #151617;
   --color-panel: #1f2022;
   --color-card: #2a2b2e;

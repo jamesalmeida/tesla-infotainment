@@ -7,6 +7,7 @@ import BatteryStatus from '../BatteryStatus/BatteryStatus';
 import GearSelect from '../GearSelect/GearSelect';
 import { PedalButton } from '../PedalDeck/PedalDeck';
 import { Telltales } from './Telltales';
+import { SelfDrivingButton } from '../SelfDriving/SelfDrivingButton';
 
 function TurnSignal({
   side,
@@ -120,6 +121,7 @@ export function CarStatus() {
         <SpeedLimit />
       </div>
       <Telltales />
+      <SelfDrivingButton />
       <Pedals />
     </div>
   );
