@@ -1,6 +1,10 @@
 import { useSyncExternalStore } from 'react';
-import { getMediaTransport } from '../state/mediaTransport';
+import { setMediaTransport } from '../state/mediaTransport';
 import { safeStorage } from '../utils/safeStorage';
+import { createAudioEngine, type PlaybackEngine, type PlaybackReport } from './audioEngine';
+import { FEATURED_PODCASTS } from './featuredPodcasts';
+
+export type { PlaybackEngine, PlaybackReport };
 
 /* -------------------- What the apps browse -------------------- */
 
@@ -10,10 +14,16 @@ export interface MediaItem {
   // The artist, show or station.
   subtitle: string;
   collectionId: string;
-  // Null for a live stream.
+  // Null when it isn't known up front, for a live stream or before an episode has loaded.
   durationSeconds: number | null;
+  // A live stream has no position to seek or remember.
+  live?: boolean;
   // Absent for sample content, which has no audio behind it.
   streamUrl?: string;
+  // Cover art. Without it the art is drawn from the collection, so nothing breaks.
+  artworkUrl?: string;
+  // Which source it came from, so the player can show where it's playing from.
+  sourceId?: MediaSourceId;
   // Episodes pick up where they stopped. Songs start over.
   resumable?: boolean;
   description?: string;
@@ -23,6 +33,7 @@ export interface MediaCollection {
   id: string;
   title: string;
   subtitle: string;
+  artworkUrl?: string;
   items: MediaItem[];
 }
 
@@ -32,7 +43,8 @@ export interface MediaShelf {
   collections: MediaCollection[];
 }
 
-// A catalogue. Sample data today; a MusicKit or RSS version only has to implement this.
+// A catalogue. Adding a new kind of audio means registering one of these: the media card, the
+// full player and the shortcuts all work with it from then on.
 export interface MediaSource {
   browse: () => Promise<MediaShelf[]>;
 }
@@ -156,12 +168,25 @@ const SAMPLE_PODCASTS: MediaShelf[] = [
   },
 ];
 
+// Every item a source hands out is tagged with it, so the player knows where it came from.
+const tagShelves = (id: MediaSourceId, shelves: MediaShelf[]): MediaShelf[] =>
+  shelves.map((shelf) => ({
+    ...shelf,
+    collections: shelf.collections.map((shelfCollection) => ({
+      ...shelfCollection,
+      items: shelfCollection.items.map((item) => ({ ...item, sourceId: item.sourceId ?? id })),
+    })),
+  }));
+
 const sources: Record<string, MediaSource> = {
-  music: { browse: () => Promise.resolve(SAMPLE_MUSIC) },
-  podcasts: { browse: () => Promise.resolve(SAMPLE_PODCASTS) },
+  music: { browse: () => Promise.resolve(tagShelves('music', SAMPLE_MUSIC)) },
+  podcasts: {
+    browse: () => Promise.resolve(tagShelves('podcasts', [FEATURED_PODCASTS, ...SAMPLE_PODCASTS])),
+  },
 };
 
-export type MediaSourceId = 'music' | 'podcasts';
+// Known sources. Radio streams live, from its own app, so it has no catalogue here.
+export type MediaSourceId = 'music' | 'podcasts' | 'radio';
 
 export const getMediaSource = (id: MediaSourceId): MediaSource => sources[id];
 
@@ -219,37 +244,36 @@ export interface NowPlaying {
   isPlaying: boolean;
   isLoading: boolean;
   positionSeconds: number;
+  // The real length once the audio knows it, which a catalogue often doesn't.
+  durationSeconds: number | null;
   error: string | null;
 }
 
-// What MusicPanel's playback has to offer for these apps to use it. It reports back through
-// `reportPlayback`, which is passed in when it connects.
-export interface PlaybackEngine {
-  play: (item: MediaItem, startAtSeconds: number) => void;
-  pause: () => void;
-  resume: () => void;
-  seek: (seconds: number) => void;
-  stop: () => void;
-  setVolume: (volume: number) => void;
-}
+// Past this, Previous goes back to the start of the item rather than to the one before.
+export const RESTART_THRESHOLD_SECONDS = 3;
 
-export type PlaybackReport =
-  | { type: 'position'; seconds: number }
-  | { type: 'playing' }
-  | { type: 'paused' }
-  | { type: 'ended' }
-  | { type: 'failed'; message: string };
+const SAVE_POSITION_EVERY_SECONDS = 5;
 
-const idle: NowPlaying = {
-  item: null,
-  queue: [],
-  isPlaying: false,
-  isLoading: false,
-  positionSeconds: 0,
-  error: null,
+// The media card shows something from the first moment, the way the car does: one of the
+// featured episodes, cued but not loaded, so nothing downloads until play is pressed.
+const featuredEpisodes = FEATURED_PODCASTS.collections.flatMap((show) =>
+  show.items.map((item) => ({ ...item, sourceId: 'podcasts' as const })),
+);
+
+const cued = (): NowPlaying => {
+  const item = featuredEpisodes[Math.floor(Math.random() * featuredEpisodes.length)] ?? null;
+  return {
+    item,
+    queue: featuredEpisodes,
+    isPlaying: false,
+    isLoading: false,
+    positionSeconds: 0,
+    durationSeconds: item?.durationSeconds ?? null,
+    error: null,
+  };
 };
 
-let nowPlaying = idle;
+let nowPlaying: NowPlaying = cued();
 const listeners = new Set<() => void>();
 
 const publish = (patch: Partial<NowPlaying>) => {
@@ -257,23 +281,30 @@ const publish = (patch: Partial<NowPlaying>) => {
   listeners.forEach((listener) => listener());
 };
 
-const SAVE_POSITION_EVERY_SECONDS = 5;
 let lastSavedPosition = 0;
 
 function rememberPosition(force = false) {
   const { item, positionSeconds } = nowPlaying;
-  if (!item?.resumable) return;
+  if (!item?.resumable || item.live) return;
   if (!force && Math.abs(positionSeconds - lastSavedPosition) < SAVE_POSITION_EVERY_SECONDS) return;
   lastSavedPosition = positionSeconds;
-  positions = updatePosition(readPositions(), item, positionSeconds);
+  const sized = { ...item, durationSeconds: nowPlaying.durationSeconds ?? item.durationSeconds };
+  positions = updatePosition(readPositions(), sized, positionSeconds);
   safeStorage.setItem(POSITIONS_KEY, JSON.stringify(positions));
 }
 
 function reportPlayback(report: PlaybackReport) {
   switch (report.type) {
     case 'position':
+      if (report.seconds === nowPlaying.positionSeconds) return;
       publish({ positionSeconds: report.seconds });
       rememberPosition();
+      break;
+    case 'duration':
+      publish({ durationSeconds: report.seconds ?? nowPlaying.item?.durationSeconds ?? null });
+      break;
+    case 'loading':
+      publish({ isLoading: true, error: null });
       break;
     case 'playing':
       publish({ isPlaying: true, isLoading: false, error: null });
@@ -282,129 +313,24 @@ function reportPlayback(report: PlaybackReport) {
       publish({ isPlaying: false, isLoading: false });
       rememberPosition(true);
       break;
-    case 'ended':
+    case 'ended': {
       rememberPosition(true);
-      skip(1);
+      // Plays on through the queue, and stops after the last item rather than starting over.
+      const { item, queue } = nowPlaying;
+      const index = item ? queue.findIndex((queued) => queued.id === item.id) : -1;
+      if (index >= 0 && index < queue.length - 1) playItem(queue[index + 1], queue);
+      else publish({ isPlaying: false, isLoading: false });
       break;
+    }
     case 'failed':
       publish({ isPlaying: false, isLoading: false, error: report.message });
       break;
   }
 }
 
-const CLOCK_TICK_MS = 250;
-const STREAM_TIMEOUT_MS = 12000;
-const STREAM_FAILED = "This stream can't be played right now.";
+let engine: PlaybackEngine = createAudioEngine(reportPlayback);
 
-// Stands in until the real player is connected. Anything with a stream plays through its own
-// audio element, and sample content has no audio, so a clock moves it along silently.
-function createPreviewEngine(report: (report: PlaybackReport) => void): PlaybackEngine {
-  let audio: HTMLAudioElement | null = null;
-  let clock: ReturnType<typeof setInterval> | undefined;
-  let loadTimer: ReturnType<typeof setTimeout> | undefined;
-  let position = 0;
-  let duration: number | null = null;
-  let volume = 0.5;
-
-  const stopClock = () => clearInterval(clock);
-
-  const startClock = () => {
-    stopClock();
-    let last = Date.now();
-    clock = setInterval(() => {
-      const now = Date.now();
-      position += (now - last) / 1000;
-      last = now;
-      if (duration !== null && position >= duration) {
-        stopClock();
-        report({ type: 'ended' });
-      } else {
-        report({ type: 'position', seconds: position });
-      }
-    }, CLOCK_TICK_MS);
-  };
-
-  const releaseAudio = () => {
-    clearTimeout(loadTimer);
-    if (!audio) return;
-    audio.pause();
-    audio.removeAttribute('src');
-    audio.load();
-    audio = null;
-  };
-
-  const startAudio = (element: HTMLAudioElement) => {
-    element.play().catch((error: Error) => {
-      if (error.name === 'AbortError') return;
-      report({ type: 'failed', message: STREAM_FAILED });
-    });
-  };
-
-  return {
-    play(item, startAtSeconds) {
-      stopClock();
-      releaseAudio();
-      position = startAtSeconds;
-      duration = item.durationSeconds;
-      if (!item.streamUrl) {
-        startClock();
-        report({ type: 'playing' });
-        return;
-      }
-      const element = new Audio(item.streamUrl);
-      audio = element;
-      element.volume = volume;
-      element.currentTime = startAtSeconds;
-      // A dead stream can hang without ever raising an error.
-      loadTimer = setTimeout(
-        () => report({ type: 'failed', message: STREAM_FAILED }),
-        STREAM_TIMEOUT_MS,
-      );
-      element.addEventListener('playing', () => {
-        clearTimeout(loadTimer);
-        report({ type: 'playing' });
-      });
-      element.addEventListener('timeupdate', () =>
-        report({ type: 'position', seconds: element.currentTime }),
-      );
-      element.addEventListener('ended', () => report({ type: 'ended' }));
-      element.addEventListener('error', () => {
-        clearTimeout(loadTimer);
-        report({ type: 'failed', message: STREAM_FAILED });
-      });
-      startAudio(element);
-    },
-    pause() {
-      stopClock();
-      audio?.pause();
-      report({ type: 'paused' });
-    },
-    resume() {
-      if (audio) startAudio(audio);
-      else startClock();
-      report({ type: 'playing' });
-    },
-    seek(seconds) {
-      position = seconds;
-      if (audio) audio.currentTime = seconds;
-      report({ type: 'position', seconds });
-    },
-    stop() {
-      stopClock();
-      releaseAudio();
-    },
-    setVolume(next) {
-      volume = next / 100;
-      if (audio) audio.volume = volume;
-    },
-  };
-}
-
-let engine = createPreviewEngine(reportPlayback);
-
-// THE WIRING POINT. Call this once with the real player (usePlayback) and every media app plays
-// through it: Music, Podcasts, Radio and Caraoke, including queueing and remembered positions.
-// The engine reports position, state and the end of each item through the callback it is given.
+// For tests, and for a future engine such as one backed by a streaming SDK.
 export function connectPlayback(
   connect: (report: (report: PlaybackReport) => void) => PlaybackEngine,
 ) {
@@ -412,11 +338,11 @@ export function connectPlayback(
   engine = connect(reportPlayback);
 }
 
+// Plays an item now, from where it was left if it's an episode. The queue is what Next and
+// Previous move through, and it wraps around like the car's player.
 export function playItem(item: MediaItem, queue: MediaItem[] = [item]) {
-  // One source at a time, so an app starting silences the media card.
-  getMediaTransport()?.pause();
   rememberPosition(true);
-  const startAt = resumePosition(item);
+  const startAt = item.live ? 0 : resumePosition(item);
   lastSavedPosition = startAt;
   publish({
     item,
@@ -424,49 +350,70 @@ export function playItem(item: MediaItem, queue: MediaItem[] = [item]) {
     isPlaying: false,
     isLoading: true,
     positionSeconds: startAt,
+    durationSeconds: item.durationSeconds,
     error: null,
   });
   engine.play(item, startAt);
 }
 
-export function togglePlayback() {
-  if (!nowPlaying.item) return;
-  if (nowPlaying.isPlaying) {
-    engine.pause();
-  } else {
-    getMediaTransport()?.pause();
-    engine.resume();
-  }
+export function playCurrent() {
+  const { item, queue } = nowPlaying;
+  if (!item) return;
+  // A cued item, or one that failed, has to load; anything else just carries on.
+  if (engine.loadedId() !== item.id || nowPlaying.error) playItem(item, queue);
+  else engine.resume();
 }
 
-export function pauseLibraryPlayback() {
-  if (nowPlaying.isPlaying) engine.pause();
+export function pausePlayback() {
+  if (nowPlaying.isPlaying || nowPlaying.isLoading) engine.pause();
+}
+
+export function togglePlayback() {
+  if (!nowPlaying.item) return;
+  if (nowPlaying.isPlaying || nowPlaying.isLoading) pausePlayback();
+  else playCurrent();
 }
 
 export function seekPlayback(seconds: number) {
+  if (nowPlaying.item?.live) return;
   engine.seek(seconds);
   rememberPosition(true);
 }
 
-export const nextInQueue = (queue: MediaItem[], current: MediaItem, step: number) =>
-  queue[queue.findIndex((item) => item.id === current.id) + step];
+export const nextInQueue = (queue: MediaItem[], current: MediaItem, step: number) => {
+  if (queue.length === 0) return undefined;
+  const index = queue.findIndex((item) => item.id === current.id);
+  return queue[(index + step + queue.length) % queue.length];
+};
 
+// Moves through the queue, carrying on playing if it was. Previous restarts the item first
+// once it is a few seconds in, as most players do.
 export function skip(step: 1 | -1) {
-  const { item, queue } = nowPlaying;
+  const { item, queue, isPlaying, isLoading, positionSeconds } = nowPlaying;
   if (!item) return;
-  const next = nextInQueue(queue, item, step);
-  if (next) playItem(next, queue);
-  else {
-    if (step === 1) engine.pause();
+  if (step === -1 && !item.live && positionSeconds > RESTART_THRESHOLD_SECONDS) {
     seekPlayback(0);
+    return;
+  }
+  const next = nextInQueue(queue, item, step);
+  if (!next) return;
+  if (isPlaying || isLoading || engine.loadedId() === item.id) {
+    playItem(next, queue);
+  } else {
+    // Nothing is loaded yet: just cue the next one, as the card does before first play.
+    publish({
+      item: next,
+      positionSeconds: next.live ? 0 : resumePosition(next),
+      durationSeconds: next.durationSeconds,
+      error: null,
+    });
   }
 }
 
 export function stopPlayback() {
   rememberPosition(true);
   engine.stop();
-  nowPlaying = idle;
-  listeners.forEach((listener) => listener());
+  publish({ ...cued(), item: null, queue: [] });
 }
 
 // For apps whose sound must not outlive their screen. Anything else playing is left alone.
@@ -476,6 +423,16 @@ export function stopItem(id: string) {
 
 export const setPlaybackVolume = (volume: number) => engine.setVolume(volume);
 
+// Shortcuts, voice and the rear display all drive the player through this.
+setMediaTransport({
+  togglePlayPause: togglePlayback,
+  play: playCurrent,
+  pause: pausePlayback,
+  next: () => skip(1),
+  previous: () => skip(-1),
+  isPlaying: () => nowPlaying.isPlaying,
+});
+
 const subscribe = (listener: () => void) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
@@ -483,11 +440,16 @@ const subscribe = (listener: () => void) => {
 
 export const useNowPlaying = (): NowPlaying => useSyncExternalStore(subscribe, () => nowPlaying);
 
-// Tests start each case with nothing playing and from what is in storage.
-export function resetMediaLibrary() {
+// One part of what's playing, so a component only re-renders when that part changes. The
+// selector must return a primitive or an object already in the state.
+export const useNowPlayingValue = <T>(selector: (now: NowPlaying) => T): T =>
+  useSyncExternalStore(subscribe, () => selector(nowPlaying));
+
+// Tests start each case with nothing loaded and from what is in storage.
+export function resetMediaLibrary(options: { cue?: boolean } = {}) {
   engine.stop();
-  engine = createPreviewEngine(reportPlayback);
-  nowPlaying = idle;
+  engine = createAudioEngine(reportPlayback);
+  nowPlaying = options.cue ? cued() : { ...cued(), item: null, queue: [] };
   positions = null;
   lastSavedPosition = 0;
 }

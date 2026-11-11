@@ -1,118 +1,100 @@
-import { memo, useEffect, useState } from 'react';
-import { pauseLibraryPlayback } from '../../apps/mediaLibrary';
-import { setMediaTransport } from '../../state/mediaTransport';
+import { memo, useState } from 'react';
+import {
+  skip,
+  togglePlayback,
+  useNowPlayingValue,
+  type MediaSourceId,
+} from '../../apps/mediaLibrary';
+import { MediaArt } from '../../apps/ui/MediaArt';
 import { FullMediaPlayer, type PlayerTab } from '../FullMediaPlayer/FullMediaPlayer';
 import { getImagePath } from '../../utils/assetPaths';
 import { ProgressBar } from './ProgressBar';
-import { usePlayback } from './usePlayback';
 import styles from './MusicPanel.module.css';
 
-const tracks = [
-  {
-    title: '#440 - Pieter Levels: Programming, Viral Al Startups, and Digital Nomad Life',
-    album: 'Lex Fridman Podcast',
-    art: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts115/v4/3e/e3/9c/3ee39c89-de08-47a6-7f3d-3849cef6d255/mza_16657851278549137484.png/600x600bb.webp',
-    // audio: "/audio/podcasts/lex_fridman_440_ai_pieter_levels.mp3"
-    audio: 'https://content.blubrry.com/takeituneasy/lex_ai_pieter_levels.mp3',
+// The small grey mark before the second line, saying where the audio comes from. Podcasts keep
+// the card's original Bluetooth mark; the others are drawn to match it. A new source only needs
+// an entry here.
+const SOURCE_MARKS: Record<MediaSourceId, { label: string; image?: string; path?: string }> = {
+  podcasts: { label: 'Bluetooth', image: 'icon-music-bluetooth.svg' },
+  radio: {
+    label: 'Radio',
+    path: 'M12 11v9M8.5 7.5a5 5 0 0 1 7 0M5.7 4.7a9 9 0 0 1 12.6 0M10.6 9.4a2 2 0 0 1 2.8 0',
   },
-  {
-    title: '#438 – Elon Musk: Neuralink and the Future of Humanity',
-    album: 'Lex Fridman Podcast',
-    art: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts115/v4/3e/e3/9c/3ee39c89-de08-47a6-7f3d-3849cef6d255/mza_16657851278549137484.png/600x600bb.webp',
-    audio: 'https://content.blubrry.com/takeituneasy/lex_ai_elon_musk_and_neuralink_team.mp3',
+  music: {
+    label: 'Music',
+    path: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm11-2a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z',
   },
-  {
-    title: 'SEP 5 - S01E77 - The Road to Autonomous Intelligence with Andrej Karpathy',
-    album: 'No Priors Podcast',
-    art: 'https://is1-ssl.mzstatic.com/image/thumb/Podcasts122/v4/a6/4d/9c/a64d9c5a-2ca4-6a1b-3ceb-424efe00d022/mza_1247466525586262525.jpg/600x600bb.webp',
-    audio:
-      'https://dcs-spotify.megaphone.fm/PDP5840775995.mp3?key=ddb7f40d09aa7f54678599bee8fe8735&request_event_id=db0b2f9d-9700-4f1d-9a84-163472e7824c&timetoken=1726938704_F98B8D0954A9F5A6E4C44CD6BC70A492',
-  },
-  // Add more tracks here
-];
+};
 
-const audioUrls = tracks.map((track) => track.audio);
-
-const chooseRandomTrack = () => Math.floor(Math.random() * tracks.length);
-
-function AlbumArt({ src }: { src: string }) {
-  const [failed, setFailed] = useState(false);
-
-  if (failed) {
-    return (
-      <div className={styles.artPlaceholder} role="img" aria-label="No album art">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z" />
-        </svg>
-      </div>
-    );
+function SourceMark({ source }: { source: MediaSourceId }) {
+  const mark = SOURCE_MARKS[source];
+  if (mark.image) {
+    return <img className={styles.sourceIcon} src={getImagePath(mark.image)} alt={mark.label} />;
   }
-  return <img alt="" src={src} onError={() => setFailed(true)} />;
+  return (
+    <svg
+      className={`${styles.sourceIcon} ${styles.sourceGlyph}`}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label={mark.label}
+    >
+      <path d={mark.path} />
+    </svg>
+  );
+}
+
+function EmptyArt() {
+  return (
+    <div className={styles.artPlaceholder} role="img" aria-label="No album art">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z" />
+      </svg>
+    </div>
+  );
 }
 
 interface MusicPanelProps {
-  volume: number;
-  // Optional, so the player can be tested without the car store.
+  // Kept for the callers that pass it; the player itself follows the car's volume.
+  volume?: number;
   onOpenAudioSettings?: () => void;
 }
 
-export const MusicPanel = memo(function MusicPanel({
-  volume,
-  onOpenAudioSettings,
-}: MusicPanelProps) {
-  const { playback, timeline, togglePlayPause, play, pause, next, previous, seek } = usePlayback(
-    audioUrls,
-    chooseRandomTrack,
-    volume,
-  );
+/**
+ * The media card. It plays nothing itself: it shows whatever the shared player has, from any
+ * app (Podcasts, Radio, Music, and whatever comes next), and its buttons drive that player.
+ */
+export const MusicPanel = memo(function MusicPanel({ onOpenAudioSettings }: MusicPanelProps) {
+  const item = useNowPlayingValue((now) => now.item);
+  const isPlaying = useNowPlayingValue((now) => now.isPlaying);
+  const isBuffering = useNowPlayingValue((now) => now.isLoading);
+  const error = useNowPlayingValue((now) => now.error);
   const [playerTab, setPlayerTab] = useState<PlayerTab | null>(null);
-  const track = tracks[playback.track];
-  const isBuffering = playback.status === 'loading';
-  const showPause = playback.status === 'playing' || isBuffering;
-
-  // Keyboard shortcuts, kept apart from playback: these move to a shared handler.
-  // Lets the shortcut table and other apps drive the player without owning it.
-  useEffect(() => {
-    setMediaTransport({
-      togglePlayPause,
-      play,
-      pause,
-      next,
-      previous,
-      isPlaying: () => playback.status === 'playing',
-    });
-    return () => setMediaTransport(null);
-  }, [togglePlayPause, play, pause, next, previous, playback.status]);
-
-  // One source at a time: starting this player pauses anything from the media apps.
-  useEffect(() => {
-    if (playback.status === 'playing') pauseLibraryPlayback();
-  }, [playback.status]);
+  const showPause = isPlaying || isBuffering;
 
   return (
     <>
       <div className={styles.musicPanel}>
         <div className={styles.albumArt}>
-          <AlbumArt key={track.art} src={track.art} />
-        </div>
-        <div className={styles.musicText}>
-          <div className={styles.title}>{track.title}</div>
-          <img
-            className={styles.sourceIcon}
-            src={getImagePath('icon-music-bluetooth.svg')}
-            alt="Bluetooth"
-          />
-          {playback.status === 'error' ? (
-            <div className={`${styles.albumTitle} ${styles.errorText}`} role="alert">
-              {playback.message}
-            </div>
+          {item ? (
+            <MediaArt key={item.id} artworkUrl={item.artworkUrl} seed={item.collectionId} />
           ) : (
-            <div className={styles.albumTitle}>{track.album}</div>
+            <EmptyArt />
           )}
         </div>
-        <ProgressBar timeline={timeline} onSeek={seek} />
+        <div className={styles.musicText}>
+          <div className={styles.title}>{item?.title ?? 'Nothing playing'}</div>
+          <SourceMark source={item?.sourceId ?? 'podcasts'} />
+          {error ? (
+            <div className={`${styles.albumTitle} ${styles.errorText}`} role="alert">
+              {error}
+            </div>
+          ) : (
+            <div className={styles.albumTitle}>{item?.subtitle ?? 'Choose something to play'}</div>
+          )}
+        </div>
+        <ProgressBar />
         <div className={styles.musicBtnBar}>
-          <button className={styles.musicBtn} onClick={previous}>
+          <button className={styles.musicBtn} onClick={() => skip(-1)}>
             <img
               className={`${styles.musicIcon} ctaBtn`}
               src={getImagePath('icon-music-previous.svg')}
@@ -121,7 +103,7 @@ export const MusicPanel = memo(function MusicPanel({
           </button>
           <button
             className={`${styles.musicBtn} ${isBuffering ? styles.buffering : ''}`}
-            onClick={togglePlayPause}
+            onClick={togglePlayback}
             aria-busy={isBuffering}
           >
             <img
@@ -130,7 +112,7 @@ export const MusicPanel = memo(function MusicPanel({
               alt={showPause ? 'Pause' : 'Play'}
             />
           </button>
-          <button className={styles.musicBtn} onClick={next}>
+          <button className={styles.musicBtn} onClick={() => skip(1)}>
             <img
               className={`${styles.musicIcon} ctaBtn`}
               src={getImagePath('icon-music-next.svg')}

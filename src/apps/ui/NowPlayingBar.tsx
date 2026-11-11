@@ -6,19 +6,20 @@ import {
   useNowPlaying,
 } from '../mediaLibrary';
 import { ui } from './AppScreen';
-import { GeneratedArt } from './GeneratedArt';
+import { MediaArt } from './MediaArt';
 import styles from './NowPlayingBar.module.css';
 
 // The transport shared by Music, Podcasts and Radio.
 export function NowPlayingBar() {
-  const { item, isPlaying, isLoading, positionSeconds } = useNowPlaying();
+  const { item, isPlaying, isLoading, positionSeconds, durationSeconds } = useNowPlaying();
   if (!item) return null;
 
-  const duration = item.durationSeconds;
+  // Live radio has no length to show; an episode shows one once its audio knows it.
+  const duration = item.live ? null : durationSeconds;
 
   return (
     <section className={styles.bar} aria-label="Now playing">
-      <GeneratedArt seed={item.collectionId} className={styles.art} />
+      <MediaArt artworkUrl={item.artworkUrl} seed={item.collectionId} className={styles.art} />
       <div className={styles.text}>
         <div className={`${ui.strong} ${styles.line}`}>{item.title}</div>
         <div className={`${ui.muted} ${styles.line}`}>{item.subtitle}</div>
@@ -40,30 +41,21 @@ export function NowPlayingBar() {
         </div>
       )}
       <div className={styles.buttons}>
-        {duration !== null && (
-          <button
-            type="button"
-            className={ui.button}
-            aria-label="Previous"
-            onClick={() => skip(-1)}
-          >
-            ‹‹
-          </button>
-        )}
+        {/* Radio steps through the station list too, so both buttons show for every source. */}
+        <button type="button" className={ui.button} aria-label="Previous" onClick={() => skip(-1)}>
+          ‹‹
+        </button>
         <button
           type="button"
           className={`${ui.button} ${ui.primary}`}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-          disabled={isLoading}
+          aria-label={isPlaying || isLoading ? 'Pause' : 'Play'}
           onClick={togglePlayback}
         >
           {isLoading ? '…' : isPlaying ? 'Pause' : 'Play'}
         </button>
-        {duration !== null && (
-          <button type="button" className={ui.button} aria-label="Next" onClick={() => skip(1)}>
-            ››
-          </button>
-        )}
+        <button type="button" className={ui.button} aria-label="Next" onClick={() => skip(1)}>
+          ››
+        </button>
       </div>
     </section>
   );

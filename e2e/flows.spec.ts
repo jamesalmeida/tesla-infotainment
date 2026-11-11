@@ -164,9 +164,16 @@ test('only one Audio element ever exists, and unrelated clicks request nothing',
     await page.getByAltText('Increase temperature').click();
   }
 
-  const count = await page.evaluate(() => (window as unknown as { audioCount: number }).audioCount);
-  expect(count).toBe(1);
+  const audioCount = () =>
+    page.evaluate(() => (window as unknown as { audioCount: number }).audioCount);
+  // The shared player makes its one element on the first Play, not before.
+  expect(await audioCount()).toBe(0);
   expect(audioRequests).toEqual([]);
+
+  const card = page.locator('[class*="musicPanel"]');
+  await card.getByAltText('Play').click();
+  await card.getByAltText('Next Track').click();
+  expect(await audioCount()).toBe(1);
 });
 
 test.describe('failures stay contained', () => {

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useRef, useState } from 'react';
-import { APPS, type AppId } from '../../apps/registry';
+import { APPS, appSurface, type AppId } from '../../apps/registry';
 import { useDragToDismiss } from '../../hooks/useDragToDismiss';
 import { AppFailed } from '../ErrorBoundary/Fallbacks';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
@@ -55,7 +55,14 @@ const VerticalSliderPanel = ({
   ].join(' ');
 
   return (
-    <div ref={panelRef} className={className}>
+    <div
+      ref={panelRef}
+      className={className}
+      // The grab bar's strip takes the app's own colour, so it reads as part of the app.
+      style={
+        activeApp && activeApp !== 'camera' ? { backgroundColor: appSurface(activeApp) } : undefined
+      }
+    >
       {canDismiss ? (
         <div className={styles['slider-handle-area']} {...handleProps}>
           <div className={styles['slider-handle']}></div>

@@ -23,6 +23,7 @@
 }
 
 .albumArt img,
+.albumArt > svg,
 .artPlaceholder {
   height: 100%;
   width: 100%;
@@ -71,6 +72,16 @@
   grid-row: 2 / 3;
   height: auto;
   width: calc(18 * var(--u));
+}
+
+/* Drawn marks for sources without an image, in the same grey as the Bluetooth one. */
+.sourceGlyph {
+  height: calc(18 * var(--u));
+  fill: none;
+  stroke: #9c9c9c;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .albumTitle {

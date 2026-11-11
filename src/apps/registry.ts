@@ -9,6 +9,9 @@ export interface AppDefinition {
   parkedOnly?: boolean;
   // Stays open and pauses on leaving Park, rather than closing.
   pausesOutOfPark?: boolean;
+  // The colour the app paints, so the panel's grab bar above it matches. Defaults to the
+  // standard app background.
+  surface?: string;
 }
 
 const named =
@@ -40,6 +43,7 @@ export const APPS = {
     label: 'Bluetooth',
     icon: 'app-bluetooth.svg',
     load: named(() => import('../components/Apps/Bluetooth/Bluetooth'), 'Bluetooth'),
+    surface: 'var(--color-settings-bg)',
   },
   browser: {
     label: 'Browser',
@@ -66,6 +70,7 @@ export const APPS = {
     label: 'Settings',
     icon: 'icon-car-settings.svg',
     load: named(() => import('../components/Apps/CarSettings/CarSettings'), 'CarSettings'),
+    surface: 'var(--color-settings-bg)',
   },
   dashcam: {
     label: 'Dashcam',
@@ -167,3 +172,7 @@ export const DOCK: (AppId | 'open-shelf')[] = [
 
 // Shelf entries with no app yet still show, so the shelf matches the real car.
 export const SHELF_PLACEHOLDERS = [{ id: 'nav', label: 'Nav' }];
+
+// What the slide-up panel paints behind an app, including the strip with the grab bar.
+export const appSurface = (app: AppId): string =>
+  (APPS[app] as AppDefinition).surface ?? 'var(--color-bg)';

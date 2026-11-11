@@ -139,6 +139,7 @@ describe('screen', () => {
       seek: vi.fn(),
       stop: vi.fn(),
       setVolume: vi.fn(),
+      loadedId: vi.fn(() => null),
     };
     connectPlayback(() => engine);
     renderRadio();

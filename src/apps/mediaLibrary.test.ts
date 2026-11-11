@@ -1,6 +1,5 @@
 import { act } from '@testing-library/react';
 import { vi } from 'vitest';
-import { setMediaTransport } from '../state/mediaTransport';
 import {
   connectPlayback,
   formatMediaTime,
@@ -59,9 +58,11 @@ test('times read naturally with and without hours', () => {
   expect(formatMediaTime(3725)).toBe('1:02:05');
 });
 
-test('the next item comes from the queue', () => {
+test('the next item comes from the queue, and Next wraps around it', () => {
   expect(nextInQueue([song, episode], song, 1)).toBe(episode);
-  expect(nextInQueue([song, episode], episode, 1)).toBeUndefined();
+  expect(nextInQueue([song, episode], episode, 1)).toBe(song);
+  expect(nextInQueue([song, episode], song, -1)).toBe(episode);
+  expect(nextInQueue([], song, 1)).toBeUndefined();
 });
 
 test('an episode resumes from where it stopped, across visits', () => {
@@ -89,7 +90,7 @@ test('sample content moves along by the clock and advances the queue', () => {
   expect(result.current.item?.id).toBe('ep');
 });
 
-test('the end of the queue stops playback', () => {
+test('playback stops after the last item rather than starting over', () => {
   vi.useFakeTimers();
   const { result } = renderHook(() => useNowPlaying());
   act(() => playItem(song));
@@ -135,6 +136,7 @@ test('a connected engine takes over and reports back', () => {
     seek: vi.fn(),
     stop: vi.fn(),
     setVolume: vi.fn(),
+    loadedId: vi.fn(() => null),
   };
   connectPlayback((reportPlayback) => {
     report = reportPlayback;
@@ -162,30 +164,34 @@ test('a catalogue can be replaced without touching the screens', async () => {
   await expect(getMediaSource('music').browse()).resolves.not.toEqual([]);
 });
 
-describe('one source at a time', () => {
-  const item: MediaItem = {
-    id: 'exclusive',
-    title: 'Sample',
-    subtitle: 'Sample',
-    collectionId: 'sample',
-    durationSeconds: 100,
+test('every source plays through one player: the last one started is what is playing', () => {
+  vi.useFakeTimers();
+  const { result } = renderHook(() => useNowPlaying());
+  const station: MediaItem = {
+    id: 'radio-1',
+    title: 'Station',
+    subtitle: 'Somewhere',
+    collectionId: 'radio-1',
+    durationSeconds: null,
+    live: true,
+    sourceId: 'radio',
   };
 
-  test('starting an item pauses the media card', () => {
-    const pause = vi.fn();
-    setMediaTransport({
-      togglePlayPause: vi.fn(),
-      play: vi.fn(),
-      pause,
-      next: vi.fn(),
-      previous: vi.fn(),
-      isPlaying: () => false,
-    });
+  act(() => playItem(episode, [episode]));
+  act(() => playItem(station, [station]));
 
-    playItem(item);
+  expect(result.current.item?.id).toBe('radio-1');
+  expect(result.current.isPlaying).toBe(true);
+  // A live stream has no position to seek or to remember.
+  act(() => seekPlayback(30));
+  expect(result.current.positionSeconds).toBe(0);
+});
 
-    expect(pause).toHaveBeenCalledTimes(1);
-    setMediaTransport(null);
-    stopPlayback();
-  });
+test('the player starts with a featured episode cued, without loading anything', () => {
+  resetMediaLibrary({ cue: true });
+  const { result } = renderHook(() => useNowPlaying());
+  expect(result.current.item?.sourceId).toBe('podcasts');
+  expect(result.current.item?.streamUrl).toMatch(/^https:\/\//);
+  expect(result.current.isPlaying).toBe(false);
+  expect(result.current.isLoading).toBe(false);
 });

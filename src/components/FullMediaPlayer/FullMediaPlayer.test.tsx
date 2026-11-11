@@ -1,11 +1,13 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
+import { resetMediaLibrary } from '../../apps/mediaLibrary';
 import { FullMediaPlayer } from './FullMediaPlayer';
 
 const flush = () => act(async () => {});
 
 beforeEach(() => {
   localStorage.clear();
+  resetMediaLibrary();
 });
 
 test('has browse, queue, favorites and search sections', async () => {
