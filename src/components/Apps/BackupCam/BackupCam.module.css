@@ -36,10 +36,10 @@
   transform: translate(-50%, -50%) rotate(270deg);
 }
 
-.rotateButton {
+.rotateButton,
+.switchButton {
   position: absolute;
   top: calc(12 * var(--u));
-  right: calc(12 * var(--u));
   z-index: 2;
   display: grid;
   place-items: center;
@@ -52,7 +52,16 @@
   cursor: pointer;
 }
 
-.rotateButton svg {
+.rotateButton {
+  right: calc(12 * var(--u));
+}
+
+.switchButton {
+  left: calc(12 * var(--u));
+}
+
+.rotateButton svg,
+.switchButton svg {
   width: calc(22 * var(--u));
   height: calc(22 * var(--u));
   fill: none;
