@@ -8,9 +8,12 @@ import { useCarSounds } from './useCarSounds';
 vi.mock('../apps/carSounds', () => ({
   playCarSound: vi.fn(),
   playLockChime: vi.fn(),
+  startIndicator: vi.fn(),
+  stopIndicator: vi.fn(),
+  setIndicatorVolume: vi.fn(),
 }));
 
-import { playCarSound, playLockChime } from '../apps/carSounds';
+import { playCarSound, playLockChime, startIndicator, stopIndicator } from '../apps/carSounds';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <CarStateProvider initialState={initialCarState}>{children}</CarStateProvider>
@@ -28,6 +31,8 @@ const renderSounds = () =>
 beforeEach(() => {
   vi.mocked(playCarSound).mockClear();
   vi.mocked(playLockChime).mockClear();
+  vi.mocked(startIndicator).mockClear();
+  vi.mocked(stopIndicator).mockClear();
 });
 
 test('locking plays the chime, and opening the trunk plays the door sound', () => {
@@ -45,7 +50,7 @@ test('a turn signal ticks and shifting into Drive sounds the belt reminder', () 
   const { result } = renderSounds();
 
   act(() => result.current.toggleLeftSignal());
-  expect(playCarSound).toHaveBeenCalledWith('indicator', 50);
+  expect(startIndicator).toHaveBeenCalledWith(50);
 
   act(() => result.current.selectGear('D'));
   expect(playCarSound).toHaveBeenCalledWith('seatbelt', 50);
@@ -63,4 +68,28 @@ test('muting car sounds silences every chime', () => {
 
   expect(playCarSound).not.toHaveBeenCalled();
   expect(playLockChime).not.toHaveBeenCalled();
+  expect(startIndicator).not.toHaveBeenCalled();
+});
+
+test('the indicator stops when the signal turns off, and never layers', () => {
+  const { result } = renderSounds();
+
+  act(() => result.current.toggleLeftSignal());
+  act(() => result.current.toggleRightSignal());
+  act(() => result.current.toggleHazards());
+  expect(startIndicator).toHaveBeenCalledTimes(1);
+  expect(stopIndicator).not.toHaveBeenCalled();
+
+  act(() => result.current.toggleHazards());
+  act(() => result.current.toggleRightSignal());
+  expect(stopIndicator).toHaveBeenCalledTimes(1);
+});
+
+test('hazards alone start and stop the indicator', () => {
+  const { result } = renderSounds();
+
+  act(() => result.current.toggleHazards());
+  expect(startIndicator).toHaveBeenCalledTimes(1);
+  act(() => result.current.toggleHazards());
+  expect(stopIndicator).toHaveBeenCalledTimes(1);
 });

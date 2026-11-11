@@ -8,17 +8,52 @@ export const CAR_SOUND_FILES = {
 
 export type CarSound = keyof typeof CAR_SOUND_FILES;
 
+// One-shot sounds. The indicator loops instead, through startIndicator.
+type OneShotSound = Exclude<CarSound, 'indicator'>;
+
 const MAX_VOLUME = 0.35;
 
 // The audio element is created on demand and thrown away after playing. These are short
 // samples, so there is nothing to keep alive.
-export function playCarSound(sound: CarSound, volume: number): void {
+const toElementVolume = (volume: number) =>
+  Math.max(0, Math.min(MAX_VOLUME, (volume / 100) * MAX_VOLUME));
+
+export function playCarSound(sound: OneShotSound, volume: number): void {
   if (typeof Audio === 'undefined') return;
   const audio = new Audio(getAudioPath(CAR_SOUND_FILES[sound]));
-  audio.volume = Math.max(0, Math.min(MAX_VOLUME, (volume / 100) * MAX_VOLUME));
+  audio.volume = toElementVolume(volume);
   audio.play().catch(() => {
     // Autoplay can be blocked before the first gesture. A missing chime is harmless.
   });
+}
+
+// The indicator ticks for as long as a signal or the hazards are on, so it is one looping
+// element rather than a new sound per press. Starting it twice never layers a second copy,
+// and stopping it silences it at once.
+let indicator: HTMLAudioElement | null = null;
+
+export function startIndicator(volume: number): void {
+  if (typeof Audio === 'undefined') return;
+  if (!indicator) {
+    indicator = new Audio(getAudioPath(CAR_SOUND_FILES.indicator));
+    indicator.loop = true;
+  }
+  indicator.volume = toElementVolume(volume);
+  if (!indicator.paused) return;
+  indicator.currentTime = 0;
+  indicator.play().catch(() => {
+    // Blocked before the first gesture; the lights still blink.
+  });
+}
+
+export function stopIndicator(): void {
+  if (!indicator) return;
+  indicator.pause();
+  indicator.currentTime = 0;
+}
+
+export function setIndicatorVolume(volume: number): void {
+  if (indicator) indicator.volume = toElementVolume(volume);
 }
 
 // The lock chime is generated rather than sampled, so it has no file to download.
