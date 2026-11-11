@@ -3,7 +3,8 @@ import { getAudioPath } from '../utils/assetPaths';
 export const CAR_SOUND_FILES = {
   door: 'car-door-close-6929.d6abd9e73d75ca9067ba.mp3',
   indicator: '039355_hazard-lights-60570.d22f9442d5a63d906e64.mp3',
-  seatbelt: 'car-seatbelt-alarm-86950.9524ed4da2c0b1a7af7a.mp3',
+  // The warning chime, for a door opened while the car isn't in Park.
+  doorAjar: 'car-seatbelt-alarm-86950.9524ed4da2c0b1a7af7a.mp3',
 } as const;
 
 export type CarSound = keyof typeof CAR_SOUND_FILES;

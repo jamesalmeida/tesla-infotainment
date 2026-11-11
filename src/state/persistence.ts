@@ -262,9 +262,18 @@ const isKeyList = (value: unknown): boolean =>
 
 const isClockTime = (value: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
 
+// The profiles were Chill, Average and Assertive before the Self-Driving modes replaced them.
+const RENAMED_PROFILES: Record<string, string> = { average: 'standard', assertive: 'hurry' };
+
+const withRenamedProfile = (saved: unknown): unknown => {
+  if (!isRecord(saved) || typeof saved.drivingProfile !== 'string') return saved;
+  const renamed = RENAMED_PROFILES[saved.drivingProfile];
+  return renamed ? { ...saved, drivingProfile: renamed } : saved;
+};
+
 function restoreSettings(defaults: VehicleSettings, saved: unknown): VehicleSettings {
   const merged = keepRanges(
-    keepChoices(mergeKnown(defaults, saved), defaults, SETTING_CHOICES),
+    keepChoices(mergeKnown(defaults, withRenamedProfile(saved)), defaults, SETTING_CHOICES),
     defaults,
   );
   const savedPreferences = isRecord(saved) ? saved.preferences : undefined;

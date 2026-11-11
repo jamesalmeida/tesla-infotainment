@@ -11,6 +11,11 @@
   pointer-events: none;
 }
 
+/* The indicators are just for show, but the controls in the column take taps. */
+.telltales :is(button, select, a) {
+  pointer-events: auto;
+}
+
 /* In Drive the speed takes the top left, so the column starts under it. */
 :global(.drivingIndicators) .telltales {
   top: calc(140 * var(--u));

@@ -105,7 +105,10 @@ const BRAKING_RATE = 18;
 const REGEN_RATE = { low: 1.5, standard: 3 } as const;
 const TRACK_REGEN_RATE = 5;
 const COAST_RATE = 1;
-const AUTOPILOT_RATE = { chill: 3, average: 5, assertive: 8 } as const;
+// How each Self-Driving mode drives: how hard it gets up to speed (mph per second), and how far
+// over the limit it is happy to cruise. Standard follows the driver's own offset alone.
+const AUTOPILOT_RATE = { sloth: 2, chill: 3, standard: 5, hurry: 7, 'mad-max': 10 } as const;
+const PROFILE_OFFSET_MPH = { sloth: -3, chill: 0, standard: 0, hurry: 5, 'mad-max': 10 } as const;
 const CREEP_SPEED = 3;
 // Below this speed Roll lets regen fade out instead of braking to a stop.
 const ROLL_FADE_SPEED = 6;
@@ -184,7 +187,16 @@ export const ACCELERATION_MODES = ['chill', 'standard', 'sport'] as const;
 export const STEERING_MODES = ['comfort', 'standard', 'sport'] as const;
 export const STOPPING_MODES = ['creep', 'roll', 'hold'] as const;
 export const REGEN_MODES = ['low', 'standard'] as const;
-export const DRIVING_PROFILES = ['chill', 'average', 'assertive'] as const;
+// The Self-Driving modes, gentlest first, as the car lists them.
+export const DRIVING_PROFILES = ['sloth', 'chill', 'standard', 'hurry', 'mad-max'] as const;
+
+export const DRIVING_PROFILE_LABELS: Record<DrivingProfile, string> = {
+  sloth: 'Sloth',
+  chill: 'Chill',
+  standard: 'Standard',
+  hurry: 'Hurry',
+  'mad-max': 'Mad Max',
+};
 export const DASHCAM_MODES = ['auto', 'manual', 'honk'] as const;
 export const DOME_LIGHT_MODES = ['off', 'on', 'auto'] as const;
 export const PET_MODES = ['off', 'dog', 'camp'] as const;
@@ -753,7 +765,7 @@ export const initialCarState: CarState = {
     autosteer: true,
     followingDistance: 3,
     speedOffset: 0,
-    drivingProfile: 'average',
+    drivingProfile: 'standard',
     headlightsAfterExit: true,
     domeLights: 'auto',
     ambientLights: true,
@@ -962,7 +974,15 @@ export const chargeHoursRemaining = (state: CarState): number | null => {
 };
 
 export const autopilotTargetSpeed = (state: CarState): number =>
-  Math.max(0, Math.min(MAX_SPEED, SPEED_LIMIT_MPH + state.settings.speedOffset));
+  Math.max(
+    0,
+    Math.min(
+      MAX_SPEED,
+      SPEED_LIMIT_MPH +
+        state.settings.speedOffset +
+        PROFILE_OFFSET_MPH[state.settings.drivingProfile],
+    ),
+  );
 
 // Sentry is a setting that holds through a drive, but it only watches in Park.
 export const sentryState = (state: CarState): SentryState => {

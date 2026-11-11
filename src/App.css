@@ -358,20 +358,22 @@ body {
 }
 
 .speedLimit {
-  font-size: max(var(--text-min), calc(12 * var(--u)));
+  box-sizing: border-box;
+  width: calc(36 * var(--u));
+  padding: calc(3 * var(--u)) calc(3 * var(--u)) calc(2 * var(--u));
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  border-radius: calc(4 * var(--u));
   background-color: #ffffff;
-  padding: calc(4 * var(--u)) calc(5 * var(--u)) 2px;
-  border-radius: calc(5 * var(--u));
-  width: calc(40 * var(--u));
-  text-align: center;
+  color: #000000;
+  font-size: max(var(--text-min), calc(8 * var(--u)));
   font-weight: 600;
-  max-height: calc(60 * var(--u));
-  margin-left: auto;
+  line-height: 1.05;
+  text-align: center;
 }
 
 .speedLimit span {
-  font-size: calc(26 * var(--u));
-  font-weight: 800;
+  font-size: max(var(--text-min), calc(20 * var(--u)));
+  font-weight: 700;
 }
 
 .toggleFrunk,

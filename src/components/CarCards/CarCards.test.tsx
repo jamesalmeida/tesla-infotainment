@@ -5,7 +5,12 @@ import { initialCarState } from '../../state/carState';
 import { CarCards, cardAfterSwipe } from './CarCards';
 
 vi.mock('../MusicPanel/MusicPanel', () => ({
-  MusicPanel: () => <div>Media player</div>,
+  MusicPanel: () => (
+    <div>
+      Media player
+      <button type="button">Inside button</button>
+    </div>
+  ),
 }));
 
 const renderCards = (state = initialCarState) =>
@@ -108,4 +113,34 @@ test('only the dots show, with no tab labels above the card', () => {
   expect(screen.queryByText('Media')).not.toBeInTheDocument();
   expect(screen.queryByText('Trip')).not.toBeInTheDocument();
   expect(screen.getAllByRole('tab')).toHaveLength(3);
+});
+
+test('a swipe that starts on the player changes card, without pressing a button', () => {
+  renderCards();
+  const viewport = document.querySelector('[class*="viewport"]') as HTMLElement;
+  const button = screen.getByRole('button', { name: 'Inside button' });
+  const onClick = vi.fn();
+  button.addEventListener('click', onClick);
+
+  fireEvent.pointerDown(button, { button: 0, pointerId: 3, clientX: 300, clientY: 100 });
+  fireEvent.pointerMove(button, { button: 0, pointerId: 3, clientX: 240, clientY: 102 });
+  fireEvent.pointerUp(viewport, { button: 0, pointerId: 3, clientX: 220, clientY: 102 });
+  fireEvent.click(button);
+
+  expect(screen.getByRole('tab', { name: 'Tires' })).toHaveAttribute('aria-selected', 'true');
+  expect(onClick).not.toHaveBeenCalled();
+});
+
+test('a tap on a button still presses it', () => {
+  renderCards();
+  const button = screen.getByRole('button', { name: 'Inside button' });
+  const onClick = vi.fn();
+  button.addEventListener('click', onClick);
+
+  fireEvent.pointerDown(button, { button: 0, pointerId: 3, clientX: 300, clientY: 100 });
+  fireEvent.pointerUp(button, { button: 0, pointerId: 3, clientX: 301, clientY: 100 });
+  fireEvent.click(button);
+
+  expect(onClick).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('tab', { name: 'Media' })).toHaveAttribute('aria-selected', 'true');
 });
