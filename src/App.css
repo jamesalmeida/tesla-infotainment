@@ -530,3 +530,28 @@ body {
   width: 28px;
   top: 0;
 }
+
+/*
+ * The in-app fallback for browsers without the Fullscreen API. The display fills the
+ * viewport, and the pedals move back onto the screen because the external deck no longer fits.
+ */
+:root[data-fullscreen='true'] #root {
+  gap: 0;
+}
+
+:root[data-fullscreen='true'] .displayBezel {
+  width: 100dvw;
+  height: 100dvh;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-fullscreen='true'] [class*='pedalDeck'] {
+  display: none;
+}
+
+:root[data-fullscreen='true'] .pedals {
+  display: flex;
+}
