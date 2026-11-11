@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { useDismiss } from '../../../../hooks/useDismiss';
 import { useCar, useCarActions } from '../../../../state/CarStateContext';
 import {
@@ -15,6 +15,21 @@ import {
 } from '../../../../state/carState';
 import { Pressable } from '../../../Pressable/Pressable';
 import styles from '../CarSettings.module.css';
+import {
+  CameraIcon,
+  CarWashIcon,
+  ChildLockIcon,
+  FoldMirrorIcon,
+  GloveboxIcon,
+  HighBeamIcon,
+  MirrorAdjustIcon,
+  SentryIcon,
+  SteeringAdjustIcon,
+  SunIcon,
+  VentWindowIcon,
+  WindowLockIcon,
+  WiperIcon,
+} from './ControlIcons';
 import { MirrorsAdjustment } from './MirrorsAdjustment';
 import { ActionButton, ActionRow, Section, Segmented, type Choice } from './SettingsKit';
 import { SteeringAdjustment } from './SteeringAdjustment';
@@ -132,6 +147,41 @@ function SentrySection() {
   );
 }
 
+interface TileProps {
+  setting?: string;
+  icon: ReactNode;
+  label: ReactNode;
+  // A second, smaller line, such as which doors a child lock covers.
+  sub?: ReactNode;
+  isOn?: boolean;
+  pressed?: boolean;
+  // The car marks a camera that is recording with a red dot on its icon.
+  dot?: boolean;
+  onPress: () => void;
+}
+
+// A tile as the car draws it: icon above a short label. Blue only while what it switches is on.
+function Tile({ setting, icon, label, sub, isOn = false, pressed, dot, onPress }: TileProps) {
+  return (
+    <Pressable
+      data-setting={setting}
+      className={`${styles.tile} ${active(isOn)}`}
+      pressed={pressed}
+      onPress={onPress}
+    >
+      <span className={styles['tile-icon']}>
+        {icon}
+        {dot && <span className={styles['red-dot']}></span>}
+      </span>
+      {/* Bare text, not wrapped, so the tile itself is what carries the label's text. */}
+      {label}
+      {sub && <span className={styles.subtext}>{sub}</span>}
+    </Pressable>
+  );
+}
+
+const selected = (isSelected: boolean) => (isSelected ? styles.selected : '');
+
 export const Controls = () => {
   const settings = useCar((state) => state.settings);
   const brightness = useCar((state) => state.display.brightness);
@@ -150,169 +200,164 @@ export const Controls = () => {
 
   return (
     <div className={styles['buttons-container']}>
-      {/* Row 1 */}
-      <div className={`${styles['flex-row']} ${styles['row-1']}`}>
-        {HEADLIGHT_MODES.map(({ value, label }) => (
-          <Pressable
-            key={value}
-            data-setting={value === 'off' ? 'headlights' : undefined}
-            className={`${styles.btn} ${active(settings.headlights === value)}`}
-            pressed={settings.headlights === value}
-            onPress={() => setSettings({ headlights: value })}
-          >
-            {label}
-          </Pressable>
-        ))}
-        <Pressable
-          data-setting="high-beams"
-          className={`${styles.btn} ${styles['auto-high-beams-btn']} ${active(settings.highBeams)}`}
-          pressed={settings.highBeams}
-          onPress={() => setSettings({ highBeams: !settings.highBeams })}
-        >
-          High Beams
-        </Pressable>
-      </div>
-
-      <div className={styles['gap-row']}></div>
-
-      {/* Row 2 */}
-      <div className={`${styles['flex-row']} ${styles['row-2']}`}>
-        <Pressable
-          data-setting="fold-mirrors"
-          className={`${styles.btn} ${active(settings.foldMirrors)}`}
-          pressed={settings.foldMirrors}
-          onPress={() => setSettings({ foldMirrors: !settings.foldMirrors })}
-        >
-          Fold Mirrors
-        </Pressable>
-        <Pressable
-          data-setting="child-lock"
-          className={`${styles.btn} ${active(settings.childLock !== 'off')}`}
-          onPress={() => setOverlay(overlay === 'childLock' ? null : 'childLock')}
-        >
-          Child Lock
-          {settings.childLock !== 'off' && (
-            <span className={styles.subtext}>{childLockLabel?.label}</span>
-          )}
-        </Pressable>
-        <Pressable
-          data-setting="window-lock"
-          className={`${styles.btn} ${active(settings.windowLock)}`}
-          pressed={settings.windowLock}
-          onPress={() => setSettings({ windowLock: !settings.windowLock })}
-        >
-          Window Lock
-        </Pressable>
-        <Pressable
-          data-setting="vent-windows"
-          className={`${styles.btn} ${active(settings.windowsVented)}`}
-          pressed={settings.windowsVented}
-          onPress={() => setSettings({ windowsVented: !settings.windowsVented })}
-        >
-          {settings.windowsVented ? 'Close Windows' : 'Vent Windows'}
-        </Pressable>
-      </div>
-
-      {overlay === 'childLock' && (
-        <div className={styles['child-lock-popup']} ref={childLockRef}>
-          {CHILD_LOCK_OPTIONS.map(({ value, label }) => (
+      {/* Headlights, and the high beams beside them */}
+      <div className={styles['controls-row']}>
+        <div className={`${styles.segments} ${styles['headlight-segments']}`}>
+          {HEADLIGHT_MODES.map(({ value, label }) => (
             <Pressable
               key={value}
-              className={`${styles.btn} ${active(settings.childLock === value)}`}
-              onPress={() => {
-                setSettings({ childLock: value });
-                closeOverlay();
-              }}
+              data-setting={value === 'off' ? 'headlights' : undefined}
+              className={`${styles.segment} ${selected(settings.headlights === value)}`}
+              pressed={settings.headlights === value}
+              onPress={() => setSettings({ headlights: value })}
             >
+              {value === 'off' && <SunIcon className={styles['segment-icon']} />}
               {label}
             </Pressable>
           ))}
         </div>
+        <Pressable
+          data-setting="high-beams"
+          className={`${styles.tile} ${styles['side-tile']} ${active(settings.highBeams)}`}
+          pressed={settings.highBeams}
+          onPress={() => setSettings({ highBeams: !settings.highBeams })}
+        >
+          <span className={styles['tile-icon']}>
+            <HighBeamIcon />
+          </span>
+          {/* The car shows only the lamp; the name is still there for anyone not looking. */}
+          <span className={styles['visually-hidden']}>High Beams</span>
+        </Pressable>
+      </div>
+
+      {/* Doors, windows and the glovebox */}
+      <div className={`${styles['tile-group']} ${styles['tile-row']}`}>
+        <Tile
+          setting="fold-mirrors"
+          icon={<FoldMirrorIcon />}
+          label="Fold Mirrors"
+          isOn={settings.foldMirrors}
+          pressed={settings.foldMirrors}
+          onPress={() => setSettings({ foldMirrors: !settings.foldMirrors })}
+        />
+        <Tile
+          setting="child-lock"
+          icon={<ChildLockIcon />}
+          label="Child Lock"
+          sub={settings.childLock !== 'off' ? childLockLabel?.label : undefined}
+          isOn={settings.childLock !== 'off'}
+          onPress={() => setOverlay(overlay === 'childLock' ? null : 'childLock')}
+        />
+        <Tile
+          setting="window-lock"
+          icon={<WindowLockIcon />}
+          label="Window Lock"
+          isOn={settings.windowLock}
+          pressed={settings.windowLock}
+          onPress={() => setSettings({ windowLock: !settings.windowLock })}
+        />
+        <Tile
+          setting="vent-windows"
+          icon={<VentWindowIcon />}
+          label={settings.windowsVented ? 'Close Windows' : 'Vent Windows'}
+          isOn={settings.windowsVented}
+          pressed={settings.windowsVented}
+          onPress={() => setSettings({ windowsVented: !settings.windowsVented })}
+        />
+      </div>
+
+      {overlay === 'childLock' && (
+        <div className={styles['child-lock-popup']} ref={childLockRef}>
+          <div className={styles.segments}>
+            {CHILD_LOCK_OPTIONS.map(({ value, label }) => (
+              <Pressable
+                key={value}
+                className={`${styles.segment} ${selected(settings.childLock === value)}`}
+                onPress={() => {
+                  setSettings({ childLock: value });
+                  closeOverlay();
+                }}
+              >
+                {label}
+              </Pressable>
+            ))}
+          </div>
+        </div>
       )}
 
-      <div className={styles['gap-row']}></div>
-
-      {/* Row 3 */}
-      <div className={`${styles['flex-row']} ${styles['row-3']}`}>
+      {/* Wipers */}
+      <div className={`${styles.segments} ${styles['wiper-segments']}`}>
         {WIPER_MODES.map(({ value, label }) => (
           <Pressable
             key={label}
             data-setting={label === 'Off' ? 'wipers' : undefined}
-            className={`${styles.btn} ${active(sameWipers(settings.wipers, value))}`}
+            className={`${styles.segment} ${selected(sameWipers(settings.wipers, value))}`}
             pressed={sameWipers(settings.wipers, value)}
             onPress={() => setSettings({ wipers: value })}
           >
+            {label === 'Off' && <WiperIcon className={styles['segment-icon']} />}
             {label}
           </Pressable>
         ))}
       </div>
 
-      <div className={styles['gap-row']}></div>
-
-      {/* Row 4 */}
-      <div className={`${styles['flex-row']} ${styles['row-4']}`}>
-        <div className={styles['flex-column']}>
-          <Pressable
-            data-setting="mirrors"
-            className={styles.btn}
+      {/* Adjustments, cameras and modes, two to a column */}
+      <div className={styles['tile-columns']}>
+        <div className={`${styles['tile-group']} ${styles['tile-column']}`}>
+          <Tile
+            setting="mirrors"
+            icon={<MirrorAdjustIcon />}
+            label="Mirrors"
             onPress={() => setOverlay('mirrors')}
-          >
-            Mirrors
-          </Pressable>
-          <Pressable
-            data-setting="steering-wheel"
-            className={styles.btn}
+          />
+          <Tile
+            setting="steering-wheel"
+            icon={<SteeringAdjustIcon />}
+            label="Steering"
             onPress={() => (steeringBlocked ? showNotice(steeringBlocked) : setOverlay('steering'))}
-          >
-            Steering
-          </Pressable>
+          />
         </div>
-        <div className={styles['gap-column']}></div>
-        <div className={styles['flex-column']}>
-          <Pressable
-            data-setting="dashcam"
-            className={`${styles.btn} ${active(settings.dashcam)}`}
+        <div className={`${styles['tile-group']} ${styles['tile-column']}`}>
+          <Tile
+            setting="dashcam"
+            icon={<CameraIcon />}
+            label="Dashcam"
+            dot={dashcamOn}
+            isOn={settings.dashcam}
             pressed={settings.dashcam}
             onPress={() => setSettings({ dashcam: !settings.dashcam })}
-          >
-            Dashcam
-            {dashcamOn && <span className={styles['red-dot']}></span>}
-          </Pressable>
-          <Pressable
-            data-setting="sentry"
-            className={`${styles.btn} ${active(settings.sentry)}`}
+          />
+          <Tile
+            setting="sentry"
+            icon={<SentryIcon />}
+            label="Sentry"
+            dot={settings.sentry}
+            isOn={settings.sentry}
             pressed={settings.sentry}
             onPress={() => setSettings({ sentry: !settings.sentry })}
-          >
-            Sentry
-            {settings.sentry && <span className={styles['red-dot']}></span>}
-          </Pressable>
+          />
         </div>
-        <div className={styles['gap-column']}></div>
-        <div className={styles['flex-column']}>
-          <Pressable
-            data-setting="car-wash"
-            className={styles.btn}
+        <div className={`${styles['tile-group']} ${styles['tile-column']}`}>
+          <Tile
+            setting="car-wash"
+            icon={<CarWashIcon />}
+            label="Car Wash"
             onPress={() => enterMode('car-wash')}
-          >
-            Car Wash
-          </Pressable>
-          <Pressable
-            data-setting="glovebox"
-            className={`${styles.btn} ${active(isGloveboxOpen)}`}
+          />
+          <Tile
+            setting="glovebox"
+            icon={<GloveboxIcon />}
+            label="Glovebox"
+            sub={isGloveboxOpen ? 'Open' : undefined}
+            isOn={isGloveboxOpen}
             pressed={isGloveboxOpen}
             onPress={toggleGlovebox}
-          >
-            Glovebox
-            {isGloveboxOpen && <span className={styles.subtext}>Open</span>}
-          </Pressable>
+          />
         </div>
       </div>
 
-      <div className={styles['gap-row']}></div>
-
-      {/* Row 5 */}
-      <div className={`${styles['flex-row']} ${styles['row-5']}`}>
+      {/* Brightness */}
+      <div className={styles['controls-row']}>
         <div className={styles['brightness-slider']}>
           <input
             type="range"
@@ -323,9 +368,10 @@ export const Controls = () => {
             onChange={(e) => setDisplay({ brightness: Number(e.target.value) })}
             disabled={autoBrightness}
           />
+          <SunIcon className={styles['brightness-icon']} />
         </div>
         <Pressable
-          className={`${styles.btn} ${styles['brightness-auto-btn']} ${active(autoBrightness)}`}
+          className={`${styles.tile} ${styles['side-tile']} ${styles['brightness-auto-btn']} ${active(autoBrightness)}`}
           pressed={autoBrightness}
           onPress={() => setDisplay({ autoBrightness: !autoBrightness })}
         >

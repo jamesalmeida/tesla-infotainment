@@ -11,7 +11,7 @@
   min-width: 0;
   padding-bottom: calc(16 * var(--u));
   box-sizing: border-box;
-  background-color: var(--color-panel);
+  background-color: var(--color-settings-bg);
   color: var(--color-text);
   font-size: max(var(--text-min), calc(14 * var(--u)));
   text-align: left;
@@ -29,9 +29,9 @@
   flex-direction: column;
   gap: calc(8 * var(--u));
   padding: calc(12 * var(--u)) calc(14 * var(--u));
-  border: 1px solid var(--color-border);
-  border-radius: calc(10 * var(--u));
-  background-color: var(--color-card);
+  border: 1px solid var(--color-control-border);
+  border-radius: calc(5 * var(--u));
+  background-color: var(--color-control);
 }
 
 .sectionTitle {
@@ -53,7 +53,7 @@
   padding: calc(8 * var(--u)) calc(12 * var(--u));
   border-left: calc(3 * var(--u)) solid var(--color-warning);
   border-radius: calc(4 * var(--u));
-  background-color: var(--color-card);
+  background-color: var(--color-control);
   color: var(--color-text);
   font-size: max(var(--text-min), calc(12 * var(--u)));
   line-height: 1.35;
@@ -83,7 +83,7 @@
 }
 
 .rowLabel {
-  color: var(--color-text-strong);
+  color: var(--color-text);
 }
 
 .rowControl {
@@ -121,7 +121,7 @@
 }
 
 .switch[aria-checked='true']::before {
-  background-color: var(--color-accent);
+  background-color: var(--color-toggle-on);
 }
 
 .switchThumb {
@@ -131,7 +131,8 @@
   width: max(20px, calc(22 * var(--u)));
   height: max(20px, calc(22 * var(--u)));
   border-radius: 50%;
-  background-color: var(--color-on-accent);
+  background-color: var(--color-on-toggle);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-screen-off) 20%, transparent);
   transform: translateY(-50%);
   transition: left 0.15s ease-out;
 }
@@ -148,14 +149,15 @@
   cursor: not-allowed;
 }
 
+/* One strip with thin dividers, drawn by the gap; the pick turns a darker grey. */
 .segmented {
   display: flex;
   flex-wrap: wrap;
   gap: 1px;
   overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: calc(8 * var(--u));
-  background-color: var(--color-border);
+  border: 1px solid var(--color-control-border);
+  border-radius: calc(5 * var(--u));
+  background-color: var(--color-control-border);
 }
 
 .segment {
@@ -164,15 +166,16 @@
   min-height: max(var(--tap-target), calc(34 * var(--u)));
   padding: calc(4 * var(--u)) calc(8 * var(--u));
   border: none;
-  background-color: var(--color-card);
-  color: var(--color-text);
+  background-color: var(--color-control);
+  color: var(--color-control-text);
   font: inherit;
+  font-size: max(var(--text-min), calc(12 * var(--u)));
   cursor: pointer;
 }
 
 .segment[aria-checked='true'] {
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
+  background-color: var(--color-segment-selected);
+  color: var(--color-on-segment-selected);
 }
 
 .sliderHeader {
@@ -190,7 +193,7 @@
   width: 100%;
   min-height: max(var(--tap-target), calc(24 * var(--u)));
   margin: 0;
-  accent-color: var(--color-accent);
+  accent-color: var(--color-toggle-on);
   cursor: pointer;
 }
 
@@ -222,25 +225,26 @@
   min-width: var(--tap-target);
   min-height: max(var(--tap-target), calc(34 * var(--u)));
   padding: calc(4 * var(--u)) calc(12 * var(--u));
-  border: 1px solid var(--color-border);
-  border-radius: calc(8 * var(--u));
-  background-color: var(--color-card);
-  color: var(--color-text-strong);
+  border: 1px solid var(--color-control-border);
+  border-radius: calc(5 * var(--u));
+  background-color: var(--color-control);
+  color: var(--color-text);
   font: inherit;
+  font-weight: 500;
   cursor: pointer;
 }
 
 @media (hover: hover) {
   .button:hover:not(:disabled) {
-    background-color: var(--color-card-hover);
+    background-color: var(--color-control-hover);
   }
 }
 
 .button.primary,
 .button.primary:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
+  border-color: var(--color-toggle-on);
+  background-color: var(--color-toggle-on);
+  color: var(--color-on-toggle);
 }
 
 .button.danger {
@@ -318,7 +322,7 @@
   flex-direction: column;
   gap: calc(6 * var(--u));
   padding: calc(8 * var(--u)) 0;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-control-border);
 }
 
 .listItem:first-child {

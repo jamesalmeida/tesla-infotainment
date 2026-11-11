@@ -6,14 +6,32 @@
   color: var(--color-text);
 }
 
+/* A section's rows share one border, split by thin lines, like the car's grouped tiles. */
 .section {
+  --control-radius: calc(5 * var(--u));
+
   display: flex;
   flex-direction: column;
-  gap: calc(2 * var(--u));
+}
+
+.section > * + * {
+  margin-top: calc(8 * var(--u));
+}
+
+.section > .row + .row {
+  margin-top: 0;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.section > .row:has(+ .row) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .sectionTitle {
-  margin: 0 0 calc(4 * var(--u));
+  margin: 0;
   color: var(--color-text-muted);
   font-size: max(var(--text-min), calc(12 * var(--u)));
   font-weight: 500;
@@ -27,9 +45,10 @@
   justify-content: space-between;
   gap: calc(12 * var(--u));
   min-height: var(--tap-target);
-  padding: calc(9 * var(--u)) calc(12 * var(--u));
-  border-radius: calc(10 * var(--u));
-  background-color: var(--color-card);
+  padding: calc(10 * var(--u)) calc(14 * var(--u));
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--control-radius, calc(5 * var(--u)));
+  background-color: var(--color-control);
   scroll-margin: calc(12 * var(--u));
 }
 
@@ -45,7 +64,7 @@
 }
 
 .label {
-  color: var(--color-text-strong);
+  color: var(--color-text);
 }
 
 .description {
@@ -114,24 +133,28 @@
   width: calc(20 * var(--u));
   height: calc(20 * var(--u));
   border-radius: 50%;
-  background-color: var(--color-on-accent);
+  background-color: var(--color-on-toggle);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-screen-off) 20%, transparent);
   transition: transform 0.15s ease-out;
 }
 
 .switch:checked::before {
-  background-color: var(--color-accent);
+  background-color: var(--color-toggle-on);
 }
 
 .switch:checked::after {
   transform: translate(calc(18 * var(--u)), -50%);
 }
 
+/* One strip with thin dividers; the pick turns a darker grey, never blue. */
 .segments {
   flex: none;
   display: flex;
   max-width: 100%;
-  border-radius: calc(8 * var(--u));
-  background-color: var(--color-panel);
+  overflow: hidden;
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--control-radius, calc(5 * var(--u)));
+  background-color: var(--color-control);
 }
 
 .segment {
@@ -144,8 +167,8 @@
   min-height: max(var(--tap-target), calc(32 * var(--u)));
   padding: 0 calc(10 * var(--u));
   box-sizing: border-box;
-  border-radius: calc(8 * var(--u));
-  color: var(--color-text);
+  color: var(--color-control-text);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
   text-align: center;
   white-space: nowrap;
   cursor: pointer;
@@ -160,14 +183,30 @@
   margin: 0;
 }
 
-.segment.selected {
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
+.segment + .segment {
+  border-left: 1px solid var(--color-control-border);
 }
 
+.segment.selected {
+  background-color: var(--color-segment-selected);
+  color: var(--color-on-segment-selected);
+}
+
+.segment.selected + .segment,
+.segment:has(+ .segment.selected) + .segment.selected {
+  border-left-color: transparent;
+}
+
+@media (hover: hover) {
+  .segment:not(.selected):hover {
+    background-color: var(--color-control-hover);
+  }
+}
+
+/* Inset, since the strip clips anything drawn outside it. */
 .segment:has(input:focus-visible) {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  outline: 2px solid var(--color-toggle-on);
+  outline-offset: -2px;
 }
 
 .sliderRow {
@@ -187,11 +226,53 @@
   color: var(--color-text-strong);
 }
 
+/* A thin line with a round thumb, as on the car's brightness control. */
 .slider {
+  --thumb: calc(22 * var(--u));
+
   width: 100%;
-  min-height: var(--tap-target);
+  height: max(var(--tap-target), var(--thumb));
   margin: 0;
-  accent-color: var(--color-accent);
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: calc(2 * var(--u));
+  border-radius: calc(1 * var(--u));
+  background-color: var(--color-text);
+}
+
+.slider::-moz-range-track {
+  height: calc(2 * var(--u));
+  border-radius: calc(1 * var(--u));
+  background-color: var(--color-text);
+}
+
+.slider::-webkit-slider-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((var(--thumb) - 2 * var(--u)) / -2);
+  border: 1px solid var(--color-control-border);
+  border-radius: 50%;
+  background-color: var(--color-card);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-screen-off) 25%, transparent);
+  -webkit-appearance: none;
+}
+
+.slider::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 1px solid var(--color-control-border);
+  border-radius: 50%;
+  background-color: var(--color-card);
+}
+
+.slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .actions {
@@ -202,18 +283,22 @@
 }
 
 .button {
-  min-height: max(var(--tap-target), calc(32 * var(--u)));
-  padding: calc(4 * var(--u)) calc(14 * var(--u));
-  border: 1px solid var(--color-border);
-  border-radius: calc(8 * var(--u));
-  background-color: var(--color-card);
-  color: var(--color-text-strong);
+  min-height: max(var(--tap-target), calc(36 * var(--u)));
+  padding: calc(4 * var(--u)) calc(16 * var(--u));
+  border: 1px solid var(--color-control-border);
+  border-radius: calc(5 * var(--u));
+  background-color: var(--color-control);
+  color: var(--color-text);
   font: inherit;
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  font-weight: 500;
   cursor: pointer;
 }
 
-.button:hover:not(:disabled) {
-  background-color: var(--color-card-hover);
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    background-color: var(--color-control-hover);
+  }
 }
 
 .button:disabled {
@@ -223,9 +308,9 @@
 
 .primary,
 .primary:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
+  border-color: var(--color-toggle-on);
+  background-color: var(--color-toggle-on);
+  color: var(--color-on-toggle);
 }
 
 .stats {
@@ -236,9 +321,10 @@
 }
 
 .stat {
-  padding: calc(9 * var(--u)) calc(12 * var(--u));
-  border-radius: calc(10 * var(--u));
-  background-color: var(--color-card);
+  padding: calc(10 * var(--u)) calc(14 * var(--u));
+  border: 1px solid var(--color-control-border);
+  border-radius: calc(5 * var(--u));
+  background-color: var(--color-control);
 }
 
 .stat dt {
@@ -254,9 +340,10 @@
 
 .note {
   margin: 0;
-  padding: calc(9 * var(--u)) calc(12 * var(--u));
-  border-radius: calc(10 * var(--u));
-  background-color: var(--color-card);
+  padding: calc(10 * var(--u)) calc(14 * var(--u));
+  border: 1px solid var(--color-control-border);
+  border-radius: calc(5 * var(--u));
+  background-color: var(--color-control);
   color: var(--color-text);
 }
 
