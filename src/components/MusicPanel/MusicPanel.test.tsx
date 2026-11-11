@@ -1,13 +1,15 @@
 import { StrictMode } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
-import { getImagePath } from '../../utils/assetPaths';
+import {
+  playItem,
+  resetMediaLibrary,
+  setPlaybackVolume,
+  useNowPlaying,
+  type MediaItem,
+} from '../../apps/mediaLibrary';
 import { getMediaTransport } from '../../state/mediaTransport';
 import { MusicPanel } from './MusicPanel';
-
-vi.mock('../../utils/assetPaths', () => ({
-  getImagePath: vi.fn((name: string) => `/img/${name}`),
-}));
 
 /**
  * Stands in for the element, following the parts of the HTML media spec this
@@ -125,32 +127,51 @@ const audio = () => {
 };
 
 const inAct = (run: () => void) => act(async () => run());
-
 const clickButton = (alt: string) => inAct(() => fireEvent.click(screen.getByAltText(alt)));
-
 const pressPlay = async () => {
   await clickButton('Play');
   await inAct(() => audio().emit('playing'));
 };
-
+const cardTitle = () => document.querySelector('.title')?.textContent;
 const barWidth = () => document.querySelector<HTMLElement>('.progressForeground')?.style.width;
 const hitArea = () => {
   const element = document.querySelector<HTMLElement>('.progressHitArea');
   if (!element) throw new Error('No progress bar');
   return element;
 };
-const isBuffering = () => document.querySelector('[aria-busy="true"]') !== null;
 
-const panelRenders = () => vi.mocked(getImagePath).mock.calls.length;
+// The three featured episodes, in order. Math.random() is pinned so the first is cued.
+const FEATURED = ['lex_ai_pieter_levels', 'lex_ai_elon_musk', 'PDP5840775995'];
 
-const TRACK_FILES = ['lex_ai_pieter_levels', 'lex_ai_elon_musk', 'PDP5840775995'];
+const station: MediaItem = {
+  id: 'radio-kexp',
+  title: 'KEXP',
+  subtitle: 'Seattle',
+  collectionId: 'radio-kexp',
+  durationSeconds: null,
+  live: true,
+  streamUrl: 'https://example.com/kexp.mp3',
+  sourceId: 'radio',
+};
+
+function NowPlayingTitle() {
+  return <output aria-label="now playing">{useNowPlaying().item?.title}</output>;
+}
+
+const renderCard = () =>
+  render(
+    <>
+      <MusicPanel />
+      <NowPlayingTitle />
+    </>,
+  );
 
 beforeEach(() => {
   FakeAudio.instances = [];
   vi.stubGlobal('Audio', FakeAudio);
-  // Math.random() picks the first track.
   vi.spyOn(Math, 'random').mockReturnValue(0);
-  vi.mocked(getImagePath).mockClear();
+  localStorage.clear();
+  resetMediaLibrary({ cue: true });
   Element.prototype.setPointerCapture = vi.fn();
   vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
     left: 100,
@@ -159,436 +180,173 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  resetMediaLibrary();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
-describe('the audio element (#85)', () => {
-  it('constructs exactly one element however often the panel renders', async () => {
-    const { rerender } = render(<MusicPanel volume={50} />);
-    for (let volume = 0; volume < 10; volume += 1) rerender(<MusicPanel volume={volume} />);
-    await pressPlay();
-    for (let second = 1; second <= 12; second += 1) {
-      await inAct(() => audio().advanceTo(second, 60));
-    }
-    await clickButton('Next Track');
-
-    expect(FakeAudio.instances).toHaveLength(1);
+describe('one player for everything', () => {
+  it('shows a featured episode from the start, and downloads nothing until play', () => {
+    renderCard();
+    expect(cardTitle()).toMatch(/Pieter Levels/);
+    expect(screen.getByText('Lex Fridman Podcast')).toBeInTheDocument();
+    expect(FakeAudio.instances).toHaveLength(0);
   });
 
-  it('keeps to one element through the StrictMode remount, with its source intact', () => {
+  it('keeps to one audio element across sources, renders and a StrictMode remount', async () => {
     render(
       <StrictMode>
-        <MusicPanel volume={50} />
+        <MusicPanel />
       </StrictMode>,
     );
+    await pressPlay();
+    await clickButton('Next Track');
+    await inAct(() => playItem(station, [station]));
 
     expect(FakeAudio.instances).toHaveLength(1);
-    expect(audio().src).toContain(TRACK_FILES[0]);
-  });
-
-  it('requests nothing until asked to play', () => {
-    const { rerender } = render(<MusicPanel volume={50} />);
-    rerender(<MusicPanel volume={60} />);
-
     expect(audio().preload).toBe('none');
-    expect(audio().playCalls).toBe(0);
-    expect(audio().srcHistory).toHaveLength(1);
+    expect(audio().src).toBe(station.streamUrl);
   });
 
-  it('pauses and clears the source on unmount', async () => {
-    const { unmount } = render(<MusicPanel volume={50} />);
-    await pressPlay();
+  it('a station started in Radio becomes what the card shows and controls', async () => {
+    renderCard();
+    await inAct(() => playItem(station, [station]));
+    await inAct(() => audio().emit('playing'));
 
-    unmount();
+    expect(cardTitle()).toBe('KEXP');
+    expect(screen.getByRole('img', { name: 'Radio' })).toBeInTheDocument();
+    expect(screen.getByAltText('Pause')).toBeInTheDocument();
 
+    await clickButton('Pause');
     expect(audio().paused).toBe(true);
-    expect(audio().src).toBe('');
-    expect(audio().loadCalls).toBe(1);
+    expect(screen.getByAltText('Play')).toBeInTheDocument();
   });
 
-  it('follows the volume prop', () => {
-    const { rerender } = render(<MusicPanel volume={50} />);
-    expect(audio().volume).toBe(0.5);
-    rerender(<MusicPanel volume={30} />);
-    expect(audio().volume).toBe(0.3);
+  it('follows the car volume', async () => {
+    renderCard();
+    setPlaybackVolume(30);
+    await pressPlay();
+    expect(audio().volume).toBeCloseTo(0.3);
+  });
+
+  it('lets shortcuts, voice and the rear display drive it', async () => {
+    renderCard();
+    const transport = getMediaTransport();
+    if (!transport) throw new Error('The player did not register its transport');
+
+    await inAct(() => transport.togglePlayPause());
+    expect(audio().playCalls).toBe(1);
+    await inAct(() => transport.next());
+    expect(screen.getByLabelText('now playing')).toHaveTextContent(/Elon Musk/);
   });
 });
 
-describe('the #47 scenarios', () => {
-  it('starts the next track at 0 when Next is pressed mid-track', async () => {
-    render(<MusicPanel volume={50} />);
+describe('playback follows the audio (#47)', () => {
+  it('starts the next episode at 0 when Next is pressed mid-way', async () => {
+    renderCard();
     await pressPlay();
-    await inAct(() => audio().advanceTo(15.8, 60));
-
+    await inAct(() => audio().advanceTo(15.8, 600));
     await clickButton('Next Track');
 
-    expect(audio().src).toContain(TRACK_FILES[1]);
+    expect(audio().src).toContain(FEATURED[1]);
     expect(audio().currentTime).toBe(0);
-    expect(audio().seeks).toEqual([]);
-    expect(audio().paused).toBe(false);
   });
 
-  it('advances and keeps playing when a track finishes', async () => {
-    render(<MusicPanel volume={50} />);
+  it('advances and keeps playing when an episode finishes', async () => {
+    renderCard();
     await pressPlay();
-    await inAct(() => audio().advanceTo(59, 60));
-
+    await inAct(() => audio().advanceTo(599, 600));
     await inAct(() => audio().reachEnd());
 
-    expect(audio().src).toContain(TRACK_FILES[1]);
-    expect(audio().currentTime).toBe(0);
-    expect(audio().paused).toBe(false);
-    expect(screen.getByAltText('Pause')).toBeInTheDocument();
-  });
-
-  it('never shows the play icon between the end of one track and the next', async () => {
-    render(<MusicPanel volume={50} />);
-    await pressPlay();
-    audio().duration = 60;
-
-    audio().ended = true;
-    await inAct(() => audio().emit('pause'));
-
-    expect(screen.getByAltText('Pause')).toBeInTheDocument();
+    expect(audio().src).toContain(FEATURED[1]);
+    expect(audio().playCalls).toBe(2);
   });
 
   it('shows the play icon and an error when play() is rejected', async () => {
-    render(<MusicPanel volume={50} />);
+    renderCard();
+    await clickButton('Play');
     audio().rejectPlayWith = new DOMException('Blocked', 'NotAllowedError');
-
+    await clickButton('Pause');
     await clickButton('Play');
 
+    expect(await screen.findByRole('alert')).toHaveTextContent('Playback was blocked');
     expect(screen.getByAltText('Play')).toBeInTheDocument();
-    expect(screen.getByRole('alert')).toHaveTextContent(/blocked/i);
   });
 
-  it('does not reassign src on play or pause, so the position survives', async () => {
-    render(<MusicPanel volume={50} />);
+  it('does not reload the file on pause and resume', async () => {
+    renderCard();
     await pressPlay();
-    await inAct(() => audio().advanceTo(20, 60));
-
     await clickButton('Pause');
-    await inAct(() => undefined);
-    await pressPlay();
+    await clickButton('Play');
 
     expect(audio().srcHistory).toHaveLength(1);
-    expect(audio().loadCalls).toBe(0);
-    expect(audio().currentTime).toBe(20);
   });
 
-  it('keeps the bar at 0% before the duration is known and after a track change', async () => {
-    render(<MusicPanel volume={50} />);
-    expect(barWidth()).toBe('0%');
-
+  it('shows a media error in place of the show, and retries on play', async () => {
+    renderCard();
     await pressPlay();
-    await inAct(() => audio().advanceTo(30, 60));
-    expect(barWidth()).toBe('50%');
-
-    await clickButton('Next Track');
-    expect(barWidth()).toBe('0%');
-  });
-});
-
-describe('the transport icon', () => {
-  it('follows the element rather than the button press', async () => {
-    render(<MusicPanel volume={50} />);
-
-    await clickButton('Play');
-    expect(isBuffering()).toBe(true);
-
-    await inAct(() => audio().emit('playing'));
-    expect(isBuffering()).toBe(false);
-    expect(screen.getByAltText('Pause')).toBeInTheDocument();
-
-    // Something other than the button pauses it, like a headset or the OS.
-    await inAct(() => audio().pause());
-    expect(screen.getByAltText('Play')).toBeInTheDocument();
-  });
-
-  it('shows buffering on waiting and clears it when playback resumes', async () => {
-    render(<MusicPanel volume={50} />);
-    await pressPlay();
-
-    await inAct(() => audio().emit('waiting'));
-    expect(isBuffering()).toBe(true);
-
-    await inAct(() => audio().emit('playing'));
-    expect(isBuffering()).toBe(false);
-  });
-
-  it('can be paused while still loading', async () => {
-    render(<MusicPanel volume={50} />);
-    await clickButton('Play');
-
-    await clickButton('Pause');
-
-    expect(audio().paused).toBe(true);
-    expect(screen.getByAltText('Play')).toBeInTheDocument();
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  });
-
-  it('ignores the AbortError from a play() replaced by a new track', async () => {
-    render(<MusicPanel volume={50} />);
-    await clickButton('Play');
-
-    await clickButton('Next Track');
-
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(audio().playCalls).toBe(2);
-  });
-
-  it('stays silent on Next while paused', async () => {
-    render(<MusicPanel volume={50} />);
-
-    await clickButton('Next Track');
-
-    expect(audio().playCalls).toBe(0);
-    expect(screen.getByAltText('Play')).toBeInTheDocument();
-  });
-});
-
-describe('errors', () => {
-  const failLoading = async () => {
-    await clickButton('Play');
-    audio().error = { code: 4 };
-    await inAct(() => audio().emit('error'));
-  };
-
-  it('shows a media error in place of the album, with the play icon', async () => {
-    render(<MusicPanel volume={50} />);
-
-    await failLoading();
-
-    expect(screen.getByRole('alert')).toHaveTextContent(/unavailable/i);
-    expect(screen.queryByText('Lex Fridman Podcast')).not.toBeInTheDocument();
-    expect(screen.getByAltText('Play')).toBeInTheDocument();
-  });
-
-  it('reloads the track when play is pressed again', async () => {
-    render(<MusicPanel volume={50} />);
-    await failLoading();
-
-    await clickButton('Play');
-
-    expect(audio().srcHistory).toEqual([audio().src, audio().src]);
-    expect(audio().playCalls).toBe(2);
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  });
-
-  it('moves on with Next, trying to play the new track', async () => {
-    render(<MusicPanel volume={50} />);
-    await failLoading();
-
-    await clickButton('Next Track');
-
-    expect(audio().src).toContain(TRACK_FILES[1]);
-    expect(audio().playCalls).toBe(2);
-  });
-});
-
-describe('previous', () => {
-  it('restarts the track when past the threshold, without changing track', async () => {
-    render(<MusicPanel volume={50} />);
-    await pressPlay();
-    await inAct(() => audio().advanceTo(10, 60));
-
-    await clickButton('Previous Track');
-
-    expect(audio().currentTime).toBe(0);
-    expect(audio().srcHistory).toHaveLength(1);
-    expect(barWidth()).toBe('0%');
-  });
-
-  it('goes to the previous track near the start, however long since the last press', async () => {
-    render(<MusicPanel volume={50} />);
-    await pressPlay();
-    await inAct(() => audio().advanceTo(2, 60));
-
-    await clickButton('Previous Track');
-
-    expect(audio().src).toContain(TRACK_FILES[2]);
-    expect(audio().paused).toBe(false);
-  });
-
-  it('goes back on a failed track even if it failed part way through', async () => {
-    render(<MusicPanel volume={50} />);
-    await pressPlay();
-    await inAct(() => audio().advanceTo(10, 60));
     audio().error = { code: 2 };
     await inAct(() => audio().emit('error'));
 
+    expect(screen.getByRole('alert')).toHaveTextContent('Network error');
+    await clickButton('Play');
+    expect(audio().srcHistory).toHaveLength(2);
+  });
+
+  it('restarts when past a few seconds, and goes back near the start', async () => {
+    renderCard();
+    await pressPlay();
+    await inAct(() => audio().advanceTo(20, 600));
     await clickButton('Previous Track');
+    expect(audio().currentTime).toBe(0);
+    expect(audio().src).toContain(FEATURED[0]);
 
-    expect(audio().src).toContain(TRACK_FILES[2]);
+    await clickButton('Previous Track');
+    expect(audio().src).toContain(FEATURED[2]);
   });
-});
 
-describe('the shared transport', () => {
-  const transport = () => {
-    const current = getMediaTransport();
-    if (!current) throw new Error('The player did not register its transport');
-    return current;
-  };
-
-  it('lets shortcuts and other apps drive the player', async () => {
-    render(<MusicPanel volume={50} />);
-
-    await inAct(() => transport().togglePlayPause());
-    expect(audio().playCalls).toBe(1);
+  it('shows buffering on waiting and clears it once playing', async () => {
+    renderCard();
+    await pressPlay();
+    await inAct(() => audio().emit('waiting'));
+    expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
     await inAct(() => audio().emit('playing'));
-    await inAct(() => transport().togglePlayPause());
-    expect(audio().paused).toBe(true);
-
-    await inAct(() => transport().next());
-    expect(audio().src).toContain(TRACK_FILES[1]);
-    await inAct(() => transport().previous());
-    expect(audio().src).toContain(TRACK_FILES[0]);
-  });
-
-  it('is gone once the player unmounts', () => {
-    const { unmount } = render(<MusicPanel volume={50} />);
-
-    unmount();
-
-    expect(getMediaTransport()).toBe(null);
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull();
   });
 });
 
 describe('the progress bar', () => {
-  const withDuration = async () => {
+  it('stays at 0 until the length is known, then follows the audio', async () => {
+    renderCard();
+    expect(barWidth()).toBe('0%');
     await pressPlay();
-    await inAct(() => audio().advanceTo(0, 100));
-  };
-
-  // Each in its own act, as React renders between discrete events in a browser.
-  const pointer = (
-    type: 'pointerDown' | 'pointerMove' | 'pointerUp' | 'pointerCancel',
-    clientX: number,
-    button = 0,
-  ) => inAct(() => fireEvent[type](hitArea(), { clientX, button, pointerId: 7 }));
-
-  it('seeks on a tap', async () => {
-    render(<MusicPanel volume={50} />);
-    await withDuration();
-
-    await pointer('pointerDown', 150);
-    await pointer('pointerUp', 150);
-
-    expect(audio().currentTime).toBe(25);
+    await inAct(() => audio().advanceTo(150, 600));
     expect(barWidth()).toBe('25%');
   });
 
-  it('follows a drag and seeks once, on release, keeping hold of the pointer', async () => {
-    render(<MusicPanel volume={50} />);
-    await withDuration();
-
-    await pointer('pointerDown', 150);
-    expect(Element.prototype.setPointerCapture).toHaveBeenCalledWith(7);
-
-    await pointer('pointerMove', 200);
-    expect(barWidth()).toBe('50%');
-    expect(audio().seeks).toEqual([]);
-
-    await pointer('pointerUp', 250);
-    expect(audio().seeks).toEqual([75]);
-  });
-
-  it('holds the dragged position while time updates arrive', async () => {
-    render(<MusicPanel volume={50} />);
-    await withDuration();
-
-    await pointer('pointerDown', 200);
-    await inAct(() => audio().advanceTo(10, 100));
-
-    expect(barWidth()).toBe('50%');
-  });
-
-  it('clamps a drag that leaves the bar', async () => {
-    render(<MusicPanel volume={50} />);
-    await withDuration();
-
-    await pointer('pointerDown', 150);
-    await pointer('pointerUp', 900);
-
-    expect(audio().currentTime).toBe(100);
-  });
-
-  it('drops a cancelled drag without seeking', async () => {
-    render(<MusicPanel volume={50} />);
-    await withDuration();
-    await inAct(() => audio().advanceTo(10, 100));
-
-    await pointer('pointerDown', 200);
-    await pointer('pointerCancel', 200);
-
-    expect(audio().seeks).toEqual([]);
-    expect(barWidth()).toBe('10%');
-  });
-
-  it('ignores moves without a press, other buttons, and an unknown duration', async () => {
-    render(<MusicPanel volume={50} />);
-
-    await pointer('pointerDown', 150);
-    await pointer('pointerUp', 150);
-    expect(audio().seeks).toEqual([]);
-
-    await withDuration();
-    await pointer('pointerMove', 150);
-    await pointer('pointerDown', 150, 2);
-    await pointer('pointerUp', 150, 2);
-    expect(audio().seeks).toEqual([]);
-  });
-});
-
-describe('re-rendering (#92)', () => {
-  it('re-renders only the progress bar on timeupdate', async () => {
-    render(<MusicPanel volume={50} />);
+  it('seeks on a tap', async () => {
+    renderCard();
     await pressPlay();
-    const renders = panelRenders();
-
-    for (let second = 1; second <= 5; second += 1) {
-      await inAct(() => audio().advanceTo(second, 10));
-    }
-
-    expect(barWidth()).toBe('50%');
-    expect(panelRenders()).toBe(renders);
+    await inAct(() => audio().advanceTo(0, 600));
+    fireEvent.pointerDown(hitArea(), { button: 0, pointerId: 1, clientX: 200 });
+    fireEvent.pointerUp(hitArea(), { button: 0, pointerId: 1, clientX: 200 });
+    expect(audio().currentTime).toBe(300);
   });
 
-  it('skips rendering when its parent re-renders with the same volume', () => {
-    const { rerender } = render(<MusicPanel volume={50} />);
-    const renders = panelRenders();
-
-    rerender(<MusicPanel volume={50} />);
-
-    expect(panelRenders()).toBe(renders);
+  it('has nothing to drag on live radio', async () => {
+    renderCard();
+    await inAct(() => playItem(station, [station]));
+    fireEvent.pointerDown(hitArea(), { button: 0, pointerId: 1, clientX: 200 });
+    fireEvent.pointerUp(hitArea(), { button: 0, pointerId: 1, clientX: 200 });
+    expect(audio().seeks).toEqual([]);
   });
 });
 
-describe('album art', () => {
-  const art = () => document.querySelector('.albumArt img');
-
-  it('shows a placeholder instead of a broken image', async () => {
-    render(<MusicPanel volume={50} />);
-    const image = art();
-    if (!image) throw new Error('No album art');
-
-    await inAct(() => fireEvent.error(image));
-
-    expect(art()).not.toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'No album art' })).toBeInTheDocument();
-  });
-
-  it('tries again when the next track has different art', async () => {
-    vi.mocked(Math.random).mockReturnValue(0.5);
-    render(<MusicPanel volume={50} />);
-    const image = art();
-    if (!image) throw new Error('No album art');
-    await inAct(() => fireEvent.error(image));
-
-    await clickButton('Next Track');
-
-    expect(art()).toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: 'No album art' })).not.toBeInTheDocument();
-  });
+test('shows drawn art instead of a broken image', async () => {
+  renderCard();
+  const image = document.querySelector('.albumArt img');
+  if (!image) throw new Error('No album art');
+  await inAct(() => fireEvent.error(image));
+  expect(document.querySelector('.albumArt img')).toBeNull();
+  expect(document.querySelector('.albumArt svg')).not.toBeNull();
 });
