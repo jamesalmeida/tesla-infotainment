@@ -38,3 +38,7 @@ package-lock.json
 
 # Optional: Uncomment if using yarn
 # yarn.lock
+
+# Playwright
+/test-results/
+/playwright-report/

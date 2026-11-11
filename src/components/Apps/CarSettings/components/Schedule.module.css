@@ -1,0 +1,24 @@
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(4 * var(--u));
+}
+
+.day {
+  flex: 1 1 var(--tap-target);
+  min-width: var(--tap-target);
+  min-height: max(var(--tap-target), calc(34 * var(--u)));
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.day[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}

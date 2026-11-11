@@ -1,3 +1,71 @@
-.theaterWrapper {
-  text-align: center;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(110px, calc(170 * var(--u))), 1fr));
+  gap: calc(8 * var(--u));
+}
+
+.source {
+  min-height: max(var(--tap-target), calc(64 * var(--u)));
+  border: none;
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.video {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--u));
+  min-width: 0;
+  padding: calc(8 * var(--u));
+  border: none;
+  border-radius: var(--app-radius);
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.art {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.player {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  min-height: 0;
+}
+
+.playerBar {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+}
+
+.playerTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.frame {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--app-radius);
+  background-color: var(--color-panel);
+}
+
+.embed {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
 }

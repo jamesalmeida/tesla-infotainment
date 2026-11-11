@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useCar } from '../../state/CarStateContext';
+import { formatTime } from '../../utils/units';
 
 const Clock = () => {
   const [time, setTime] = useState(new Date());
+  const format = useCar((state) => state.settings.preferences.timeFormat);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -13,17 +16,7 @@ const Clock = () => {
     };
   }, []);
 
-  const formatTime = (date: Date) => {
-    let hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
-    return `${hours}:${minutesStr} ${ampm}`;
-  };
-
-  return <div className="clock no-select">{formatTime(time)}</div>;
+  return <div className="no-select">{formatTime(time, format)}</div>;
 };
 
 export default Clock;

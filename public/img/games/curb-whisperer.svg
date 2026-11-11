@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600">
+  <rect width="400" height="600" fill="#343a40"/>
+  <g stroke="#f1f3f5" stroke-width="8">
+    <path d="M60 100 V500 M340 100 V500"/>
+    <path d="M60 100 H340" stroke="#74c0fc"/>
+  </g>
+  <rect x="96" y="104" width="208" height="392" fill="#74c0fc" opacity="0.14"/>
+  <g transform="translate(200 300)">
+    <rect x="-82" y="-150" width="164" height="300" rx="44" fill="#f1f3f5"/>
+    <rect x="-64" y="-84" width="128" height="170" rx="26" fill="#1d2733"/>
+    <rect x="-52" y="-34" width="104" height="70" rx="14" fill="#f1f3f5"/>
+    <rect x="-100" y="-112" width="20" height="56" rx="6" fill="#14171a"/>
+    <rect x="80" y="-112" width="20" height="56" rx="6" fill="#14171a"/>
+    <rect x="-100" y="62" width="20" height="56" rx="6" fill="#14171a"/>
+    <rect x="80" y="62" width="20" height="56" rx="6" fill="#14171a"/>
+  </g>
+  <g fill="none" stroke="#ffd43b" stroke-width="6" stroke-linecap="round">
+    <path d="M28 240 Q10 300 28 360"/>
+    <path d="M372 240 Q390 300 372 360"/>
+  </g>
+  <circle cx="200" cy="108" r="30" fill="#212529"/>
+  <path d="M206 84 L186 114 H200 L194 134 L216 102 H202Z" fill="#ffd43b"/>
+  <g font-family="system-ui, -apple-system, sans-serif" font-weight="800" text-anchor="middle" fill="#ffffff">
+    <text x="200" y="60" font-size="52">CURB</text>
+    <text x="200" y="560" font-size="46">WHISPERER</text>
+  </g>
+</svg>

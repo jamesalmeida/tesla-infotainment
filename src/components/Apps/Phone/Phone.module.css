@@ -1,0 +1,113 @@
+.device {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(6 * var(--u)) var(--app-gap);
+}
+
+.avatar {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: max(32px, calc(40 * var(--u)));
+  height: max(32px, calc(40 * var(--u)));
+  border-radius: 50%;
+  background-color: var(--color-panel);
+  color: var(--color-text-strong);
+  font-size: var(--app-text-small);
+  font-weight: 600;
+}
+
+.block {
+  display: block;
+}
+
+.missed {
+  color: var(--color-danger);
+}
+
+.dialPad {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  width: 100%;
+  max-width: calc(360 * var(--u));
+  margin: 0 auto;
+}
+
+/* The number sits above the keys, even though it follows them for the short layout below. */
+.keys {
+  order: 1;
+}
+
+.dialActions {
+  flex-wrap: wrap;
+}
+
+.display {
+  flex: 1 1 100%;
+  min-height: var(--app-control);
+  color: var(--color-text-strong);
+  font-size: max(16px, calc(24 * var(--u)));
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: calc(6 * var(--u));
+}
+
+.key {
+  min-height: max(var(--tap-target), calc(48 * var(--u)));
+  border: none;
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  font: inherit;
+  font-size: max(16px, calc(20 * var(--u)));
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .key:hover {
+    background-color: var(--color-card-hover);
+  }
+}
+
+.dialActions {
+  display: flex;
+  justify-content: center;
+  gap: calc(8 * var(--u));
+}
+
+.activeCall {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  padding: var(--app-gap);
+  text-align: center;
+}
+
+/* A short screen can't hold four rows of keys, so the number and the keys sit side by side. */
+:global(:root[data-layout='compact']) .dialPad {
+  flex-direction: row;
+  align-items: flex-start;
+  max-width: none;
+}
+
+:global(:root[data-layout='compact']) .keys {
+  flex: 3;
+  order: 0;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+:global(:root[data-layout='compact']) .dialActions {
+  flex: 2;
+  min-width: 0;
+}

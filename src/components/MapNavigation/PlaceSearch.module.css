@@ -2,27 +2,33 @@
   position: relative;
 }
 
-/* Matches the look of Google's legacy autocomplete dropdown that it replaces. */
-.placeSuggestions {
+.searchPopover {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + calc(4 * var(--u)));
   left: 0;
   width: 35%;
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+  z-index: 1000;
+}
+
+/* Matches the look of Google's legacy autocomplete dropdown that it replaces. */
+.placeSuggestions {
   margin: 0;
   padding: 0;
   list-style: none;
-  border-radius: 8px;
+  border-radius: calc(8 * var(--u));
   border: 1px solid #ddd;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   font-family: Arial, sans-serif;
   background-color: #fff;
   overflow: hidden;
-  z-index: 1000;
 }
 
 .placeSuggestion {
-  padding: 10px;
-  font-size: 14px;
+  padding: calc(10 * var(--u));
+  font-size: calc(14 * var(--u));
   color: #999;
   cursor: pointer;
   white-space: nowrap;
@@ -40,9 +46,111 @@
 }
 
 .placeSuggestionMain {
-  margin-right: 6px;
+  margin-right: calc(6 * var(--u));
   color: #333;
   font-weight: bold;
+}
+
+.searchMessage {
+  margin: 0;
+  padding: calc(10 * var(--u));
+  border-radius: calc(8 * var(--u));
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-family: Arial, sans-serif;
+  font-size: calc(14 * var(--u));
+  color: #666;
+  background-color: #fff;
+}
+
+.searchError {
+  color: #b3261e;
+}
+
+.savedPlaces {
+  margin: 0;
+  padding: 0;
+  max-height: calc(320 * var(--u));
+  overflow-y: auto;
+  list-style: none;
+  border-radius: calc(8 * var(--u));
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  color: var(--color-text);
+  background-color: var(--color-card);
+}
+
+.savedHeading {
+  padding: calc(8 * var(--u)) calc(10 * var(--u)) calc(2 * var(--u));
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.savedRow {
+  display: flex;
+  align-items: center;
+}
+
+.savedRow + .savedRow {
+  border-top: 1px solid var(--color-border);
+}
+
+.savedPick {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-target);
+  padding: calc(10 * var(--u));
+  border: none;
+  overflow: hidden;
+  font: inherit;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-strong);
+  background: none;
+  cursor: pointer;
+}
+
+.savedPick:disabled {
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
+.savedLabel {
+  margin-right: calc(6 * var(--u));
+  font-weight: 600;
+}
+
+.savedHint {
+  color: var(--color-text-muted);
+}
+
+@media (hover: hover) {
+  .savedPick:hover:enabled {
+    background-color: var(--color-card-hover);
+  }
+}
+
+.savedAction {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: max(calc(36 * var(--u)), var(--tap-target));
+  min-height: max(calc(36 * var(--u)), var(--tap-target));
+  padding: 0;
+  border: none;
+  font-size: max(var(--text-min), calc(18 * var(--u)));
+  line-height: 1;
+  color: var(--color-text-muted);
+  background: none;
+  cursor: pointer;
+}
+
+.savedAction[aria-pressed='true'] {
+  color: var(--color-warning);
 }
 
 /* The search box below moved from MapNavigation.css (and App.css for the small-screen font size). */
@@ -52,13 +160,21 @@
   position: relative;
 }
 
+/* 16px at every width: iOS Safari zooms the page when focusing anything smaller. */
 .navBtn input {
+  flex: 1;
+  min-width: 0;
   border: none;
   margin-left: 3%;
-  font-size: 1em;
+  font-size: max(16px, calc(16 * var(--u)));
   font-weight: 400;
   color: #4e4e4e;
   background-color: transparent;
+}
+
+.navBtn input:disabled {
+  color: #a1a1a1;
+  cursor: not-allowed;
 }
 
 .searchIcon {
@@ -68,7 +184,7 @@
 
 .clearInput {
   position: absolute;
-  right: 10px;
+  right: calc(10 * var(--u));
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -78,23 +194,12 @@
 }
 
 .clearInput img {
-  width: 16px;
-  height: 16px;
+  width: calc(16 * var(--u));
+  height: calc(16 * var(--u));
 }
 
-@media screen and (max-width: 768px) {
-  .navBtn input {
-    font-size: 10px;
-  }
-}
-
-/* Media query for mobile devices in landscape mode */
-@media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  .navBtn input {
-    max-width: 138px;
-    margin-left: 0px;
-  }
-  .searchIcon {
-    margin-left: 5px;
-  }
+/* Wider boxes on phones, where 35% of the panel is too narrow to type in. */
+:global(:root[data-layout='compact']) .searchPopover,
+:global(:root[data-layout='stacked']) .searchPopover {
+  width: calc(100% - 64px);
 }

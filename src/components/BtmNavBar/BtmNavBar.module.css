@@ -1,16 +1,22 @@
 /* `.navIconWrapper`, `.navIcons` and `.icon` are global utilities (src/styles/utilities.css). */
 .btmNavBar {
+  flex: none;
+  box-sizing: border-box;
   background-color: black;
   position: relative;
-  height: 13%;
+  height: var(--dock-height);
   width: 100%;
-  /* need to account for the 1px border in the width and height */
   border-left: 1px solid #343434;
   border-right: 1px solid #343434;
   border-bottom: 1px solid #343434;
-  border-radius: 0 0 15px 15px;
+  border-radius: 0 0 calc(15 * var(--u)) calc(15 * var(--u));
   z-index: 99999999;
-  max-width: 1329px; /* to maintain aspect ratio */
+}
+
+:global(:root[data-layout='compact']) .btmNavBar,
+:global(:root[data-layout='stacked']) .btmNavBar {
+  border: none;
+  border-radius: 0;
 }
 
 .btmNavItems {
@@ -33,14 +39,60 @@
   justify-self: start;
 }
 
-@media screen and (max-width: 768px) {
-  .btmNavBar {
-    border-radius: 0 0 6px 6px;
-  }
+/* Split takes the passenger control's room from the dock and the audio column. */
+.btmNavItems[data-split='true'] {
+  grid-template-columns: 8% 19% 37% 18% 18%;
 }
 
-@media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  .btmNavBar {
-    height: 18%;
-  }
+/* A small stage window leaves the dock narrower than its icons. The padding keeps the active
+   marker, which hangs below the icon, inside the scroll area. */
+.btmNavItems[data-split='true'] .dockApps {
+  justify-self: stretch;
+  justify-content: safe center;
+  min-width: 0;
+  padding-bottom: calc(6 * var(--u));
+  margin-bottom: calc(-6 * var(--u));
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+/* Compact drops the dock to one short row. */
+:global(:root[data-layout='compact']) .btmNavItems {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+/* The dock already scrolls, so it gives up the width. */
+:global(:root[data-layout='compact']) .btmNavItems[data-split='true'] {
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+}
+
+/* Stacked has no width for one row, so the dock gets its own and scrolls. */
+:global(:root[data-layout='stacked']) .btmNavItems {
+  grid-template-columns: auto 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  padding: 0 8px;
+  column-gap: 8px;
+}
+
+:global(:root[data-layout='stacked']) .btmNavItems[data-split='true'] {
+  grid-template-columns: auto 1fr auto 1fr;
+  column-gap: 4px;
+}
+
+:global(:root[data-layout='stacked']) .dockApps {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  justify-self: stretch;
+  justify-content: space-between;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+:global(:root[data-layout='compact']) .dockApps {
+  justify-self: stretch;
+  justify-content: space-between;
+  overflow-x: auto;
+  scrollbar-width: none;
 }

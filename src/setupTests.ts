@@ -27,8 +27,9 @@ if (!globalThis.matchMedia) {
   });
 }
 
-// jsdom does not implement media playback; MusicPanel calls these on mount.
+// jsdom does not implement media playback, which the player's audio element relies on.
 if (typeof HTMLMediaElement !== 'undefined') {
+  HTMLMediaElement.prototype.load = () => {};
   HTMLMediaElement.prototype.pause = () => {};
   HTMLMediaElement.prototype.play = () => Promise.resolve();
 }

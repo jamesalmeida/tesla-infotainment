@@ -1,0 +1,88 @@
+.emergency {
+  width: min(92vw, calc(520 * var(--u)));
+  max-height: 85vh;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: calc(18 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background: #ffffff;
+  color: #2b2b2b;
+  text-align: left;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+}
+
+.kicker {
+  margin: 0;
+  color: #777;
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.title {
+  margin: calc(2 * var(--u)) 0 0;
+  color: #c62828;
+  font-size: calc(42 * var(--u));
+  line-height: 1;
+}
+
+.close {
+  min-height: var(--tap-target);
+  padding: 0 calc(12 * var(--u));
+  border: none;
+  border-radius: calc(6 * var(--u));
+  background: rgba(0, 0, 0, 0.08);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.demo {
+  margin: calc(12 * var(--u)) 0;
+  padding: calc(8 * var(--u));
+  border-left: calc(3 * var(--u)) solid #c62828;
+  background: rgba(198, 40, 40, 0.08);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+}
+
+.callBox {
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  margin: calc(12 * var(--u)) 0;
+}
+
+.callButton {
+  flex: none;
+  min-height: var(--tap-target);
+  min-width: calc(120 * var(--u));
+  padding: 0 calc(14 * var(--u));
+  border: none;
+  border-radius: calc(999 * var(--u));
+  background: #c62828;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.callBox p {
+  margin: 0;
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  color: #555;
+}
+
+.list {
+  margin: 0;
+  padding-left: calc(18 * var(--u));
+  display: grid;
+  gap: calc(6 * var(--u));
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  color: #555;
+}

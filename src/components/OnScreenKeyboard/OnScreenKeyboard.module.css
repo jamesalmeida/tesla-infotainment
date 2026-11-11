@@ -1,0 +1,72 @@
+.keyboard {
+  position: fixed;
+  left: 50%;
+  bottom: calc(12 * var(--u));
+  transform: translateX(-50%);
+  z-index: 1600;
+  width: min(94vw, calc(620 * var(--u)));
+  padding: calc(10 * var(--u));
+  border-radius: calc(10 * var(--u));
+  background: #2b2b2b;
+  color: #ffffff;
+  box-shadow: rgba(0, 0, 0, 0.4) 0 12px 30px -6px;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(6 * var(--u));
+  color: #bdbdbd;
+  font-size: max(var(--text-min), calc(10 * var(--u)));
+}
+
+.done {
+  min-height: var(--tap-target);
+  padding: 0 calc(10 * var(--u));
+  border: none;
+  border-radius: calc(6 * var(--u));
+  background: #ffffff;
+  color: #2b2b2b;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  gap: calc(4 * var(--u));
+  margin-bottom: calc(4 * var(--u));
+}
+
+.key {
+  flex: 1;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  max-width: calc(54 * var(--u));
+  border: none;
+  border-radius: calc(5 * var(--u));
+  background: #454545;
+  color: #ffffff;
+  font: inherit;
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.key:active {
+  background: #5d5d5d;
+}
+
+.wide {
+  flex: 2;
+  max-width: calc(110 * var(--u));
+  text-transform: none;
+}
+
+.enter {
+  flex: 2;
+  max-width: calc(110 * var(--u));
+  background: #0b57d0;
+}

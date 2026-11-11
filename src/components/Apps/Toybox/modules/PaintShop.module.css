@@ -1,0 +1,98 @@
+.heading {
+  margin: calc(10 * var(--u)) 0 calc(4 * var(--u));
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  font-weight: 600;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(6 * var(--u));
+}
+
+.swatch {
+  position: relative;
+  width: calc(64 * var(--u));
+  height: calc(44 * var(--u));
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: calc(6 * var(--u));
+  cursor: pointer;
+}
+
+.swatch.selected {
+  border-color: #0b57d0;
+  box-shadow: 0 0 0 2px #ffffff inset;
+}
+
+.swatchLabel {
+  position: absolute;
+  inset: auto 2px 2px;
+  padding: 1px 2px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #222;
+  font-size: max(var(--text-min), calc(9 * var(--u)));
+  font-weight: 600;
+  text-align: center;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(6 * var(--u));
+}
+
+.choice {
+  min-height: var(--tap-target);
+  padding: 0 calc(10 * var(--u));
+  border: 1px solid #ccc;
+  border-radius: calc(6 * var(--u));
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.selectedChoice {
+  border-color: #0b57d0;
+  background: rgba(11, 87, 208, 0.08);
+}
+
+.label {
+  display: block;
+  margin-bottom: calc(4 * var(--u));
+  color: #777;
+  font-size: max(var(--text-min), calc(10 * var(--u)));
+}
+
+.plateRow {
+  display: flex;
+  gap: calc(6 * var(--u));
+}
+
+.plateRow input {
+  flex: 1;
+  min-height: var(--tap-target);
+  min-width: 0;
+  padding: 0 calc(8 * var(--u));
+  border: 1px solid #ccc;
+  border-radius: calc(6 * var(--u));
+  font: inherit;
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.save {
+  flex: none;
+  min-height: var(--tap-target);
+  padding: 0 calc(12 * var(--u));
+  border: none;
+  border-radius: calc(6 * var(--u));
+  background: #0b57d0;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}

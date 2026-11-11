@@ -1,17 +1,25 @@
 .gearSelect {
   display: flex;
-  gap: 5px;
+  gap: calc(5 * var(--u));
 }
 
 .gearSelectIcon {
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
   color: #4e4e4e;
   font-weight: 400;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.gearSelectIcon:hover {
-  background-color: #f0f0f0;
+@media (hover: hover) {
+  .gearSelectIcon:hover {
+    background-color: #f0f0f0;
+  }
 }
 
 .gearSelectIcon.active {

@@ -1,5 +1,12 @@
 /* Moved from App.css. */
 .batteryStatus {
+  min-height: var(--tap-target);
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -9,15 +16,9 @@
 }
 
 .batteryStatus span {
-  padding-right: 4px;
+  padding-right: calc(4 * var(--u));
 }
 
-.battery-fill-animate {
+.battery-fill {
   transition: width 0.3s ease-in-out;
-}
-
-@media screen and (max-width: 768px) {
-  .batteryStatus span {
-    padding-right: 0px;
-  }
 }

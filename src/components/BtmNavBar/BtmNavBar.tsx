@@ -1,109 +1,113 @@
-import type { MouseEvent } from 'react';
+import { APPS, type AppId } from '../../apps/registry';
 import TemperatureControl from '../TemperatureControl/TemperatureControl';
 import VolumeControl from '../VolumeControl/VolumeControl';
 import { getImagePath } from '../../utils/assetPaths';
-import { useCarActions, useCarState } from '../../state/CarStateContext';
-import type { AppId } from '../../state/carState';
+import { useCar, useCarActions } from '../../state/CarStateContext';
+import { activeApp, dockOrder, isCameraForced, type TemperatureZone } from '../../state/carState';
 import styles from './BtmNavBar.module.css';
 
+function DockIcon({ app }: { app: AppId }) {
+  const isActive = useCar((state) => activeApp(state) === app);
+  const isDisabled = useCar(isCameraForced);
+  const { toggleApp } = useCarActions();
+
+  return (
+    <button
+      type="button"
+      className={`navIconWrapper ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
+      disabled={isDisabled}
+      aria-pressed={isActive}
+      onClick={() => toggleApp(app)}
+    >
+      <img className={`navIcons ${app}`} src={getImagePath(APPS[app].icon)} alt={`${app} icon`} />
+    </button>
+  );
+}
+
+function ShelfButton() {
+  const isOpen = useCar((state) => state.activeModal === 'app-shelf');
+  const { toggleModal } = useCarActions();
+
+  return (
+    <button
+      type="button"
+      className="navIconWrapper"
+      aria-expanded={isOpen}
+      onClick={() => toggleModal('app-shelf')}
+    >
+      <img
+        className="icon"
+        src={getImagePath(isOpen ? 'icon-close-shelf.svg' : 'icon-open-shelf.svg')}
+        alt={isOpen ? 'Close Menu' : 'Open Menu'}
+      />
+    </button>
+  );
+}
+
+function ClimateControl({ zone }: { zone: TemperatureZone }) {
+  const temperature = useCar((state) =>
+    zone === 'driver' ? state.climate.driverTemp : state.climate.passengerTemp,
+  );
+  const isSplit = useCar((state) => state.climate.isSplit);
+  const isClimateOn = useCar((state) => state.climate.cabin.isOn);
+  const isPanelOpen = useCar((state) => state.activeModal === 'climate');
+  const { stepTemperature, toggleModal } = useCarActions();
+
+  return (
+    <TemperatureControl
+      temperature={temperature}
+      zone={isSplit ? zone : undefined}
+      isClimateOn={isClimateOn}
+      isPanelOpen={isPanelOpen}
+      onOpenPanel={() => toggleModal('climate')}
+      onIncrement={() => stepTemperature(zone, 1)}
+      onDecrement={() => stepTemperature(zone, -1)}
+    />
+  );
+}
+
+function AudioControl() {
+  const volume = useCar((state) => state.volume);
+  const { setVolume, openSettings } = useCarActions();
+
+  return (
+    <VolumeControl
+      volume={volume}
+      onVolumeChange={setVolume}
+      onOpenAudioSettings={() => openSettings('Audio')}
+    />
+  );
+}
+
 const BtmNavBar = () => {
-  const {
-    temperature,
-    volume,
-    activeApp: activeNavIcon,
-    isShelfOpen,
-    isCameraForced,
-  } = useCarState();
-  const { toggleApp, toggleShelf, stepTemperature, setVolume } = useCarActions();
-
-  const dockApps: (AppId | 'open-shelf')[] = [
-    'camera',
-    // 'calendar',
-    // 'toybox',
-    // 'theater',
-    'arcade',
-    'bluetooth',
-    'apple-music',
-    'dashcam',
-    'open-shelf',
-    'podcasts',
-  ];
-
-  const handleIconMouseDown = (event: MouseEvent<HTMLElement>) => {
-    event.currentTarget.classList.add('active');
-  };
-
-  const handleIconMouseUp = (event: MouseEvent<HTMLElement>) => {
-    event.currentTarget.classList.remove('active');
-  };
-
-  const handleOpenAudioSettings = () => {
-    toggleApp('car-settings');
-  };
+  const isSplit = useCar((state) => state.climate.isSplit);
+  const dock = useCar(dockOrder);
+  const { toggleApp } = useCarActions();
 
   return (
     <div className={styles.btmNavBar}>
-      <div className={`${styles.btmNavItems} no-select`}>
-        <div className={`navIconWrapper ${styles['car-settings']}`}>
-          <img
-            className={'navIcons'}
-            src={getImagePath(`icon-car-settings.svg`)}
-            alt={`car settings icon`}
+      <div className={`${styles.btmNavItems} no-select`} data-split={isSplit}>
+        <div className={styles['car-settings']}>
+          <button
+            type="button"
+            className="navIconWrapper"
             onClick={() => toggleApp('car-settings')}
-            onMouseDown={handleIconMouseDown}
-            onMouseUp={handleIconMouseUp}
-            onMouseLeave={handleIconMouseUp}
-          />
+          >
+            <img
+              className="navIcons"
+              src={getImagePath(APPS['car-settings'].icon)}
+              alt="car settings icon"
+            />
+          </button>
         </div>
-        <TemperatureControl
-          temperature={temperature}
-          onIncrement={() => stepTemperature(1)}
-          onDecrement={() => stepTemperature(-1)}
-        />
+        <ClimateControl zone="driver" />
         <div className={styles.dockApps}>
-          {dockApps.map((icon, index) => {
-            if (icon === 'open-shelf') {
-              return (
-                <div
-                  key="open-shelf"
-                  className={`navIconWrapper`}
-                  onClick={toggleShelf}
-                  onMouseDown={handleIconMouseDown}
-                  onMouseUp={handleIconMouseUp}
-                  onMouseLeave={handleIconMouseUp}
-                >
-                  <img
-                    className="icon"
-                    src={getImagePath(isShelfOpen ? 'icon-close-shelf.svg' : 'icon-open-shelf.svg')}
-                    alt={isShelfOpen ? 'Close Menu' : 'Open Menu'}
-                  />
-                </div>
-              );
-            } else {
-              return (
-                <div
-                  key={`${icon}-${index}`}
-                  className={`navIconWrapper ${activeNavIcon === icon ? 'active' : ''} ${isCameraForced ? 'disabled' : ''}`}
-                >
-                  <img
-                    className={`navIcons ${icon}`}
-                    src={getImagePath(`app-${icon}.svg`)}
-                    alt={`${icon} icon`}
-                    onClick={() => !isCameraForced && toggleApp(icon)}
-                    onMouseDown={!isCameraForced ? handleIconMouseDown : undefined}
-                    onMouseUp={!isCameraForced ? handleIconMouseUp : undefined}
-                    onMouseLeave={!isCameraForced ? handleIconMouseUp : undefined}
-                  />
-                </div>
-              );
-            }
-          })}
+          {dock.map((item) =>
+            item === 'open-shelf' ? <ShelfButton key={item} /> : <DockIcon key={item} app={item} />,
+          )}
         </div>
-        <VolumeControl
-          volume={volume}
-          onVolumeChange={setVolume}
-          onOpenAudioSettings={handleOpenAudioSettings}
-        />
+        {isSplit && <ClimateControl zone="passenger" />}
+        <AudioControl />
       </div>
     </div>
   );

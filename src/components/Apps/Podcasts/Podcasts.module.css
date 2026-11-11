@@ -1,0 +1,31 @@
+.content {
+  flex: 1;
+  min-height: 0;
+  margin-bottom: calc(6 * var(--u));
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.current {
+  color: var(--color-accent);
+}
+
+.block {
+  display: block;
+}
+
+.progress {
+  display: block;
+  height: calc(4 * var(--u));
+  min-height: 3px;
+  margin-top: calc(4 * var(--u));
+  overflow: hidden;
+  border-radius: calc(2 * var(--u));
+  background-color: var(--color-panel);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background-color: var(--color-accent);
+}

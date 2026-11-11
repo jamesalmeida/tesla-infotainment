@@ -13,23 +13,28 @@
 
 /* Styles specific to app shelf */
 .modal-content.app-shelf {
-  width: 40%;
+  width: min(90%, calc(560 * var(--u)));
+  max-height: 85%;
+  overflow: auto;
+  box-sizing: border-box;
   background-color: black;
   color: white;
-  padding: 10px;
-  border-radius: 10px;
-  width: 40%;
+  padding: calc(10 * var(--u));
+  border-radius: calc(10 * var(--u));
   text-align: center;
 }
 
-@media screen and (max-width: 768px) {
-  .modal-content.app-shelf {
-    width: 70%;
-  }
+.modal-content.sos {
+  padding: 0;
+  background: transparent;
 }
 
-@media only screen and (max-device-width: 896px) and (orientation: landscape) {
-  .modal-content.app-shelf {
-    width: 70%;
-  }
+.modal-content.shortcuts {
+  max-width: 80%;
+  max-height: 80%;
+  overflow: auto;
+  background-color: black;
+  color: white;
+  padding: calc(20 * var(--u));
+  border-radius: calc(10 * var(--u));
 }

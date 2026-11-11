@@ -3,59 +3,61 @@
 }
 
 .userProfile {
+  min-height: var(--tap-target);
   display: flex;
   align-items: center;
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
 }
 
-/* .profile-dropdown-header {
-    position: relative;
-    top: -20px;
-    padding: 10px;
-    background-color: #f0f0f0;
-  } */
-
 .userProfile img {
-  height: 24px;
+  height: calc(24 * var(--u));
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: calc(10 * var(--u));
 }
 
 .profile-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-card);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--color-text-strong) 10%, transparent);
   z-index: 1000;
-  width: 209px;
+  width: min(calc(209 * var(--u)), 90cqw);
 }
 
 .profile-option {
   display: flex;
   align-items: center;
-  padding: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  min-height: var(--tap-target);
+  padding: calc(10 * var(--u));
   cursor: pointer;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
 }
 
-.profile-option span {
-  /* margin-left: 10px; */
-}
-
 .profile-option:hover {
-  background-color: #f0f0f0;
+  background-color: var(--color-card-hover);
 }
 
 .profile-option img {
-  width: 24px;
-  height: 24px;
+  width: calc(24 * var(--u));
+  height: calc(24 * var(--u));
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: calc(10 * var(--u));
 }
 
 .active-profile-icon {
@@ -63,7 +65,7 @@
 }
 
 .profile-option-icon {
-  margin-left: 10px;
+  margin-left: calc(10 * var(--u));
   width: 14%;
 }
 
@@ -71,19 +73,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: calc(10 * var(--u));
+  background: none;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
-  border-top: 1px solid rgb(182, 182, 182);
+  border: none;
+  border-top: 1px solid var(--color-border);
 }
 
 .driver-profile-settings img {
   width: 9%;
-}
-
-@media (max-width: 768px) {
-  .userProfile img {
-    height: 14px;
-    margin-right: 4px;
-  }
-  /* .userProfile span {} */
 }

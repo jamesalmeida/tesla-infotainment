@@ -1,0 +1,392 @@
+/*
+ * Shared by every system panel. The page is its own size container, so @container rules
+ * follow the space the panel really has, whichever layout or sidebar is around it.
+ */
+.page {
+  container: system-panel / inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: calc(12 * var(--u));
+  width: 100%;
+  min-width: 0;
+  padding-bottom: calc(16 * var(--u));
+  box-sizing: border-box;
+  background-color: var(--color-panel);
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  text-align: left;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: max(var(--text-min), calc(20 * var(--u)));
+  font-weight: 600;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  padding: calc(12 * var(--u)) calc(14 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: max(var(--text-min), calc(15 * var(--u)));
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  line-height: 1.35;
+}
+
+.demoNote {
+  margin: 0;
+  padding: calc(8 * var(--u)) calc(12 * var(--u));
+  border-left: calc(3 * var(--u)) solid var(--color-warning);
+  border-radius: calc(4 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  line-height: 1.35;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+  min-height: var(--tap-target);
+}
+
+.stackedRow {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: calc(2 * var(--u));
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rowLabel {
+  color: var(--color-text-strong);
+}
+
+.rowControl {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(6 * var(--u));
+}
+
+/* A switch is smaller than a finger, so its hit area is what meets the minimum. */
+.switch {
+  position: relative;
+  flex-shrink: 0;
+  width: max(var(--tap-target), calc(44 * var(--u)));
+  height: max(var(--tap-target), calc(26 * var(--u)));
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.switch::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: max(24px, calc(26 * var(--u)));
+  border-radius: calc(13 * var(--u));
+  background-color: var(--color-border);
+  transform: translateY(-50%);
+  transition: background-color 0.15s ease-out;
+}
+
+.switch[aria-checked='true']::before {
+  background-color: var(--color-accent);
+}
+
+.switchThumb {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: max(20px, calc(22 * var(--u)));
+  height: max(20px, calc(22 * var(--u)));
+  border-radius: 50%;
+  background-color: var(--color-on-accent);
+  transform: translateY(-50%);
+  transition: left 0.15s ease-out;
+}
+
+.switch[aria-checked='true'] .switchThumb {
+  left: calc(100% - max(20px, calc(22 * var(--u))) - 2px);
+}
+
+.switch:disabled,
+.segment:disabled,
+.button:disabled,
+.slider:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-border);
+}
+
+.segment {
+  flex: 1 1 0;
+  min-width: fit-content;
+  min-height: max(var(--tap-target), calc(34 * var(--u)));
+  padding: calc(4 * var(--u)) calc(8 * var(--u));
+  border: none;
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.segment[aria-checked='true'] {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.sliderHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+}
+
+.sliderValue {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.slider {
+  width: 100%;
+  min-height: max(var(--tap-target), calc(24 * var(--u)));
+  margin: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(calc(110 * var(--u)), 1fr));
+  gap: calc(8 * var(--u));
+  margin: 0;
+}
+
+.stat {
+  min-width: 0;
+}
+
+.statLabel {
+  color: var(--color-text-muted);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+}
+
+.statValue {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: max(var(--text-min), calc(17 * var(--u)));
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.button {
+  min-width: var(--tap-target);
+  min-height: max(var(--tap-target), calc(34 * var(--u)));
+  padding: calc(4 * var(--u)) calc(12 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    background-color: var(--color-card-hover);
+  }
+}
+
+.button.primary,
+.button.primary:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.button.danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+}
+
+.inlineForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(8 * var(--u));
+}
+
+.input {
+  flex: 1 1 calc(140 * var(--u));
+  min-width: 0;
+  min-height: max(var(--tap-target), calc(34 * var(--u)));
+  padding: calc(4 * var(--u)) calc(10 * var(--u));
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-bg);
+  color: var(--color-text-strong);
+  /* Below 16px, iOS zooms the page on focus. */
+  font: inherit;
+  font-size: max(16px, 1em);
+}
+
+.pinInput {
+  flex: 0 1 calc(130 * var(--u));
+  letter-spacing: 0.2em;
+}
+
+.pinInput::placeholder {
+  letter-spacing: normal;
+}
+
+/* In a column the input's flex basis would become its height. */
+.stackedRow .input {
+  flex: none;
+  width: 100%;
+}
+
+.progress {
+  overflow: hidden;
+  height: max(6px, calc(8 * var(--u)));
+  border-radius: calc(4 * var(--u));
+  background-color: var(--color-border);
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--color-accent);
+  transition: width 0.1s linear;
+}
+
+/* Rows of data with their own actions: networks, devices, meters, drivers. */
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  padding: calc(8 * var(--u)) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.listItem:first-child {
+  border-top: none;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+}
+
+.success {
+  color: var(--color-success);
+}
+
+.prose {
+  line-height: 1.4;
+}
+
+.prose h3,
+.prose h4 {
+  margin: calc(10 * var(--u)) 0 calc(4 * var(--u));
+  color: var(--color-text-strong);
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+}
+
+.prose h3:first-child {
+  margin-top: 0;
+}
+
+.prose ul {
+  margin: 0;
+  padding-left: calc(18 * var(--u));
+}
+
+.prose p {
+  margin: 0;
+}
+
+.prose a {
+  color: var(--color-accent);
+}
+
+.twoColumns {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12 * var(--u));
+}
+
+/* Narrow panels: controls drop under their labels rather than squeezing them. */
+@container system-panel (max-width: 320px) {
+  .row:has(.rowControl .button) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rowControl {
+    justify-content: flex-start;
+  }
+}
+
+/* Wide panels: sections sit side by side instead of running down one long column. */
+@container system-panel (min-width: 620px) {
+  .twoColumns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: calc(12 * var(--u));
+  }
+}

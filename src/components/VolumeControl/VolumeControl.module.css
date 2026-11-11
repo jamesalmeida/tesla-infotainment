@@ -6,7 +6,7 @@
   bottom: 100%;
   left: 87%;
   transform: translateX(-50%);
-  margin-bottom: 10px;
+  margin-bottom: calc(10 * var(--u));
 }
 
 .volume-control {
@@ -17,15 +17,14 @@
 }
 
 :global(.navIcons).volume-display {
-  width: 12%;
-  max-height: 38px;
+  max-height: calc(38 * var(--u));
 }
 
-.volume-display {
-  width: 12%;
+.volume-btn {
+  flex: 0 0 auto;
 }
 
 /* Moved from BtmNavBar.css. */
 .volume-control .volume-display {
-  padding: 0 12px;
+  padding: 0 calc(12 * var(--u));
 }

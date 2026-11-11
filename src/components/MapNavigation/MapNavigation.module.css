@@ -27,46 +27,247 @@
   border: none !important;
 }
 
-input:focus {
-  outline: none;
+.fallback {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #eceef0;
 }
 
-.navigateBtn {
+.fallbackArt {
   position: absolute;
-  background-color: #1976d2;
-  color: white;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fallbackNote {
+  position: relative;
+  box-sizing: border-box;
+  width: min(calc(380 * var(--u)), 70%);
+  margin-top: 8%;
+  padding: calc(20 * var(--u));
+  border-radius: calc(10 * var(--u));
+  text-align: center;
+  color: #4e4e4e;
+  background-color: rgb(250, 250, 250, 90%);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.fallbackNote h2 {
+  margin: 0 0 calc(6 * var(--u));
+  font-size: max(var(--text-min), calc(16 * var(--u)));
+  font-weight: 600;
+}
+
+.fallbackNote p {
+  margin: 0;
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  line-height: 1.4;
+}
+
+.fallbackNote code {
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+}
+
+.navPanel {
+  position: absolute;
+  top: calc(90 * var(--u));
+  left: calc(25 * var(--u));
+  bottom: calc(10 * var(--u));
+  width: 35%;
+  overflow-y: auto;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+}
+
+.navPanel > * {
+  flex: none;
+  pointer-events: auto;
+}
+
+.navStatus {
+  margin: 0;
+  padding: calc(8 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(8 * var(--u));
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  color: #4e4e4e;
+  background-color: rgb(250, 250, 250, 90%);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.navError {
+  color: #b3261e;
+}
+
+.routeSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+  padding: calc(8 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(8 * var(--u));
+  background-color: rgb(250, 250, 250, 92%);
+  color: #4e4e4e;
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  font-weight: 600;
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.chargeStop {
+  color: #b26a00;
+}
+
+.mapNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8 * var(--u));
+}
+
+.noticeDismiss {
+  flex: none;
+  display: flex;
+  padding: 0;
+  background: none;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
   cursor: pointer;
+}
+
+.noticeDismiss img {
+  width: calc(14 * var(--u));
+  height: calc(14 * var(--u));
+}
+
+.placeActions {
+  display: flex;
+  gap: calc(6 * var(--u));
+}
+
+.placeAction {
+  flex: 1;
+  min-height: var(--tap-target);
+  padding: calc(6 * var(--u)) calc(8 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(5 * var(--u));
+  font: inherit;
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  color: var(--color-text);
+  background-color: var(--color-card);
+  cursor: pointer;
+}
+
+.placeAction[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+  background-color: var(--color-accent);
 }
 
 .navigateBtn,
 .endNavigateBtn {
-  position: absolute;
-  top: 90px;
-  left: 25px;
-  padding: 10px 20px;
-  border-radius: 5px;
+  width: 100%;
+  padding: calc(10 * var(--u)) calc(20 * var(--u));
+  border: none;
+  border-radius: calc(5 * var(--u));
+  color: white;
   cursor: pointer;
   transition: opacity 0.3s ease;
 }
 
 .navigateBtn {
   background-color: #1976d2;
-  color: white;
-  border: none;
 }
 
 .endNavigateBtn {
   background-color: #d32f2f;
-  color: white;
-  border: none;
 }
 
-.navigateBtn:hover,
-.endNavigateBtn:hover {
-  opacity: 0.8;
+@media (hover: hover) {
+  .navigateBtn:hover,
+  .endNavigateBtn:hover {
+    opacity: 0.8;
+  }
+}
+
+.navigateBtn:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.recenterBtn {
+  position: absolute;
+  bottom: calc(24 * var(--u));
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: var(--tap-target);
+  padding: calc(8 * var(--u)) calc(20 * var(--u));
+  border: none;
+  border-radius: calc(5 * var(--u));
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  color: var(--color-text-strong);
+  background-color: var(--color-card);
+  cursor: pointer;
+}
+
+.mapOptions {
+  position: absolute;
+  top: 0;
+  right: calc(100% + calc(10 * var(--u)));
+  box-sizing: border-box;
+  width: calc(260 * var(--u));
+  min-width: 200px;
+  max-height: calc(100cqh - calc(120 * var(--u)));
+  padding: calc(12 * var(--u));
+  overflow-y: auto;
+  border-radius: calc(10 * var(--u));
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  color: var(--color-text);
+  background-color: var(--color-card);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.mapOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(8 * var(--u));
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: calc(6 * var(--u)) 0;
+  border: none;
+  font: inherit;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.mapOption:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.mapOption[aria-checked='true']::after {
+  content: 'On';
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.mapOption[aria-checked='false']::after {
+  content: 'Off';
+  color: var(--color-text-muted);
 }
 
 .floatingRightBtnsWrapper {
@@ -84,7 +285,7 @@ input:focus {
   box-shadow:
     rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
-  border-radius: 10px;
+  border-radius: calc(10 * var(--u));
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -98,6 +299,19 @@ input:focus {
   background-color: rgb(250, 250, 250, 90%);
 }
 
+:global(.floatingBtn):global(.squareBtn).layerOn {
+  background-color: rgba(25, 118, 210, 0.25);
+}
+
+:global(.floatingBtn):global(.squareBtn).layerError {
+  background-color: rgba(211, 47, 47, 0.25);
+}
+
+:global(.floatingBtn):global(.squareBtn):disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .icon-compass {
   width: 89%;
 }
@@ -106,7 +320,7 @@ input:focus {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3px 10px;
+  padding: calc(3 * var(--u)) calc(10 * var(--u));
   background-color: rgba(0, 0, 0, 0);
   z-index: 3;
   font-size: 1em;
@@ -116,32 +330,47 @@ input:focus {
 }
 
 .carLockWrapper {
-  margin-right: 10px;
+  margin-right: calc(10 * var(--u));
 }
 
 /* <CarLock>'s root element. Was `.carLockWrapper .carLock`; this keeps it more specific than `.carLock`. */
-.carLockWrapper > div {
-  width: 30px;
-  height: 20px;
+.carLockWrapper > button {
+  width: max(calc(30 * var(--u)), var(--tap-target));
+  height: max(calc(20 * var(--u)), var(--tap-target));
 }
 
 .wifiStatus {
-  width: 3%;
-  margin-right: 10px;
-  margin-left: 10px;
+  width: calc(24 * var(--u));
+  margin-right: calc(10 * var(--u));
+  margin-left: calc(10 * var(--u));
 }
 
 /* The wrapper around <OutsideTemp>. Was styled by OutsideTemp.css as a global class. */
 .outsideTemp {
   cursor: pointer;
-  padding-left: 10px;
+  padding-left: calc(10 * var(--u));
+}
+
+.sosButton {
+  min-height: var(--tap-target);
+  min-width: var(--tap-target);
+  margin-left: calc(10 * var(--u));
+  padding: 0 calc(7 * var(--u));
+  border: none;
+  border-radius: calc(8 * var(--u));
+  background: #c62828;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  font-size: max(var(--text-min), 0.7em);
+  cursor: pointer;
 }
 
 .airbagStatus {
   margin-left: auto;
   background-color: rgb(250, 250, 250, 80%);
-  padding: 2px 5px;
-  border-radius: 8px;
+  padding: 2px calc(5 * var(--u));
+  border-radius: calc(8 * var(--u));
   display: flex;
   flex-direction: row;
   align-items: left;
@@ -149,15 +378,16 @@ input:focus {
 
 .airbagStatus img {
   width: auto;
-  height: 20px;
-  margin-right: 4px;
+  height: calc(20 * var(--u));
+  margin-right: calc(4 * var(--u));
 }
 
 .airbagStatusText {
-  font-size: 0.1em;
+  font-size: max(var(--text-min), 0.6em);
+  line-height: 1.1;
   font-weight: 600;
   color: #4e4e4e;
-  width: 62px;
+  white-space: nowrap;
 }
 
 .airbagStatusOff {
@@ -174,23 +404,37 @@ input:focus {
   background: none !important;
 }
 
-@media (max-width: 768px) {
-  .topMenuBar {
-    font-size: 9px;
-  }
-  .airbagStatusText {
-    width: auto;
-    font-size: 3px;
-  }
-  .airbagStatus img {
-    width: auto;
-    height: 6px;
-    margin-right: 2px;
-  }
-  .wifiStatus {
-    width: 15px;
-    margin-right: 4px;
-    margin-left: 4px;
-  }
-  /* .floatingBtn .icon {} */
+/* Phones: the bar has room for what the driver needs, so airbag status goes first. */
+:global(:root[data-layout='compact']) .airbagStatus,
+:global(:root[data-layout='stacked']) .airbagStatus {
+  display: none;
+}
+
+:global(:root[data-layout='compact']) .floatingRightBtnsWrapper,
+:global(:root[data-layout='stacked']) .floatingRightBtnsWrapper {
+  width: 44px;
+  top: 52px;
+  right: 6px;
+}
+
+:global(:root[data-layout='compact']) .compassDirection {
+  display: none;
+}
+
+:global(:root[data-layout='compact']) .floatingRightBtnsWrapper {
+  top: 44px;
+}
+
+:global(:root[data-layout='compact']) .floatingRightBtnColumn {
+  margin-top: 0;
+  padding: 0;
+}
+
+.floatingRightBtnColumn button {
+  min-height: var(--tap-target);
+}
+
+:global(:root[data-layout='compact']) .floatingRightBtnColumn button,
+:global(:root[data-layout='stacked']) .floatingRightBtnColumn button {
+  padding: 0;
 }

@@ -1,18 +1,16 @@
-import styles from '../CarSettings.module.css';
+import { useCar, useCarActions } from '../../../../state/CarStateContext';
+import { AdjustmentPad } from './AdjustmentPad';
 
 export const SteeringAdjustment = ({ onClose }: { onClose: () => void }) => {
+  const value = useCar((state) => state.settings.steeringWheel);
+  const { setSettings } = useCarActions();
+
   return (
-    <div className={styles['adjustment-modal']}>
-      <h2>Adjust Steering Wheel</h2>
-      <div className={styles['adjustment-controls']}>
-        <button className={styles['adjustment-btn']}>↑</button>
-        <button className={styles['adjustment-btn']}>↓</button>
-        <button className={styles['adjustment-btn']}>←</button>
-        <button className={styles['adjustment-btn']}>→</button>
-      </div>
-      <button className={styles['close-btn']} onClick={onClose}>
-        Close
-      </button>
-    </div>
+    <AdjustmentPad
+      title="Adjust Steering Wheel"
+      value={value}
+      onChange={(steeringWheel) => setSettings({ steeringWheel })}
+      onClose={onClose}
+    />
   );
 };

@@ -1,0 +1,282 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: calc(18 * var(--u));
+  padding-bottom: calc(20 * var(--u));
+  color: var(--color-text);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 * var(--u));
+}
+
+.sectionTitle {
+  margin: 0 0 calc(4 * var(--u));
+  color: var(--color-text-muted);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+  min-height: var(--tap-target);
+  padding: calc(9 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
+  scroll-margin: calc(12 * var(--u));
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.labelLine {
+  display: flex;
+  align-items: center;
+  gap: calc(6 * var(--u));
+}
+
+.label {
+  color: var(--color-text-strong);
+}
+
+.description {
+  margin: calc(2 * var(--u)) 0 0;
+  color: var(--color-text-muted);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+}
+
+.infoButton {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.infoGlyph {
+  display: grid;
+  place-items: center;
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  font: italic 500 max(var(--text-min), calc(11 * var(--u))) serif;
+}
+
+/* A switch drawn on a real checkbox, so labels, focus and keys all behave as one. The input
+   itself keeps the full tap height, and the track and thumb are drawn in the middle of it. */
+.switch {
+  --track-height: calc(24 * var(--u));
+
+  flex: none;
+  position: relative;
+  width: calc(42 * var(--u));
+  height: max(var(--tap-target), var(--track-height));
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.switch::before,
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.switch::before {
+  left: 0;
+  right: 0;
+  height: var(--track-height);
+  border-radius: calc(12 * var(--u));
+  background-color: var(--color-border);
+  transition: background-color 0.15s ease-out;
+}
+
+.switch::after {
+  left: calc(2 * var(--u));
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  border-radius: 50%;
+  background-color: var(--color-on-accent);
+  transition: transform 0.15s ease-out;
+}
+
+.switch:checked::before {
+  background-color: var(--color-accent);
+}
+
+.switch:checked::after {
+  transform: translate(calc(18 * var(--u)), -50%);
+}
+
+.segments {
+  flex: none;
+  display: flex;
+  max-width: 100%;
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-panel);
+}
+
+.segment {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(58 * var(--u));
+  min-height: max(var(--tap-target), calc(32 * var(--u)));
+  padding: 0 calc(10 * var(--u));
+  box-sizing: border-box;
+  border-radius: calc(8 * var(--u));
+  color: var(--color-text);
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Hidden by position, not display, so the radio stays focusable. */
+.segment input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+.segment.selected {
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.segment:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.sliderRow {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.sliderHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+}
+
+.value {
+  flex: none;
+  color: var(--color-text-strong);
+}
+
+.slider {
+  width: 100%;
+  min-height: var(--tap-target);
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+}
+
+.button {
+  min-height: max(var(--tap-target), calc(32 * var(--u)));
+  padding: calc(4 * var(--u)) calc(14 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text-strong);
+  font: inherit;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background-color: var(--color-card-hover);
+}
+
+.button:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.primary,
+.primary:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(calc(110 * var(--u)), 1fr));
+  gap: calc(8 * var(--u));
+  margin: 0;
+}
+
+.stat {
+  padding: calc(9 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
+}
+
+.stat dt {
+  color: var(--color-text-muted);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+}
+
+.stat dd {
+  margin: calc(2 * var(--u)) 0 0;
+  color: var(--color-text-strong);
+  font-size: max(var(--text-min), calc(17 * var(--u)));
+}
+
+.note {
+  margin: 0;
+  padding: calc(9 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+}
+
+.warning {
+  border-left: calc(4 * var(--u)) solid var(--color-warning);
+  color: var(--color-text-strong);
+}
+
+/* Label over control once the two no longer share a line comfortably. */
+@container (max-width: 640px) {
+  .stackable {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .segments {
+    width: 100%;
+  }
+
+  .segment {
+    min-width: 0;
+  }
+}

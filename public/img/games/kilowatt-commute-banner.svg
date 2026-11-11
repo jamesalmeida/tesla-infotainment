@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff9a4d"/>
+      <stop offset="0.6" stop-color="#ff5e62"/>
+      <stop offset="1" stop-color="#4b2a6b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="600" fill="url(#sky)"/>
+  <circle cx="1180" cy="210" r="120" fill="#ffe08a"/>
+  <path d="M0 300 L180 210 L320 280 L520 180 L700 290 L900 220 L1100 300 L1320 230 L1600 310 V360 H0Z" fill="#3a2460"/>
+  <g fill="#2b1b4d">
+    <rect x="240" y="240" width="60" height="120"/>
+    <rect x="310" y="200" width="80" height="160"/>
+    <rect x="400" y="260" width="50" height="100"/>
+    <rect x="1320" y="250" width="70" height="110"/>
+    <rect x="1400" y="210" width="60" height="150"/>
+  </g>
+  <rect y="350" width="1600" height="250" fill="#2b3036"/>
+  <rect y="350" width="1600" height="8" fill="#e9ecef"/>
+  <path d="M0 470 h120 v8 H0Z M220 470 h120 v8 H220Z M440 470 h120 v8 H440Z M660 470 h120 v8 H660Z M880 470 h120 v8 H880Z M1100 470 h120 v8 H1100Z M1320 470 h120 v8 H1320Z M1540 470 h60 v8 H1540Z" fill="#ced4da"/>
+  <g transform="translate(500 420)">
+    <path d="M-240 40 Q-250 -6 -190 -16 L-110 -26 Q-40 -86 60 -86 Q150 -86 210 -24 Q262 -18 270 10 L272 40Z" fill="#f1f3f5"/>
+    <path d="M-92 -26 Q-30 -72 40 -72 V-26Z M58 -72 Q130 -70 180 -26 H58Z" fill="#1d2733"/>
+    <circle cx="-140" cy="42" r="40" fill="#14171a"/>
+    <circle cx="-140" cy="42" r="18" fill="#ced4da"/>
+    <circle cx="170" cy="42" r="40" fill="#14171a"/>
+    <circle cx="170" cy="42" r="18" fill="#ced4da"/>
+    <path d="M-310 -10 h50 M-340 16 h70 M-300 42 h40" stroke="#74c0fc" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(1100 500)">
+    <rect x="-70" y="-30" width="140" height="60" rx="10" fill="#40c057" opacity="0.35" stroke="#69db7c" stroke-width="5"/>
+    <path d="M10 -24 L-22 6 H-2 L-10 26 L22 -6 H2Z" fill="#69db7c"/>
+  </g>
+</svg>

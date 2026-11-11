@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset="0.45" stop-color="#ff5e62"/>
+      <stop offset="1" stop-color="#2b1b4d"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#sky)"/>
+  <circle cx="200" cy="250" r="90" fill="#ffe08a"/>
+  <path d="M0 330 L70 270 L130 320 L210 250 L290 325 L340 285 L400 330 V380 H0Z" fill="#3a2460"/>
+  <path d="M0 370 H400 V600 H0Z" fill="#23262b"/>
+  <path d="M170 370 L230 370 L400 600 L0 600Z" fill="#30343a"/>
+  <path d="M197 380 H203 L205 410 H195Z M192 435 H208 L212 485 H188Z M183 515 H217 L224 600 H176Z" fill="#f1f3f5"/>
+  <g transform="translate(200 470)">
+    <rect x="-82" y="-20" width="164" height="72" rx="20" fill="#f1f3f5"/>
+    <path d="M-58 -20 L-40 -62 Q-36 -70 -26 -70 H26 Q36 -70 40 -62 L58 -20Z" fill="#dee2e6"/>
+    <path d="M-46 -24 L-32 -58 H32 L46 -24Z" fill="#1d2733"/>
+    <rect x="-70" y="6" width="34" height="12" rx="4" fill="#e03131"/>
+    <rect x="36" y="6" width="34" height="12" rx="4" fill="#e03131"/>
+    <rect x="-82" y="46" width="30" height="20" rx="6" fill="#14171a"/>
+    <rect x="52" y="46" width="30" height="20" rx="6" fill="#14171a"/>
+  </g>
+  <path d="M232 70 L150 200 H198 L168 300 L262 150 H212Z" fill="#ffe066" stroke="#2b1b4d" stroke-width="8" stroke-linejoin="round"/>
+  <rect y="526" width="400" height="74" fill="#23262b"/>
+  <g font-family="system-ui, -apple-system, sans-serif" font-weight="800" text-anchor="middle" fill="#ffffff">
+    <text x="200" y="56" font-size="44">KILOWATT</text>
+    <text x="200" y="566" font-size="46">COMMUTE</text>
+  </g>
+</svg>

@@ -1,83 +1,295 @@
-import { createContext, useContext, useMemo, useReducer, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, useSyncExternalStore } from 'react';
+import type { ReactNode } from 'react';
 import {
   carReducer,
   initialCarState,
-  isCameraForced,
   type AppId,
+  type Autopilot,
+  type CabinSettings,
+  type CabinPosition,
+  type CarAction,
   type CarState,
+  type ClimateMode,
+  type ClimateOptions,
+  type ClipSource,
+  type Compartment,
+  type DefrostWindow,
+  type DemoId,
+  type DockItem,
+  type DisplaySettings,
   type Gear,
+  type ModalId,
+  type OverlayMode,
+  type Pedal,
+  type ScheduleKind,
+  type SeatId,
+  type SeatKind,
+  type SettingsPanel,
+  type Surface,
+  type TemperatureZone,
+  type VehicleSettings,
 } from './carState';
-
-export interface CarStateValue extends CarState {
-  isCameraForced: boolean;
-}
+import type { DoorId } from './doors';
+import { loadPersistedState, savePersistedState } from './persistence';
 
 export interface CarActions {
   selectGear: (gear: Gear) => void;
   toggleApp: (app: AppId) => void;
-  closeSlider: () => void;
+  closeSurface: () => void;
+  restoreSurface: (surface: Surface) => void;
+  applyDemo: (demo: DemoId) => void;
   toggleCamera: () => void;
-  openWifiSettings: () => void;
-  leaveWifiSettings: () => void;
-  toggleShelf: () => void;
+  openSettings: (panel: SettingsPanel) => void;
+  setSettings: (patch: Partial<VehicleSettings>) => void;
+  setDisplay: (patch: Partial<DisplaySettings>) => void;
+  toggleModal: (modal: ModalId) => void;
   closeModal: () => void;
-  toggleFrunk: () => void;
-  toggleTrunk: () => void;
+  toggleCompartment: (compartment: Compartment) => void;
+  toggleDoor: (door: DoorId) => void;
+  toggleLock: () => void;
   toggleLeftSignal: () => void;
   toggleRightSignal: () => void;
   toggleHazards: () => void;
-  stepTemperature: (delta: number) => void;
+  stepTemperature: (zone: TemperatureZone, delta: number) => void;
+  setTemperature: (zone: TemperatureZone, value: number) => void;
+  setCabin: (patch: Partial<CabinSettings>) => void;
+  setClimateOptions: (options: ClimateOptions) => void;
+  toggleDefrost: (window: DefrostWindow) => void;
+  cycleSeat: (seat: SeatId, kind: SeatKind) => void;
+  toggleHeatAuto: () => void;
+  toggleClimateMode: (mode: ClimateMode) => void;
   setVolume: (volume: number) => void;
+  selectProfile: (id: number) => void;
+  moveDockItem: (item: DockItem, delta: -1 | 1) => void;
+  addProfile: (name: string) => void;
+  renameProfile: (id: number, name: string) => void;
+  deleteProfile: (id: number) => void;
+  setCabinPosition: (patch: Partial<CabinPosition>) => void;
+  enterValet: (pin: string) => void;
+  exitValet: (pin: string) => void;
+  showNotice: (message: string) => void;
+  // Without an id, clears every toast.
+  dismissNotice: (id?: number) => void;
+  clearNotifications: () => void;
+  markNotificationsSeen: () => void;
+  setPedal: (pedal: Pedal) => void;
+  tick: (seconds: number) => void;
+  plugIn: () => void;
+  unplug: () => void;
+  toggleCharging: () => void;
+  toggleChargePort: () => void;
+  resetTrip: () => void;
+  engageAutopilot: (mode: Exclude<Autopilot, 'off'>) => void;
+  disengageAutopilot: () => void;
+  triggerSentryAlarm: () => void;
+  clearSentryAlarm: () => void;
+  saveDashcamClip: (source: Exclude<ClipSource, 'sentry'>) => void;
+  enterMode: (mode: OverlayMode) => void;
+  exitMode: () => void;
+  toggleGlovebox: () => void;
+  walkAway: () => void;
+  addTripMeter: (name: string) => void;
+  renameTripMeter: (id: number, name: string) => void;
+  resetTripMeter: (id: number) => void;
+  removeTripMeter: (id: number) => void;
+  moveTripMeter: (id: number, offset: -1 | 1) => void;
+  enableSpeedLimit: (pin: string) => void;
+  disableSpeedLimit: (pin: string) => void;
+  enablePinToDrive: (pin: string) => void;
+  disablePinToDrive: (pin: string) => void;
+  unlockDrive: (pin: string) => void;
+  resetPins: () => void;
+  setRequireSafetyFeatures: (enabled: boolean) => void;
+  setWifiEnabled: (enabled: boolean) => void;
+  connectWifi: (id: string, password: string) => void;
+  disconnectWifi: () => void;
+  forgetWifi: (id: string) => void;
+  setHotspot: (enabled: boolean) => void;
+  setBluetoothEnabled: (enabled: boolean) => void;
+  pairBluetooth: (id: string) => void;
+  confirmBluetoothPairing: () => void;
+  cancelBluetoothPairing: () => void;
+  connectBluetooth: (id: string) => void;
+  disconnectBluetooth: () => void;
+  forgetBluetooth: (id: string) => void;
+  setPriorityBluetooth: (id: string | null) => void;
+  setTowMode: (enabled: boolean) => void;
+  restartDisplay: () => void;
+  checkForUpdate: () => void;
+  downloadUpdate: () => void;
+  installUpdate: () => void;
+  toggleGarageDoor: () => void;
+  setHomeHere: () => void;
+  addSchedule: (kind: ScheduleKind, time: string, days: number[]) => void;
+  removeSchedule: (id: number) => void;
+  setScheduleEnabled: (id: number, enabled: boolean) => void;
+  runSchedule: (id: number, date: string) => void;
+  startChargeNow: () => void;
 }
 
-const CarStateContext = createContext<CarStateValue | null>(null);
-const CarActionsContext = createContext<CarActions | null>(null);
+export interface CarStore {
+  getState: () => CarState;
+  subscribe: (listener: () => void) => () => void;
+  dispatch: (action: CarAction) => void;
+}
 
-export function CarStateProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(carReducer, initialCarState);
+function createCarStore(initial: CarState): CarStore {
+  let state = initial;
+  const listeners = new Set<() => void>();
+
+  return {
+    getState: () => state,
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    dispatch: (action) => {
+      const next = carReducer(state, action);
+      if (next === state) return;
+      state = next;
+      listeners.forEach((listener) => listener());
+    },
+  };
+}
+
+const createActions = ({ dispatch }: CarStore): CarActions => ({
+  selectGear: (gear) => dispatch({ type: 'gear/select', gear }),
+  toggleApp: (app) => dispatch({ type: 'app/toggle', app }),
+  closeSurface: () => dispatch({ type: 'surface/close' }),
+  restoreSurface: (surface) => dispatch({ type: 'surface/restore', surface }),
+  applyDemo: (demo) => dispatch({ type: 'demo/apply', demo }),
+  toggleCamera: () => dispatch({ type: 'camera/toggle' }),
+  openSettings: (panel) => dispatch({ type: 'settings/open', panel }),
+  setSettings: (patch) => dispatch({ type: 'settings/set', patch }),
+  setDisplay: (patch) => dispatch({ type: 'display/set', patch }),
+  toggleModal: (modal) => dispatch({ type: 'modal/toggle', modal }),
+  closeModal: () => dispatch({ type: 'modal/close' }),
+  toggleCompartment: (compartment) => dispatch({ type: 'compartment/toggle', compartment }),
+  toggleDoor: (door) => dispatch({ type: 'door/toggle', door }),
+  toggleLock: () => dispatch({ type: 'lock/toggle' }),
+  toggleLeftSignal: () => dispatch({ type: 'signal/left' }),
+  toggleRightSignal: () => dispatch({ type: 'signal/right' }),
+  toggleHazards: () => dispatch({ type: 'signal/hazards' }),
+  stepTemperature: (zone, delta) => dispatch({ type: 'climate/temperature', zone, delta }),
+  setTemperature: (zone, value) => dispatch({ type: 'climate/setTemperature', zone, value }),
+  setCabin: (patch) => dispatch({ type: 'climate/cabin', patch }),
+  setClimateOptions: (options) => dispatch({ type: 'climate/options', options }),
+  toggleDefrost: (window) => dispatch({ type: 'climate/defrost', window }),
+  cycleSeat: (seat, kind) => dispatch({ type: 'climate/seat', seat, kind }),
+  toggleHeatAuto: () => dispatch({ type: 'climate/heat-auto' }),
+  toggleClimateMode: (mode) => dispatch({ type: 'climate/mode', mode }),
+  setVolume: (volume) => dispatch({ type: 'volume/set', volume }),
+  selectProfile: (id) => dispatch({ type: 'profile/select', id }),
+  moveDockItem: (item, delta) => dispatch({ type: 'dock/move', item, delta }),
+  addProfile: (name) => dispatch({ type: 'profile/add', name }),
+  renameProfile: (id, name) => dispatch({ type: 'profile/rename', id, name }),
+  deleteProfile: (id) => dispatch({ type: 'profile/delete', id }),
+  setCabinPosition: (patch) => dispatch({ type: 'cabin/set', patch }),
+  enterValet: (pin) => dispatch({ type: 'valet/enter', pin }),
+  exitValet: (pin) => dispatch({ type: 'valet/exit', pin }),
+  showNotice: (message) => dispatch({ type: 'notice/show', message }),
+  dismissNotice: (id) => dispatch({ type: 'notice/dismiss', id }),
+  clearNotifications: () => dispatch({ type: 'notifications/clear' }),
+  markNotificationsSeen: () => dispatch({ type: 'notifications/seen' }),
+  setPedal: (pedal) => dispatch({ type: 'pedal/set', pedal }),
+  tick: (seconds) => dispatch({ type: 'sim/tick', seconds }),
+  plugIn: () => dispatch({ type: 'charge/plug' }),
+  unplug: () => dispatch({ type: 'charge/unplug' }),
+  toggleCharging: () => dispatch({ type: 'charge/toggle' }),
+  toggleChargePort: () => dispatch({ type: 'charge-port/toggle' }),
+  resetTrip: () => dispatch({ type: 'trip/reset' }),
+  engageAutopilot: (mode) => dispatch({ type: 'autopilot/engage', mode }),
+  disengageAutopilot: () => dispatch({ type: 'autopilot/disengage' }),
+  triggerSentryAlarm: () => dispatch({ type: 'sentry/alarm' }),
+  clearSentryAlarm: () => dispatch({ type: 'sentry/clear' }),
+  saveDashcamClip: (source) => dispatch({ type: 'dashcam/save', source }),
+  enterMode: (mode) => dispatch({ type: 'mode/enter', mode }),
+  exitMode: () => dispatch({ type: 'mode/exit' }),
+  toggleGlovebox: () => dispatch({ type: 'glovebox/toggle' }),
+  walkAway: () => dispatch({ type: 'lock/walk-away' }),
+  addTripMeter: (name) => dispatch({ type: 'trip/add', name }),
+  renameTripMeter: (id, name) => dispatch({ type: 'trip/rename', id, name }),
+  resetTripMeter: (id) => dispatch({ type: 'trip/resetMeter', id }),
+  removeTripMeter: (id) => dispatch({ type: 'trip/remove', id }),
+  moveTripMeter: (id, offset) => dispatch({ type: 'trip/move', id, offset }),
+  enableSpeedLimit: (pin) => dispatch({ type: 'speedLimit/enable', pin }),
+  disableSpeedLimit: (pin) => dispatch({ type: 'speedLimit/disable', pin }),
+  enablePinToDrive: (pin) => dispatch({ type: 'pinToDrive/enable', pin }),
+  disablePinToDrive: (pin) => dispatch({ type: 'pinToDrive/disable', pin }),
+  unlockDrive: (pin) => dispatch({ type: 'pinToDrive/unlock', pin }),
+  resetPins: () => dispatch({ type: 'pins/reset' }),
+  setRequireSafetyFeatures: (enabled) => dispatch({ type: 'safety/require', enabled }),
+  setWifiEnabled: (enabled) => dispatch({ type: 'wifi/enable', enabled }),
+  connectWifi: (id, password) => dispatch({ type: 'wifi/connect', id, password }),
+  disconnectWifi: () => dispatch({ type: 'wifi/disconnect' }),
+  forgetWifi: (id) => dispatch({ type: 'wifi/forget', id }),
+  setHotspot: (enabled) => dispatch({ type: 'wifi/hotspot', enabled }),
+  setBluetoothEnabled: (enabled) => dispatch({ type: 'bluetooth/enable', enabled }),
+  pairBluetooth: (id) => dispatch({ type: 'bluetooth/pair', id }),
+  confirmBluetoothPairing: () => dispatch({ type: 'bluetooth/confirm' }),
+  cancelBluetoothPairing: () => dispatch({ type: 'bluetooth/cancel' }),
+  connectBluetooth: (id) => dispatch({ type: 'bluetooth/connect', id }),
+  disconnectBluetooth: () => dispatch({ type: 'bluetooth/disconnect' }),
+  forgetBluetooth: (id) => dispatch({ type: 'bluetooth/forget', id }),
+  setPriorityBluetooth: (id) => dispatch({ type: 'bluetooth/priority', id }),
+  setTowMode: (enabled) => dispatch({ type: 'tow/set', enabled }),
+  restartDisplay: () => dispatch({ type: 'system/restart' }),
+  checkForUpdate: () => dispatch({ type: 'software/check' }),
+  downloadUpdate: () => dispatch({ type: 'software/download' }),
+  installUpdate: () => dispatch({ type: 'software/install' }),
+  toggleGarageDoor: () => dispatch({ type: 'homelink/toggle' }),
+  setHomeHere: () => dispatch({ type: 'homelink/setHome' }),
+  addSchedule: (kind, time, days) => dispatch({ type: 'schedule/add', kind, time, days }),
+  removeSchedule: (id) => dispatch({ type: 'schedule/remove', id }),
+  setScheduleEnabled: (id, enabled) => dispatch({ type: 'schedule/enable', id, enabled }),
+  runSchedule: (id, date) => dispatch({ type: 'schedule/run', id, date }),
+  startChargeNow: () => dispatch({ type: 'charge/startNow' }),
+});
+
+interface CarContextValue {
+  store: CarStore;
+  actions: CarActions;
+}
+
+const CarContext = createContext<CarContextValue | null>(null);
+
+export function CarStateProvider({
+  children,
+  initialState,
+}: {
+  children: ReactNode;
+  initialState?: CarState;
+}) {
+  const [store] = useState(() => {
+    const created = createCarStore(initialState ?? loadPersistedState(initialCarState));
+    created.subscribe(() => savePersistedState(created.getState()));
+    return created;
+  });
 
   // Actions never change, so components that only act on the car don't re-render with it.
-  const actions = useMemo<CarActions>(
-    () => ({
-      selectGear: (gear) => dispatch({ type: 'gear/select', gear }),
-      toggleApp: (app) => dispatch({ type: 'app/toggle', app }),
-      closeSlider: () => dispatch({ type: 'slider/close' }),
-      toggleCamera: () => dispatch({ type: 'camera/toggle' }),
-      openWifiSettings: () => dispatch({ type: 'settings/openWifi' }),
-      leaveWifiSettings: () => dispatch({ type: 'settings/leaveWifi' }),
-      toggleShelf: () => dispatch({ type: 'shelf/toggle' }),
-      closeModal: () => dispatch({ type: 'modal/close' }),
-      toggleFrunk: () => dispatch({ type: 'compartment/toggle', compartment: 'frunk' }),
-      toggleTrunk: () => dispatch({ type: 'compartment/toggle', compartment: 'trunk' }),
-      toggleLeftSignal: () => dispatch({ type: 'signal/left' }),
-      toggleRightSignal: () => dispatch({ type: 'signal/right' }),
-      toggleHazards: () => dispatch({ type: 'signal/hazards' }),
-      stepTemperature: (delta) => dispatch({ type: 'temperature/step', delta }),
-      setVolume: (volume) => dispatch({ type: 'volume/set', volume }),
-    }),
-    [],
-  );
+  const value = useMemo(() => ({ store, actions: createActions(store) }), [store]);
 
-  const value = useMemo<CarStateValue>(
-    () => ({ ...state, isCameraForced: isCameraForced(state) }),
-    [state],
-  );
-
-  return (
-    <CarActionsContext.Provider value={actions}>
-      <CarStateContext.Provider value={value}>{children}</CarStateContext.Provider>
-    </CarActionsContext.Provider>
-  );
+  return <CarContext.Provider value={value}>{children}</CarContext.Provider>;
 }
 
-export const useCarState = (): CarStateValue => {
-  const value = useContext(CarStateContext);
-  if (!value) throw new Error('useCarState must be used inside <CarStateProvider>');
+const useCarContext = (): CarContextValue => {
+  const value = useContext(CarContext);
+  if (!value) throw new Error('Car hooks must be used inside <CarStateProvider>');
   return value;
 };
 
-export const useCarActions = (): CarActions => {
-  const value = useContext(CarActionsContext);
-  if (!value) throw new Error('useCarActions must be used inside <CarStateProvider>');
-  return value;
+// Subscribes to one slice, so a component only re-renders when that slice changes.
+// The selector must return a primitive or an existing object from the state.
+export const useCar = <T,>(selector: (state: CarState) => T): T => {
+  const { store } = useCarContext();
+  return useSyncExternalStore(store.subscribe, () => selector(store.getState()));
 };
+
+export const useCarActions = (): CarActions => useCarContext().actions;
+
+// For code that has to see the state an action just produced, before React renders it.
+export const useGetCarState = (): (() => CarState) => useCarContext().store.getState;
+
+// For code that follows the car without rendering each change, such as the map tracking
+// movement. Anything that displays a value should use `useCar`.
+export const useCarStore = (): CarStore => useCarContext().store;

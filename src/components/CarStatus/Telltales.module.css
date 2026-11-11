@@ -1,0 +1,38 @@
+.telltales {
+  display: flex;
+  justify-content: center;
+  gap: calc(10 * var(--u));
+  min-height: calc(22 * var(--u));
+}
+
+.telltale {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dashcam {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  border-radius: 50%;
+}
+
+.green {
+  color: var(--color-success);
+}
+
+.blue {
+  color: var(--color-accent);
+}
+
+.amber {
+  color: var(--color-warning);
+}
+
+.red {
+  color: var(--color-danger);
+}

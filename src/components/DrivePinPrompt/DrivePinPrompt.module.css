@@ -1,0 +1,21 @@
+.prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(10 * var(--u));
+  box-sizing: border-box;
+  width: min(calc(380 * var(--u)), 90cqw);
+  max-height: 90cqh;
+  overflow: auto;
+  padding: calc(20 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: max(var(--text-min), calc(20 * var(--u)));
+}

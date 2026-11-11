@@ -1,0 +1,110 @@
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--u));
+  min-width: 0;
+  margin: 0;
+  padding: calc(10 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
+}
+
+.caption {
+  color: var(--color-text-strong);
+  font-size: var(--app-text-small);
+  font-weight: 600;
+}
+
+.frame {
+  display: flex;
+  gap: calc(6 * var(--u));
+  height: max(90px, calc(150 * var(--u)));
+  min-width: 0;
+}
+
+.yAxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  font-size: var(--text-min);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.plot {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  touch-action: pan-y;
+}
+
+.plot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.grid {
+  stroke: var(--color-border);
+  stroke-width: 1px;
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.baseline {
+  stroke: var(--color-border);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  margin-left: calc(6 * var(--u));
+  padding: calc(3 * var(--u)) calc(7 * var(--u));
+  border: 1px solid var(--color-border);
+  border-radius: calc(6 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font-size: var(--text-min);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tooltip strong {
+  color: var(--color-text-strong);
+}
+
+.tooltipLeft {
+  transform: translateX(-100%);
+  margin-left: calc(-6 * var(--u));
+}
+
+.xAxis {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-muted);
+  font-size: var(--text-min);
+}

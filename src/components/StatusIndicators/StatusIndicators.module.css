@@ -1,0 +1,22 @@
+/* Sits in the status bar's own row, under the gear and battery. */
+.indicators {
+  position: absolute;
+  top: calc(44 * var(--u));
+  right: calc(14 * var(--u));
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  pointer-events: none;
+}
+
+.indicators img {
+  width: max(14px, calc(18 * var(--u)));
+  height: max(14px, calc(18 * var(--u)));
+}
+
+.pending {
+  opacity: 0.4;
+}

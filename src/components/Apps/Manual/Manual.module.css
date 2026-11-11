@@ -1,0 +1,38 @@
+.sections {
+  columns: 2;
+  column-gap: calc(16 * var(--u));
+}
+
+.section {
+  margin-bottom: var(--app-gap);
+  break-inside: avoid;
+}
+
+.hit {
+  display: block;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(6 * var(--u));
+  max-width: calc(760 * var(--u));
+}
+
+.pageTitle {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: var(--app-text-title);
+  font-weight: 600;
+}
+
+.paragraph {
+  margin: 0;
+}
+
+@container (max-width: 560px) {
+  .sections {
+    columns: 1;
+  }
+}

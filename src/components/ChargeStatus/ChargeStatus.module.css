@@ -1,0 +1,88 @@
+/* In the flow above the car, so it never covers the model at any layout. The canvas is
+   nudged upward, so this needs to sit in front of it as the closure buttons do. */
+.chargeStatus {
+  position: relative;
+  z-index: 4;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  margin: calc(6 * var(--u)) calc(16 * var(--u));
+  padding: calc(6 * var(--u)) calc(12 * var(--u));
+  border-radius: calc(10 * var(--u));
+  background-color: var(--color-card);
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+}
+
+/* The artwork is only a shape, so a mask lets the bolt take the theme's colour. */
+.bolt {
+  flex: none;
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  background-color: var(--color-success);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+
+.details {
+  flex: 1;
+  min-width: 0;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 calc(10 * var(--u));
+}
+
+.meter {
+  position: relative;
+  height: calc(6 * var(--u));
+  margin-top: calc(4 * var(--u));
+  border-radius: calc(3 * var(--u));
+  background-color: var(--color-border);
+}
+
+.fill {
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--color-success);
+  transition: width 0.3s ease-in-out;
+}
+
+.flowing {
+  background-image: linear-gradient(90deg, transparent 0%, var(--color-card) 50%, transparent 100%);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: flow 1.6s linear infinite;
+}
+
+.limit {
+  position: absolute;
+  top: calc(-2 * var(--u));
+  bottom: calc(-2 * var(--u));
+  width: 2px;
+  background-color: var(--color-text-strong);
+}
+
+.pulsing {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes flow {
+  from {
+    background-position: -60% 0;
+  }
+  to {
+    background-position: 160% 0;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.4;
+  }
+}

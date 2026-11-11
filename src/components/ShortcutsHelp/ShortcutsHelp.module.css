@@ -1,0 +1,41 @@
+.shortcutsHelp {
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.shortcutsHelp h2 {
+  margin: 0 0 calc(12 * var(--u));
+  font-size: 1.1rem;
+}
+
+.shortcutsHelp h3 {
+  margin: 0 0 calc(6 * var(--u));
+  font-size: 0.85rem;
+  color: #a1a1a1;
+}
+
+.groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(24 * var(--u));
+}
+
+.shortcutsHelp dl {
+  margin: 0;
+}
+
+.shortcutsHelp dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(16 * var(--u));
+  padding: calc(3 * var(--u)) 0;
+}
+
+.shortcutsHelp dt {
+  font-weight: 600;
+}
+
+.shortcutsHelp dd {
+  margin: 0;
+  color: #d0d0d0;
+}

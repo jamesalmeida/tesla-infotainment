@@ -8,7 +8,7 @@ const unusedVarsOptions = { argsIgnorePattern: '^_', varsIgnorePattern: '^_' };
 
 export default defineConfig([
   {
-    ignores: ['dist/', 'node_modules/'],
+    ignores: ['dist/', 'node_modules/', 'playwright-report/', 'test-results/'],
   },
   {
     files: ['**/*.{js,jsx,mjs,ts,tsx}'],
@@ -39,17 +39,7 @@ export default defineConfig([
     },
   },
   {
-    // Untyped CodePen game kept as-is under @ts-nocheck until it is replaced (issue #6).
-    files: ['src/components/Apps/Arcade/Games/Outrun/Outrun.tsx'],
-    rules: {
-      '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/no-this-alias': 'off',
-      'prefer-const': 'off',
-      'no-var': 'off',
-    },
-  },
-  {
-    files: ['vite.config.mjs'],
+    files: ['vite.config.mjs', 'playwright.config.ts'],
     languageOptions: {
       globals: globals.node,
     },

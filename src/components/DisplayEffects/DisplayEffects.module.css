@@ -1,0 +1,9 @@
+.nightTint {
+  position: absolute;
+  inset: 0;
+  /* Over the bottom bar, like the brightness layer. */
+  z-index: 100000000;
+  background-color: var(--color-night-tint);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
