@@ -353,7 +353,9 @@ test('Park view: drag the car across, see the map in the corner, and bring it ba
   const rightWidth = await page.locator('.rightPanel').evaluate((panel) => panel.clientWidth);
   const groupWidth = await group.evaluate((element) => element.clientWidth);
   expect(rightWidth).toBeGreaterThan(groupWidth * 0.95);
-  await expect(page.getByRole('button', { name: 'Navigate' })).toBeVisible();
+  await expect(
+    page.getByRole('region', { name: 'Navigation' }).getByRole('button', { name: 'Navigate' }),
+  ).toBeVisible();
 
   await page.getByRole('button', { name: 'Open the map' }).click();
   await expect(group).not.toHaveClass(/parkView/);
