@@ -54,6 +54,7 @@ import { CarUnavailable, DisplayCrashed } from './components/ErrorBoundary/Fallb
 import { DisplayEffects } from './components/DisplayEffects/DisplayEffects';
 import { DrivePinPrompt } from './components/DrivePinPrompt/DrivePinPrompt';
 import { Emergency } from './components/Emergency/Emergency';
+import { FullscreenPrompt } from './components/FullscreenPrompt/FullscreenPrompt';
 import { Notice } from './components/Notice/Notice';
 import { PwaUpdate } from './components/PwaUpdate/PwaUpdate';
 import { RearSync } from './components/RearDisplay/RearSync';
@@ -359,6 +360,7 @@ function Display() {
           <ScreenClean />
           <SleepOverlay />
           <PwaUpdate />
+          <FullscreenPrompt />
           <RearSync />
           <OnScreenKeyboard target={keyboardTarget} onClose={closeKeyboard} />
         </div>
