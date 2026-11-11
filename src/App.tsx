@@ -327,9 +327,7 @@ function Display() {
   useEffect(() => {
     if (isLoading || safeStorage.getItem('tesla-tips-seen') === '1') return;
     const timer = setTimeout(() => {
-      showNotice(
-        'Press Shift + ? for keyboard shortcuts. Press the brake, then swipe the drive strip to shift.',
-      );
+      showNotice('Shift + ? shows shortcuts. Brake, then swipe the drive strip to shift.');
       safeStorage.setItem('tesla-tips-seen', '1');
     }, 1200);
     return () => clearTimeout(timer);
