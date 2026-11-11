@@ -1,0 +1,93 @@
+.seatControl {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.seatButton {
+  display: grid;
+  place-items: center;
+  min-width: max(calc(44 * var(--u)), var(--tap-target));
+  min-height: max(calc(44 * var(--u)), var(--tap-target));
+}
+
+.glyph {
+  width: calc(34 * var(--u));
+  height: calc(34 * var(--u));
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.seat {
+  stroke: #ffffff;
+}
+
+.heat {
+  stroke: #ff5a4e;
+}
+
+.cool {
+  stroke: #4aa3ff;
+}
+
+.popover {
+  position: absolute;
+  bottom: calc(100% + 10 * var(--u));
+  left: 50%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--u));
+  padding: calc(12 * var(--u));
+  transform: translateX(-50%);
+  border-radius: calc(10 * var(--u));
+  background: var(--color-card);
+  box-shadow:
+    rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-control-border, var(--color-border));
+  border-radius: calc(8 * var(--u));
+}
+
+.rowLabel {
+  min-width: calc(48 * var(--u));
+  padding: 0 calc(10 * var(--u));
+  color: var(--color-text-muted);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  text-align: left;
+}
+
+.option {
+  min-width: max(calc(44 * var(--u)), var(--tap-target));
+  min-height: max(calc(40 * var(--u)), var(--tap-target));
+  border: none;
+  border-left: 1px solid var(--color-control-border, var(--color-border));
+  background: var(--color-control, var(--color-card));
+  color: var(--color-text);
+  font: inherit;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  cursor: pointer;
+}
+
+.option[aria-pressed='true'] {
+  background: var(--color-segment-selected, #c8c8c8);
+  color: var(--color-on-segment-selected, var(--color-text-strong));
+}
+
+.heatOption[aria-pressed='true'] {
+  background: #e5483b;
+  color: #ffffff;
+}
+
+.coolOption[aria-pressed='true'] {
+  background: #2f80ed;
+  color: #ffffff;
+}

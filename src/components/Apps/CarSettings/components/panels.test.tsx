@@ -130,7 +130,7 @@ describe('Valet Mode', () => {
 describe('profile menu', () => {
   test('choosing Valet asks for a PIN instead of switching', () => {
     renderPanel(<UserProfile />);
-    press(/Alex/);
+    press(/James/);
     press(/Valet/);
     expect(latest.activeProfileId).toBe(1);
     expect(latest.surface).toEqual({ kind: 'settings', panel: 'Profiles' });
@@ -138,7 +138,7 @@ describe('profile menu', () => {
 
   test('Driver Profile Settings opens the Profiles panel', () => {
     renderPanel(<UserProfile />);
-    press(/Alex/);
+    press(/James/);
     press('Driver Profile Settings');
     expect(latest.surface).toEqual({ kind: 'settings', panel: 'Profiles' });
   });

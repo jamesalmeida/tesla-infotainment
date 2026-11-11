@@ -42,3 +42,6 @@ package-lock.json
 # Playwright
 /test-results/
 /playwright-report/
+
+# Vercel CLI link for this checkout
+.vercel

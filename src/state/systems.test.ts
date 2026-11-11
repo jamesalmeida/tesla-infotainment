@@ -342,11 +342,11 @@ describe('profiles', () => {
 
   test.each<[string, CarAction, string]>([
     ['a blank name', { type: 'profile/add', name: ' ' }, 'Enter a name'],
-    ['a name in use', { type: 'profile/add', name: 'sam' }, 'sam is already in use'],
+    ['a name in use', { type: 'profile/add', name: 'lauren' }, 'lauren is already in use'],
     [
       'renaming to a name in use',
-      { type: 'profile/rename', id: 1, name: 'Sam' },
-      'Sam is already in use',
+      { type: 'profile/rename', id: 1, name: 'Lauren' },
+      'Lauren is already in use',
     ],
   ])('refuses %s', (_name, action, reason) => {
     const state = reduce(action);

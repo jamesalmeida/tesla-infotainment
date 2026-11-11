@@ -4,6 +4,7 @@ import VolumeControl from '../VolumeControl/VolumeControl';
 import { getImagePath } from '../../utils/assetPaths';
 import { useCar, useCarActions } from '../../state/CarStateContext';
 import { activeApp, dockOrder, isCameraForced, type TemperatureZone } from '../../state/carState';
+import { SeatButton } from './SeatButton';
 import styles from './BtmNavBar.module.css';
 
 function DockIcon({ app }: { app: AppId }) {
@@ -100,14 +101,25 @@ const BtmNavBar = () => {
             />
           </button>
         </div>
-        <ClimateControl zone="driver" />
+        <div className={styles.climateGroup}>
+          <ClimateControl zone="driver" />
+          <SeatButton seat="driver" side="left" />
+        </div>
         <div className={styles.dockApps}>
           {dock.map((item) =>
             item === 'open-shelf' ? <ShelfButton key={item} /> : <DockIcon key={item} app={item} />,
           )}
         </div>
-        {isSplit && <ClimateControl zone="passenger" />}
-        <AudioControl />
+        {isSplit ? (
+          <div className={styles.climateGroup}>
+            <SeatButton seat="passenger" side="right" />
+            <ClimateControl zone="passenger" />
+          </div>
+        ) : null}
+        <div className={styles.climateGroup}>
+          {!isSplit && <SeatButton seat="passenger" side="right" />}
+          <AudioControl />
+        </div>
       </div>
     </div>
   );

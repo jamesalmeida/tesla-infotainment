@@ -7,6 +7,7 @@ import BatteryStatus from '../BatteryStatus/BatteryStatus';
 import GearSelect from '../GearSelect/GearSelect';
 import { PedalButton } from '../PedalDeck/PedalDeck';
 import { Telltales } from './Telltales';
+import { SelfDrivingButton } from '../SelfDriving/SelfDrivingButton';
 
 function TurnSignal({
   side,
@@ -105,8 +106,10 @@ function Pedals() {
 }
 
 export function CarStatus() {
+  const driving = useCar(isDriving);
+
   return (
-    <div className="carStatusIcons">
+    <div className={`carStatusIcons ${driving ? 'drivingIndicators' : ''}`}>
       <div className="topBarCarStatusIcons">
         <GearSelect />
         <HazardButton />
@@ -118,6 +121,7 @@ export function CarStatus() {
         <SpeedLimit />
       </div>
       <Telltales />
+      <SelfDrivingButton />
       <Pedals />
     </div>
   );

@@ -14,9 +14,11 @@ import styles from './Telltales.module.css';
 interface Telltale {
   id: string;
   label: string;
-  color: 'green' | 'blue' | 'amber' | 'red';
+  color: 'green' | 'blue' | 'amber' | 'red' | 'grey';
   isOn: (state: CarState) => boolean;
   glyph: ReactNode;
+  // Shown as a word rather than a symbol, as the car does with PARK.
+  text?: string;
 }
 
 const LOW_BATTERY_PERCENT = 10;
@@ -29,10 +31,19 @@ const TELLTALES: Telltale[] = [
     label: 'Parking brake on',
     color: 'red',
     isOn: (state) => state.gear === 'P',
+    glyph: null,
+    text: 'PARK',
+  },
+  {
+    id: 'auto-headlights',
+    label: 'Automatic headlights',
+    color: 'grey',
+    isOn: (state) => state.settings.headlights === 'auto',
     glyph: (
       <>
-        <circle cx="12" cy="12" r="7" />
-        <path d="M10 16V8h3a2.5 2.5 0 0 1 0 5h-3" />
+        <path d="M11 6c4 0 6 3 6 6s-2 6-6 6z" />
+        <path d="M8 8H3M8 12H3M8 16H3" />
+        <path d="M17.5 18.5 20 12l2.5 6.5M18.4 16.3h3.2" />
       </>
     ),
   },
@@ -113,10 +124,11 @@ const TELLTALES: Telltale[] = [
     label: 'Low tire pressure',
     color: 'amber',
     isOn: hasTirePressureWarning,
+    // A tire in cross-section with an exclamation mark, the usual pressure warning.
     glyph: (
       <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M8 8v8M8 12h4a2 2 0 0 1 0 4H8M16 8v8" />
+        <path d="M6.5 6.5a8 8 0 0 0 0 11M17.5 6.5a8 8 0 0 1 0 11M6.5 17.5h11" />
+        <path d="M12 8v5M12 15.5v.5" />
       </>
     ),
   },
@@ -132,6 +144,18 @@ const TELLTALES: Telltale[] = [
 function TelltaleIcon({ telltale }: { telltale: Telltale }) {
   const isOn = useCar(telltale.isOn);
   if (!isOn) return null;
+
+  if (telltale.text) {
+    return (
+      <span
+        className={`${styles.word} ${styles[telltale.color]}`}
+        role="img"
+        aria-label={telltale.label}
+      >
+        {telltale.text}
+      </span>
+    );
+  }
 
   return (
     <svg

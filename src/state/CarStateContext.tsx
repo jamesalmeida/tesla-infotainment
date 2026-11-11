@@ -24,6 +24,7 @@ import {
   type ScheduleKind,
   type SeatId,
   type SeatKind,
+  type SeatLevel,
   type SettingsPanel,
   type Surface,
   type TemperatureZone,
@@ -56,6 +57,7 @@ export interface CarActions {
   setClimateOptions: (options: ClimateOptions) => void;
   toggleDefrost: (window: DefrostWindow) => void;
   cycleSeat: (seat: SeatId, kind: SeatKind) => void;
+  setSeatLevel: (seat: SeatId, level: SeatLevel) => void;
   toggleHeatAuto: () => void;
   toggleClimateMode: (mode: ClimateMode) => void;
   setVolume: (volume: number) => void;
@@ -176,6 +178,7 @@ const createActions = ({ dispatch }: CarStore): CarActions => ({
   setClimateOptions: (options) => dispatch({ type: 'climate/options', options }),
   toggleDefrost: (window) => dispatch({ type: 'climate/defrost', window }),
   cycleSeat: (seat, kind) => dispatch({ type: 'climate/seat', seat, kind }),
+  setSeatLevel: (seat, level) => dispatch({ type: 'climate/seat-level', seat, level }),
   toggleHeatAuto: () => dispatch({ type: 'climate/heat-auto' }),
   toggleClimateMode: (mode) => dispatch({ type: 'climate/mode', mode }),
   setVolume: (volume) => dispatch({ type: 'volume/set', volume }),

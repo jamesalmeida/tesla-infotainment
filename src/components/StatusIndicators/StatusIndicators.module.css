@@ -1,8 +1,8 @@
-/* Sits in the status bar's own row, under the gear and battery. */
+/* Sits in the top row beside the battery, leaving the space below it for Start Self-Driving. */
 .indicators {
   position: absolute;
-  top: calc(44 * var(--u));
-  right: calc(14 * var(--u));
+  top: calc(10 * var(--u));
+  right: calc(96 * var(--u));
   z-index: 1;
   display: flex;
   align-items: center;

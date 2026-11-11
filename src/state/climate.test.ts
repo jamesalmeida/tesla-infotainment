@@ -27,6 +27,7 @@ import {
   toggleDefrost,
   toggleHeatAuto,
   type ClimateState,
+  setSeatLevel,
 } from './climate';
 
 const reduce = (...actions: CarAction[]) => actions.reduce(carReducer, initialCarState);
@@ -302,5 +303,15 @@ describe('climate modes', () => {
     );
     expect(state.climate.mode).toBe('keep');
     expect(state.climate.cabin.isOn).toBe(true);
+  });
+});
+
+describe('setting a seat level directly', () => {
+  test('sets heat or cool, and refuses cooling a seat without ventilation', () => {
+    const heated = setSeatLevel(initialClimate, 'driver', 3);
+    expect(heated.seats.driver).toBe(3);
+    expect(setSeatLevel(heated, 'driver', -2).seats.driver).toBe(-2);
+    expect(setSeatLevel(initialClimate, 'rear-left', -1)).toBe(initialClimate);
+    expect(setSeatLevel(heated, 'driver', 3)).toBe(heated);
   });
 });

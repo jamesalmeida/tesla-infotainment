@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { useCar, useCarActions } from '../../state/CarStateContext';
 import { LOW_TIRE_PSI, TIRE_CORNERS, TIRE_CORNER_LABELS } from '../../state/carState';
 import { RECOMMENDED_TIRE_PSI } from '../../state/sampleData';
@@ -120,6 +120,20 @@ export function CarCards() {
   const volume = useCar((state) => state.volume);
   const { openSettings } = useCarActions();
   const [index, setIndex] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | undefined>(undefined);
+
+  // The frame takes the height of the card showing, not the tallest one, so a short card
+  // doesn't leave an empty band under it. It follows the card as its contents change.
+  useLayoutEffect(() => {
+    const slide = trackRef.current?.children[index];
+    if (!(slide instanceof HTMLElement)) return;
+    const measure = () => setHeight(slide.offsetHeight || undefined);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(slide);
+    return () => observer.disconnect();
+  }, [index]);
   const [dragX, setDragX] = useState(0);
   const dragStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -163,12 +177,14 @@ export function CarCards() {
     <div className={styles.deck}>
       <div
         className={styles.viewport}
+        style={{ height }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handleCancel}
       >
         <div
+          ref={trackRef}
           className={styles.track}
           style={{ transform: `translateX(calc(${-index * 100}% + ${dragPercent * 100}%))` }}
         >
