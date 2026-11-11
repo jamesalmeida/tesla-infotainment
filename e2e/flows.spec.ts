@@ -332,3 +332,50 @@ test.describe('the URL follows the display', () => {
     await expectPanelOpen(page, true);
   });
 });
+
+test('Park view: drag the car across, see the map in the corner, and bring it back', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openApp(page);
+  const group = page.locator('.horizontalPanelGroup');
+
+  const separator = page.locator('.panelResizeHandle');
+  await expect(separator).toBeVisible();
+  const box = await separator.boundingBox();
+  await page.mouse.move(box!.x + 1, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + 600, box!.y + box!.height / 2, { steps: 6 });
+  await page.mouse.up();
+  await expect(group).toHaveClass(/parkView/);
+
+  // The map stays full width underneath, and its status bar is still in reach.
+  const rightWidth = await page.locator('.rightPanel').evaluate((panel) => panel.clientWidth);
+  const groupWidth = await group.evaluate((element) => element.clientWidth);
+  expect(rightWidth).toBeGreaterThan(groupWidth * 0.95);
+  await expect(
+    page.getByRole('region', { name: 'Navigation' }).getByRole('button', { name: 'Navigate' }),
+  ).toBeVisible();
+
+  await page.getByRole('button', { name: 'Open the map' }).click();
+  await expect(group).not.toHaveClass(/parkView/);
+});
+
+test('pressing the brake brings up the drive strip, which shifts the car', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openApp(page);
+  const strip = page.getByRole('slider', { name: 'Drive strip' });
+  await expect(strip).toHaveCount(0);
+
+  const brake = page.getByRole('button', { name: /^Brake/ }).last();
+  await brake.dispatchEvent('pointerdown');
+  await brake.dispatchEvent('pointerup');
+  await expect(strip).toBeVisible();
+
+  await strip.focus();
+  await page.keyboard.press('ArrowUp');
+  await expect(page.getByRole('button', { name: 'D', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+});

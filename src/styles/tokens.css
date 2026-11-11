@@ -35,8 +35,24 @@
   /* What blue-light reduction lays over the screen. */
   --color-night-tint: #ff9a3c;
 
+  /* Settings controls, drawn the way the car draws them: light tiles on a light grey panel,
+     a darker grey for the chosen segment of a choice, and blue only for a switch that is on. */
+  --color-settings-bg: #e8e8e8;
+  --color-control: #f3f3f3;
+  --color-control-hover: #e9e9e9;
+  --color-control-border: #d2d2d2;
+  --color-control-text: #6f6f6f;
+  --color-segment-selected: #b9b9b9;
+  --color-on-segment-selected: #333333;
+  --color-toggle-on: #2d5be3;
+  --color-on-toggle: #ffffff;
+
   /* The real screen is 1920x1200. */
   --display-ratio: 1.6;
+
+  /* Room under the screen for the pedals, on desktop only. */
+  --pedal-deck-height: 0px;
+  --pedal-deck-gap: 0px;
 
   /* Apple's minimum, applied wherever touch is the main input. */
   --tap-target: 0px;
@@ -53,6 +69,16 @@
   --color-text-strong: #ffffff;
   --color-text-muted: #8f8f8f;
   --color-border: #3d3e41;
+
+  --color-settings-bg: #1f2022;
+  --color-control: #2a2b2e;
+  --color-control-hover: #333438;
+  --color-control-border: #3d3e41;
+  --color-control-text: #b0b0b0;
+  --color-segment-selected: #55575c;
+  --color-on-segment-selected: #ffffff;
+  --color-toggle-on: #3b68ec;
+  --color-on-toggle: #ffffff;
 }
 
 /* Phones have no room to scale a car display down, so these modes use real pixels. */
@@ -64,5 +90,17 @@
 @media (pointer: coarse) {
   :root {
     --tap-target: 44px;
+  }
+}
+
+:root[data-layout='stage'] {
+  --pedal-deck-height: 96px;
+  --pedal-deck-gap: 12px;
+}
+
+@media (pointer: coarse) {
+  :root[data-layout='stage'] {
+    --pedal-deck-height: 0px;
+    --pedal-deck-gap: 0px;
   }
 }

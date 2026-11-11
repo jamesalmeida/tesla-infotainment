@@ -1,4 +1,4 @@
-import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { useCar, useCarActions } from '../../state/CarStateContext';
 import type { Gear } from '../../state/carState';
 import styles from './DriveStrip.module.css';
@@ -14,11 +14,46 @@ export const gearFromDrag = (deltaY: number, threshold = DRIVE_STRIP_THRESHOLD_P
   return null;
 };
 
+// The strip stays up this long after the brake is let go, so a mouse, which can't hold the
+// brake and swipe at once, still has time to shift.
+export const DRIVE_STRIP_LINGER_MS = 6000;
+
+// The car only offers the strip with a foot on the brake. Here a press of the brake stands
+// for that, and for the seat belt being on.
+function useDriveStripReveal() {
+  const isBraking = useCar((state) => state.pedal === 'brake');
+  const [isLingering, setIsLingering] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isBraking) return;
+    clearTimeout(timer.current);
+    // Letting go of the brake starts the grace period.
+    return () => {
+      setIsLingering(true);
+      timer.current = setTimeout(() => setIsLingering(false), DRIVE_STRIP_LINGER_MS);
+    };
+  }, [isBraking]);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const hide = () => {
+    clearTimeout(timer.current);
+    setIsLingering(false);
+  };
+
+  return { isRevealed: isBraking || isLingering, hide };
+}
+
 export function DriveStrip() {
   const gear = useCar((state) => state.gear);
   const { selectGear } = useCarActions();
   const [dragY, setDragY] = useState(0);
   const startY = useRef<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const { isRevealed, hide } = useDriveStripReveal();
+  // A drag that started while the strip was up finishes even if the grace period runs out.
+  const isVisible = isRevealed || isDragging;
 
   const target = gearFromDrag(dragY);
   const shown = target ?? gear;
@@ -26,11 +61,14 @@ export function DriveStrip() {
   const shift = (next: Gear | null) => {
     if (!next || next === gear) return;
     selectGear(next);
+    // Shifted: the strip has done its job.
+    hide();
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
     startY.current = event.clientY;
+    setIsDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -44,12 +82,14 @@ export function DriveStrip() {
     if (startY.current === null) return;
     const delta = event.clientY - startY.current;
     startY.current = null;
+    setIsDragging(false);
     setDragY(0);
     shift(gearFromDrag(delta));
   };
 
   const handlePointerCancel = () => {
     startY.current = null;
+    setIsDragging(false);
     setDragY(0);
   };
 
@@ -65,7 +105,9 @@ export function DriveStrip() {
 
   return (
     <div
-      className={styles.strip}
+      className={`${styles.strip} ${isVisible ? styles.visible : ''}`}
+      aria-hidden={!isVisible}
+      inert={!isVisible}
       role="slider"
       aria-label="Drive strip"
       aria-valuetext={`${shown}. Swipe up for Drive, down for Reverse.`}

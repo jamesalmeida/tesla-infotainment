@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  background-color: var(--color-panel);
+  background-color: var(--color-settings-bg);
   color: var(--color-text);
   font-size: max(var(--text-min), calc(13 * var(--u)));
 }
@@ -13,7 +13,7 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(calc(150 * var(--u)), 1fr) 3fr;
+  grid-template-columns: minmax(calc(150 * var(--u)), 1fr) 2.4fr;
   grid-template-rows: minmax(0, 1fr);
   padding-left: calc(20 * var(--u));
 }
@@ -140,23 +140,28 @@
   display: none;
 }
 
+/* Plain icon and label; only the open panel sits on a pill. */
 .left-scroll-panel-item {
   flex: none;
   display: flex;
   align-items: center;
+  gap: calc(14 * var(--u));
   min-height: var(--tap-target);
-  padding: calc(9 * var(--u)) calc(10 * var(--u));
+  padding: calc(9 * var(--u)) calc(14 * var(--u));
   margin-bottom: calc(5 * var(--u));
   box-sizing: border-box;
-  border-radius: calc(5 * var(--u));
+  border-radius: calc(6 * var(--u));
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(15 * var(--u)));
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .left-scroll-panel-item img {
-  margin-right: calc(10 * var(--u));
-  width: calc(20 * var(--u));
-  height: calc(20 * var(--u));
+  flex: none;
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+  opacity: 0.55;
 }
 
 @media (hover: hover) {
@@ -168,7 +173,11 @@
 .left-scroll-panel-item.active {
   background-color: var(--color-card);
   color: var(--color-text-strong);
-  font-weight: bold;
+  font-weight: 500;
+}
+
+.left-scroll-panel-item.active img {
+  opacity: 0.9;
 }
 
 .settings-right-panel {
@@ -211,156 +220,283 @@
   outline-offset: 1px;
 }
 
-/* CONTROLS */
+/* CONTROLS, drawn as the car draws them. A choice is one segmented strip whose pick turns a
+   darker grey; a switch is a tile that turns blue while on; related tiles share one border. */
 .buttons-container {
+  --control-radius: calc(5 * var(--u));
+  --control-gap: calc(18 * var(--u));
+
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: var(--control-gap);
   width: 100%;
-}
-
-.gap-row {
-  flex: none;
-  height: calc(14 * var(--u));
-}
-
-.flex-row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: calc(6 * var(--u)) 0;
-  width: 100%;
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  line-height: 1.2;
   text-align: center;
-  border-radius: calc(5 * var(--u));
 }
 
-.btn {
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A strip with a tile beside it: headlights and high beams, brightness and Auto. */
+.controls-row {
+  display: flex;
+  align-items: stretch;
+  gap: calc(20 * var(--u));
+}
+
+.segments {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--control-radius);
+  background-color: var(--color-control);
+}
+
+.segment {
+  flex: 2 1 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--tap-target);
+  gap: calc(8 * var(--u));
+  min-width: 0;
+  min-height: max(var(--tap-target), calc(60 * var(--u)));
+  padding: 0 calc(4 * var(--u));
+  color: var(--color-control-text);
+  white-space: nowrap;
   cursor: pointer;
 }
 
+.segment + .segment {
+  border-left: 1px solid var(--color-control-border);
+}
+
+.segment.selected {
+  background-color: var(--color-segment-selected);
+  color: var(--color-on-segment-selected);
+}
+
+/* The car leaves no divider beside the picked segment, only the change of fill. */
+.segment.selected + .segment,
+.segment:has(+ .segment.selected) + .segment.selected {
+  border-left-color: transparent;
+}
+
+.segment-icon {
+  flex: none;
+  width: calc(24 * var(--u));
+  height: calc(24 * var(--u));
+}
+
+/* Off carries its icon, so it gets more room than the rest. */
+.headlight-segments .segment:first-child {
+  flex-grow: 3;
+}
+
+.wiper-segments .segment {
+  flex-grow: 1;
+}
+
+.wiper-segments .segment:nth-child(-n + 2) {
+  flex-grow: 2;
+}
+
+.tile {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(6 * var(--u));
+  min-width: 0;
+  min-height: var(--tap-target);
+  padding: calc(10 * var(--u)) calc(6 * var(--u));
+  box-sizing: border-box;
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--control-radius);
+  background-color: var(--color-control);
+  color: var(--color-control-text);
+  overflow-wrap: break-word;
+  cursor: pointer;
+}
+
+.tile-icon {
+  position: relative;
+  display: flex;
+}
+
+.tile-icon svg {
+  width: calc(26 * var(--u));
+  height: calc(26 * var(--u));
+}
+
 @media (hover: hover) {
-  .btn:hover {
-    background-color: var(--color-card-hover);
+  .segment:not(.selected):hover,
+  .tile:not(.active):hover {
+    background-color: var(--color-control-hover);
   }
 }
 
-.flex-column {
+.tile.active {
+  border-color: var(--color-toggle-on);
+  background-color: var(--color-toggle-on);
+  color: var(--color-on-toggle);
+  font-weight: 500;
+}
+
+.side-tile {
+  flex: 0 0 21%;
+}
+
+/* Tiles that share one border, split by thin lines. */
+.tile-group {
   display: flex;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--control-radius);
+  background-color: var(--color-control);
+}
+
+.tile-group .tile {
+  border: none;
+  border-radius: 0;
+}
+
+.tile-row .tile {
+  min-height: max(var(--tap-target), calc(108 * var(--u)));
+}
+
+.tile-row .tile + .tile {
+  border-left: 1px solid var(--color-control-border);
+}
+
+.tile-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(20 * var(--u));
+}
+
+.tile-column {
   flex-direction: column;
-  justify-content: space-between;
-  align-items: stretch;
+}
+
+.tile-column .tile {
+  min-height: max(var(--tap-target), calc(96 * var(--u)));
+}
+
+.tile-column .tile + .tile {
+  border-top: 1px solid var(--color-control-border);
+}
+
+/* A blue tile fills to its edges; between two blue tiles the car keeps a faint light seam. */
+.tile-row .tile.active + .tile,
+.tile-row .tile + .tile.active {
+  border-left-color: var(--color-toggle-on);
+}
+
+.tile-column .tile.active + .tile,
+.tile-column .tile + .tile.active {
+  border-top-color: var(--color-toggle-on);
+}
+
+.tile-row .tile.active + .tile.active,
+.tile-column .tile.active + .tile.active {
+  border-color: color-mix(in srgb, var(--color-on-toggle) 35%, var(--color-toggle-on));
+}
+
+.brightness-slider {
   flex: 1;
-  background-color: var(--color-card);
-  text-align: center;
-  border-radius: calc(5 * var(--u));
-  border: 1px solid var(--color-border);
-}
-
-.flex-column div:first-child {
-  border-bottom: 1px solid var(--color-border);
-}
-
-.flex-row div:first-child,
-.row-5 div:last-child {
-  border-top-left-radius: calc(5 * var(--u));
-  border-bottom-left-radius: calc(5 * var(--u));
-}
-
-.flex-row div:last-child,
-.row-1 > div:nth-child(4) {
-  border-top-right-radius: calc(5 * var(--u));
-  border-bottom-right-radius: calc(5 * var(--u));
-}
-
-.row-1 div,
-.row-2 div,
-.row-3 div,
-.row-5 div {
-  padding: calc(10 * var(--u)) calc(4 * var(--u));
-  background-color: var(--color-card);
-  flex: 1;
-  border: 1px solid var(--color-border);
-}
-
-.row-5 {
-  align-items: center;
-  flex-wrap: nowrap;
-  margin-bottom: calc(10 * var(--u));
-}
-
-.flex-column div:first-child {
-  border-bottom-left-radius: 0;
-}
-
-.auto-high-beams-btn {
-  flex: 1 0 calc(80 * var(--u));
-  margin-left: 4%;
-  border-radius: calc(5 * var(--u));
-}
-
-.row-2 div {
-  flex: 1 0 calc(90 * var(--u));
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: calc(64 * var(--u));
+  gap: calc(14 * var(--u));
+  min-width: 0;
+  min-height: max(var(--tap-target), calc(66 * var(--u)));
+  padding: 0 calc(16 * var(--u)) 0 calc(20 * var(--u));
   box-sizing: border-box;
-  flex-direction: column;
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--control-radius);
+  background-color: var(--color-control);
+  color: var(--color-control-text);
 }
 
-.row-4 {
-  flex-wrap: nowrap;
-}
+/* A thin line with a round thumb. On Auto the car shows just the line. */
+.brightness-slider input {
+  --thumb: calc(22 * var(--u));
 
-.row-4 div div {
-  padding: calc(16 * var(--u)) calc(4 * var(--u));
-}
-
-.gap-column {
-  width: 4%;
-  flex: unset !important;
-}
-
-.row-5 .brightness-slider {
   flex: 1;
   min-width: 0;
-  padding: calc(5 * var(--u));
-  border: 1px solid var(--color-border);
-  border-radius: calc(10 * var(--u));
+  height: max(var(--tap-target), var(--thumb));
+  margin: 0;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.brightness-slider input::-webkit-slider-runnable-track {
+  height: calc(2 * var(--u));
+  border-radius: calc(1 * var(--u));
+  background-color: var(--color-text);
+}
+
+.brightness-slider input::-moz-range-track {
+  height: calc(2 * var(--u));
+  border-radius: calc(1 * var(--u));
+  background-color: var(--color-text);
+}
+
+.brightness-slider input::-webkit-slider-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((var(--thumb) - 2 * var(--u)) / -2);
+  border: 1px solid var(--color-control-border);
+  border-radius: 50%;
+  background-color: var(--color-card);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-screen-off) 25%, transparent);
+  -webkit-appearance: none;
+}
+
+.brightness-slider input::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 1px solid var(--color-control-border);
+  border-radius: 50%;
   background-color: var(--color-card);
 }
 
-.brightness-slider input {
-  display: block;
-  width: 100%;
-  min-height: var(--tap-target);
-  margin: 0;
-  accent-color: var(--color-accent);
+.brightness-slider input:disabled {
+  cursor: default;
 }
 
-.row-5 .brightness-auto-btn {
+.brightness-slider input:disabled::-webkit-slider-thumb {
+  visibility: hidden;
+}
+
+.brightness-slider input:disabled::-moz-range-thumb {
+  visibility: hidden;
+}
+
+.brightness-icon {
   flex: none;
-  min-width: calc(80 * var(--u));
-  margin-left: 4%;
+  width: calc(24 * var(--u));
+  height: calc(24 * var(--u));
 }
 
-.flex-row div {
-  flex: 1;
-}
-
-.btn.active,
-.row-1 .btn.active,
-.row-2 .btn.active,
-.row-3 .btn.active,
-.row-5 .btn.active {
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
+.brightness-auto-btn {
+  flex-direction: row;
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  font-weight: 500;
 }
 
 .red-dot {
@@ -372,6 +508,19 @@
   border-radius: 50%;
 }
 
+/* On a tile the dot sits on the icon's corner, so the label stays centred. */
+.tile-icon .red-dot {
+  position: absolute;
+  right: calc(-3 * var(--u));
+  bottom: calc(-2 * var(--u));
+  margin: 0;
+  box-shadow: 0 0 0 calc(1.5 * var(--u)) var(--color-control);
+}
+
+.tile.active .tile-icon .red-dot {
+  box-shadow: 0 0 0 calc(1.5 * var(--u)) var(--color-toggle-on);
+}
+
 /* Both are placed against the slide-up panel, the nearest positioned ancestor, so they stay
    put and aren't clipped when the settings column scrolls. */
 .child-lock-popup {
@@ -381,22 +530,26 @@
   transform: translateX(-50%);
   z-index: 5;
   display: flex;
-  flex-wrap: wrap;
-  gap: calc(10 * var(--u));
-  background-color: var(--color-card);
+  width: min(calc(340 * var(--u)), 90%);
   padding: calc(14 * var(--u));
-  border-radius: calc(6 * var(--u));
-  border: 1px solid var(--color-border);
+  box-sizing: border-box;
+  border: 1px solid var(--color-control-border);
+  border-radius: calc(8 * var(--u));
+  background-color: var(--color-settings-bg);
+  box-shadow: 0 calc(4 * var(--u)) calc(16 * var(--u))
+    color-mix(in srgb, var(--color-screen-off) 20%, transparent);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
 }
 
-.child-lock-popup .btn {
-  min-width: calc(56 * var(--u));
-  border: 1px solid var(--color-border);
-  border-radius: calc(5 * var(--u));
+.child-lock-popup .segment {
+  flex-grow: 1;
+  min-height: max(var(--tap-target), calc(48 * var(--u)));
 }
 
 .subtext {
   font-size: var(--text-min);
+  font-weight: 400;
+  opacity: 0.85;
 }
 
 .controls-sections {
@@ -405,6 +558,7 @@
   gap: calc(16 * var(--u));
   width: 100%;
   padding-bottom: calc(20 * var(--u));
+  text-align: left;
 }
 
 .modal {
@@ -601,10 +755,6 @@
   .top-bar-right-icons {
     gap: calc(6 * var(--u));
     padding-right: 0;
-  }
-
-  .row-4 {
-    flex-wrap: wrap;
   }
 }
 

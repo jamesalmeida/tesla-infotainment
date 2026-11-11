@@ -114,8 +114,8 @@ function TripCard() {
   );
 }
 
-// The cards under the car. They are a real tab list, so touch, mouse and keyboard can all
-// move between them; a horizontal drag is the shortcut the car itself uses.
+// The cards under the car. Swiping is how the car does it; the dots underneath are also a
+// tab list, so a tap or the arrow keys reach every card too.
 export function CarCards() {
   const volume = useCar((state) => state.volume);
   const { openSettings } = useCarActions();
@@ -162,26 +162,6 @@ export function CarCards() {
   return (
     <div className={styles.deck}>
       <div
-        className={styles.tabs}
-        role="tablist"
-        aria-label="Cards under the car"
-        onKeyDown={handleKeyDown}
-      >
-        {CARDS.map((option, optionIndex) => (
-          <button
-            key={option.id}
-            type="button"
-            role="tab"
-            aria-selected={option.id === card.id}
-            tabIndex={option.id === card.id ? 0 : -1}
-            className={option.id === card.id ? styles.activeTab : ''}
-            onClick={() => setIndex(optionIndex)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-      <div
         className={styles.viewport}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -213,9 +193,24 @@ export function CarCards() {
           </div>
         </div>
       </div>
-      <div className={styles.dots} aria-hidden="true">
+      {/* Only the dots show, as on the car: swipe the card, or tap a dot to jump to it. */}
+      <div
+        className={styles.dots}
+        role="tablist"
+        aria-label="Cards under the car"
+        onKeyDown={handleKeyDown}
+      >
         {CARDS.map((option, optionIndex) => (
-          <span key={option.id} className={optionIndex === index ? styles.activeDot : ''} />
+          <button
+            key={option.id}
+            type="button"
+            role="tab"
+            aria-label={option.label}
+            aria-selected={option.id === card.id}
+            tabIndex={option.id === card.id ? 0 : -1}
+            className={option.id === card.id ? styles.activeDot : ''}
+            onClick={() => setIndex(optionIndex)}
+          />
         ))}
       </div>
     </div>

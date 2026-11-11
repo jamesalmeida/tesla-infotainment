@@ -23,6 +23,8 @@ const base = process.env.VERCEL ? '/' : '/tesla-infotainment/';
 
 export default defineConfig({
   base,
+  // The car model is a binary asset. Tests read its node tree through `?inline`.
+  assetsInclude: ['**/*.glb'],
   plugins: [
     react(),
     VitePWA({
