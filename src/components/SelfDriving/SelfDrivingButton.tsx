@@ -43,6 +43,7 @@ export function SelfDrivingButton() {
 // under it. A tap on the name starts or stops it; the mode can change at any time.
 export function SelfDrivingStatus() {
   const isEngaged = useCar((state) => state.autopilot === 'autosteer');
+  const canStart = useCar((state) => canEngageAutopilot(state, 'autosteer').allowed);
   const reason = useCar((state) => {
     const permission = canEngageAutopilot(state, 'autosteer');
     return permission.allowed ? null : permission.reason;
@@ -56,16 +57,17 @@ export function SelfDrivingStatus() {
     else engageAutopilot('autosteer');
   };
 
+  const state = isEngaged ? 'engaged' : canStart ? 'ready' : 'unavailable';
+
   return (
     <div className={styles.status}>
       <button
         type="button"
-        className={`${styles.statusName} ${isEngaged ? styles.statusOn : ''}`}
+        className={`${styles.statusButton} ${styles[state]}`}
         aria-pressed={isEngaged}
-        aria-label={isEngaged ? 'Stop Self-Driving' : 'Start Self-Driving'}
         onClick={handlePress}
       >
-        Self-Driving
+        {isEngaged ? 'Stop Self-Driving' : 'Start Self-Driving'}
       </button>
       <label className={styles.mode}>
         <span className={styles.visuallyHidden}>Self-Driving mode</span>
