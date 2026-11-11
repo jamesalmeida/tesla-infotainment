@@ -1,6 +1,6 @@
 import type { MediaCollection, MediaShelf } from '../mediaLibrary';
 import { Callout, ui } from './AppScreen';
-import { GeneratedArt } from './GeneratedArt';
+import { MediaArt } from './MediaArt';
 import type { useMediaShelves } from './useMediaShelves';
 import styles from './MediaBrowse.module.css';
 
@@ -13,7 +13,7 @@ export function CollectionTile({
 }) {
   return (
     <button type="button" className={styles.tile} onClick={onOpen}>
-      <GeneratedArt seed={collection.id} className={styles.art} />
+      <MediaArt artworkUrl={collection.artworkUrl} seed={collection.id} className={styles.art} />
       <span className={`${ui.strong} ${styles.block}`}>{collection.title}</span>
       <span className={`${ui.muted} ${styles.block}`}>{collection.subtitle}</span>
     </button>
@@ -57,7 +57,11 @@ export function CollectionHeader({
       <button type="button" className={ui.button} onClick={onBack}>
         ‹ {backLabel}
       </button>
-      <GeneratedArt seed={collection.id} className={styles.headerArt} />
+      <MediaArt
+        artworkUrl={collection.artworkUrl}
+        seed={collection.id}
+        className={styles.headerArt}
+      />
       <div className={ui.rowText}>
         <h3 className={styles.collectionTitle}>{collection.title}</h3>
         <div className={ui.muted}>{collection.subtitle}</div>

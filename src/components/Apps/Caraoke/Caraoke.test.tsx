@@ -29,6 +29,7 @@ const engine: PlaybackEngine = {
   seek: vi.fn(),
   stop: vi.fn(),
   setVolume: vi.fn(),
+  loadedId: vi.fn(() => null),
 };
 
 const firstLineStart = LYRICS[0].startBeat * SECONDS_PER_BEAT;

@@ -108,7 +108,9 @@ export const toMediaItem = (station: Station): MediaItem => ({
   subtitle: station.place || 'Internet radio',
   collectionId: `radio-${station.id}`,
   durationSeconds: null,
+  live: true,
   streamUrl: station.url,
+  sourceId: 'radio',
 });
 
 const isStation = (value: unknown): value is Station => {

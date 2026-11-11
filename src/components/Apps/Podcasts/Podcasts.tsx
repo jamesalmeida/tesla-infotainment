@@ -60,7 +60,7 @@ export const Podcasts = () => {
   const { error } = useNowPlaying();
 
   return (
-    <AppScreen title="Podcasts" fixed toolbar={<span className={ui.muted}>Sample shows</span>}>
+    <AppScreen title="Podcasts" fixed>
       <div className={styles.content}>
         <ShelvesStatus loaded={loaded} retry={retry} />
         {error && <Callout tone="error">{error}</Callout>}
@@ -70,7 +70,8 @@ export const Podcasts = () => {
           loaded.status === 'ready' && <ShelfList shelves={loaded.shelves} onOpen={setShow} />
         )}
         <p className={ui.muted}>
-          These shows are invented and have no audio. Each episode remembers where you stopped.
+          Each episode remembers where you stopped. The shows under Shows are invented samples with
+          no audio.
         </p>
       </div>
       <NowPlayingBar />
