@@ -1,8 +1,26 @@
+/* A column down the left under the gears, where the car keeps its indicators. */
 .telltales {
+  position: absolute;
+  top: calc(40 * var(--u));
+  left: calc(14 * var(--u));
+  z-index: 4;
   display: flex;
-  justify-content: center;
-  gap: calc(10 * var(--u));
-  min-height: calc(22 * var(--u));
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(8 * var(--u));
+  pointer-events: none;
+}
+
+/* In Drive the speed takes the top left, so the column starts under it. */
+:global(.drivingIndicators) .telltales {
+  top: calc(140 * var(--u));
+}
+
+.word {
+  font-size: max(var(--text-min), calc(15 * var(--u)));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .telltale {
@@ -35,4 +53,8 @@
 
 .red {
   color: var(--color-danger);
+}
+
+.grey {
+  color: var(--color-text-muted);
 }

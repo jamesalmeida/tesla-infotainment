@@ -105,8 +105,10 @@ function Pedals() {
 }
 
 export function CarStatus() {
+  const driving = useCar(isDriving);
+
   return (
-    <div className="carStatusIcons">
+    <div className={`carStatusIcons ${driving ? 'drivingIndicators' : ''}`}>
       <div className="topBarCarStatusIcons">
         <GearSelect />
         <HazardButton />

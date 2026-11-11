@@ -658,7 +658,7 @@ export const initialCarState: CarState = {
   ],
   chargeState: 'unplugged',
   chargePortOpen: false,
-  tirePressures: { frontLeft: 42, frontRight: 41, rearLeft: 42, rearRight: 34 },
+  tirePressures: { frontLeft: 42, frontRight: 41, rearLeft: 42, rearRight: 41 },
   chargeSession: null,
   autopilot: 'off',
   sentryAlarm: false,

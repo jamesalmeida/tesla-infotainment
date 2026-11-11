@@ -88,15 +88,15 @@ export type PaintColor = (typeof PAINT_COLORS)[number]['value'];
 export const paintHex = (paint: PaintColor): string =>
   PAINT_COLORS.find(({ value }) => value === paint)?.hex ?? PAINT_COLORS[0].hex;
 
-// Recommended cold pressure and a fixed sample reading for each corner. The rear right
-// is deliberately low, so the tire warning has something to show in the demo.
+// Recommended cold pressure and a fixed sample reading for each corner. All four start
+// healthy: a warning lit on every visit only reads as a mystery symbol.
 export const RECOMMENDED_TIRE_PSI = 42;
 
 export const TIRE_PRESSURES = [
   { corner: 'frontLeft', label: 'Front Left', psi: 42 },
   { corner: 'frontRight', label: 'Front Right', psi: 41 },
   { corner: 'rearLeft', label: 'Rear Left', psi: 42 },
-  { corner: 'rearRight', label: 'Rear Right', psi: 34 },
+  { corner: 'rearRight', label: 'Rear Right', psi: 41 },
 ] as const;
 
 export const SERVICE_INTERVALS = [

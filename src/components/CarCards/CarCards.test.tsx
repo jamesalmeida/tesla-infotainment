@@ -8,9 +8,9 @@ vi.mock('../MusicPanel/MusicPanel', () => ({
   MusicPanel: () => <div>Media player</div>,
 }));
 
-const renderCards = () =>
+const renderCards = (state = initialCarState) =>
   render(
-    <CarStateProvider initialState={initialCarState}>
+    <CarStateProvider initialState={state}>
       <CarCards />
     </CarStateProvider>,
   );
@@ -36,8 +36,19 @@ test('opens on the media card', () => {
   expect(screen.getByRole('tab', { name: 'Media' })).toHaveAttribute('aria-selected', 'true');
 });
 
-test('the tire card shows the simulated pressures and the low corner', () => {
+test('all four tires start healthy, with no warning', () => {
   renderCards();
+  fireEvent.click(screen.getByRole('tab', { name: 'Tires' }));
+
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.getByText(/All four tires are at the recommended pressure/)).toBeInTheDocument();
+});
+
+test('the tire card shows the simulated pressures and the low corner', () => {
+  renderCards({
+    ...initialCarState,
+    tirePressures: { ...initialCarState.tirePressures, rearRight: 34 },
+  });
   fireEvent.click(screen.getByRole('tab', { name: 'Tires' }));
 
   expect(screen.getByText('Front Left')).toBeInTheDocument();

@@ -931,9 +931,18 @@ describe('invariants', () => {
 });
 
 describe('tire pressure warnings', () => {
-  test('the sample car has one low tire', () => {
-    expect(lowTireCorners(initialCarState)).toEqual(['rearRight']);
-    expect(hasTirePressureWarning(initialCarState)).toBe(true);
+  test('the sample car starts with no warning', () => {
+    expect(lowTireCorners(initialCarState)).toEqual([]);
+    expect(hasTirePressureWarning(initialCarState)).toBe(false);
+  });
+
+  test('a low corner raises the warning', () => {
+    const state = {
+      ...initialCarState,
+      tirePressures: { ...initialCarState.tirePressures, rearRight: 34 },
+    };
+    expect(lowTireCorners(state)).toEqual(['rearRight']);
+    expect(hasTirePressureWarning(state)).toBe(true);
   });
 
   test('every corner at or above the threshold clears the warning', () => {

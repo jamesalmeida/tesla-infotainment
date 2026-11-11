@@ -14,6 +14,8 @@
 .carLock svg {
   width: calc(24 * var(--u));
   height: calc(24 * var(--u));
+  /* The open shackle swings out past the icon's box, so it must not be clipped. */
+  overflow: visible;
   transition: all 0.5s ease;
 }
 
