@@ -1,15 +1,19 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { CarStateProvider, useCar } from '../../state/CarStateContext';
 import { initialCarState, type CarState } from '../../state/carState';
 import { Notice } from '../Notice/Notice';
-import { DriveStrip, gearFromDrag } from './DriveStrip';
+import { DRIVE_STRIP_LINGER_MS, DriveStrip, gearFromDrag } from './DriveStrip';
+import { PedalButton } from '../PedalDeck/PedalDeck';
 
 function Gear() {
   return <output aria-label="gear">{useCar((state: CarState) => state.gear)}</output>;
 }
 
-const renderStrip = (state = initialCarState) =>
+// The strip only shows with the brake down, so most tests start there.
+const braking: CarState = { ...initialCarState, pedal: 'brake' };
+
+const renderStrip = (state = braking) =>
   render(
     <CarStateProvider initialState={state}>
       <DriveStrip />
@@ -68,8 +72,63 @@ test('the arrow keys shift from the keyboard too', () => {
 });
 
 test('a charge cable refuses Drive and explains why', () => {
-  renderStrip({ ...initialCarState, chargeState: 'charging' });
+  renderStrip({ ...braking, chargeState: 'charging' });
   drag(-60);
   expect(gear()).toBe('P');
   expect(screen.getByText(/Unplug the charge cable/)).toBeInTheDocument();
+});
+
+describe('showing the strip', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const renderWithPedal = () =>
+    render(
+      <CarStateProvider initialState={initialCarState}>
+        <DriveStrip />
+        <PedalButton pedal="brake" label="Brake" hint="↓" />
+        <Gear />
+      </CarStateProvider>,
+    );
+  const brake = () => screen.getByRole('button', { name: /Brake/ });
+  const visibleStrip = () => screen.queryByRole('slider', { name: 'Drive strip' });
+
+  test('is hidden until the brake is pressed', () => {
+    renderWithPedal();
+    expect(visibleStrip()).not.toBeInTheDocument();
+
+    fireEvent.pointerDown(brake());
+    expect(visibleStrip()).toBeInTheDocument();
+  });
+
+  test('stays up for a while after the brake is let go, then hides', () => {
+    renderWithPedal();
+    fireEvent.pointerDown(brake());
+    fireEvent.pointerUp(brake());
+
+    act(() => {
+      vi.advanceTimersByTime(DRIVE_STRIP_LINGER_MS - 100);
+    });
+    expect(visibleStrip()).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(visibleStrip()).not.toBeInTheDocument();
+  });
+
+  test('hides once it has shifted the car', () => {
+    renderWithPedal();
+    fireEvent.pointerDown(brake());
+    fireEvent.pointerUp(brake());
+
+    drag(-40);
+    expect(gear()).toBe('D');
+    expect(visibleStrip()).not.toBeInTheDocument();
+  });
 });

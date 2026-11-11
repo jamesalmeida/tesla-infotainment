@@ -50,6 +50,10 @@
   /* The real screen is 1920x1200. */
   --display-ratio: 1.6;
 
+  /* Room under the screen for the pedals, on desktop only. */
+  --pedal-deck-height: 0px;
+  --pedal-deck-gap: 0px;
+
   /* Apple's minimum, applied wherever touch is the main input. */
   --tap-target: 0px;
   /* Nothing should render smaller than this. */
@@ -86,5 +90,17 @@
 @media (pointer: coarse) {
   :root {
     --tap-target: 44px;
+  }
+}
+
+:root[data-layout='stage'] {
+  --pedal-deck-height: 96px;
+  --pedal-deck-gap: 12px;
+}
+
+@media (pointer: coarse) {
+  :root[data-layout='stage'] {
+    --pedal-deck-height: 0px;
+    --pedal-deck-gap: 0px;
   }
 }

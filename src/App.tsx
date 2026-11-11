@@ -35,6 +35,7 @@ import {
 import { MapNavigation } from './components/MapNavigation/MapNavigation';
 import { CarCards } from './components/CarCards/CarCards';
 import { DriveStrip } from './components/DriveStrip/DriveStrip';
+import { PedalDeck } from './components/PedalDeck/PedalDeck';
 import { DrivingVisualization } from './components/DrivingVisualization/DrivingVisualization';
 import { Modal } from './components/Modal/Modal';
 import { AppShelf } from './components/AppShelf/AppShelf';
@@ -329,7 +330,9 @@ function Display() {
   useEffect(() => {
     if (isLoading || safeStorage.getItem('tesla-tips-seen') === '1') return;
     const timer = setTimeout(() => {
-      showNotice('Press Shift + ? for keyboard shortcuts. Swipe the drive strip to shift.');
+      showNotice(
+        'Press Shift + ? for keyboard shortcuts. Press the brake, then swipe the drive strip to shift.',
+      );
       safeStorage.setItem('tesla-tips-seen', '1');
     }, 1200);
     return () => clearTimeout(timer);
@@ -365,6 +368,7 @@ function Display() {
           <OnScreenKeyboard target={keyboardTarget} onClose={closeKeyboard} />
         </div>
       </div>
+      <PedalDeck />
     </>
   );
 }

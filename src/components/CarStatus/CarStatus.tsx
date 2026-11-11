@@ -1,16 +1,11 @@
 import { useCar, useCarActions } from '../../state/CarStateContext';
 import { useBlink } from '../../hooks/useBlink';
-import {
-  isDriving,
-  leftSignalLit,
-  rightSignalLit,
-  SPEED_LIMIT_MPH,
-  type Pedal,
-} from '../../state/carState';
+import { isDriving, leftSignalLit, rightSignalLit, SPEED_LIMIT_MPH } from '../../state/carState';
 import { getImagePath } from '../../utils/assetPaths';
 import { formatSpeed, speedUnit } from '../../utils/units';
 import BatteryStatus from '../BatteryStatus/BatteryStatus';
 import GearSelect from '../GearSelect/GearSelect';
+import { PedalButton } from '../PedalDeck/PedalDeck';
 import { Telltales } from './Telltales';
 
 function TurnSignal({
@@ -99,33 +94,12 @@ function SpeedLimit() {
   );
 }
 
-function PedalButton({ pedal, label }: { pedal: Pedal; label: string }) {
-  const { setPedal } = useCarActions();
-  const release = () => setPedal('none');
-
-  return (
-    <button
-      type="button"
-      className="pedalBtn"
-      onPointerDown={() => setPedal(pedal)}
-      onPointerUp={release}
-      onPointerLeave={release}
-      onPointerCancel={release}
-    >
-      {label}
-    </button>
-  );
-}
-
-// Held like real pedals. Keyboard users get the same from the up and down arrows.
+// Phones and tablets have no room under the screen, so their pedals sit on it.
 function Pedals() {
-  const canDrive = useCar((state) => state.gear === 'D' || state.gear === 'R');
-  if (!canDrive) return null;
-
   return (
     <div className="pedals">
-      <PedalButton pedal="brake" label="Brake" />
-      <PedalButton pedal="accelerate" label="Go" />
+      <PedalButton className="pedalBtn" pedal="brake" label="Brake" hint="↓" />
+      <PedalButton className="pedalBtn" pedal="accelerate" label="Go" hint="↑" />
     </div>
   );
 }

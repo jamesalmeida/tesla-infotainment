@@ -4,6 +4,8 @@
   z-index: 3000;
   display: grid;
   place-items: center;
+  /* Leaves the same room the pedals take, so the screen doesn't jump when the app appears. */
+  padding-bottom: calc(var(--pedal-deck-height) + var(--pedal-deck-gap));
   background: #4e4e4e;
 }
 

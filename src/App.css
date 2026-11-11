@@ -8,6 +8,8 @@ body {
 #root {
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: var(--pedal-deck-gap);
   height: 100%;
   background: #4e4e4e;
   caret-color: rgb(0 157 255);
@@ -19,7 +21,8 @@ body {
   --gutter: clamp(8px, 3vmin, 48px);
   --bezel-width: min(
     100dvw - 2 * var(--gutter),
-    (100dvh - 2 * var(--gutter)) * var(--display-ratio)
+    (100dvh - 2 * var(--gutter) - var(--pedal-deck-height) - var(--pedal-deck-gap)) *
+      var(--display-ratio)
   );
 
   box-sizing: border-box;
@@ -344,6 +347,17 @@ body {
   display: flex;
   justify-content: center;
   min-width: calc(40 * var(--u));
+}
+
+/* On a desktop window the pedals live under the screen instead (PedalDeck). */
+:root[data-layout='stage'] .pedals {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  :root[data-layout='stage'] .pedals {
+    display: flex;
+  }
 }
 
 .pedals {

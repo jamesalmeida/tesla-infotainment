@@ -1,5 +1,5 @@
 .musicPanel {
-  font-family: 'Open Sans';
+  font-family: 'Open Sans', system-ui, sans-serif;
   font-weight: 600;
   flex: none;
   display: grid;

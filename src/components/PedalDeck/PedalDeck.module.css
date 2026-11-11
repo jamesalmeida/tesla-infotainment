@@ -1,0 +1,86 @@
+/* Only shown on a desktop window: phones and tablets keep their pedals on the screen. */
+.pedalDeck {
+  display: none;
+}
+
+:global(:root[data-layout='stage']) .pedalDeck {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: end;
+  gap: 16px;
+  width: var(--bezel-width);
+  height: var(--pedal-deck-height);
+  box-sizing: border-box;
+  padding: 0 4%;
+}
+
+@media (pointer: coarse) {
+  :global(:root[data-layout='stage']) .pedalDeck {
+    display: none;
+  }
+}
+
+.brake,
+.accelerator {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 8px;
+  border: 1px solid #1c1c1c;
+  border-radius: 10px;
+  /* Rubber ribs, drawn rather than imaged. */
+  background: repeating-linear-gradient(180deg, #3a3a3a 0 3px, #2a2a2a 3px 8px), #2a2a2a;
+  box-shadow:
+    0 6px 0 #161616,
+    0 8px 14px rgba(0, 0, 0, 0.45);
+  color: #d0d0d0;
+  font: inherit;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out;
+}
+
+.brake {
+  width: 150px;
+  height: 64px;
+}
+
+.accelerator {
+  width: 84px;
+  height: 92px;
+}
+
+.brake[aria-pressed='true'],
+.accelerator[aria-pressed='true'] {
+  transform: translateY(5px);
+  box-shadow:
+    0 1px 0 #161616,
+    0 3px 6px rgba(0, 0, 0, 0.45);
+}
+
+.brake[aria-pressed='true'] {
+  border-color: var(--color-danger);
+}
+
+.accelerator[aria-pressed='true'] {
+  border-color: var(--color-success);
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.hint {
+  margin: 0 0 8px 8px;
+  color: #c8c8c8;
+  font-size: 12px;
+  text-align: right;
+}

@@ -19,6 +19,19 @@
   user-select: none;
   -webkit-user-select: none;
   outline-offset: 2px;
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease-out,
+    transform 0.2s ease-out;
+}
+
+/* Up only while the brake is pressed, and for a few seconds after. */
+.strip.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
 }
 
 .strip:active {
