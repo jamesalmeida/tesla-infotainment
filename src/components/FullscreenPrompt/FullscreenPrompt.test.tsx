@@ -13,6 +13,7 @@ const setTouch = (points: number) => {
 
 beforeEach(() => {
   localStorage.clear();
+  delete document.documentElement.dataset.fullscreen;
   setTouch(5);
   setViewport(402, 714);
 });
@@ -20,6 +21,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   setTouch(0);
+  delete document.documentElement.dataset.fullscreen;
   Object.defineProperty(document, 'fullscreenEnabled', { configurable: true, value: undefined });
   Object.defineProperty(document.documentElement, 'requestFullscreen', {
     configurable: true,
@@ -54,12 +56,13 @@ describe('when to offer full screen', () => {
 });
 
 describe('the hint itself', () => {
-  test('offers Home Screen when the browser has no element full screen', async () => {
+  test('offers full screen now when the browser has no element full screen', async () => {
     render(<FullscreenPrompt />);
 
-    expect(await screen.findByRole('note')).toHaveTextContent('Add to Home Screen');
-    fireEvent.click(screen.getByRole('button', { name: 'Got it' }));
+    expect(await screen.findByRole('note')).toHaveTextContent('Go full screen now');
+    fireEvent.click(screen.getByRole('button', { name: 'Full screen' }));
 
+    expect(document.documentElement.dataset.fullscreen).toBe('true');
     expect(screen.queryByRole('note')).toBeNull();
     expect(localStorage.getItem('tesla-fullscreen-dismissed')).toBe('1');
   });
@@ -83,6 +86,15 @@ describe('the hint itself', () => {
 
     expect(request).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByRole('note')).toBeNull());
+    expect(document.documentElement.dataset.fullscreen).toBeUndefined();
     expect(localStorage.getItem('tesla-fullscreen-dismissed')).toBe('1');
+  });
+
+  test('Escape leaves the in-app full screen', () => {
+    document.documentElement.dataset.fullscreen = 'true';
+    render(<FullscreenPrompt />);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(document.documentElement.dataset.fullscreen).toBeUndefined();
   });
 });

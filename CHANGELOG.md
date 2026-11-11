@@ -17,7 +17,7 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 - The Camera app uses the device's camera, stands up a sideways feed on touch devices, and switches between cameras when the device has more than one.
 - Turn-by-turn directions with ETA, arrival, voice guidance and a directions list, saved Home/Work/Favorites/Recents, car tracking on the map, follow-camera and map options, and arrival battery with a charge-stop hint.
 - Door state lives in the car store, and the first visit shows a one-time shortcut tip. Reduced-motion preferences are respected across the app.
-- The app can be installed to a home screen and starts offline, with an update prompt and a full-screen hint on small touch devices.
+- The app can be installed to a home screen and starts offline, with an update prompt and a full-screen prompt on small touch devices, including an in-app fallback when the browser has no full-screen API.
 - A notice in the README and Software panel says this is an unofficial fan project, not affiliated with or endorsed by Tesla, Inc. The page title is now "Tesla Infotainment Simulator".
 - The README lists each `public/` folder with its known source and licence, or says it is unknown.
 - Dependabot keeps dependencies and GitHub Actions current, with React and the 3D packages grouped so they move together.

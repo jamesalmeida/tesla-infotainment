@@ -39,8 +39,37 @@ const isStandalone = () =>
 
 const isFullscreen = () => Boolean(document.fullscreenElement);
 
-const canRequestFullscreen = () =>
-  Boolean(document.fullscreenEnabled && document.documentElement.requestFullscreen);
+type FullscreenElement = HTMLElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
+
+// Safari's older full-screen path is prefixed, so try both.
+const requestBrowserFullscreen = (): Promise<void> | null => {
+  const element = document.documentElement as FullscreenElement;
+  if (document.fullscreenEnabled && element.requestFullscreen) {
+    return element.requestFullscreen();
+  }
+  if (element.webkitRequestFullscreen) {
+    return Promise.resolve(element.webkitRequestFullscreen());
+  }
+  return null;
+};
+
+const canRequestFullscreen = () => {
+  const element = document.documentElement as FullscreenElement;
+  return Boolean(
+    (document.fullscreenEnabled && element.requestFullscreen) || element.webkitRequestFullscreen,
+  );
+};
+
+// Where the browser has no full-screen API, the app fills the viewport itself instead.
+const enterImmersive = () => {
+  document.documentElement.dataset.fullscreen = 'true';
+};
+
+const exitImmersive = () => {
+  delete document.documentElement.dataset.fullscreen;
+};
 
 export function FullscreenPrompt() {
   const [visible, setVisible] = useState(() =>
@@ -55,13 +84,19 @@ export function FullscreenPrompt() {
   );
 
   useEffect(() => {
-    if (!visible) return;
-    const onChange = () => {
+    const onFullscreenChange = () => {
       if (isFullscreen()) setVisible(false);
     };
-    document.addEventListener('fullscreenchange', onChange);
-    return () => document.removeEventListener('fullscreenchange', onChange);
-  }, [visible]);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') exitImmersive();
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
 
   const dismiss = () => {
     safeStorage.setItem(DISMISSED_KEY, '1');
@@ -69,39 +104,36 @@ export function FullscreenPrompt() {
   };
 
   const goFullscreen = () => {
-    const request = document.documentElement.requestFullscreen;
+    const request = requestBrowserFullscreen();
     if (!request) {
+      enterImmersive();
       dismiss();
       return;
     }
-    request
-      .call(document.documentElement)
-      .then(dismiss)
-      .catch(() => {
-        // iOS Safari on iPhone has no element full screen; the hint still helps.
-        dismiss();
-      });
+    request.then(dismiss).catch(() => {
+      // iOS Safari on iPhone has no element full screen; fill the viewport instead.
+      enterImmersive();
+      dismiss();
+    });
   };
 
   if (!visible) return null;
 
-  const supported = canRequestFullscreen();
-
   return (
     <div className={styles.banner} role="note">
-      <span>
-        {supported
+      <p className={styles.message}>
+        {canRequestFullscreen()
           ? 'Use full screen to give the display more room.'
-          : 'Add to Home Screen for a full-screen display.'}
-      </span>
-      <button type="button" onClick={supported ? goFullscreen : dismiss}>
-        {supported ? 'Full screen' : 'Got it'}
-      </button>
-      {supported && (
+          : 'Go full screen now, or add the app to your Home Screen.'}
+      </p>
+      <div className={styles.actions}>
+        <button type="button" onClick={goFullscreen}>
+          Full screen
+        </button>
         <button type="button" className={styles.dismiss} onClick={dismiss}>
           Later
         </button>
-      )}
+      </div>
     </div>
   );
 }
