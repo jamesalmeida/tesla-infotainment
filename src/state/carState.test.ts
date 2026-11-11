@@ -597,16 +597,20 @@ describe('autopilot', () => {
   test('holds the speed limit plus the offset, then keeps it there', () => {
     const offset = withSettings({ speedOffset: 5 }, drive);
     expect(autopilotTargetSpeed(offset)).toBe(35);
+    expect(autopilotTargetSpeed(withSettings({ drivingProfile: 'mad-max' }, drive))).toBe(40);
+    expect(autopilotTargetSpeed(withSettings({ drivingProfile: 'sloth' }, drive))).toBe(27);
     const engaged = reduceFrom({ ...offset, speed: 34 }, engage);
     expect(isSimulationActive(engaged)).toBe(true);
     expect(reduceFrom(engaged, ...ticks(3)).speed).toBe(35);
   });
 
   test.each([
+    ['sloth', 2],
     ['chill', 3],
-    ['average', 5],
-    ['assertive', 8],
-  ] as const)('the %s profile sets how quickly it gets there', (drivingProfile, speed) => {
+    ['standard', 5],
+    ['hurry', 7],
+    ['mad-max', 10],
+  ] as const)('the %s mode sets how quickly it gets there', (drivingProfile, speed) => {
     const state = withSettings({ drivingProfile }, drive);
     expect(reduceFrom(state, engage, tick()).speed).toBe(speed);
   });

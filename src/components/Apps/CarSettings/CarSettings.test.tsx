@@ -87,13 +87,7 @@ describe('each control reaches the store and outlives its panel', () => {
       5,
     ],
     ['Autopilot', 'offset', () => slide('Speed Offset', -5), (s) => s.settings.speedOffset, -5],
-    [
-      'Autopilot',
-      'profile',
-      () => pick('Assertive'),
-      (s) => s.settings.drivingProfile,
-      'assertive',
-    ],
+    ['Autopilot', 'profile', () => pick('Mad Max'), (s) => s.settings.drivingProfile, 'mad-max'],
     [
       'Locks',
       'walk-away',

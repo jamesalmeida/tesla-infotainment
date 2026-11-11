@@ -184,9 +184,13 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* On touch the band is a little taller than the line, but no more: it used to reach up over
+   the title, so a swipe there scrubbed the audio instead of changing card. */
 @media (pointer: coarse) {
   .progressHitArea {
-    height: calc(44 * var(--u));
+    bottom: -8px;
+    height: 20px;
+    align-items: center;
   }
 }
 

@@ -7,7 +7,7 @@ import BatteryStatus from '../BatteryStatus/BatteryStatus';
 import GearSelect from '../GearSelect/GearSelect';
 import { PedalButton } from '../PedalDeck/PedalDeck';
 import { Telltales } from './Telltales';
-import { SelfDrivingButton } from '../SelfDriving/SelfDrivingButton';
+import { SelfDrivingButton, SelfDrivingStatus } from '../SelfDriving/SelfDrivingButton';
 
 function TurnSignal({
   side,
@@ -80,12 +80,16 @@ function Speedometer() {
   );
 }
 
+// Small, in the column under the speed, where the car shows it.
 function SpeedLimit() {
-  const driving = useCar(isDriving);
   const preferences = useCar((state) => state.settings.preferences);
 
   return (
-    <div className={`speedLimit ${driving ? 'fade-in' : 'fade-out'}`}>
+    <div
+      className="speedLimit"
+      role="img"
+      aria-label={`Speed limit ${formatSpeed(SPEED_LIMIT_MPH, preferences)}`}
+    >
       SPEED
       <br />
       LIMIT
@@ -112,16 +116,26 @@ export function CarStatus() {
     <div className={`carStatusIcons ${driving ? 'drivingIndicators' : ''}`}>
       <div className="topBarCarStatusIcons">
         <GearSelect />
-        <HazardButton />
         <BatteryStatus />
       </div>
       <div className="drivingGearIcons">
         <Speedometer />
         <TurnSignals />
-        <SpeedLimit />
       </div>
-      <Telltales />
-      <SelfDrivingButton />
+      {/* The column down the left: in Drive, Self-Driving and the speed limit come first. */}
+      <Telltales
+        leading={
+          driving ? (
+            <>
+              <SelfDrivingStatus />
+              <SpeedLimit />
+            </>
+          ) : null
+        }
+        trailing={<HazardButton />}
+      />
+      {/* In Park the start button sits top right; in Drive it moves into the column. */}
+      {!driving && <SelfDrivingButton />}
       <Pedals />
     </div>
   );

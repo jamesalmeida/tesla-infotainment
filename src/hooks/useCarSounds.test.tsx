@@ -46,14 +46,26 @@ test('locking plays the chime, and opening the trunk plays the door sound', () =
   expect(playCarSound).toHaveBeenCalledWith('door', 50);
 });
 
-test('a turn signal ticks and shifting into Drive sounds the belt reminder', () => {
+test('a turn signal ticks, and shifting gear is silent', () => {
   const { result } = renderSounds();
 
   act(() => result.current.toggleLeftSignal());
   expect(startIndicator).toHaveBeenCalledWith(50);
 
   act(() => result.current.selectGear('D'));
-  expect(playCarSound).toHaveBeenCalledWith('seatbelt', 50);
+  expect(playCarSound).not.toHaveBeenCalled();
+});
+
+test('opening a door chimes only when the car is not in Park', () => {
+  const { result } = renderSounds();
+
+  act(() => result.current.toggleDoor('lf'));
+  expect(playCarSound).not.toHaveBeenCalledWith('doorAjar', 50);
+  act(() => result.current.toggleDoor('lf'));
+
+  act(() => result.current.selectGear('D'));
+  act(() => result.current.toggleDoor('rf'));
+  expect(playCarSound).toHaveBeenCalledWith('doorAjar', 50);
 });
 
 test('muting car sounds silences every chime', () => {

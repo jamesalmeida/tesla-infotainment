@@ -1,4 +1,11 @@
-import { useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+} from 'react';
 import { useCar, useCarActions } from '../../state/CarStateContext';
 import { LOW_TIRE_PSI, TIRE_CORNERS, TIRE_CORNER_LABELS } from '../../state/carState';
 import { RECOMMENDED_TIRE_PSI } from '../../state/sampleData';
@@ -28,9 +35,14 @@ export const cardAfterSwipe = (index: number, deltaX: number, deltaY = 0): numbe
   return Math.max(0, Math.min(CARDS.length - 1, index + (deltaX < 0 ? 1 : -1)));
 };
 
-const isInteractive = (target: EventTarget | null): boolean =>
+// Fields and the media scrubber keep their own drags. Buttons don't: a sideways drag that starts
+// on one is still a swipe, and the press is cancelled, as on the car.
+const ownsDrag = (target: EventTarget | null): boolean =>
   target instanceof Element &&
-  Boolean(target.closest('button, input, textarea, select, a, [data-swipe-ignore]'));
+  Boolean(target.closest('input, textarea, select, [data-swipe-ignore]'));
+
+// Sideways movement past this turns a press into a swipe.
+const SWIPE_START_PX = 10;
 
 function TireCard() {
   const pressures = useCar((state) => state.tirePressures);
@@ -136,18 +148,32 @@ export function CarCards() {
   }, [index]);
   const [dragX, setDragX] = useState(0);
   const dragStart = useRef<{ x: number; y: number } | null>(null);
+  const isSwiping = useRef(false);
+  // Set once a swipe ends, so the click that follows doesn't also press a button.
+  const swallowClick = useRef(false);
 
   const card = CARDS[index];
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.button !== 0 || isInteractive(event.target)) return;
+    if (event.button !== 0 || ownsDrag(event.target)) return;
     dragStart.current = { x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    isSwiping.current = false;
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!dragStart.current) return;
-    setDragX(event.clientX - dragStart.current.x);
+    const deltaX = event.clientX - dragStart.current.x;
+    const deltaY = event.clientY - dragStart.current.y;
+    // Only a mostly sideways move becomes a swipe; anything else is a tap or a scroll.
+    if (
+      !isSwiping.current &&
+      Math.abs(deltaX) > SWIPE_START_PX &&
+      Math.abs(deltaX) > Math.abs(deltaY)
+    ) {
+      isSwiping.current = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    if (isSwiping.current) setDragX(deltaX);
   };
 
   const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
@@ -156,12 +182,23 @@ export function CarCards() {
     const deltaY = event.clientY - dragStart.current.y;
     dragStart.current = null;
     setDragX(0);
-    setIndex((current) => cardAfterSwipe(current, deltaX, deltaY));
+    const next = cardAfterSwipe(index, deltaX, deltaY);
+    if (isSwiping.current || next !== index) swallowClick.current = true;
+    isSwiping.current = false;
+    setIndex(next);
   };
 
   const handleCancel = () => {
     dragStart.current = null;
+    isSwiping.current = false;
     setDragX(0);
+  };
+
+  const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
+    if (!swallowClick.current) return;
+    swallowClick.current = false;
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -182,6 +219,7 @@ export function CarCards() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handleCancel}
+        onClickCapture={handleClickCapture}
       >
         <div
           ref={trackRef}

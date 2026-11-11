@@ -1,6 +1,8 @@
 import { useCar, useCarActions } from '../../../../state/CarStateContext';
 import {
   autopilotTargetSpeed,
+  DRIVING_PROFILE_LABELS,
+  DRIVING_PROFILES,
   MAX_FOLLOWING_DISTANCE,
   MAX_SPEED_OFFSET,
   MIN_FOLLOWING_DISTANCE,
@@ -21,11 +23,10 @@ import {
   type Choice,
 } from './SettingsKit';
 
-const PROFILES: Choice<DrivingProfile>[] = [
-  { value: 'chill', label: 'Chill' },
-  { value: 'average', label: 'Average' },
-  { value: 'assertive', label: 'Assertive' },
-];
+const PROFILES: Choice<DrivingProfile>[] = DRIVING_PROFILES.map((value) => ({
+  value,
+  label: DRIVING_PROFILE_LABELS[value],
+}));
 
 const AUTOPILOT_LABELS: Record<AutopilotMode, string> = {
   off: 'Not engaged',

@@ -1,8 +1,65 @@
 .cameraWrapper {
   box-sizing: border-box;
+  position: relative;
+  container-type: size;
   margin: 0 auto;
   padding: 1.5%;
   height: 100%;
+}
+
+/* Fills the frame, and on a quarter turn swaps its width and height so the turned video
+   still fills it. */
+.rotator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 97cqw;
+  height: 97cqh;
+  transform: translate(-50%, -50%);
+}
+
+.rotator[data-rotation='90'],
+.rotator[data-rotation='270'] {
+  width: 97cqh;
+  height: 97cqw;
+}
+
+.rotator[data-rotation='90'] {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.rotator[data-rotation='180'] {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
+.rotator[data-rotation='270'] {
+  transform: translate(-50%, -50%) rotate(270deg);
+}
+
+.rotateButton {
+  position: absolute;
+  top: calc(12 * var(--u));
+  right: calc(12 * var(--u));
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: max(calc(40 * var(--u)), var(--tap-target));
+  height: max(calc(40 * var(--u)), var(--tap-target));
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.rotateButton svg {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .cameraWrapper video {

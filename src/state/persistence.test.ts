@@ -467,3 +467,16 @@ test('tire pressures come back, and bad readings fall back one corner at a time'
   expect(restored.tirePressures.rearRight).toBe(initialCarState.tirePressures.rearRight);
   expect(serializeState(restored)).toContain('"frontLeft":38');
 });
+
+test('a saved Average or Assertive profile becomes Standard or Hurry', () => {
+  const restoreProfile = (drivingProfile: string) =>
+    restoreState(
+      initialCarState,
+      JSON.stringify({ version: 1, state: { settings: { drivingProfile } } }),
+    ).settings.drivingProfile;
+
+  expect(restoreProfile('average')).toBe('standard');
+  expect(restoreProfile('assertive')).toBe('hurry');
+  expect(restoreProfile('mad-max')).toBe('mad-max');
+  expect(restoreProfile('ludicrous')).toBe('standard');
+});

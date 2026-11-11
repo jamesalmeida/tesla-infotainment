@@ -11,7 +11,7 @@ import { useCar } from '../state/CarStateContext';
 interface SoundState {
   isLocked: boolean;
   compartment: string | null;
-  gear: string;
+  openDoors: number;
 }
 
 // Short sounds for things that happen to the car. The samples are local, so this never
@@ -23,18 +23,20 @@ export function useCarSounds() {
   const isLocked = useCar((state) => state.isLocked);
   const compartment = useCar((state) => state.openCompartment);
   const isIndicating = useCar((state) => state.signal !== 'off' || state.hazards);
-  const gear = useCar((state) => state.gear);
-  const previous = useRef<SoundState>({ isLocked, compartment, gear });
+  const isParked = useCar((state) => state.gear === 'P');
+  const openDoors = useCar((state) => Object.values(state.doors).filter(Boolean).length);
+  const previous = useRef<SoundState>({ isLocked, compartment, openDoors });
 
   useEffect(() => {
     const before = previous.current;
-    previous.current = { isLocked, compartment, gear };
+    previous.current = { isLocked, compartment, openDoors };
     if (!enabled) return;
 
     if (isLocked && !before.isLocked && lockSound) playLockChime(volume);
     if (compartment !== before.compartment) playCarSound('door', volume);
-    if ((gear === 'D' || gear === 'R') && before.gear === 'P') playCarSound('seatbelt', volume);
-  }, [compartment, enabled, gear, isLocked, lockSound, volume]);
+    // Shifting is silent. The warning chime is for a door opened while the car is in gear.
+    if (openDoors > before.openDoors && !isParked) playCarSound('doorAjar', volume);
+  }, [compartment, enabled, isLocked, isParked, lockSound, openDoors, volume]);
 
   // The tick follows the blinker: on while any signal or the hazards are on, off the moment
   // they all are. Volume is applied separately, so changing it doesn't restart the loop.

@@ -200,13 +200,17 @@ function DashcamIndicator() {
   );
 }
 
-export function Telltales() {
+// The column under the gears. `leading` and `trailing` take controls that belong in it too,
+// such as Self-Driving in Drive and the hazard button.
+export function Telltales({ leading, trailing }: { leading?: ReactNode; trailing?: ReactNode }) {
   return (
     <div className={styles.telltales}>
+      {leading}
       {TELLTALES.map((telltale) => (
         <TelltaleIcon key={telltale.id} telltale={telltale} />
       ))}
       <DashcamIndicator />
+      {trailing}
     </div>
   );
 }
