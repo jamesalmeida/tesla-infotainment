@@ -136,3 +136,7 @@ export function nearestAngle(angle: number, reference: number) {
   const difference = (((angle - reference + Math.PI) % turn) + turn) % turn;
   return reference + difference - Math.PI;
 }
+
+// The axle groups that spin with speed. Neither may be an ancestor of the other, or spinning
+// one would carry the other around with it.
+export const SPINNING_WHEEL_NODES = ['wheels', 'wheels.001'] as const;

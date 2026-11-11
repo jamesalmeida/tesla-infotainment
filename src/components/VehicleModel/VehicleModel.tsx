@@ -32,6 +32,7 @@ import {
   type DoorId,
   type DoorStates,
   type VehiclePose,
+  SPINNING_WHEEL_NODES,
 } from './vehiclePose';
 import styles from './VehicleModel.module.css';
 
@@ -215,11 +216,14 @@ function Model({
     [scene],
   );
   const paintMaterials = useMemo(() => collectPaintMaterials(scene), [scene]);
+  // Each axle spins about its own centre. Their shared parent, wheel_rf_dummy, sits on the
+  // front axle with the rear axle as a child, so spinning it swings the rear wheels around
+  // the front ones and they come off the car.
   const wheels = useMemo(
     () =>
-      ['wheel_rf_dummy', 'wheels', 'wheels.001']
-        .map((name) => scene.getObjectByName(name))
-        .filter((wheel): wheel is THREE.Object3D => Boolean(wheel)),
+      SPINNING_WHEEL_NODES.map((name) => scene.getObjectByName(name)).filter(
+        (wheel): wheel is THREE.Object3D => Boolean(wheel),
+      ),
     [scene],
   );
   const wheelAngle = useRef(0);
