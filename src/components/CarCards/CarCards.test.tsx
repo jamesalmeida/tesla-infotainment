@@ -91,3 +91,10 @@ test.each([
 ])('swipe %i by (%i, %i) lands on %i', (index, deltaX, deltaY, expected) => {
   expect(cardAfterSwipe(index, deltaX, deltaY)).toBe(expected);
 });
+
+test('only the dots show, with no tab labels above the card', () => {
+  renderCards();
+  expect(screen.queryByText('Media')).not.toBeInTheDocument();
+  expect(screen.queryByText('Trip')).not.toBeInTheDocument();
+  expect(screen.getAllByRole('tab')).toHaveLength(3);
+});

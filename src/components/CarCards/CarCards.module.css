@@ -5,31 +5,6 @@
   color: #4e4e4e;
 }
 
-.tabs {
-  display: flex;
-  gap: calc(4 * var(--u));
-  margin-bottom: calc(4 * var(--u));
-}
-
-.tabs button {
-  flex: 1;
-  min-height: max(calc(24 * var(--u)), var(--tap-target));
-  border: none;
-  border-radius: calc(5 * var(--u));
-  background: rgba(0, 0, 0, 0.06);
-  color: #777;
-  font: inherit;
-  font-size: max(var(--text-min), calc(11 * var(--u)));
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.tabs button.activeTab {
-  background: #ffffff;
-  color: #2b2b2b;
-  box-shadow: rgba(0, 0, 0, 0.16) 0 1px 4px;
-}
-
 .viewport {
   overflow: hidden;
   border-radius: calc(5 * var(--u));
@@ -138,28 +113,35 @@
 .dots {
   display: flex;
   justify-content: center;
-  gap: calc(6 * var(--u));
-  margin-top: calc(4 * var(--u));
 }
 
-.dots span {
+/* The dot is small, but the button around it is a full-size target. */
+.dots button {
+  display: grid;
+  place-items: center;
+  min-width: max(calc(16 * var(--u)), var(--tap-target));
+  min-height: max(calc(16 * var(--u)), var(--tap-target));
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.dots button::before {
+  content: '';
   width: calc(6 * var(--u));
   height: calc(6 * var(--u));
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.2);
 }
 
-.dots span.activeDot {
+.dots button.activeDot::before {
   background: #4e4e4e;
 }
 
 /* A phone on its side has less room: keep the readings in one compact row. */
 :global(:root[data-layout='compact']) .deck {
   margin-bottom: 4px;
-}
-
-:global(:root[data-layout='compact']) .tabs {
-  display: none;
 }
 
 :global(:root[data-layout='compact']) .card {
