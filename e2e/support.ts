@@ -11,7 +11,13 @@ export async function blockThirdParties(context: BrowserContext) {
 
 export async function openApp(page: Page, url = '') {
   await page.goto(url);
-  await expect(page.locator('[class*="loading-overlay"]')).toHaveCount(0, { timeout: 30_000 });
+  // A CI runner can take much longer than a laptop to parse the bundle and start the car.
+  const isCI = Boolean(
+    (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.CI,
+  );
+  await expect(page.locator('[class*="loading-overlay"]')).toHaveCount(0, {
+    timeout: isCI ? 60_000 : 30_000,
+  });
 }
 
 export const appPanel = (page: Page) => page.locator('[class*="vertical-slider-panel"]');
