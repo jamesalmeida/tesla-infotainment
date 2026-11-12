@@ -93,6 +93,8 @@ const cameraPosition = (elevation: number, azimuth: number): [number, number, nu
   5 * Math.cos(elevation) * Math.cos(azimuth),
 ];
 
+const CAMERA_FOV = 22;
+
 const ORBIT_TARGET: [number, number, number] = [0, -0.5, 0];
 // OrbitControls measures from straight overhead, so the highest camera is the smallest angle.
 const polarAngle = (elevation: number) => Math.PI / 2 - elevation;
@@ -524,7 +526,9 @@ export function VehicleModel({
       frameloop={tabHidden ? 'never' : 'demand'}
       dpr={[1, 2]}
       camera={{
-        fov: 40,
+        // A long lens from further back, as on the car: a wide one up close makes the nose
+        // loom and the far wheel shrink. Stage's fit backs the camera off to suit.
+        fov: CAMERA_FOV,
         position: initialPosition,
         near: 0.1,
         far: 1000,

@@ -1,4 +1,14 @@
-import { lazy, memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  lazy,
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from 'react';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import { AppOverlays } from './apps/AppOverlays';
 import { CarStateProvider, useCar, useCarActions } from './state/CarStateContext';
@@ -88,6 +98,8 @@ const STACKED_LEFT_PANEL_SIZE = 50;
 const CLOSE_APP_DRAG_MARGIN = 3;
 // Dragged this far across in Park, the car panel takes the whole screen.
 const PARK_VIEW_ENTER_SIZE = 75;
+// How far, in pixels, a press on the grabber can move and still be a tap.
+const TAP_TRAVEL = 6;
 
 function App() {
   return (
@@ -297,6 +309,36 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
 
   const leaveParkView = useCallback(() => setParkView(false), []);
 
+  // A tap on the grabber, rather than a drag, opens the full Park view in one go, as on the
+  // car. Only a press that barely moves counts; anything longer was a resize.
+  const pressStart = useRef<{ x: number; y: number } | null>(null);
+  const openParkView = () => {
+    if (!parked) return;
+    if (isOpen) closeSurface();
+    setParkView(true);
+  };
+  const separatorTap = {
+    onPointerDown: (event: PointerEvent<HTMLDivElement>) => {
+      pressStart.current = { x: event.clientX, y: event.clientY };
+    },
+    onPointerUp: (event: PointerEvent<HTMLDivElement>) => {
+      const start = pressStart.current;
+      pressStart.current = null;
+      if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) <= TAP_TRAVEL) {
+        openParkView();
+      }
+    },
+    onPointerCancel: () => {
+      pressStart.current = null;
+    },
+    onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openParkView();
+      }
+    },
+  };
+
   return (
     <>
       {hasViewSwitch && <StackedViewSwitch view={visibleView} onChange={setStackedView} />}
@@ -320,7 +362,9 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
             onLeaveParkView={leaveParkView}
           />
         </Panel>
-        {!isStacked && !showParkView && <Separator className="panelResizeHandle" />}
+        {!isStacked && !showParkView && (
+          <Separator className="panelResizeHandle" {...separatorTap} />
+        )}
         <Panel
           id="rightPanel"
           defaultSize={`${RIGHT_PANEL_SIZE}%`}
