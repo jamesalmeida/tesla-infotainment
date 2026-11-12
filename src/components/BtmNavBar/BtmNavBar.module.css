@@ -88,18 +88,22 @@
   column-gap: 4px;
 }
 
+/* The icons keep together in the middle, spaced as on a wide screen, rather than spreading
+   across the whole row. They still scroll when the row is too narrow for them all. */
 :global(:root[data-layout='stacked']) .dockApps {
   grid-column: 1 / -1;
   grid-row: 1;
   justify-self: stretch;
-  justify-content: space-between;
+  justify-content: safe center;
+  gap: 12px;
   overflow-x: auto;
   scrollbar-width: none;
 }
 
 :global(:root[data-layout='compact']) .dockApps {
   justify-self: stretch;
-  justify-content: space-between;
+  justify-content: safe center;
+  gap: 8px;
   overflow-x: auto;
   scrollbar-width: none;
 }
