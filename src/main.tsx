@@ -19,6 +19,10 @@ function Root() {
   return isRear ? <RearDisplay /> : <App />;
 }
 
+// The pointer media query is unreliable on foldables and installed apps, so touch is also
+// detected in JS and exposed to CSS.
+document.documentElement.dataset.touch = navigator.maxTouchPoints > 0 ? 'true' : 'false';
+
 const container = document.getElementById('root');
 if (!container) throw new Error('Missing #root element in index.html');
 const root = ReactDOM.createRoot(container);

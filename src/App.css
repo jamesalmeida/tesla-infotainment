@@ -555,3 +555,18 @@ body {
 :root[data-fullscreen='true'] .pedals {
   display: flex;
 }
+
+/* Touch layout: the display fills the screen. The top and left safe areas are kept, while
+   the map and dock bleed into the right and bottom edges. */
+:root[data-touch='true'] .displayBezel {
+  width: 100dvw;
+  height: 100dvh;
+  padding: var(--safe-top) 0 0 var(--safe-left);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root[data-touch='true'][data-layout='stage'] .pedals {
+  display: flex;
+}

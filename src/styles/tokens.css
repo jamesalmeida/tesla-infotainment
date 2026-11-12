@@ -112,3 +112,18 @@
     --pedal-deck-gap: 0px;
   }
 }
+
+/* The pointer media query can report fine on a foldable or an installed app. Touch is also
+   detected in JS, so these values hold on those devices too. */
+:root[data-touch='true'] {
+  --safe-top: max(env(safe-area-inset-top, 0px), 8px);
+  --safe-right: max(env(safe-area-inset-right, 0px), 8px);
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  --safe-left: max(env(safe-area-inset-left, 0px), 8px);
+  --tap-target: 44px;
+}
+
+:root[data-touch='true'][data-layout='stage'] {
+  --pedal-deck-height: 0px;
+  --pedal-deck-gap: 0px;
+}

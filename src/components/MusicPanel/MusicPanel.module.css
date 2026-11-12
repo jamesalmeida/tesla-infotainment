@@ -248,3 +248,10 @@
 :global(:root[data-layout='compact']) .title {
   grid-row: 1 / 3;
 }
+
+/* The same touch hit area, for devices where the pointer query reports fine. */
+:global(:root[data-touch='true']) .progressHitArea {
+  bottom: -8px;
+  height: 20px;
+  align-items: center;
+}

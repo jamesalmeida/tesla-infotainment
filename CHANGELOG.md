@@ -27,6 +27,8 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 - The 3D model starts downloading straight after the HTML, and Open Sans loads through a stylesheet link with preconnect instead of an inline `@import`.
 - Hosting moved to Vercel, with the live app at https://tesla-infotainment-display.vercel.app/. The GitHub workflow runs checks only.
+- Touch layouts fill the screen on foldables and installed apps, keep the map controls clear of the island, and let the dock reach the bottom edge. Desktop layouts are unchanged.
+- SOS moved to Settings > Safety; it only appears in the map corner while Sentry is alarming.
 - CI permissions are per job, so PR builds are read-only.
 - The loading screen has a new original animation, replacing the third-party CodePen circles, and it holds still for people who prefer reduced motion.
 - Migrated the app to TypeScript in strict mode; the UI state lives in a reducer instead of `App.jsx`, and component styles are scoped with CSS Modules.
