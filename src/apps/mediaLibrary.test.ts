@@ -5,6 +5,7 @@ import {
   formatMediaTime,
   getMediaSource,
   nextInQueue,
+  parseNowPlaying,
   parsePositions,
   playItem,
   resetMediaLibrary,
@@ -194,4 +195,22 @@ test('the player starts with a featured episode cued, without loading anything',
   expect(result.current.item?.streamUrl).toMatch(/^https:\/\//);
   expect(result.current.isPlaying).toBe(false);
   expect(result.current.isLoading).toBe(false);
+});
+
+test('what was playing is remembered for the next visit, queue and all', () => {
+  const other: MediaItem = { ...episode, id: 'ep2', title: 'Next' };
+  act(() => playItem(episode, [episode, other]));
+  const saved = parseNowPlaying(localStorage.getItem('tesla-media-now-playing'));
+  expect(saved?.item.id).toBe('ep');
+  expect(saved?.queue.map((item) => item.id)).toEqual(['ep', 'ep2']);
+});
+
+test('a damaged saved player is ignored', () => {
+  expect(parseNowPlaying('{')).toBeNull();
+  expect(parseNowPlaying(JSON.stringify({ version: 1, item: { id: 3 } }))).toBeNull();
+  expect(parseNowPlaying(JSON.stringify({ version: 2, item: episode }))).toBeNull();
+  // A queue that has lost the item falls back to the item alone.
+  expect(parseNowPlaying(JSON.stringify({ version: 1, item: episode, queue: [] }))?.queue).toEqual([
+    episode,
+  ]);
 });

@@ -33,7 +33,10 @@ export function useCarSounds() {
     if (!enabled) return;
 
     if (isLocked && !before.isLocked && lockSound) playLockChime(volume);
-    if (compartment !== before.compartment) playCarSound('door', volume);
+    // A door opening or shutting makes the same sound as the frunk and trunk.
+    if (compartment !== before.compartment || openDoors !== before.openDoors) {
+      playCarSound('door', volume);
+    }
     // Shifting is silent. The warning chime is for a door opened while the car is in gear.
     if (openDoors > before.openDoors && !isParked) playCarSound('doorAjar', volume);
   }, [compartment, enabled, isLocked, isParked, lockSound, openDoors, volume]);

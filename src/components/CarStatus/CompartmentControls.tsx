@@ -183,8 +183,23 @@ export function CompartmentControls() {
     draw();
     const unsubscribe = subscribeCompartmentAnchors(draw);
     window.addEventListener('resize', draw);
+    // The car may hold still while the panel around it settles, as fonts load or the panel
+    // opens out, so a change of layout redraws too. Otherwise the labels keep their old place.
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(draw);
+    const stage = document.querySelector('.vehicleStage');
+    // The row's parent too: a sibling above growing moves the row without resizing it.
+    for (const element of [rootRef.current, rootRef.current?.parentElement]) {
+      if (observer && element) observer.observe(element);
+    }
+    if (observer && stage) observer.observe(stage);
+    let cancelled = false;
+    void document.fonts?.ready.then(() => {
+      if (!cancelled) draw();
+    });
     return () => {
+      cancelled = true;
       unsubscribe();
+      observer?.disconnect();
       window.removeEventListener('resize', draw);
     };
   }, []);

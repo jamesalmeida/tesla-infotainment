@@ -273,11 +273,99 @@ const cued = (): NowPlaying => {
   };
 };
 
-let nowPlaying: NowPlaying = cued();
+// What was last in the player, so a reload comes back to it, cued but not playing: the
+// browser won't start sound without a tap.
+const NOW_PLAYING_KEY = 'tesla-media-now-playing';
+const NOW_PLAYING_VERSION = 1;
+const MAX_SAVED_QUEUE = 100;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const optionalString = (value: unknown) => value === undefined || typeof value === 'string';
+
+const SOURCE_IDS: readonly unknown[] = ['music', 'podcasts', 'radio'];
+
+function isMediaItem(value: unknown): value is MediaItem {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.title === 'string' &&
+    typeof value.subtitle === 'string' &&
+    typeof value.collectionId === 'string' &&
+    (value.durationSeconds === null ||
+      (typeof value.durationSeconds === 'number' && Number.isFinite(value.durationSeconds))) &&
+    (value.live === undefined || typeof value.live === 'boolean') &&
+    (value.resumable === undefined || typeof value.resumable === 'boolean') &&
+    (value.sourceId === undefined || SOURCE_IDS.includes(value.sourceId)) &&
+    optionalString(value.streamUrl) &&
+    optionalString(value.artworkUrl) &&
+    optionalString(value.description)
+  );
+}
+
+// Storage is outside the app's control, so anything malformed means starting fresh.
+export function parseNowPlaying(
+  raw: string | null,
+): { item: MediaItem; queue: MediaItem[] } | null {
+  if (!raw) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!isRecord(parsed) || parsed.version !== NOW_PLAYING_VERSION) return null;
+  if (!isMediaItem(parsed.item)) return null;
+  const queue = Array.isArray(parsed.queue) ? parsed.queue.filter(isMediaItem) : [];
+  const item = parsed.item;
+  return { item, queue: queue.some((queued) => queued.id === item.id) ? queue : [item] };
+}
+
+function restored(): NowPlaying | null {
+  const saved = parseNowPlaying(safeStorage.getItem(NOW_PLAYING_KEY));
+  if (!saved) return null;
+  const { item, queue } = saved;
+  return {
+    item,
+    queue,
+    isPlaying: false,
+    isLoading: false,
+    positionSeconds: item.live ? 0 : resumePosition(item),
+    durationSeconds: item.durationSeconds,
+    error: null,
+  };
+}
+
+function rememberNowPlaying({ item, queue }: NowPlaying) {
+  if (!item) {
+    safeStorage.removeItem(NOW_PLAYING_KEY);
+    return;
+  }
+  const index = Math.max(
+    0,
+    queue.findIndex((queued) => queued.id === item.id),
+  );
+  const start = Math.max(0, Math.min(index - MAX_SAVED_QUEUE / 2, queue.length - MAX_SAVED_QUEUE));
+  safeStorage.setItem(
+    NOW_PLAYING_KEY,
+    JSON.stringify({
+      version: NOW_PLAYING_VERSION,
+      item,
+      queue: queue.slice(start, start + MAX_SAVED_QUEUE),
+    }),
+  );
+}
+
+let nowPlaying: NowPlaying = restored() ?? cued();
 const listeners = new Set<() => void>();
 
 const publish = (patch: Partial<NowPlaying>) => {
+  const before = nowPlaying;
   nowPlaying = { ...nowPlaying, ...patch };
+  if (nowPlaying.item !== before.item || nowPlaying.queue !== before.queue) {
+    rememberNowPlaying(nowPlaying);
+  }
   listeners.forEach((listener) => listener());
 };
 

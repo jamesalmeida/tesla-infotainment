@@ -46,6 +46,17 @@ test('locking plays the chime, and opening the trunk plays the door sound', () =
   expect(playCarSound).toHaveBeenCalledWith('door', 50);
 });
 
+test('a door opening and shutting makes the same sound as the trunk', () => {
+  const { result } = renderSounds();
+
+  act(() => result.current.toggleDoor('lf'));
+  expect(playCarSound).toHaveBeenCalledWith('door', 50);
+  vi.mocked(playCarSound).mockClear();
+
+  act(() => result.current.toggleDoor('lf'));
+  expect(playCarSound).toHaveBeenCalledWith('door', 50);
+});
+
 test('a turn signal ticks, and shifting gear is silent', () => {
   const { result } = renderSounds();
 

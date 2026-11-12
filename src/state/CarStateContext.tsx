@@ -1,4 +1,11 @@
-import { createContext, useContext, useMemo, useState, useSyncExternalStore } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import type { ReactNode } from 'react';
 import {
   carReducer,
@@ -31,7 +38,7 @@ import {
   type VehicleSettings,
 } from './carState';
 import type { DoorId } from './doors';
-import { loadPersistedState, savePersistedState } from './persistence';
+import { flushPersistedState, loadPersistedState, savePersistedState } from './persistence';
 
 export interface CarActions {
   selectGear: (gear: Gear) => void;
@@ -268,6 +275,19 @@ export function CarStateProvider({
     created.subscribe(() => savePersistedState(created.getState()));
     return created;
   });
+
+  // Closing or hiding the page saves straight away rather than after the usual short wait.
+  useEffect(() => {
+    const flushWhenHidden = () => {
+      if (document.visibilityState === 'hidden') flushPersistedState();
+    };
+    window.addEventListener('pagehide', flushPersistedState);
+    document.addEventListener('visibilitychange', flushWhenHidden);
+    return () => {
+      window.removeEventListener('pagehide', flushPersistedState);
+      document.removeEventListener('visibilitychange', flushWhenHidden);
+    };
+  }, []);
 
   // Actions never change, so components that only act on the car don't re-render with it.
   const value = useMemo(() => ({ store, actions: createActions(store) }), [store]);

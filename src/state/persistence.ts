@@ -673,17 +673,39 @@ export const loadPersistedState = (defaults: CarState): CarState =>
   restoreState(defaults, safeStorage.getItem(STORAGE_KEY));
 
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
+// When the oldest unsaved change was made.
+let pendingSince: number | undefined;
+let pending: CarState | null = null;
 let lastSaved = '';
+
+// A save waits for a short quiet spell, but never longer than this: while the car is
+// charging or driving it changes every tick, and a save that only waited for quiet would
+// never come.
+const MAX_SAVE_WAIT_MS = 1000;
 
 export const serializeState = (state: CarState): string =>
   JSON.stringify({ version: SCHEMA_VERSION, state: pickPersisted(state) });
 
-export function savePersistedState(state: CarState) {
+// Writes the latest state now, if there is one waiting.
+export function flushPersistedState() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    const serialized = serializeState(state);
-    if (serialized === lastSaved) return;
-    lastSaved = serialized;
-    safeStorage.setItem(STORAGE_KEY, serialized);
-  }, SAVE_DELAY_MS);
+  saveTimer = undefined;
+  pendingSince = undefined;
+  if (!pending) return;
+  const serialized = serializeState(pending);
+  pending = null;
+  if (serialized === lastSaved) return;
+  lastSaved = serialized;
+  safeStorage.setItem(STORAGE_KEY, serialized);
+}
+
+export function savePersistedState(state: CarState) {
+  pending = state;
+  pendingSince ??= Date.now();
+  clearTimeout(saveTimer);
+  if (Date.now() - pendingSince >= MAX_SAVE_WAIT_MS) {
+    flushPersistedState();
+    return;
+  }
+  saveTimer = setTimeout(flushPersistedState, SAVE_DELAY_MS);
 }

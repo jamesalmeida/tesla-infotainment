@@ -61,9 +61,9 @@ const POSE_TARGETS: Record<VehiclePose, { rotation: number; frunk: number; trunk
   drive: { rotation: DEFAULT_AZIMUTH, frunk: 0, trunk: 0 },
   // The parked view already shows the frunk. It opens 30 degrees.
   frunk: { rotation: Math.PI, frunk: Math.PI / 6, trunk: 0 },
-  // A quarter turn from parked brings the rear round. The lid opens about 51 degrees,
-  // negative because its hinge is at the front of the lid.
-  trunk: { rotation: Math.PI / 2, frunk: 0, trunk: -Math.PI / 3.5 },
+  // The car stays where it is, as it does on the car now, and the lid lifts in view. It
+  // opens about 51 degrees, negative because its hinge is at the front of the lid.
+  trunk: { rotation: Math.PI, frunk: 0, trunk: -Math.PI / 3.5 },
 };
 
 export function doorNodeName(door: DoorId) {

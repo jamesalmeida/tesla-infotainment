@@ -1,7 +1,13 @@
 import { DOCK } from '../apps/registry';
 import { carReducer, initialCarState, type CarAction } from './carState';
 import { initialClimate } from './climate';
-import { restoreState, serializeState } from './persistence';
+import { vi } from 'vitest';
+import {
+  flushPersistedState,
+  restoreState,
+  savePersistedState,
+  serializeState,
+} from './persistence';
 
 const saved = (state: unknown, version = 1) => JSON.stringify({ version, state });
 
@@ -484,4 +490,34 @@ test('a saved Average or Assertive profile becomes Standard or Hurry', () => {
   expect(restoreProfile('assertive')).toBe('hurry');
   expect(restoreProfile('mad-max')).toBe('mad-max');
   expect(restoreProfile('ludicrous')).toBe('standard');
+});
+
+test('a car that changes every tick still gets saved', () => {
+  vi.useFakeTimers();
+  try {
+    localStorage.removeItem('tesla-car-state');
+    let state = { ...initialCarState, volume: 10 };
+    // The simulation ticks every 100ms while charging or driving.
+    for (let tick = 0; tick < 15; tick += 1) {
+      state = { ...state, volume: 10 + tick };
+      savePersistedState(state);
+      vi.advanceTimersByTime(100);
+    }
+    const stored = JSON.parse(localStorage.getItem('tesla-car-state') ?? '{}');
+    expect(stored.state?.volume).toBeGreaterThan(10);
+  } finally {
+    flushPersistedState();
+    vi.useRealTimers();
+  }
+});
+
+test('leaving the page saves what is waiting straight away', () => {
+  vi.useFakeTimers();
+  try {
+    savePersistedState({ ...initialCarState, volume: 77 });
+    flushPersistedState();
+    expect(JSON.parse(localStorage.getItem('tesla-car-state')!).state.volume).toBe(77);
+  } finally {
+    vi.useRealTimers();
+  }
 });
