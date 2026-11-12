@@ -68,3 +68,13 @@
 :global(:root[data-layout='stacked']) .slider-content {
   height: calc(100% - 28px);
 }
+
+/* A tablet in portrait shows the map above the car: an app covers only the car's half, below
+   the map. */
+@media (min-width: 600px) and (min-height: 800px) {
+  :global(:root[data-layout='stacked']) .vertical-slider-panel {
+    height: 50%;
+    /* Above the car panel's own layers, which it now covers. */
+    z-index: 10;
+  }
+}

@@ -9,7 +9,6 @@ import {
 } from '../../../apps/mediaLibrary';
 import { AppScreen, Callout, ui } from '../../../apps/ui/AppScreen';
 import { CollectionHeader, ShelfList, ShelvesStatus } from '../../../apps/ui/MediaBrowse';
-import { NowPlayingBar } from '../../../apps/ui/NowPlayingBar';
 import { useMediaShelves } from '../../../apps/ui/useMediaShelves';
 import styles from './Podcasts.module.css';
 
@@ -74,7 +73,6 @@ export const Podcasts = () => {
           no audio.
         </p>
       </div>
-      <NowPlayingBar />
     </AppScreen>
   );
 };

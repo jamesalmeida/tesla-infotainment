@@ -148,7 +148,8 @@ describe('screen', () => {
 
     expect(engine.play).toHaveBeenCalledTimes(1);
     expect(vi.mocked(engine.play).mock.calls[0][0].streamUrl).toContain('good.mp3');
-    expect(screen.getByRole('region', { name: 'Now playing' })).toBeInTheDocument();
+    // No player of its own: the media card plays it.
+    expect(screen.queryByRole('region', { name: 'Now playing' })).not.toBeInTheDocument();
     act(() => resetMediaLibrary());
   });
 

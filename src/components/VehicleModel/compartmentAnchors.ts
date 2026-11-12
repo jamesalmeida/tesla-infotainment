@@ -15,9 +15,16 @@ export interface CompartmentAnchors {
   frunk: ScreenPoint | null;
   trunk: ScreenPoint | null;
   chargePort: PortPoint | null;
+  // The middle of the roof, where the lock's line ends.
+  roof: ScreenPoint | null;
 }
 
-export const NO_ANCHORS: CompartmentAnchors = { frunk: null, trunk: null, chargePort: null };
+export const NO_ANCHORS: CompartmentAnchors = {
+  frunk: null,
+  trunk: null,
+  chargePort: null,
+  roof: null,
+};
 
 let current: CompartmentAnchors = NO_ANCHORS;
 const listeners = new Set<() => void>();
@@ -30,6 +37,7 @@ export const setCompartmentAnchors = (next: CompartmentAnchors): void => {
     samePoint(current.frunk, next.frunk) &&
     samePoint(current.trunk, next.trunk) &&
     samePoint(current.chargePort, next.chargePort) &&
+    samePoint(current.roof, next.roof) &&
     current.chargePort?.side === next.chargePort?.side
   ) {
     return;

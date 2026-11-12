@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { playItem, useNowPlaying } from '../../../apps/mediaLibrary';
 import { AppScreen, Callout, Tabs, ui } from '../../../apps/ui/AppScreen';
 import { GeneratedArt } from '../../../apps/ui/GeneratedArt';
-import { NowPlayingBar } from '../../../apps/ui/NowPlayingBar';
 import {
   fetchStations,
   GENRES,
@@ -207,7 +206,6 @@ export const Radio = () => {
           </div>
         )}
       </div>
-      <NowPlayingBar />
     </AppScreen>
   );
 };

@@ -465,3 +465,24 @@
   right: calc(6px + var(--safe-right));
   top: calc(44px + var(--safe-top));
 }
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* During a trip, as in the car, the turn card takes the search box's place at the top and the
+   trip card sits at the bottom. The search comes back when something focuses it, such as the
+   trip card's search button. */
+.mapOverlayWrapper[data-navigating='true'] .navPanel {
+  top: calc(52 * var(--u) + var(--safe-top, 0px));
+}
+
+.mapOverlayWrapper[data-navigating='true'] > [class*='placeSearch']:not(:focus-within) {
+  opacity: 0;
+  pointer-events: none;
+}

@@ -76,8 +76,7 @@
 }
 
 /* Portrait on a phone: the apps get the top row to themselves, and the row under them is the
-   car, the A/C with its arrows and the volume, spread evenly. The seat buttons don't fit
-   there; the seats are in the app drawer and the climate panel. The groups give up their
+   car, the A/C with its arrows and the volume, spread evenly. The groups give up their
    boxes so each control can take its own place in that order. */
 :global(:root[data-layout='stacked']) .btmNavItems {
   display: flex;
@@ -96,7 +95,9 @@
   order: 1;
 }
 
-@media (max-width: 599px) {
+/* Smaller portrait screens (phones, and an unfolded iPhone Duo) leave the seat buttons out of
+   the dock to make room; the seats are in the app drawer and the climate panel. */
+@media (max-width: 759px) {
   :global(:root[data-layout='stacked']) .climateGroup [class*='seatControl'] {
     display: none;
   }
@@ -184,23 +185,4 @@
    area, instead of floating in the middle of a tall black band. */
 :global(:root[data-touch='true'][data-layout='stage']) .btmNavItems {
   align-items: end;
-}
-
-/* A small tablet in portrait (an unfolded iPhone Duo) only just fits the row, so the spaces
-   between controls close up; every button keeps its full-size target. */
-@media (min-width: 600px) and (max-width: 759px) {
-  :global(:root[data-layout='stacked']) .btmNavItems {
-    column-gap: 0;
-    padding: 0 4px;
-  }
-
-  :global(:root[data-layout='stacked']) .dockApps {
-    gap: 0;
-  }
-
-  /* The small arrows beside the temperature and the volume give up a little width. */
-  :global(:root[data-layout='stacked']) .climateGroup button:has(> img:global(.arrows)) {
-    min-width: 40px;
-    width: 40px;
-  }
 }

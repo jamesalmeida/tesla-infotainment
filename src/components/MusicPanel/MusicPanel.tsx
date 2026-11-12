@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import {
   skip,
   togglePlayback,
@@ -6,7 +6,9 @@ import {
   type MediaSourceId,
 } from '../../apps/mediaLibrary';
 import { MediaArt } from '../../apps/ui/MediaArt';
-import { FullMediaPlayer, type PlayerTab } from '../FullMediaPlayer/FullMediaPlayer';
+import type { AppId } from '../../apps/registry';
+import { useCar, useCarActions } from '../../state/CarStateContext';
+import { activeApp } from '../../state/carState';
 import { getImagePath } from '../../utils/assetPaths';
 import { ProgressBar } from './ProgressBar';
 import styles from './MusicPanel.module.css';
@@ -24,6 +26,13 @@ const SOURCE_MARKS: Record<MediaSourceId, { label: string; image?: string; path?
     label: 'Music',
     path: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm11-2a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z',
   },
+};
+
+// Search on the card opens the app that is playing, where something else can be chosen.
+const SOURCE_APPS: Record<MediaSourceId, AppId> = {
+  podcasts: 'podcasts',
+  radio: 'radio',
+  music: 'apple-music',
 };
 
 function SourceMark({ source }: { source: MediaSourceId }) {
@@ -68,8 +77,13 @@ export const MusicPanel = memo(function MusicPanel({ onOpenAudioSettings }: Musi
   const isPlaying = useNowPlayingValue((now) => now.isPlaying);
   const isBuffering = useNowPlayingValue((now) => now.isLoading);
   const error = useNowPlayingValue((now) => now.error);
-  const [playerTab, setPlayerTab] = useState<PlayerTab | null>(null);
   const showPause = isPlaying || isBuffering;
+  const sourceApp = SOURCE_APPS[item?.sourceId ?? 'podcasts'];
+  const isSourceOpen = useCar((state) => activeApp(state) === sourceApp);
+  const { toggleApp } = useCarActions();
+  const openSource = () => {
+    if (!isSourceOpen) toggleApp(sourceApp);
+  };
 
   return (
     <>
@@ -130,29 +144,15 @@ export const MusicPanel = memo(function MusicPanel({ onOpenAudioSettings }: Musi
               alt="Settings"
             />
           </button>
-          <button
-            className={styles.musicBtn}
-            aria-label="Search media"
-            onClick={() => setPlayerTab('search')}
-          >
+          <button className={styles.musicBtn} aria-label="Search media" onClick={openSource}>
             <img
               className={`${styles.musicIcon} ctaBtn`}
               src={getImagePath('icon-search.svg')}
               alt="Search"
             />
           </button>
-          <button
-            className={styles.musicBtn}
-            aria-label="Open full media player"
-            onClick={() => setPlayerTab('browse')}
-          >
-            <svg className={styles.musicIcon} viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
-            </svg>
-          </button>
         </div>
       </div>
-      {playerTab && <FullMediaPlayer initialTab={playerTab} onClose={() => setPlayerTab(null)} />}
     </>
   );
 });

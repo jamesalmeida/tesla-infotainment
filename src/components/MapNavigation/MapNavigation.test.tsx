@@ -39,7 +39,7 @@ const renderMap = (onWifiClick = () => {}) =>
   );
 const searchBox = () => screen.getByRole<HTMLInputElement>('combobox');
 const navigateButton = () => screen.queryByRole('button', { name: 'Navigate' });
-const endButton = () => screen.queryByRole('button', { name: 'End Navigation' });
+const endButton = () => screen.queryByRole('button', { name: 'End Trip' });
 const routeLine = () => screen.queryByTestId('route-line');
 const routePath = () => JSON.parse(routeLine()?.getAttribute('data-path') ?? 'null');
 const markers = () =>

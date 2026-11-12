@@ -9,6 +9,8 @@ import {
   type MediaItem,
 } from '../../apps/mediaLibrary';
 import { getMediaTransport } from '../../state/mediaTransport';
+import { CarStateProvider, useCar } from '../../state/CarStateContext';
+import { activeApp, initialCarState } from '../../state/carState';
 import { MusicPanel } from './MusicPanel';
 
 /**
@@ -158,12 +160,17 @@ function NowPlayingTitle() {
   return <output aria-label="now playing">{useNowPlaying().item?.title}</output>;
 }
 
+function OpenApp() {
+  return <output aria-label="open app">{useCar(activeApp) ?? 'none'}</output>;
+}
+
 const renderCard = () =>
   render(
-    <>
+    <CarStateProvider initialState={initialCarState}>
       <MusicPanel />
       <NowPlayingTitle />
-    </>,
+      <OpenApp />
+    </CarStateProvider>,
   );
 
 beforeEach(() => {
@@ -196,7 +203,9 @@ describe('one player for everything', () => {
   it('keeps to one audio element across sources, renders and a StrictMode remount', async () => {
     render(
       <StrictMode>
-        <MusicPanel />
+        <CarStateProvider initialState={initialCarState}>
+          <MusicPanel />
+        </CarStateProvider>
       </StrictMode>,
     );
     await pressPlay();
@@ -349,4 +358,16 @@ test('shows drawn art instead of a broken image', async () => {
   await inAct(() => fireEvent.error(image));
   expect(document.querySelector('.albumArt img')).toBeNull();
   expect(document.querySelector('.albumArt svg')).not.toBeNull();
+});
+
+describe('the card opens the app that is playing', () => {
+  it('Search opens Podcasts for a podcast, and there is no full-screen player', () => {
+    renderCard();
+    expect(screen.queryByRole('button', { name: 'Open full media player' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Search media' }));
+    expect(screen.getByLabelText('open app')).toHaveTextContent('podcasts');
+    // Pressed again, it leaves the app open.
+    fireEvent.click(screen.getByRole('button', { name: 'Search media' }));
+    expect(screen.getByLabelText('open app')).toHaveTextContent('podcasts');
+  });
 });

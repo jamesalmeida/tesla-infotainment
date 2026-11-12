@@ -3,6 +3,16 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background-color: #4e4e4e;
+}
+
+/* On touch the app fills the screen top to bottom. --app-height is the whole screen in an
+   app opened from the Home Screen, which iPadOS otherwise lays out short of the bottom edge
+   (see utils/appHeight.ts); elsewhere it is unset and the viewport decides. */
+:root[data-touch='true'],
+:root[data-touch='true'] body,
+:root[data-touch='true'] #root {
+  height: var(--app-height, 100%);
 }
 
 #root {
@@ -662,7 +672,7 @@ body {
    the map and dock bleed into the right and bottom edges. */
 :root[data-touch='true'] .displayBezel {
   width: 100dvw;
-  height: 100dvh;
+  height: var(--app-height, 100dvh);
   padding: 0;
   border: none;
   border-radius: 0;
@@ -730,4 +740,33 @@ body {
    row under the car is centred: the media card (up to 560u), the gap, then the 320u card. */
 .horizontalPanelGroup.parkView .pedals {
   right: max(3%, calc(50% - (560 * var(--u) + 12 * var(--u) + 320 * var(--u)) / 2));
+}
+
+/*
+ * Portrait: the map takes the top half and the car the bottom, so an app slides up from the
+ * dock over the car while the map stays in view. Portrait has no separator to drag, so the
+ * order only changes on screen. The app panel is positioned against the whole panel group
+ * rather than the map's half.
+ */
+:root[data-layout='stacked'] .horizontalPanelGroup {
+  flex-direction: column-reverse !important;
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-layout='stacked'] .rightPanel,
+:root[data-layout='stacked'] .horizontalPanelGroup > :has(> .rightPanel) {
+  position: static !important;
+}
+
+:root[data-layout='stacked'] .rightPanel [class*='MapNavigation'] {
+  position: relative;
+}
+
+/* In portrait the car has little height, so in Park the empty row kept for the speed gives
+   its space to the car. A turn signal blinking in Park still shows, over the row below. */
+:root[data-layout='stacked'] .carStatusIcons:not(.drivingIndicators) .drivingGearIcons {
+  height: 0;
+  margin-top: 0;
+  overflow: visible;
 }

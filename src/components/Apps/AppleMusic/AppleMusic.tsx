@@ -3,7 +3,6 @@ import { formatMediaTime, playItem, useNowPlaying } from '../../../apps/mediaLib
 import type { MediaCollection } from '../../../apps/mediaLibrary';
 import { AppScreen, Callout, ui } from '../../../apps/ui/AppScreen';
 import { CollectionHeader, ShelfList, ShelvesStatus } from '../../../apps/ui/MediaBrowse';
-import { NowPlayingBar } from '../../../apps/ui/NowPlayingBar';
 import { useMediaShelves } from '../../../apps/ui/useMediaShelves';
 import styles from './AppleMusic.module.css';
 
@@ -56,7 +55,6 @@ export const AppleMusic = () => {
           try the controls.
         </p>
       </div>
-      <NowPlayingBar />
     </AppScreen>
   );
 };

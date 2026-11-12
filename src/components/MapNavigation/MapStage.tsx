@@ -216,7 +216,7 @@ export function MapStage() {
 
   return (
     <>
-      <div className={styles.mapOverlayWrapper}>
+      <div className={styles.mapOverlayWrapper} data-navigating={Boolean(activeRoute)}>
         <PlaceSearch
           placesLibrary={placesLibrary}
           query={query}
@@ -245,13 +245,20 @@ export function MapStage() {
               <p className={styles.navStatus}>Routing to {nav.place.name}…</p>
             )}
             {nav.kind === 'navigating' && (
-              <p className={styles.navStatus}>Navigating to {nav.place.name}</p>
+              <p className={styles.visuallyHidden}>Navigating to {nav.place.name}</p>
             )}
             {nav.kind === 'arrived' && (
               <p className={styles.navStatus}>You have arrived at {nav.place.name}</p>
             )}
           </div>
-          {activeRoute && <TripPanel route={activeRoute} tracker={tracker} />}
+          {activeRoute && (
+            <TripPanel
+              route={activeRoute}
+              tracker={tracker}
+              destination={activeTrip?.place.name}
+              onEnd={endNavigation}
+            />
+          )}
           {nav.kind === 'routeFailed' && (
             <p role="alert" className={`${styles.navStatus} ${styles.navError}`}>
               {nav.reason}
@@ -274,9 +281,9 @@ export function MapStage() {
                   : 'Navigate'}
             </button>
           )}
-          {activeTrip && (
+          {activeTrip && !activeRoute && (
             <button className={`floatingBtn ${styles.endNavigateBtn}`} onClick={endNavigation}>
-              End Navigation
+              End Trip
             </button>
           )}
           {nav.kind === 'arrived' && (

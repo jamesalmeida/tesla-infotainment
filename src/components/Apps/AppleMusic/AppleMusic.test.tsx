@@ -1,6 +1,17 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { resetMediaLibrary } from '../../../apps/mediaLibrary';
+import { resetMediaLibrary, skip, togglePlayback, useNowPlaying } from '../../../apps/mediaLibrary';
 import { AppleMusic } from './AppleMusic';
+
+// The app has no player of its own: what it plays shows on the media card, which reads this.
+function NowPlayingProbe() {
+  const now = useNowPlaying();
+  return (
+    <output aria-label="now playing">
+      {now.item?.title ?? ''} | {now.isPlaying ? 'playing' : 'paused'} |{' '}
+      {Math.round(now.positionSeconds)}
+    </output>
+  );
+}
 
 beforeEach(() => {
   localStorage.clear();
@@ -12,17 +23,24 @@ afterEach(() => {
 });
 
 test('browses sample albums, and plays one through the shared transport', async () => {
-  const { container } = render(<AppleMusic />);
+  const { container } = render(
+    <>
+      <AppleMusic />
+      <NowPlayingProbe />
+    </>,
+  );
 
   fireEvent.click(await screen.findByRole('button', { name: /Glass Harbour/ }));
   fireEvent.click(screen.getByRole('button', { name: /Salt on the Dial/ }));
 
-  const nowPlaying = screen.getByRole('region', { name: 'Now playing' });
+  const nowPlaying = screen.getByLabelText('now playing');
   expect(nowPlaying).toHaveTextContent('Salt on the Dial');
-  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+  act(() => skip(1));
   expect(nowPlaying).toHaveTextContent('Harbour Lights');
-  fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
-  expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+  act(() => togglePlayback());
+  expect(nowPlaying).toHaveTextContent('paused');
+  // No player of its own: the media card plays it.
+  expect(screen.queryByRole('region', { name: 'Now playing' })).not.toBeInTheDocument();
 
   expect(container.querySelector('img')).toBeNull();
 });

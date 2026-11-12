@@ -6,6 +6,7 @@ import './styles/utilities.css';
 import App from './App';
 import { RearDisplay } from './components/RearDisplay/RearDisplay';
 import { isRearHash } from './state/urlState';
+import { trackAppHeight } from './utils/appHeight';
 
 function Root() {
   const [isRear, setIsRear] = useState(() => isRearHash(window.location.hash));
@@ -22,6 +23,7 @@ function Root() {
 // The pointer media query is unreliable on foldables and installed apps, so touch is also
 // detected in JS and exposed to CSS.
 document.documentElement.dataset.touch = navigator.maxTouchPoints > 0 ? 'true' : 'false';
+trackAppHeight();
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Missing #root element in index.html');

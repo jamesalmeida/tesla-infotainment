@@ -239,6 +239,7 @@ function Model({
     frunk: Vector3 | null;
     trunk: Vector3 | null;
     centre: Vector3;
+    roof: Vector3;
     port: [Vector3, Vector3] | null;
   } | null>(null);
 
@@ -324,6 +325,9 @@ function Model({
         frunk: lidTop(nodes.frunk),
         trunk: lidTop(nodes.trunk),
         centre: scene.worldToLocal(carCentre.clone()),
+        roof: scene.worldToLocal(
+          new Vector3(carCentre.x, new Box3().setFromObject(scene).max.y, carCentre.z),
+        ),
         port,
       };
     }
@@ -350,6 +354,7 @@ function Model({
       frunk: toScreen(anchorsRef.current.frunk),
       trunk: toScreen(anchorsRef.current.trunk),
       chargePort,
+      roof: toScreen(anchorsRef.current.roof),
     });
   };
 
@@ -486,6 +491,11 @@ export function VehicleModel({
       }}
       style={{ position: 'relative' }}
       className={styles.carModelWrapper}
+      // A touch near the panel edge is the separator's: the panel library claims it before
+      // it gets here, and the car mustn't spin while the panel is dragged.
+      onPointerDownCapture={(event) => {
+        if (event.defaultPrevented) event.stopPropagation();
+      }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
     >

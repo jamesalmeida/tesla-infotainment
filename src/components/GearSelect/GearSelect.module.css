@@ -32,6 +32,9 @@
    the car. */
 :global(:root[data-touch='true']) .gearSelect {
   gap: 0;
+  /* The P's target is wider than the letter: pull it back so the letter lines up with the
+     indicators under it rather than sitting in from the edge. */
+  margin-left: calc((var(--tap-target) / 2 - 7px) * -1);
 }
 
 :global(:root[data-touch='true']) .gearSelectIcon + .gearSelectIcon {
