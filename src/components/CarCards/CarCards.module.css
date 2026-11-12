@@ -178,13 +178,16 @@
   margin-top: 2px;
 }
 
-/* Touch: keep the card and dots close together, and overlap the dot targets so they read
-   as one small group rather than a wide row. */
+/* Touch: keep the card, the dots and the dock close together. The dots are full width
+   targets but shorter than the rest, since a swipe on the card is the main way to change it,
+   and they overlap so they read as one small group rather than a wide row. */
 :global(:root[data-touch='true']) .deck {
-  margin-bottom: calc(4 * var(--u));
+  margin-bottom: 0;
 }
 
 :global(:root[data-touch='true']) .dots button {
+  min-height: 28px;
+  padding-top: 6px;
   place-items: start center;
 }
 

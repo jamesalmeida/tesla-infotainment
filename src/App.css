@@ -586,7 +586,7 @@ body {
 }
 
 :root[data-touch='true'][data-layout='stage'] .displayWrapper {
-  --dock-height: calc(72 * var(--u));
+  --dock-height: calc(64 * var(--u));
 }
 
 :root[data-touch='true'] .stackedViewSwitch {
@@ -595,4 +595,22 @@ body {
 
 :root[data-touch='true'][data-layout='stage'] .pedals {
   display: flex;
+}
+
+/* The hazard target stays full size but overlaps its neighbours (which are only indicators),
+   so its triangle lines up with the column and sits as close as the others. */
+:root[data-touch='true'] [class*='telltales'] .hazardBtn {
+  margin: calc((24 * var(--u) - var(--tap-target)) / 2);
+}
+
+/* On the screen the pedals sit over the car scene or the road, so they need their own
+   backing to stay readable on both. */
+.pedals .pedalBtn {
+  background-color: color-mix(in srgb, var(--color-card) 82%, transparent);
+  color: var(--color-text);
+  box-shadow: rgba(0, 0, 0, 0.18) 0 2px 6px;
+}
+
+.pedals .pedalBtn:active {
+  background-color: color-mix(in srgb, var(--color-card) 60%, #808080);
 }

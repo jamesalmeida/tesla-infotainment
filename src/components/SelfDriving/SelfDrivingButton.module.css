@@ -16,6 +16,11 @@
     color 0.15s ease-out;
 }
 
+/* On touch the battery row is taller and clears the top safe area, so the button starts under it. */
+:global(:root[data-touch='true']) .selfDriving {
+  top: calc(var(--safe-top) + var(--tap-target) + 4 * var(--u));
+}
+
 /* Park: shown, but faded, the way the car shows it before it can start. */
 .unavailable {
   background: color-mix(in srgb, var(--color-toggle-on, #3e6ae1) 35%, transparent);

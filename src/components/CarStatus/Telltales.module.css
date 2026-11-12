@@ -63,3 +63,18 @@
 .grey {
   color: var(--color-text-muted);
 }
+
+/* On touch the gears are full-size targets and the bar clears the top safe area, so the
+   column starts under them instead of beside the P. */
+:global(:root[data-touch='true']) .telltales {
+  top: calc(var(--safe-top) + var(--tap-target));
+}
+
+:global(:root[data-touch='true']) :global(.drivingIndicators) .telltales {
+  top: calc(108 * var(--u) + var(--safe-top) + var(--tap-target));
+}
+
+/* Touch screens are short for how tall their targets are, so the Drive column packs closer. */
+:global(:root[data-touch='true']) :global(.drivingIndicators) .telltales {
+  gap: calc(4 * var(--u));
+}
