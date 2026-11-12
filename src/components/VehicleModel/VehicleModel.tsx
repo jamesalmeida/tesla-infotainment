@@ -12,7 +12,7 @@ import {
 } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei';
-import { Box3, Vector3 } from 'three';
+import { Box3, Raycaster, Vector3 } from 'three';
 import type * as THREE from 'three';
 import { getCarModelPath } from '../../utils/assetPaths';
 import { paintHex, type PaintColor } from '../../state/sampleData';
@@ -314,9 +314,22 @@ function Model({
   const publishAnchors = (state: { camera: THREE.Camera; gl: THREE.WebGLRenderer }) => {
     if (!anchorsRef.current) {
       scene.updateWorldMatrix(true, true);
-      const carCentre = new Box3().setFromObject(scene).getCenter(new Vector3());
-      // The middle of the lid, moved a quarter of its length out towards its end of the car:
-      // the trunk lid's box takes in the rear glass, so its plain middle sits on the roof.
+      const carBox = new Box3().setFromObject(scene);
+      const carCentre = carBox.getCenter(new Vector3());
+      // Drops a point straight down onto the car's top surface, so a line from above ends on
+      // the outline you can see rather than somewhere inside the body.
+      const raycaster = new Raycaster();
+      const onSurface = (point: Vector3) => {
+        raycaster.set(new Vector3(point.x, carBox.max.y + 1, point.z), new Vector3(0, -1, 0));
+        const hit = raycaster
+          .intersectObject(scene, true)
+          .find(({ object }) => (object as THREE.Mesh).isMesh && object.visible);
+        if (hit) point.y = hit.point.y;
+        return point;
+      };
+      // The middle of the lid, moved a quarter of its length out towards its end of the car,
+      // then down onto its surface: the trunk lid's box takes in the rear glass, so its
+      // plain middle sits on the roof, and halfway up the box is inside the car.
       const lidTop = (node: THREE.Object3D | undefined) => {
         if (!node) return null;
         const box = new Box3().setFromObject(node);
@@ -329,7 +342,7 @@ function Model({
           const halfLength = (Math.abs(outward.x) * size.x + Math.abs(outward.z) * size.z) / 2;
           centre.addScaledVector(outward, halfLength / 2);
         }
-        return scene.worldToLocal(centre);
+        return scene.worldToLocal(onSurface(centre));
       };
       const portNode = scene.getObjectByName('rear_lightsl');
       const portBox = portNode ? new Box3().setFromObject(portNode) : null;

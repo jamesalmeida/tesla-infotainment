@@ -65,7 +65,7 @@ describe('moving parts independently', () => {
   it('leaves a door alone when the pose changes', () => {
     const doors = { ...CLOSED_DOORS, rf: true };
     const parts = createParts(getPartTargets('park', doors));
-    const targets = getPartTargets('trunk', doors);
+    const targets = getPartTargets('drive', doors);
     for (let frame = 0; frame < 30; frame++) stepParts(parts, targets, FRAME);
     expect(parts.rf.value).toBe(doorAngle('rf', true));
     expect(parts.rotation.value).not.toBe(targets.rotation);
