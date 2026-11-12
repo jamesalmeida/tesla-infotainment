@@ -10,9 +10,11 @@
 }
 
 /* With the whole screen, the car sits lower and nearer the middle, as on the car: the fit
-   centres its box, which the three-quarter view leaves high and to the left. */
+   centres its box, which the three-quarter view leaves high and to the left. The canvas
+   covers the whole panel there, so this only bares a strip along the top and left edges,
+   where the car never goes. */
 :global(.horizontalPanelGroup.parkView) .carModelWrapper {
-  transform: translate(5%, 6%);
+  transform: translate(5%, 5%);
 }
 
 @media (prefers-reduced-motion: reduce) {

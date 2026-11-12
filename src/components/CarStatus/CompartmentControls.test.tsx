@@ -69,6 +69,35 @@ test('each label hangs above its part, reading away from a line down to it', () 
   expect(lockLine.getAttribute('y2')).toBe('190');
 });
 
+test('a label never rises into the status row, however the car is turned', () => {
+  render(
+    <CarStateProvider initialState={initialCarState}>
+      <div className="topBarCarStatusIcons" />
+      <CompartmentControls />
+    </CarStateProvider>,
+  );
+  const row = document.querySelector<HTMLElement>('.topBarCarStatusIcons')!;
+  vi.spyOn(row, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 40));
+  const root = document.querySelector<HTMLElement>('.carModelStatus')!;
+  vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 60, 400, 100));
+
+  act(() =>
+    setCompartmentAnchors({
+      frunk: { x: 100, y: 200 },
+      trunk: null,
+      chargePort: null,
+      roof: { x: 250, y: 300 },
+      // Tilted right over the top, the frunk's label would hang above the screen.
+      frunkLabel: { x: 100, y: 10 },
+      lockIcon: { x: 250, y: 5 },
+      roofLine: { x: 250, y: 290 },
+    }),
+  );
+  const [frunkLine] = leaderLines();
+  // The row ends 40px down; the label's space starts 60px down.
+  expect(frunkLine.getAttribute('y1')).toBe('-20');
+});
+
 function Signal() {
   const signal = useCar((state) => state.signal);
   return <output aria-label="signal">{signal}</output>;
