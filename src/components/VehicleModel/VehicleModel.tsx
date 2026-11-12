@@ -10,11 +10,14 @@ import {
 } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei';
+import { Box3, Vector3 } from 'three';
 import type * as THREE from 'three';
 import { getCarModelPath } from '../../utils/assetPaths';
 import { paintHex, type PaintColor } from '../../state/sampleData';
 import type { CarLightState } from './vehicleLights';
+import { setCompartmentAnchors, type ScreenPoint } from './compartmentAnchors';
 import {
+  AZIMUTH_RETURN_DELAY_MS,
   AZIMUTH_SMOOTH_TIME,
   CLOSED_DOORS,
   DEFAULT_AZIMUTH,
@@ -49,6 +52,8 @@ interface VehicleModelProps {
   lights?: CarLightState;
   paint?: PaintColor;
   speed?: number;
+  // How much room the camera leaves around the car. Below 1 the car fills more of the view.
+  fitMargin?: number;
 }
 
 interface ModelProps extends VehicleModelProps {
@@ -227,6 +232,8 @@ function Model({
     [scene],
   );
   const wheelAngle = useRef(0);
+  // Where the frunk and trunk leader lines end, in the car's own space: the middle of each lid.
+  const anchorsRef = useRef<{ frunk: Vector3 | null; trunk: Vector3 | null } | null>(null);
 
   // The canvas only draws on request, so a change has to ask for the first frame. Coming
   // back to the tab asks too, in case an animation was cut off when the tab was hidden.
@@ -270,12 +277,52 @@ function Model({
     invalidate();
   }, [invalidate, paint, paintMaterials]);
 
+  // Each frame the lids are projected onto the screen, so the labels' lines follow the car
+  // as it turns or the camera orbits.
+  const publishAnchors = (state: { camera: THREE.Camera; gl: THREE.WebGLRenderer }) => {
+    if (!anchorsRef.current) {
+      scene.updateWorldMatrix(true, true);
+      const carCentre = new Box3().setFromObject(scene).getCenter(new Vector3());
+      // The middle of the lid, moved a quarter of its length out towards its end of the car:
+      // the trunk lid's box takes in the rear glass, so its plain middle sits on the roof.
+      const lidTop = (node: THREE.Object3D | undefined) => {
+        if (!node) return null;
+        const box = new Box3().setFromObject(node);
+        if (box.isEmpty()) return null;
+        const centre = box.getCenter(new Vector3());
+        const size = box.getSize(new Vector3());
+        const outward = new Vector3(centre.x - carCentre.x, 0, centre.z - carCentre.z);
+        if (outward.lengthSq() > 0) {
+          outward.normalize();
+          const halfLength = (Math.abs(outward.x) * size.x + Math.abs(outward.z) * size.z) / 2;
+          centre.addScaledVector(outward, halfLength / 2);
+        }
+        return scene.worldToLocal(centre);
+      };
+      anchorsRef.current = { frunk: lidTop(nodes.frunk), trunk: lidTop(nodes.trunk) };
+    }
+    const rect = state.gl.domElement.getBoundingClientRect();
+    const toScreen = (local: Vector3 | null): ScreenPoint | null => {
+      if (!local || rect.width === 0) return null;
+      const point = scene.localToWorld(local.clone()).project(state.camera);
+      return {
+        x: rect.left + ((point.x + 1) / 2) * rect.width,
+        y: rect.top + ((1 - point.y) / 2) * rect.height,
+      };
+    };
+    setCompartmentAnchors({
+      frunk: toScreen(anchorsRef.current.frunk),
+      trunk: toScreen(anchorsRef.current.trunk),
+    });
+  };
+
   useFrame((state, delta) => {
     const targets = getPartTargets(pose, doorStates);
     // The first frame places the car in its pose. Later changes animate.
     partsRef.current ??= createParts(targets);
     const isMoving = stepParts(partsRef.current, targets, delta);
     applyParts(nodes, partsRef.current);
+    publishAnchors(state);
     if (speed > 0) {
       wheelAngle.current += speed * delta * 0.08;
       wheels.forEach((wheel) => {
@@ -286,6 +333,8 @@ function Model({
       state.invalidate();
     }
   });
+
+  useEffect(() => () => setCompartmentAnchors({ frunk: null, trunk: null }), []);
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
@@ -306,20 +355,28 @@ function Model({
 function ControlledOrbitControls() {
   const controlsRef = useRef<OrbitControlsHandle>(null);
   const azimuthRef = useRef<Damped | null>(null);
+  const returnTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const invalidate = useThree((state) => state.invalidate);
 
+  useEffect(() => () => clearTimeout(returnTimer.current), []);
+
   const handleStart = () => {
+    clearTimeout(returnTimer.current);
     azimuthRef.current = null;
   };
 
+  // The car stays where it was spun to, and only eases back once it has been left alone.
   const handleEnd = () => {
-    const controls = controlsRef.current;
-    if (!controls) return;
-    azimuthRef.current = {
-      value: nearestAngle(controls.getAzimuthalAngle(), DEFAULT_AZIMUTH),
-      velocity: 0,
-    };
-    invalidate();
+    clearTimeout(returnTimer.current);
+    returnTimer.current = setTimeout(() => {
+      const controls = controlsRef.current;
+      if (!controls) return;
+      azimuthRef.current = {
+        value: nearestAngle(controls.getAzimuthalAngle(), DEFAULT_AZIMUTH),
+        velocity: 0,
+      };
+      invalidate();
+    }, AZIMUTH_RETURN_DELAY_MS);
   };
 
   useFrame((state, delta) => {
@@ -365,6 +422,7 @@ export function VehicleModel({
   lights,
   paint,
   speed = 0,
+  fitMargin = 1,
 }: VehicleModelProps) {
   const tabHidden = useSyncExternalStore(subscribeToTabVisibility, isTabHidden);
   const pressRef = useRef<PointerPress>({ x: 0, y: 0, travel: 0 });
@@ -394,7 +452,7 @@ export function VehicleModel({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
     >
-      <Stage environment={stageEnvironment}>
+      <Stage environment={stageEnvironment} adjustCamera={fitMargin}>
         <Model
           scale={0.01}
           pose={pose}

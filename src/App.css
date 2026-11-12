@@ -251,6 +251,11 @@ body {
   padding-left: 42%;
 }
 
+/* The corner of the map is only a glimpse, so its controls stay hidden there. */
+.horizontalPanelGroup.parkView [class*='floatingRightBtnsWrapper'] {
+  display: none;
+}
+
 .horizontalPanelGroup.parkView .topBarCarStatusIcons {
   max-width: 40%;
 }
@@ -318,11 +323,10 @@ body {
   opacity: 1;
 }
 
-/* With no stalk and no keyboard, the arrows are the only way to signal. */
-@media (hover: none) {
-  .turnSignal:not(.lit) {
-    opacity: 0.2;
-  }
+/* Only there while signalling, as in the car. A tap on a blinking arrow cancels it; touch
+   screens start a signal from the buttons beside the pedals. */
+.turnSignal:not(.active) {
+  pointer-events: none;
 }
 
 .hazardBtn {
@@ -388,12 +392,34 @@ body {
   cursor: pointer;
 }
 
-.toggleFrunk {
-  border-right: 1px solid black;
+/* The bar is the top of each label's line, on the side facing its part of the car. */
+.carModelStatus button[data-side='left'] {
+  border-right: 1px solid currentColor;
 }
 
-.toggleTrunk {
-  border-left: 1px solid black;
+.carModelStatus button[data-side='right'] {
+  border-left: 1px solid currentColor;
+}
+
+/* Lines from each label's bar to its lid on the car, laid over the car. */
+.compartmentLeaders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.compartmentLeaders line {
+  stroke: currentColor;
+  stroke-width: 1;
+  visibility: hidden;
+}
+
+.compartmentLeaders circle {
+  fill: currentColor;
+  visibility: hidden;
 }
 
 .frunk,
@@ -428,8 +454,29 @@ body {
   display: flex;
 }
 
+/* min-width: 0 lets the canvas shrink again after Park View: a flex item otherwise keeps the
+   width of the widest canvas it has held. */
 .vehicleArea > .vehicleStage {
   flex: 1;
+  min-width: 0;
+}
+
+/* The turn signal buttons stand in for the stalk, so they are smaller than the pedals. */
+.pedals .signalBtn {
+  display: grid;
+  place-items: center;
+  min-width: max(calc(40 * var(--u)), var(--tap-target));
+  padding: 0;
+}
+
+.pedals .signalBtn svg {
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  fill: currentColor;
+}
+
+.pedals .signalBtn[aria-pressed='true'] {
+  color: var(--color-success);
 }
 
 .pedals {
@@ -512,12 +559,8 @@ body {
   display: none;
 }
 
-:root[data-layout='compact'] .toggleFrunk {
-  border-right: none;
-}
-
-:root[data-layout='compact'] .toggleTrunk {
-  border-left: none;
+:root[data-layout='compact'] .carModelStatus button {
+  border: none;
 }
 
 :root[data-layout='compact'] .speedometer {
@@ -613,4 +656,17 @@ body {
 
 .pedals .pedalBtn:active {
   background-color: color-mix(in srgb, var(--color-card) 60%, #808080);
+}
+
+/* On touch the map's status row clears the top safe area, so the strip cut out for it is
+   taller by the same amount. */
+:root[data-touch='true'] .horizontalPanelGroup.parkView {
+  --park-status-height: calc(52 * var(--u) + var(--safe-top));
+}
+
+/* Park View is for the car: Start Self-Driving would sit in the faded map corner, and the
+   upcoming-event card belongs to the map underneath. Both come back with the split. */
+.horizontalPanelGroup.parkView [class*='selfDriving'],
+.displayWrapper:has(.horizontalPanelGroup.parkView) aside[aria-label='Upcoming event'] {
+  display: none;
 }

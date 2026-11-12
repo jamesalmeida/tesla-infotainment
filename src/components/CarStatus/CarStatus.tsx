@@ -99,10 +99,32 @@ function SpeedLimit() {
   );
 }
 
+// Stands in for the stalk on a touch screen, which has no keyboard shortcut to signal with.
+function SignalButton({ side }: { side: 'left' | 'right' }) {
+  const on = useCar((state) => state.signal === side);
+  const { toggleLeftSignal, toggleRightSignal } = useCarActions();
+
+  return (
+    <button
+      type="button"
+      className="pedalBtn signalBtn"
+      aria-label={side === 'left' ? 'Left turn signal' : 'Right turn signal'}
+      aria-pressed={on}
+      onClick={side === 'left' ? toggleLeftSignal : toggleRightSignal}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d={side === 'left' ? 'M2 12 11 4v5h11v6H11v5Z' : 'M22 12 13 4v5H2v6h11v5Z'} />
+      </svg>
+    </button>
+  );
+}
+
 // Phones and tablets have no room under the screen, so their pedals sit on it.
 export function Pedals() {
   return (
     <div className="pedals">
+      <SignalButton side="left" />
+      <SignalButton side="right" />
       <PedalButton className="pedalBtn" pedal="brake" label="Brake" hint="↓" />
       <PedalButton className="pedalBtn" pedal="accelerate" label="Go" hint="↑" />
     </div>

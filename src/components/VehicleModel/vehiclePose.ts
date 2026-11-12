@@ -10,8 +10,10 @@ export type VehiclePose = 'park' | 'drive' | 'frunk' | 'trunk';
 
 export type CarPart = 'rotation' | 'frunk' | 'trunk' | DoorId;
 
-// Where the camera rests around the car, in radians. A drag orbits away and eases back.
+// Where the camera rests around the car, in radians. A drag orbits away and the car stays
+// where it was left, then eases back after a few seconds, as on the car.
 export const DEFAULT_AZIMUTH = 0.6;
+export const AZIMUTH_RETURN_DELAY_MS = 4000;
 
 // How long a part takes to get most of the way to its target, in seconds.
 export const AZIMUTH_SMOOTH_TIME = 0.35;
