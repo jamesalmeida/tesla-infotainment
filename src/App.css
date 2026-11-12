@@ -6,13 +6,13 @@ body {
   background-color: #4e4e4e;
 }
 
-/* An installed app on iPad can be laid out a little shorter than the screen, which leaves the
-   page showing under the dock. On touch screens the page is black, so that strip reads as
-   part of the dock. */
+/* On touch the app fills the screen top to bottom. --app-height is the whole screen in an
+   app opened from the Home Screen, which iPadOS otherwise lays out short of the bottom edge
+   (see utils/appHeight.ts); elsewhere it is unset and the viewport decides. */
 :root[data-touch='true'],
 :root[data-touch='true'] body,
 :root[data-touch='true'] #root {
-  background-color: #000000;
+  height: var(--app-height, 100%);
 }
 
 #root {
@@ -672,7 +672,7 @@ body {
    the map and dock bleed into the right and bottom edges. */
 :root[data-touch='true'] .displayBezel {
   width: 100dvw;
-  height: 100dvh;
+  height: var(--app-height, 100dvh);
   padding: 0;
   border: none;
   border-radius: 0;
