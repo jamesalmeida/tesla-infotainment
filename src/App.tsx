@@ -100,6 +100,8 @@ const CLOSE_APP_DRAG_MARGIN = 3;
 const PARK_VIEW_ENTER_SIZE = 75;
 // How far, in pixels, a press on the grabber can move and still be a tap.
 const TAP_TRAVEL = 6;
+// How long a tap on the grabber takes to slide the car panel across.
+const PARK_VIEW_SLIDE_MS = 380;
 
 function App() {
   return (
@@ -315,10 +317,34 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
   // A tap on the grabber, rather than a drag, opens the full Park view in one go, as on the
   // car. Only a press that barely moves counts; anything longer was a resize.
   const pressStart = useRef<{ x: number; y: number } | null>(null);
+  const slideFrame = useRef<number | null>(null);
+  useEffect(() => () => cancelAnimationFrame(slideFrame.current ?? 0), []);
+
+  // The panel slides across to the full width, then Park view takes over. With reduced
+  // motion it goes straight there.
   const openParkView = () => {
-    if (!parked) return;
+    if (!parked || slideFrame.current !== null) return;
     if (isOpen) closeSurface();
-    setParkView(true);
+    const panel = leftPanelRef.current;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (!panel || reduceMotion) {
+      setParkView(true);
+      return;
+    }
+    const from = panel.getSize().asPercentage;
+    const started = performance.now();
+    const step = (now: number) => {
+      const progress = Math.min(1, (now - started) / PARK_VIEW_SLIDE_MS);
+      const eased = 1 - (1 - progress) ** 3;
+      panel.resize(`${from + (100 - from) * eased}%`);
+      if (progress < 1) {
+        slideFrame.current = requestAnimationFrame(step);
+      } else {
+        slideFrame.current = null;
+        setParkView(true);
+      }
+    };
+    slideFrame.current = requestAnimationFrame(step);
   };
   const separatorTap = {
     onPointerDown: (event: PointerEvent<HTMLDivElement>) => {
