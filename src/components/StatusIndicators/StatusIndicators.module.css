@@ -40,26 +40,30 @@
   stroke-linecap: round;
 }
 
+/* The button is a full-size target, as tall as a finger needs on a touch screen, and only
+   the grey face inside it is drawn, small enough to sit in the status bar. */
 .activate {
-  position: relative;
-  min-height: calc(28 * var(--u));
-  padding: 0 calc(10 * var(--u));
+  display: grid;
+  place-items: center;
+  min-height: var(--tap-target, 0px);
+  padding: 0;
   border: none;
-  border-radius: calc(4 * var(--u));
-  background-color: #c9c9c9;
+  background: none;
   color: #333333;
   font: inherit;
   cursor: pointer;
 }
 
-/* The button stays small in the bar, but a finger gets a full-size target around it. */
-.activate::before {
-  content: '';
-  position: absolute;
-  inset: min(0px, calc((100% - var(--tap-target, 0px)) / 2)) 0;
+.activateFace {
+  display: grid;
+  place-items: center;
+  min-height: calc(28 * var(--u));
+  padding: 0 calc(10 * var(--u));
+  border-radius: calc(4 * var(--u));
+  background-color: #c9c9c9;
 }
 
-.activate:active {
+.activate:active .activateFace {
   background-color: #b3b3b3;
 }
 

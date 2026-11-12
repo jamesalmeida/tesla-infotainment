@@ -45,12 +45,11 @@ export function HomeLinkStatus() {
       <button
         type="button"
         className={styles.activate}
-        data-hit-area="extended"
         aria-label={`Activate HomeLink: ${name}`}
         disabled={!canUse}
         onClick={toggleGarageDoor}
       >
-        Activate
+        <span className={styles.activateFace}>Activate</span>
       </button>
     </div>
   );
