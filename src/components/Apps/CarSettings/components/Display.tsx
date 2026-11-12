@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { openRearWindow } from '../../../../apps/rearDisplay';
 import { useCar, useCarActions } from '../../../../state/CarStateContext';
 import type { Appearance, PetMode, Preferences } from '../../../../state/carState';
@@ -11,6 +12,13 @@ import {
   Toggle,
   type Choice,
 } from './SettingsKit';
+import {
+  canRequestFullscreen,
+  exitFullscreen,
+  isStandalone,
+  requestFullscreen,
+  useIsFullscreen,
+} from '../../../../utils/fullscreen';
 
 const APPEARANCE: Choice<Appearance>[] = [
   { value: 'light', label: 'Light' },
@@ -49,6 +57,37 @@ const PET_MODE: Choice<PetMode>[] = [
   { value: 'dog', label: 'Dog' },
   { value: 'camp', label: 'Camp' },
 ];
+
+const HOME_SCREEN_HINT =
+  "This browser can't hide its bars for a web page. In Safari, tap Share, then Add to Home Screen, and open the app from there.";
+
+// Always here, so full screen is one tap away on a touch screen after the first-visit hint
+// is gone.
+function FullScreenRow() {
+  const fullscreen = useIsFullscreen();
+  const [blocked, setBlocked] = useState(false);
+  const standalone = isStandalone();
+
+  let description = "Hides the browser's bars so the display fills the screen.";
+  if (standalone) description = 'Already full screen: the app was opened from the Home Screen.';
+  else if (blocked || !canRequestFullscreen()) description = HOME_SCREEN_HINT;
+
+  const toggle = () => {
+    if (fullscreen) {
+      void exitFullscreen();
+      return;
+    }
+    void requestFullscreen().then((entered) => setBlocked(!entered));
+  };
+
+  return (
+    <ActionRow setting="full-screen" label="Full Screen" description={description}>
+      <ActionButton onClick={toggle} disabled={standalone}>
+        {fullscreen ? 'Exit Full Screen' : 'Full Screen'}
+      </ActionButton>
+    </ActionRow>
+  );
+}
 
 export const Display = () => {
   const display = useCar((state) => state.display);
@@ -118,6 +157,7 @@ export const Display = () => {
         >
           <ActionButton onClick={openRearWindow}>Open</ActionButton>
         </ActionRow>
+        <FullScreenRow />
       </Section>
 
       <Section title="Units and format">

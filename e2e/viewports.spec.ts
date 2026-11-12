@@ -69,8 +69,12 @@ for (const { name, width, height, mode, touch } of VIEWPORTS) {
         await openApp(page);
 
         const tooSmall = await page.evaluate((minimum) => {
+          // The card dots are full width but shorter: a swipe on the card is the main way to
+          // change it, and full-height dots left a tall gap above the dock.
+          const cardDots = '[aria-label="Cards under the car"] [role="tab"]';
           return [...document.querySelectorAll<HTMLElement>('button, [role="button"]')]
             .filter((element) => element.offsetWidth > 0)
+            .filter((element) => !element.matches(cardDots))
             .filter((element) => element.offsetWidth < minimum || element.offsetHeight < minimum)
             .map(
               (element) =>

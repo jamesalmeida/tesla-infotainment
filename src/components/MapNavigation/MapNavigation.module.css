@@ -447,7 +447,21 @@
   padding-top: calc(3 * var(--u) + var(--safe-top));
 }
 
-:global(:root[data-touch='true']) .floatingRightBtnsWrapper {
+/* On a tablet-sized screen the controls run to the right edge. A large right safe area is
+   a status column in the corner (the iPhone Duo puts its clock, battery and signal there), so
+   the controls start below it. */
+:global(:root[data-touch='true'][data-layout='stage']) .floatingRightBtnsWrapper {
   right: 0;
-  top: calc(6% + 40 * var(--u) + var(--safe-top));
+  top: max(calc(6% + 40 * var(--u) + var(--safe-top)), calc(var(--safe-right) + 40px));
+}
+
+/* A phone's island is halfway down the side in landscape, so there they stay inside it. */
+:global(:root[data-touch='true'][data-layout='stacked']) .floatingRightBtnsWrapper {
+  right: calc(6px + var(--safe-right));
+  top: calc(52px + var(--safe-top));
+}
+
+:global(:root[data-touch='true'][data-layout='compact']) .floatingRightBtnsWrapper {
+  right: calc(6px + var(--safe-right));
+  top: calc(44px + var(--safe-top));
 }

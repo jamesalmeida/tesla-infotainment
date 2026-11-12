@@ -59,6 +59,9 @@
   --pedal-deck-height: 0px;
   --pedal-deck-gap: 0px;
 
+  /* How much of the home-indicator area the dock keeps under its icons. */
+  --dock-inset-bottom: 0px;
+
   /* Apple's minimum, applied wherever touch is the main input. */
   --tap-target: 0px;
   /* Nothing should render smaller than this. */
@@ -121,6 +124,9 @@
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
   --safe-left: max(env(safe-area-inset-left, 0px), 8px);
   --tap-target: 44px;
+  /* Half the home-indicator area: enough to keep the icons off the gesture bar without a tall
+     black band under them. */
+  --dock-inset-bottom: calc(var(--safe-bottom) / 2);
 }
 
 :root[data-touch='true'][data-layout='stage'] {
