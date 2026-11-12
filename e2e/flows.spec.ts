@@ -370,6 +370,23 @@ test('Park view: drag the car across, see the map in the corner, and bring it ba
   await expect(group).not.toHaveClass(/parkView/);
 });
 
+test('Park view: a tap on the grabber opens it in one go', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openApp(page);
+  const group = page.locator('.horizontalPanelGroup');
+
+  await page.locator('.panelResizeHandle').click();
+  await expect(group).toHaveClass(/parkView/);
+
+  await page.getByRole('button', { name: 'Open the map' }).click();
+  await expect(group).not.toHaveClass(/parkView/);
+
+  // In Drive there is no Park view to open.
+  await page.keyboard.press('d');
+  await page.locator('.panelResizeHandle').click();
+  await expect(group).not.toHaveClass(/parkView/);
+});
+
 test('pressing the brake brings up the drive strip, which shifts the car', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openApp(page);
