@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 import { CarStateProvider, useCar } from '../../state/CarStateContext';
 import { initialCarState, type CarState } from '../../state/carState';
+import { Safety } from '../Apps/CarSettings/components/Safety';
 import { MapNavigation } from '../MapNavigation/MapNavigation';
 import { Emergency } from './Emergency';
 
@@ -11,10 +12,22 @@ function Modal() {
   );
 }
 
-test('the SOS button opens the emergency screen', () => {
+test('the SOS button appears while the car is alarmed and opens the emergency screen', () => {
+  render(
+    <CarStateProvider initialState={{ ...initialCarState, sentryAlarm: true }}>
+      <MapNavigation onWifiClick={() => {}} />
+      <Modal />
+    </CarStateProvider>,
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Emergency SOS' }));
+  expect(screen.getByLabelText('modal')).toHaveTextContent('sos');
+});
+
+test('the Safety panel opens the emergency screen', () => {
   render(
     <CarStateProvider initialState={initialCarState}>
-      <MapNavigation onWifiClick={() => {}} />
+      <Safety />
       <Modal />
     </CarStateProvider>,
   );

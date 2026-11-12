@@ -84,3 +84,8 @@
   font-size: 12px;
   text-align: right;
 }
+
+/* The external deck is not used when touch is detected in JS. */
+:global(:root[data-touch='true'][data-layout='stage']) .pedalDeck {
+  display: none;
+}

@@ -144,7 +144,7 @@ function Restrictions() {
 export const Safety = () => {
   const settings = useCar((state) => state.settings);
   const overheatProtection = useCar((state) => state.climate.overheatProtection);
-  const { setClimateOptions, setSettings } = useCarActions();
+  const { setClimateOptions, setSettings, toggleModal } = useCarActions();
   const locked = settings.requireSafetyFeatures;
   const lockedHint = locked ? 'Required by Driver Limits.' : undefined;
 
@@ -198,6 +198,16 @@ export const Safety = () => {
           />
         </Section>
       </div>
+      <Section title="Emergency" hint="SOS is a demo in this app.">
+        <DemoNote>
+          Demo only: the SOS screen explains what the car would do; nothing is dialled.
+        </DemoNote>
+        <ButtonRow>
+          <Button variant="danger" onPress={() => toggleModal('sos')}>
+            Emergency SOS
+          </Button>
+        </ButtonRow>
+      </Section>
       <Restrictions />
     </Page>
   );

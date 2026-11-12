@@ -103,3 +103,12 @@
   overflow-x: auto;
   scrollbar-width: none;
 }
+
+/* On touch the dock's black background fills the home-indicator area, with the icons
+   staying above it. */
+:global(:root[data-touch='true']) .btmNavBar {
+  height: calc(var(--dock-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  border: none;
+  border-radius: 0;
+}

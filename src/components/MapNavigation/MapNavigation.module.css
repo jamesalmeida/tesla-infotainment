@@ -438,3 +438,13 @@
 :global(:root[data-layout='stacked']) .floatingRightBtnColumn button {
   padding: 0;
 }
+
+/* Touch: the top bar stops before the island, and the map controls clear it. */
+:global(:root[data-touch='true']) .topMenuBar {
+  width: calc(100% - var(--safe-right));
+}
+
+:global(:root[data-touch='true']) .floatingRightBtnsWrapper {
+  right: calc(2.2% + var(--safe-right));
+  top: calc(6% + 40 * var(--u));
+}
