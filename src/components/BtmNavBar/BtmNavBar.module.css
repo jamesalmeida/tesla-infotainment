@@ -75,29 +75,92 @@
   grid-template-columns: auto auto minmax(0, 1fr) auto auto;
 }
 
-/* Stacked has no width for one row, so the dock gets its own and scrolls. */
+/* Portrait on a phone: the apps get the top row to themselves, and the row under them is the
+   car, the A/C with its arrows and the volume, spread evenly. The seat buttons don't fit
+   there; the seats are in the app drawer and the climate panel. The groups give up their
+   boxes so each control can take its own place in that order. */
 :global(:root[data-layout='stacked']) .btmNavItems {
-  grid-template-columns: auto 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-around;
+  justify-content: space-between;
   padding: 0 8px;
-  column-gap: 8px;
-}
-
-:global(:root[data-layout='stacked']) .btmNavItems[data-split='true'] {
-  grid-template-columns: auto 1fr auto 1fr;
   column-gap: 4px;
 }
 
-/* The icons keep together in the middle, spaced as on a wide screen, rather than spreading
-   across the whole row. They still scroll when the row is too narrow for them all. */
+:global(:root[data-layout='stacked']) .climateGroup {
+  display: contents;
+}
+
+:global(:root[data-layout='stacked']) .car-settings {
+  order: 1;
+}
+
+@media (max-width: 599px) {
+  :global(:root[data-layout='stacked']) .climateGroup [class*='seatControl'] {
+    display: none;
+  }
+}
+
+:global(:root[data-layout='stacked']) [data-group='driver'] > :first-child {
+  order: 3;
+}
+
+:global(:root[data-layout='stacked']) [data-group='driver'] > :last-child {
+  order: 2;
+}
+
+:global(:root[data-layout='stacked']) [data-group='passenger'] > :first-child,
+:global(:root[data-layout='stacked']) [data-group='audio'] > :first-child:not(:last-child) {
+  order: 4;
+}
+
+:global(:root[data-layout='stacked']) [data-group='passenger'] > :last-child {
+  order: 5;
+}
+
+:global(:root[data-layout='stacked']) [data-group='audio'] > :last-child {
+  order: 6;
+}
+
+/* A phone's app row is about as wide as the icons, so they spread evenly across it. They
+   still scroll if it is too narrow for them all. */
 :global(:root[data-layout='stacked']) .dockApps {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  justify-self: stretch;
-  justify-content: safe center;
-  gap: 12px;
+  order: 0;
+  flex: 1 0 100%;
+  justify-content: space-between;
+  min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
+}
+
+/* Portrait on a tablet (an iPad, or an unfolded iPhone Duo) has the width for the landscape
+   row: car, climate, apps, seat and volume in one line, with the apps packed a little closer. */
+@media (min-width: 600px) {
+  :global(:root[data-layout='stacked']) .btmNavItems {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    column-gap: 8px;
+  }
+
+  :global(:root[data-layout='stacked']) .btmNavItems[data-split='true'] {
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  }
+
+  :global(:root[data-layout='stacked']) .climateGroup {
+    display: flex;
+  }
+
+  :global(:root[data-layout='stacked']) .btmNavItems > *,
+  :global(:root[data-layout='stacked']) .climateGroup > * {
+    order: 0 !important;
+  }
+
+  :global(:root[data-layout='stacked']) .dockApps {
+    justify-self: stretch;
+    justify-content: safe center;
+    gap: 4px;
+  }
 }
 
 :global(:root[data-layout='compact']) .dockApps {
@@ -121,4 +184,23 @@
    area, instead of floating in the middle of a tall black band. */
 :global(:root[data-touch='true'][data-layout='stage']) .btmNavItems {
   align-items: end;
+}
+
+/* A small tablet in portrait (an unfolded iPhone Duo) only just fits the row, so the spaces
+   between controls close up; every button keeps its full-size target. */
+@media (min-width: 600px) and (max-width: 759px) {
+  :global(:root[data-layout='stacked']) .btmNavItems {
+    column-gap: 0;
+    padding: 0 4px;
+  }
+
+  :global(:root[data-layout='stacked']) .dockApps {
+    gap: 0;
+  }
+
+  /* The small arrows beside the temperature and the volume give up a little width. */
+  :global(:root[data-layout='stacked']) .climateGroup button:has(> img:global(.arrows)) {
+    min-width: 40px;
+    width: 40px;
+  }
 }

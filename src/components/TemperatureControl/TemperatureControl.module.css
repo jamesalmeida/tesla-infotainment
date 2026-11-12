@@ -31,16 +31,10 @@
   opacity: 0.4;
 }
 
-/* A phone can't fit every pair of arrows beside the volume. The number still opens the panel,
-   which has them. Zones are only named when split. */
+/* With the climate split, a phone's row has two temperatures beside the volume: the passenger's
+   shows as a number alone, which opens the climate panel with its arrows. */
 @media (max-width: 479px) {
   :global(:root[data-layout='stacked']) [data-zone='passenger'] .temperature-btn {
-    display: none;
-  }
-}
-
-@media (max-width: 379px) {
-  :global(:root[data-layout='stacked']) [data-zone] .temperature-btn {
     display: none;
   }
 }

@@ -101,7 +101,7 @@ const BtmNavBar = () => {
             />
           </button>
         </div>
-        <div className={styles.climateGroup}>
+        <div className={styles.climateGroup} data-group="driver">
           <ClimateControl zone="driver" />
           <SeatButton seat="driver" side="left" />
         </div>
@@ -111,12 +111,12 @@ const BtmNavBar = () => {
           )}
         </div>
         {isSplit ? (
-          <div className={styles.climateGroup}>
+          <div className={styles.climateGroup} data-group="passenger">
             <SeatButton seat="passenger" side="right" />
             <ClimateControl zone="passenger" />
           </div>
         ) : null}
-        <div className={styles.climateGroup}>
+        <div className={styles.climateGroup} data-group="audio">
           {!isSplit && <SeatButton seat="passenger" side="right" />}
           <AudioControl />
         </div>

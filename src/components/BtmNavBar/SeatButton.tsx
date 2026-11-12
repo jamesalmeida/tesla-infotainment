@@ -1,7 +1,15 @@
 import { useCallback, useRef, useState } from 'react';
 import { useDismiss } from '../../hooks/useDismiss';
 import { useCar, useCarActions } from '../../state/CarStateContext';
-import { COOLED_SEATS, seatHeatLabel, type SeatId, type SeatLevel } from '../../state/climate';
+import {
+  COOLED_SEATS,
+  seatHeatLabel,
+  type SeatHeat,
+  type SeatId,
+  type SeatLevel as Level,
+} from '../../state/climate';
+import { getImagePath } from '../../utils/assetPaths';
+import { SeatLevel } from '../Climate/SeatLevel';
 import styles from './SeatButton.module.css';
 
 const LEVELS = [1, 2, 3] as const;
@@ -11,29 +19,17 @@ const SEAT_NAMES: Record<'driver' | 'passenger', string> = {
   passenger: 'Passenger seat',
 };
 
-// A seat in profile, facing the way the seat does, with heat or cool lines above it.
-function SeatGlyph({ side, level }: { side: 'left' | 'right'; level: number }) {
-  const lines = Math.abs(level);
+// The same seat icons as the app drawer's, which match the car's, with the drawer's level bars
+// under them while the seat heats or cools.
+function SeatGlyph({ side, heat }: { side: 'left' | 'right'; heat: SeatHeat }) {
   return (
-    <svg
-      className={styles.glyph}
-      viewBox="0 0 32 32"
-      aria-hidden="true"
-      style={side === 'right' ? { transform: 'scaleX(-1)' } : undefined}
-    >
-      <path
-        className={styles.seat}
-        d="M9 6c2 0 3 1 3.4 3l2 9.6h7.6a2.5 2.5 0 0 1 0 5H12.4a2 2 0 0 1-2-1.6L7.3 9.6C7 7.6 7.6 6 9 6Z"
+    <span className={styles.glyph}>
+      <img
+        src={getImagePath(side === 'left' ? 'app-left-seat.svg' : 'app-right-seat.svg')}
+        alt=""
       />
-      <path className={styles.seat} d="M14 24v3M21 24v3" />
-      {Array.from({ length: lines }, (_, index) => (
-        <path
-          key={index}
-          className={level > 0 ? styles.heat : styles.cool}
-          d={`M${18 + index * 4} 4c-1.4 1.6 1.4 3.2 0 4.8s1.4 3.2 0 4.8`}
-        />
-      ))}
-    </svg>
+      {heat !== 0 && <SeatLevel heat={heat} />}
+    </span>
   );
 }
 
@@ -57,7 +53,7 @@ export function SeatButton({
   const canCool = COOLED_SEATS.includes(seat as SeatId);
   const name = SEAT_NAMES[seat];
 
-  const choose = (next: SeatLevel) => setSeatLevel(seat, next);
+  const choose = (next: Level) => setSeatLevel(seat, next);
 
   return (
     <div className={styles.seatControl} ref={ref}>
@@ -68,7 +64,7 @@ export function SeatButton({
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
       >
-        <SeatGlyph side={side} level={level} />
+        <SeatGlyph side={side} heat={heat} />
       </button>
       {isOpen && (
         <div className={styles.popover} role="group" aria-label={`${name} heating and cooling`}>
@@ -113,7 +109,7 @@ export function SeatButton({
                   aria-label={`Cool ${value}`}
                   aria-pressed={level === -value}
                   className={`${styles.option} ${styles.coolOption}`}
-                  onClick={() => choose(-value as SeatLevel)}
+                  onClick={() => choose(-value as Level)}
                 >
                   {value}
                 </button>
