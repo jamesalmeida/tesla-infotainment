@@ -92,6 +92,13 @@ body {
   --dock-height: 112px;
 }
 
+/* A tablet in portrait fits the dock in one row, like landscape. */
+@media (min-width: 600px) {
+  :root[data-layout='stacked'] .displayWrapper {
+    --dock-height: 64px;
+  }
+}
+
 .horizontalPanelGroup {
   flex: 1;
   min-height: 0;

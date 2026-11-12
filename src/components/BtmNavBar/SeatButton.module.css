@@ -12,24 +12,22 @@
 }
 
 .glyph {
-  width: calc(34 * var(--u));
-  height: calc(34 * var(--u));
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  position: relative;
+  display: grid;
+  place-items: center;
 }
 
-.seat {
-  stroke: #ffffff;
+.glyph img {
+  width: calc(36 * var(--u));
+  height: calc(36 * var(--u));
 }
 
-.heat {
-  stroke: #ff5a4e;
-}
-
-.cool {
-  stroke: #4aa3ff;
+/* The level bars sit just under the seat without changing the button's height. */
+.glyph > span {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
 }
 
 .popover {
