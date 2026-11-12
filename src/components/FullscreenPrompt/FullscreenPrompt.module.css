@@ -1,7 +1,9 @@
 .banner {
   position: absolute;
   left: 50%;
-  bottom: calc(120 * var(--u));
+  /* Just above the dock, whatever its height in this layout, including the home-indicator
+     strip it takes on touch screens. */
+  bottom: calc(var(--dock-height) + var(--dock-inset-bottom) + 12 * var(--u));
   transform: translateX(-50%);
   z-index: 1400;
   display: flex;
