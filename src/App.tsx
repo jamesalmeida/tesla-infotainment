@@ -44,7 +44,7 @@ import VerticalSliderPanel from './components/VerticalSliderPanel/VerticalSlider
 import BtmNavBar from './components/BtmNavBar/BtmNavBar';
 import { BrightnessOverlay } from './components/BrightnessOverlay/BrightnessOverlay';
 import CarWashMode from './components/Apps/CarSettings/components/CarWashMode/CarWashMode';
-import { CarStatus } from './components/CarStatus/CarStatus';
+import { CarStatus, Pedals } from './components/CarStatus/CarStatus';
 import { ChargeStatus } from './components/ChargeStatus/ChargeStatus';
 import { CompartmentControls } from './components/CarStatus/CompartmentControls';
 import { ClimatePanel } from './components/Climate/ClimatePanel';
@@ -148,7 +148,10 @@ const LeftPanelContent = memo(function LeftPanelContent({
       <StatusIndicators />
       <CompartmentControls />
       <ChargeStatus />
-      <VehicleView onSettled={onCarSettled} />
+      <div className="vehicleArea">
+        <VehicleView onSettled={onCarSettled} />
+        <Pedals />
+      </div>
       <div className="carBottomRow">
         <CarCards />
         {isParkView && <ParkNavCard onExit={onLeaveParkView} />}

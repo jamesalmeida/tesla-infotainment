@@ -373,18 +373,20 @@
   border-radius: calc(8 * var(--u));
   display: flex;
   flex-direction: row;
-  align-items: left;
+  align-items: center;
 }
 
 .airbagStatus img {
   width: auto;
-  height: calc(20 * var(--u));
+  height: calc(30 * var(--u));
   margin-right: calc(4 * var(--u));
 }
 
 .airbagStatusText {
+  display: flex;
+  flex-direction: column;
   font-size: max(var(--text-min), 0.6em);
-  line-height: 1.1;
+  line-height: 1.05;
   font-weight: 600;
   color: #4e4e4e;
   white-space: nowrap;
@@ -441,10 +443,11 @@
 
 /* Touch: the top bar stops before the island, and the map controls clear it. */
 :global(:root[data-touch='true']) .topMenuBar {
-  width: calc(100% - var(--safe-right));
+  width: calc(100% - var(--safe-right) - 16 * var(--u));
+  padding-top: calc(3 * var(--u) + var(--safe-top));
 }
 
 :global(:root[data-touch='true']) .floatingRightBtnsWrapper {
-  right: calc(2.2% + var(--safe-right));
-  top: calc(6% + 40 * var(--u));
+  right: 0;
+  top: calc(6% + 40 * var(--u) + var(--safe-top));
 }

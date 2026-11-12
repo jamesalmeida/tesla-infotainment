@@ -420,10 +420,22 @@ body {
   }
 }
 
+/* The car model and the pedals share the space above the media card. */
+.vehicleArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.vehicleArea > .vehicleStage {
+  flex: 1;
+}
+
 .pedals {
   position: absolute;
   z-index: 4;
-  top: 100%;
+  bottom: calc(8 * var(--u));
   right: 3%;
   display: flex;
   gap: calc(8 * var(--u));
@@ -561,10 +573,24 @@ body {
 :root[data-touch='true'] .displayBezel {
   width: 100dvw;
   height: 100dvh;
-  padding: var(--safe-top) 0 0 var(--safe-left);
+  padding: 0;
   border: none;
   border-radius: 0;
   box-shadow: none;
+}
+
+/* The top status bar shifts clear of the island, while its background still fills the edge. */
+:root[data-touch='true'] .carStatusIcons {
+  padding-top: calc(0.5% + var(--safe-top));
+  padding-left: calc(3% + var(--safe-left));
+}
+
+:root[data-touch='true'][data-layout='stage'] .displayWrapper {
+  --dock-height: calc(72 * var(--u));
+}
+
+:root[data-touch='true'] .stackedViewSwitch {
+  padding-top: calc(4px + var(--safe-top));
 }
 
 :root[data-touch='true'][data-layout='stage'] .pedals {

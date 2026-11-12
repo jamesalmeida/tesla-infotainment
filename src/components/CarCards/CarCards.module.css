@@ -177,3 +177,17 @@
 :global(:root[data-layout='compact']) .dots {
   margin-top: 2px;
 }
+
+/* Touch: keep the card and dots close together, and overlap the dot targets so they read
+   as one small group rather than a wide row. */
+:global(:root[data-touch='true']) .deck {
+  margin-bottom: calc(4 * var(--u));
+}
+
+:global(:root[data-touch='true']) .dots button {
+  place-items: start center;
+}
+
+:global(:root[data-touch='true']) .dots button + button {
+  margin-left: calc(-20 * var(--u));
+}
