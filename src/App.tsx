@@ -59,7 +59,6 @@ import { Notice } from './components/Notice/Notice';
 import { PwaUpdate } from './components/PwaUpdate/PwaUpdate';
 import { RearSync } from './components/RearDisplay/RearSync';
 import { RestartOverlay } from './components/RestartOverlay/RestartOverlay';
-import { StatusIndicators } from './components/StatusIndicators/StatusIndicators';
 import { ScreenClean } from './components/ScreenClean/ScreenClean';
 import { SentryOverlay } from './components/SentryOverlay/SentryOverlay';
 import { SleepOverlay } from './components/SleepOverlay/SleepOverlay';
@@ -149,7 +148,6 @@ const LeftPanelContent = memo(function LeftPanelContent({
   return (
     <>
       <CarStatus />
-      <StatusIndicators />
       <CompartmentControls />
       <ChargeStatus />
       <div className="vehicleArea">

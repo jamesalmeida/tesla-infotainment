@@ -45,19 +45,6 @@
   gap: calc(2 * var(--u));
 }
 
-/* The start/stop control in Drive has to look like a button, not a label. */
-.statusButton {
-  min-height: max(calc(40 * var(--u)), var(--tap-target));
-  padding: 0 calc(14 * var(--u));
-  border: none;
-  border-radius: calc(8 * var(--u));
-  font: inherit;
-  font-size: max(var(--text-min), calc(13 * var(--u)));
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
 .mode {
   position: relative;
   display: inline-flex;

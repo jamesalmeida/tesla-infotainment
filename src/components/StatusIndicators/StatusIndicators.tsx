@@ -1,16 +1,11 @@
 import { useCar } from '../../state/CarStateContext';
-import {
-  connectedBluetoothName,
-  isHomeLinkInRange,
-  isValet,
-  wifiIndicator,
-} from '../../state/carState';
+import { connectedBluetoothName, isHomeLinkInRange, isValet } from '../../state/carState';
 import { getImagePath } from '../../utils/assetPaths';
 import styles from './StatusIndicators.module.css';
 
-// Small icons in the status bar for what the car is connected to right now.
+// Small icons in the map's status bar, just after the Wi-Fi icon, for what the car is
+// connected to right now. The Wi-Fi icon itself belongs to the bar.
 export function StatusIndicators() {
-  const wifi = useCar(wifiIndicator);
   const hotspot = useCar((state) => state.wifi.hotspot);
   const bluetooth = useCar(connectedBluetoothName);
   const inRange = useCar(isHomeLinkInRange);
@@ -23,13 +18,6 @@ export function StatusIndicators() {
       )}
       {bluetooth && (
         <img src={getImagePath('icon-settings-bluetooth.svg')} alt={`Connected to ${bluetooth}`} />
-      )}
-      {(wifi === 'connected' || wifi === 'connecting') && (
-        <img
-          className={wifi === 'connecting' ? styles.pending : ''}
-          src={getImagePath('icon-settings-wifi.svg')}
-          alt={wifi === 'connected' ? 'Wifi connected' : 'Wifi connecting'}
-        />
       )}
       {hotspot && <span>Hotspot</span>}
     </div>

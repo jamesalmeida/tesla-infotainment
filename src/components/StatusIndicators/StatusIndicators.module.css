@@ -1,22 +1,19 @@
-/* Sits in the top row beside the battery, leaving the space below it for Start Self-Driving. */
+/* In the map's status bar, just after the Wi-Fi icon. */
 .indicators {
-  position: absolute;
-  top: calc(10 * var(--u));
-  right: calc(96 * var(--u));
-  z-index: 1;
   display: flex;
   align-items: center;
-  gap: calc(8 * var(--u));
+  gap: calc(10 * var(--u));
+  margin-right: calc(10 * var(--u));
   color: var(--color-text);
   font-size: max(var(--text-min), calc(12 * var(--u)));
   pointer-events: none;
 }
 
-.indicators img {
-  width: max(14px, calc(18 * var(--u)));
-  height: max(14px, calc(18 * var(--u)));
+.indicators:empty {
+  display: none;
 }
 
-.pending {
-  opacity: 0.4;
+.indicators img {
+  width: max(14px, calc(20 * var(--u)));
+  height: max(14px, calc(20 * var(--u)));
 }

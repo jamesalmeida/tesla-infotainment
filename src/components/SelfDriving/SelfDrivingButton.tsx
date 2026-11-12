@@ -39,36 +39,14 @@ export function SelfDrivingButton() {
   );
 }
 
-// In Drive, the column under the speed: "Self-Driving", blue while it drives, and the mode
-// under it. A tap on the name starts or stops it; the mode can change at any time.
-export function SelfDrivingStatus() {
-  const isEngaged = useCar((state) => state.autopilot === 'autosteer');
-  const canStart = useCar((state) => canEngageAutopilot(state, 'autosteer').allowed);
-  const reason = useCar((state) => {
-    const permission = canEngageAutopilot(state, 'autosteer');
-    return permission.allowed ? null : permission.reason;
-  });
+// In Drive, the mode sits in the column under the speed: plain text with a chevron, like the
+// car, and a real menu underneath. It can change at any time.
+export function SelfDrivingMode() {
   const profile = useCar((state) => state.settings.drivingProfile);
-  const { engageAutopilot, disengageAutopilot, showNotice, setSettings } = useCarActions();
-
-  const handlePress = () => {
-    if (isEngaged) disengageAutopilot();
-    else if (reason) showNotice(reason);
-    else engageAutopilot('autosteer');
-  };
-
-  const state = isEngaged ? 'engaged' : canStart ? 'ready' : 'unavailable';
+  const { setSettings } = useCarActions();
 
   return (
     <div className={styles.status}>
-      <button
-        type="button"
-        className={`${styles.statusButton} ${styles[state]}`}
-        aria-pressed={isEngaged}
-        onClick={handlePress}
-      >
-        {isEngaged ? 'Stop Self-Driving' : 'Start Self-Driving'}
-      </button>
       <label className={styles.mode}>
         <span className={styles.visuallyHidden}>Self-Driving mode</span>
         <select
