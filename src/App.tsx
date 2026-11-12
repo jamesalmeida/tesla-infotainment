@@ -111,8 +111,11 @@ function App() {
   );
 }
 
-// In Park View the car has the whole screen, so the camera comes in closer.
-const PARK_VIEW_FIT_MARGIN = 0.64;
+// In Park View the car spans about half the screen's width, as on the car. The fit only
+// looks at the canvas's height, so the margin follows its shape: a wide desktop canvas needs
+// a closer camera than an iPad's.
+const PARK_VIEW_CAR_WIDTH = 1.57;
+const parkViewFitMargin = (aspect: number) => Math.min(1, PARK_VIEW_CAR_WIDTH / aspect);
 
 function VehicleView({ onSettled, wide }: { onSettled: () => void; wide: boolean }) {
   const pose = useCar(vehiclePose);
@@ -146,7 +149,7 @@ function VehicleView({ onSettled, wide }: { onSettled: () => void; wide: boolean
             lights={lights}
             paint={paint}
             speed={speed}
-            fitMargin={wide ? PARK_VIEW_FIT_MARGIN : 1}
+            fitMargin={wide ? parkViewFitMargin : 1}
             azimuth={wide && pose !== 'drive' ? PARK_VIEW_AZIMUTH : undefined}
             elevation={
               pose === 'drive' ? DRIVE_ELEVATION : wide ? PARK_VIEW_ELEVATION : PANEL_ELEVATION

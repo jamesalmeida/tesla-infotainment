@@ -446,12 +446,17 @@ describe('systems', () => {
     const restored = restoreState(
       initialCarState,
       saved({
-        homelink: { door: 'opening', doorPosition: 0.5, homeOdometerMiles: 100 },
+        homelink: { door: 'opening', doorPosition: 0.5, homeOdometerMiles: 100, name: 'Gate' },
         softwareUpdate: { phase: 'installing', version: 'x', progress: 50 },
         restartSecondsLeft: 3,
       }),
     );
-    expect(restored.homelink).toEqual({ door: 'closed', doorPosition: 0, homeOdometerMiles: 100 });
+    expect(restored.homelink).toEqual({
+      door: 'closed',
+      doorPosition: 0,
+      homeOdometerMiles: 100,
+      name: 'Gate',
+    });
     expect(restored.softwareUpdate).toEqual({ phase: 'idle' });
     expect(restored.restartSecondsLeft).toBe(0);
   });

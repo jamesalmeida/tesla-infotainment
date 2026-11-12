@@ -39,7 +39,7 @@
 }
 
 .navCard {
-  flex: 0 1 calc(320 * var(--u));
+  flex: 0 1 var(--park-nav-width, calc(320 * var(--u)));
   min-width: 0;
   display: flex;
   flex-direction: column;

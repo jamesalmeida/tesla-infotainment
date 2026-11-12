@@ -330,6 +330,8 @@ export interface VehicleSettings {
   walkAwayLock: boolean;
   lockSound: boolean;
   soundsEnabled: boolean;
+  // Whether the HomeLink button shows in the status bar. Off for a car without a remote set up.
+  homelinkEnabled: boolean;
   onScreenKeyboard: boolean;
   keys: CarKey[];
   acceleration: Acceleration;
@@ -440,6 +442,8 @@ export interface HomeLinkState {
   doorPosition: number;
   // Where home is, as an odometer reading, since the simulator has no position to compare.
   homeOdometerMiles: number;
+  // The name the remote was programmed with, shown beside its button in the status bar.
+  name: string;
 }
 
 export type UpdatePreference = keyof typeof DEMO_UPDATES;
@@ -722,7 +726,7 @@ export const initialCarState: CarState = {
     pairing: null,
     error: null,
   },
-  homelink: { door: 'closed', doorPosition: 0, homeOdometerMiles: 12480 },
+  homelink: { door: 'closed', doorPosition: 0, homeOdometerMiles: 12480, name: 'Gate' },
   softwareUpdate: { phase: 'idle' },
   installedUpdate: null,
   restartSecondsLeft: 0,
@@ -743,6 +747,7 @@ export const initialCarState: CarState = {
     walkAwayLock: true,
     lockSound: true,
     soundsEnabled: true,
+    homelinkEnabled: true,
     onScreenKeyboard: false,
     keys: [
       { id: 1, kind: 'phone', name: 'Phone key' },

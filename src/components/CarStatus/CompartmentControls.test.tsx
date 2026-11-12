@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, expect, test } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 import { CarStateProvider, useCar } from '../../state/CarStateContext';
 import { initialCarState } from '../../state/carState';
 import { NO_ANCHORS, setCompartmentAnchors } from '../VehicleModel/compartmentAnchors';
@@ -24,43 +24,49 @@ test('the leader lines stay hidden until the car reports where its lids are', ()
   expect(leaderLines().map((line) => line.style.visibility)).toEqual(['hidden', 'hidden']);
 });
 
-test('each label gets a line to its lid, with its bar facing that lid', () => {
+test('each label hangs above its part, reading away from a line down to it', () => {
   render(
     <CarStateProvider initialState={initialCarState}>
       <CompartmentControls />
     </CarStateProvider>,
   );
+  const root = document.querySelector<HTMLElement>('.carModelStatus')!;
+  vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 100));
   const frunk = screen.getByRole('button', { name: /Frunk/ });
   const trunk = screen.getByRole('button', { name: /Trunk/ });
+  Object.defineProperty(trunk, 'offsetWidth', { configurable: true, value: 60 });
 
   act(() =>
     setCompartmentAnchors({
       frunk: { x: 100, y: 300 },
-      trunk: { x: 300, y: 280 },
+      trunk: { x: 395, y: 280 },
       chargePort: null,
-      roof: { x: 200, y: 260 },
+      roof: { x: 250, y: 200 },
+      frunkLabel: { x: 100, y: 150 },
+      // Below the roofline, so it is raised to it.
+      trunkLabel: { x: 395, y: 260 },
+      lockIcon: { x: 250, y: 120 },
+      roofLine: { x: 250, y: 190 },
     }),
   );
-  expect(leaderLines().map((line) => line.style.visibility)).toEqual(['visible', 'visible']);
-  expect(leaderLines()[0].getAttribute('y2')).toBe('300');
-  expect(frunk.dataset.side).toBe('left');
-  expect(trunk.dataset.side).toBe('right');
-  // The lock has its own line, down to the roof.
+  const [frunkLine, trunkLine] = leaderLines();
+  expect([frunkLine, trunkLine].map((line) => line.style.visibility)).toEqual([
+    'visible',
+    'visible',
+  ]);
+  // Straight down from where the label hangs to the part.
+  expect(frunkLine.getAttribute('x1')).toBe('100');
+  expect(frunkLine.getAttribute('y1')).toBe('150');
+  expect(frunkLine.getAttribute('y2')).toBe('300');
+  expect(frunk.dataset.side).toBe('right');
+  // The trunk's text would run off the right edge, so it reads to the left of its line.
+  expect(trunkLine.getAttribute('y1')).toBe('200');
+  expect(trunk.dataset.side).toBe('left');
+
+  // The lock's line stops short of the roof.
   const lockLine = document.querySelectorAll<SVGLineElement>('.compartmentLeaders line')[3];
   expect(lockLine.style.visibility).toBe('visible');
-  expect(lockLine.getAttribute('y2')).toBe('260');
-
-  // Turned around, the trunk is on the left, so the two labels swap sides.
-  act(() =>
-    setCompartmentAnchors({
-      frunk: { x: 320, y: 300 },
-      trunk: { x: 90, y: 280 },
-      chargePort: null,
-      roof: null,
-    }),
-  );
-  expect(frunk.dataset.side).toBe('right');
-  expect(trunk.dataset.side).toBe('left');
+  expect(lockLine.getAttribute('y2')).toBe('190');
 });
 
 function Signal() {

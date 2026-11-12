@@ -290,6 +290,7 @@ body {
 .horizontalPanelGroup.parkView {
   /* About the share of the screen the car gives its media card in Park View. */
   --park-media-width: calc(480 * var(--u));
+  --park-nav-width: calc(280 * var(--u));
 }
 
 .horizontalPanelGroup.parkView .carBottomRow [class*='deck'] {
@@ -419,21 +420,24 @@ body {
 .toggleTrunk {
   min-width: max(calc(50 * var(--u)), var(--tap-target));
   min-height: var(--tap-target);
-  padding: 0 calc(6 * var(--u));
+  padding: 0;
   background: none;
   border: none;
-  color: inherit;
+  color: #5c5c5c;
   font: inherit;
+  font-size: max(var(--text-min), calc(17 * var(--u)));
+  font-weight: 500;
+  line-height: 1.25;
   cursor: pointer;
 }
 
-/* The bar is the top of each label's line, on the side facing its part of the car. */
-.carModelStatus button[data-side='left'] {
-  border-right: 1px solid currentColor;
+/* The text reads away from its line, which drops from beside its first line to the car. */
+.carModelStatus button[data-side='right'] {
+  text-align: left;
 }
 
-.carModelStatus button[data-side='right'] {
-  border-left: 1px solid currentColor;
+.carModelStatus button[data-side='left'] {
+  text-align: right;
 }
 
 /* Lines from each label's bar to its lid on the car, laid over the car. */
@@ -447,13 +451,8 @@ body {
 }
 
 .compartmentLeaders line {
-  stroke: currentColor;
+  stroke: #8e8e8e;
   stroke-width: 1;
-  visibility: hidden;
-}
-
-.compartmentLeaders circle {
-  fill: currentColor;
   visibility: hidden;
 }
 
@@ -486,9 +485,8 @@ body {
 
 .frunk,
 .trunk {
-  font-size: 1rem;
-  font-weight: 600;
-  color: black;
+  font: inherit;
+  color: inherit;
 }
 
 .toggleLocks {
@@ -742,9 +740,9 @@ body {
 }
 
 /* The signal and pedal buttons line up with the right edge of the Navigate card below. The
-   row under the car is centred: the media card, the gap, then the 320u card. */
+   row under the car is centred: the media card, the gap, then the Navigate card. */
 .horizontalPanelGroup.parkView .pedals {
-  right: max(3%, calc(50% - (var(--park-media-width) + 12 * var(--u) + 320 * var(--u)) / 2));
+  right: max(3%, calc(50% - (var(--park-media-width) + 12 * var(--u) + var(--park-nav-width)) / 2));
 }
 
 /*

@@ -186,3 +186,34 @@
 :global(:root[data-touch='true'][data-layout='stage']) .btmNavItems {
   align-items: end;
 }
+
+/* Spaced as on the car: the car button a little in from the edge, the driver's temperature
+   with room around its arrows and its seat button standing apart, and the passenger's seat
+   at the start of the right-hand column with the volume at the far end. */
+:global(:root[data-layout='stage']) .car-settings {
+  justify-self: end;
+}
+
+:global(:root[data-layout='stage']) .btmNavItems:not([data-split='true']) {
+  grid-template-columns: 8% 21% 46% 25%;
+}
+
+:global(:root[data-layout='stage']) [data-group='driver'] {
+  justify-content: flex-end;
+}
+
+/* Touch targets already space a touch screen's controls out, so only a pointer gets more. */
+:global(:root[data-layout='stage']:not([data-touch='true'])) [data-group='driver'] {
+  gap: calc(34 * var(--u));
+}
+
+:global(:root[data-layout='stage']:not([data-touch='true']))
+  [data-group]
+  :global([class*='temperature-control']) {
+  gap: calc(18 * var(--u));
+}
+
+:global(:root[data-layout='stage']) .btmNavItems:not([data-split='true']) [data-group='audio'] {
+  justify-content: space-between;
+  padding: 0 calc(14 * var(--u)) 0 calc(12 * var(--u));
+}
