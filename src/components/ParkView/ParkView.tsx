@@ -1,7 +1,9 @@
-import { useRef, type PointerEvent } from 'react';
+import { useLayoutEffect, useRef, type PointerEvent } from 'react';
+import { setParkMapFocus } from './parkMapFocus';
 import { navigateToPlace } from '../../apps/navigation';
 import { loadSavedPlaces } from '../MapNavigation/savedPlaces';
 import { useCar, useCarActions } from '../../state/CarStateContext';
+import { UpcomingDestination, useUpcomingDestination } from '../Apps/Calendar/UpcomingDestination';
 import styles from './ParkView.module.css';
 
 // How far the car panel must be dragged back before the map returns.
@@ -50,9 +52,36 @@ export function ParkViewHandle({ onExit }: { onExit: () => void }) {
 }
 
 // The faded corner of map that shows through. Tapping it brings the whole map back.
+// The map centres the car in this corner while it is all that shows.
 export function ParkViewMapCorner({ onExit }: { onExit: () => void }) {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useLayoutEffect(() => {
+    const corner = ref.current;
+    if (!corner) return;
+    const report = () => {
+      const box = corner.getBoundingClientRect();
+      setParkMapFocus({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
+    };
+    report();
+    const observer = new ResizeObserver(report);
+    observer.observe(corner);
+    window.addEventListener('resize', report);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', report);
+      setParkMapFocus(null);
+    };
+  }, []);
+
   return (
-    <button type="button" className={styles.mapCorner} aria-label="Open the map" onClick={onExit} />
+    <button
+      ref={ref}
+      type="button"
+      className={styles.mapCorner}
+      aria-label="Open the map"
+      onClick={onExit}
+    />
   );
 }
 
@@ -61,6 +90,7 @@ export function ParkViewMapCorner({ onExit }: { onExit: () => void }) {
 export function ParkNavCard({ onExit }: { onExit: () => void }) {
   const profileId = useCar((state) => state.activeProfileId);
   const { closeSurface, showNotice } = useCarActions();
+  const upcoming = useUpcomingDestination();
 
   const searchFor = (place: string) => {
     onExit();
@@ -85,27 +115,36 @@ export function ParkNavCard({ onExit }: { onExit: () => void }) {
 
   return (
     <section className={styles.navCard} aria-label="Navigation">
-      <button type="button" className={styles.search} onClick={openSearch}>
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="11" cy="11" r="6" />
-          <path d="m20 20-4.5-4.5" />
-        </svg>
-        Navigate
-      </button>
-      <div className={styles.shortcuts}>
-        <button type="button" onClick={() => goTo('home')}>
+      <div className={styles.header}>
+        <button type="button" className={styles.search} onClick={openSearch}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6" />
+            <path d="m20 20-4.5-4.5" />
+          </svg>
+          Navigate
+        </button>
+        <button
+          type="button"
+          className={styles.shortcut}
+          aria-label="Home"
+          onClick={() => goTo('home')}
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 11 12 4l8 7v9h-5v-6H9v6H4Z" />
           </svg>
-          Home
         </button>
-        <button type="button" onClick={() => goTo('work')}>
+        <button
+          type="button"
+          className={styles.shortcut}
+          aria-label="Work"
+          onClick={() => goTo('work')}
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 8h16v11H4zM9 8V5h6v3M4 13h16" />
           </svg>
-          Work
         </button>
       </div>
+      {upcoming && <UpcomingDestination event={upcoming} onPick={searchFor} />}
     </section>
   );
 }

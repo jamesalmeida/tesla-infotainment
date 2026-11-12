@@ -1,0 +1,59 @@
+.destination {
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  width: 100%;
+  min-height: max(calc(52 * var(--u)), var(--tap-target));
+  padding: calc(8 * var(--u)) calc(14 * var(--u));
+  border: none;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.destination svg {
+  flex: none;
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.name,
+.detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name {
+  color: var(--color-text-strong);
+  font-size: max(var(--text-min), calc(15 * var(--u)));
+  font-weight: 600;
+}
+
+.detail {
+  color: var(--color-text-muted);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  font-weight: 400;
+}
+
+.time {
+  flex: none;
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+  font-weight: 600;
+}

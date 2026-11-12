@@ -203,3 +203,18 @@
 :global(:root[data-layout='stacked']) .searchPopover {
   width: calc(100% - 64px);
 }
+
+/* With a row joined underneath, the two read as one card. */
+.navBtn.joined {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.searchFooter {
+  position: relative;
+  padding: 0;
+  border-top: 1px solid #e3e3e3;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  overflow: hidden;
+}

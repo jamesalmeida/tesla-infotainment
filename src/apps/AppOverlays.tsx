@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { UpcomingCard } from '../components/Apps/Calendar/UpcomingCard';
 import { CallBanner } from '../components/Apps/Phone/CallBanner';
 import { useCar } from '../state/CarStateContext';
 import { useEnergySampler } from './energyHistory';
@@ -14,7 +13,6 @@ export function AppOverlays() {
 
   return (
     <>
-      <UpcomingCard />
       <CallBanner />
     </>
   );

@@ -15,7 +15,7 @@ import type * as THREE from 'three';
 import { getCarModelPath } from '../../utils/assetPaths';
 import { paintHex, type PaintColor } from '../../state/sampleData';
 import type { CarLightState } from './vehicleLights';
-import { setCompartmentAnchors, type ScreenPoint } from './compartmentAnchors';
+import { NO_ANCHORS, setCompartmentAnchors, type ScreenPoint } from './compartmentAnchors';
 import {
   AZIMUTH_RETURN_DELAY_MS,
   AZIMUTH_SMOOTH_TIME,
@@ -233,7 +233,14 @@ function Model({
   );
   const wheelAngle = useRef(0);
   // Where the frunk and trunk leader lines end, in the car's own space: the middle of each lid.
-  const anchorsRef = useRef<{ frunk: Vector3 | null; trunk: Vector3 | null } | null>(null);
+  // The charge port is in the left tail light; the second point is a step outward from it,
+  // to tell when that side of the car faces away.
+  const anchorsRef = useRef<{
+    frunk: Vector3 | null;
+    trunk: Vector3 | null;
+    centre: Vector3;
+    port: [Vector3, Vector3] | null;
+  } | null>(null);
 
   // The canvas only draws on request, so a change has to ask for the first frame. Coming
   // back to the tab asks too, in case an animation was cut off when the tab was hidden.
@@ -299,7 +306,26 @@ function Model({
         }
         return scene.worldToLocal(centre);
       };
-      anchorsRef.current = { frunk: lidTop(nodes.frunk), trunk: lidTop(nodes.trunk) };
+      const portNode = scene.getObjectByName('rear_lightsl');
+      const portBox = portNode ? new Box3().setFromObject(portNode) : null;
+      let port: [Vector3, Vector3] | null = null;
+      if (portBox && !portBox.isEmpty()) {
+        const point = portBox.getCenter(new Vector3());
+        // Straight out of the car's side: the car is lengthwise along whichever axis is longer.
+        const carSize = new Box3().setFromObject(scene).getSize(new Vector3());
+        const outward = new Vector3(point.x - carCentre.x, 0, point.z - carCentre.z);
+        if (carSize.x > carSize.z) outward.x = 0;
+        else outward.z = 0;
+        outward.normalize();
+        const step = point.clone().addScaledVector(outward, 0.3);
+        port = [scene.worldToLocal(point), scene.worldToLocal(step)];
+      }
+      anchorsRef.current = {
+        frunk: lidTop(nodes.frunk),
+        trunk: lidTop(nodes.trunk),
+        centre: scene.worldToLocal(carCentre.clone()),
+        port,
+      };
     }
     const rect = state.gl.domElement.getBoundingClientRect();
     const toScreen = (local: Vector3 | null): ScreenPoint | null => {
@@ -310,9 +336,20 @@ function Model({
         y: rect.top + ((1 - point.y) / 2) * rect.height,
       };
     };
+    const { port, centre } = anchorsRef.current;
+    let chargePort = null;
+    if (port) {
+      const at = scene.localToWorld(port[0].clone());
+      const normal = scene.localToWorld(port[1].clone()).sub(at);
+      const facing = normal.dot(state.camera.position.clone().sub(at)) > 0;
+      const point = facing ? toScreen(port[0]) : null;
+      const middle = toScreen(centre);
+      if (point && middle) chargePort = { ...point, side: point.x >= middle.x ? 1 : -1 } as const;
+    }
     setCompartmentAnchors({
       frunk: toScreen(anchorsRef.current.frunk),
       trunk: toScreen(anchorsRef.current.trunk),
+      chargePort,
     });
   };
 
@@ -334,7 +371,7 @@ function Model({
     }
   });
 
-  useEffect(() => () => setCompartmentAnchors({ frunk: null, trunk: null }), []);
+  useEffect(() => () => setCompartmentAnchors(NO_ANCHORS), []);
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();

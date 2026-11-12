@@ -5,6 +5,7 @@ import CarLock from '../CarLock/CarLock';
 import {
   getCompartmentAnchors,
   subscribeCompartmentAnchors,
+  type PortPoint,
   type ScreenPoint,
 } from '../VehicleModel/compartmentAnchors';
 
@@ -60,10 +61,38 @@ function placeLeader(
   dot.style.visibility = 'visible';
 }
 
+// How far out from the charge port its button sits, as on the car: a short line, then the bolt.
+const PORT_REACH = 34;
+
+function placePort(
+  button: HTMLButtonElement,
+  line: SVGLineElement,
+  port: PortPoint | null,
+  origin: DOMRect,
+) {
+  if (!port) {
+    button.style.visibility = 'hidden';
+    line.style.visibility = 'hidden';
+    return;
+  }
+  const x = port.x - origin.left;
+  const y = port.y - origin.top;
+  const half = button.offsetWidth / 2;
+  const centre = clamp(x + port.side * (PORT_REACH + half), half, origin.width - half);
+  button.style.transform = `translate(${centre - half}px, ${y - button.offsetHeight / 2}px)`;
+  button.style.visibility = 'visible';
+  line.setAttribute('x1', `${x}`);
+  line.setAttribute('y1', `${y}`);
+  line.setAttribute('x2', `${centre - port.side * (half - 10)}`);
+  line.setAttribute('y2', `${y}`);
+  line.style.visibility = 'visible';
+}
+
 export function CompartmentControls() {
   const driving = useCar(isDriving);
   const openCompartment = useCar((state) => state.openCompartment);
-  const { toggleCompartment } = useCarActions();
+  const portOpen = useCar((state) => state.chargePortOpen);
+  const { toggleCompartment, toggleChargePort } = useCarActions();
 
   const rootRef = useRef<HTMLDivElement>(null);
   const lockRef = useRef<HTMLDivElement>(null);
@@ -73,6 +102,8 @@ export function CompartmentControls() {
   const trunkLine = useRef<SVGLineElement>(null);
   const frunkDot = useRef<SVGCircleElement>(null);
   const trunkDot = useRef<SVGCircleElement>(null);
+  const portButton = useRef<HTMLButtonElement>(null);
+  const portLine = useRef<SVGLineElement>(null);
 
   // Drawn straight onto the elements rather than through state: the car can move every frame.
   useLayoutEffect(() => {
@@ -91,7 +122,10 @@ export function CompartmentControls() {
       ) {
         return;
       }
-      const { frunk, trunk } = getCompartmentAnchors();
+      const { frunk, trunk, chargePort } = getCompartmentAnchors();
+      if (portButton.current && portLine.current) {
+        placePort(portButton.current, portLine.current, chargePort, root.getBoundingClientRect());
+      }
       const frunkLeader: Leader = {
         label: frunkLabel.current,
         line: frunkLine.current,
@@ -136,7 +170,20 @@ export function CompartmentControls() {
         <circle ref={frunkDot} r="2.5" />
         <line ref={trunkLine} />
         <circle ref={trunkDot} r="2.5" />
+        <line ref={portLine} />
       </svg>
+      <button
+        ref={portButton}
+        type="button"
+        className={`chargePortBtn ${portOpen ? 'open' : ''}`}
+        aria-label={portOpen ? 'Close charge port' : 'Open charge port'}
+        aria-pressed={portOpen}
+        onClick={toggleChargePort}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M13 2 5 13.5h6L10 22l8-11.5h-6Z" />
+        </svg>
+      </button>
       <button
         ref={frunkLabel}
         type="button"

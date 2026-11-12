@@ -15,7 +15,7 @@ import {
   type CalendarEvent,
 } from './calendarEvents';
 import { parseIcs } from './ics';
-import { UpcomingCard } from './UpcomingCard';
+import { UpcomingDestination, useUpcomingDestination } from './UpcomingDestination';
 
 const NOON = new Date(2026, 10, 6, 12, 0).getTime();
 
@@ -180,23 +180,27 @@ describe('screens', () => {
     expect(await screen.findByText('No events found in empty.ics.')).toBeInTheDocument();
   });
 
-  test('the upcoming card shows in Park, dismisses, and stays away while driving', () => {
+  test('the next calendar destination is suggested in Park, and not while driving', () => {
     vi.useFakeTimers({ now: new Date(2026, 10, 6, 8, 0) });
-    const parked = renderInCar(<UpcomingCard />);
-    expect(screen.getByRole('complementary', { name: 'Upcoming event' })).toHaveTextContent(
-      'Team check-in',
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Dismiss upcoming event' }));
-    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    const picked: string[] = [];
+    function Suggestion() {
+      const event = useUpcomingDestination();
+      return event ? (
+        <UpcomingDestination event={event} onPick={(place) => picked.push(place)} />
+      ) : null;
+    }
+
+    // Team check-in comes first but has no place, so the coffee is what is suggested.
+    const parked = renderInCar(<Suggestion />);
+    const row = screen.getByRole('button', { name: /^Navigate to Ferry Building/ });
+    expect(row).toHaveTextContent('Ferry Building');
+    expect(row).toHaveTextContent('Coffee with a friend · San Francisco');
+    fireEvent.click(row);
+    expect(picked).toEqual(['Ferry Building, San Francisco']);
     parked.unmount();
 
-    const driving = renderInCar(<UpcomingCard />, 'D');
-    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
-    driving.unmount();
-
-    // It must not sit on top of an open app.
-    renderInCar(<UpcomingCard />, 'P', { kind: 'app', app: 'energy' });
-    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    renderInCar(<Suggestion />, 'D');
+    expect(screen.queryByRole('button', { name: /^Navigate to/ })).not.toBeInTheDocument();
     vi.useRealTimers();
   });
 });

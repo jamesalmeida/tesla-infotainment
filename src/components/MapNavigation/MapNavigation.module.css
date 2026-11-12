@@ -448,9 +448,9 @@
 }
 
 /* On a touch tablet such as the unfolded iPhone Duo, the top right corner holds the system's
-   clock, battery and signal, so the controls sit at the bottom right edge of the map instead. */
+   clock, battery and signal, so the controls sit at the bottom right of the map instead. */
 :global(:root[data-touch='true'][data-layout='stage']) .floatingRightBtnsWrapper {
-  right: 0;
+  right: calc(16 * var(--u));
   top: auto;
   bottom: calc(12 * var(--u));
 }
