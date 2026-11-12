@@ -17,6 +17,13 @@ export interface CompartmentAnchors {
   chargePort: PortPoint | null;
   // The middle of the roof, where the lock's line ends.
   roof: ScreenPoint | null;
+  // Points a set height straight up from the frunk, trunk and roof, where the car hangs each
+  // label and the lock. Being in the scene, they keep their place as the car turns.
+  frunkLabel?: ScreenPoint | null;
+  trunkLabel?: ScreenPoint | null;
+  lockIcon?: ScreenPoint | null;
+  // Just above the roof, where the lock's line stops short of the car.
+  roofLine?: ScreenPoint | null;
 }
 
 export const NO_ANCHORS: CompartmentAnchors = {
@@ -29,7 +36,7 @@ export const NO_ANCHORS: CompartmentAnchors = {
 let current: CompartmentAnchors = NO_ANCHORS;
 const listeners = new Set<() => void>();
 
-const samePoint = (a: ScreenPoint | null, b: ScreenPoint | null) =>
+const samePoint = (a: ScreenPoint | null = null, b: ScreenPoint | null = null) =>
   a === b || (a !== null && b !== null && Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5);
 
 export const setCompartmentAnchors = (next: CompartmentAnchors): void => {
@@ -38,6 +45,10 @@ export const setCompartmentAnchors = (next: CompartmentAnchors): void => {
     samePoint(current.trunk, next.trunk) &&
     samePoint(current.chargePort, next.chargePort) &&
     samePoint(current.roof, next.roof) &&
+    samePoint(current.frunkLabel, next.frunkLabel) &&
+    samePoint(current.trunkLabel, next.trunkLabel) &&
+    samePoint(current.lockIcon, next.lockIcon) &&
+    samePoint(current.roofLine, next.roofLine) &&
     current.chargePort?.side === next.chargePort?.side
   ) {
     return;

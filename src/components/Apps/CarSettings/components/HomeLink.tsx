@@ -1,6 +1,15 @@
 import { useCar, useCarActions } from '../../../../state/CarStateContext';
 import { canUseHomeLink, isHomeLinkInRange, type GarageDoor } from '../../../../state/carState';
-import { Button, ButtonRow, DemoNote, Page, Row, Section, panelStyles } from './SystemPanel';
+import {
+  Button,
+  ButtonRow,
+  DemoNote,
+  Page,
+  Row,
+  Section,
+  Toggle,
+  panelStyles,
+} from './SystemPanel';
 import { ValetHidden } from './ValetHidden';
 import styles from './HomeLink.module.css';
 
@@ -25,14 +34,24 @@ export const HomeLink = () => {
   const door = useCar((state) => state.homelink.door);
   const inRange = useCar(isHomeLinkInRange);
   const canUse = useCar((state) => canUseHomeLink(state).allowed);
-  const { setHomeHere, toggleGarageDoor } = useCarActions();
+  const enabled = useCar((state) => state.settings.homelinkEnabled);
+  const name = useCar((state) => state.homelink.name);
+  const { setHomeHere, toggleGarageDoor, setSettings } = useCarActions();
   const isUp = door === 'open' || door === 'opening';
 
   return (
     <Page title="HomeLink">
       <DemoNote>Demo only: this door is a drawing, and nothing is transmitted.</DemoNote>
       <ValetHidden what="HomeLink">
-        <Section title="Demo Garage">
+        <Section title="HomeLink">
+          <Toggle
+            label="Show HomeLink"
+            hint={`The ${name} button in the status bar, shown near home.`}
+            checked={enabled}
+            onChange={(homelinkEnabled) => setSettings({ homelinkEnabled })}
+          />
+        </Section>
+        <Section title={name}>
           <Door />
           <Row
             label={DOOR_LABELS[door]}

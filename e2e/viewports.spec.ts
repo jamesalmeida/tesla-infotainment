@@ -72,9 +72,21 @@ for (const { name, width, height, mode, touch } of VIEWPORTS) {
           // The card dots are full width but shorter: a swipe on the card is the main way to
           // change it, and full-height dots left a tall gap above the dock.
           const cardDots = '[aria-label="Cards under the car"] [role="tab"]';
+          // HomeLink's Activate is drawn small to fit the status bar, with a full-height
+          // target laid around it: a tap that far above or below it still lands on it.
+          const extended = (element: HTMLElement) => {
+            if (element.dataset.hitArea !== 'extended') return false;
+            const box = element.getBoundingClientRect();
+            const reach = (minimum - box.height) / 2 - 1;
+            const x = box.left + box.width / 2;
+            return [box.top - reach, box.bottom + reach].every((y) =>
+              element.contains(document.elementFromPoint(x, y)),
+            );
+          };
           return [...document.querySelectorAll<HTMLElement>('button, [role="button"]')]
             .filter((element) => element.offsetWidth > 0)
             .filter((element) => !element.matches(cardDots))
+            .filter((element) => !extended(element))
             .filter((element) => element.offsetWidth < minimum || element.offsetHeight < minimum)
             .map(
               (element) =>

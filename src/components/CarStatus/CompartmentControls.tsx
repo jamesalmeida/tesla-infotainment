@@ -12,53 +12,62 @@ import {
 interface Leader {
   label: HTMLButtonElement;
   line: SVGLineElement;
-  dot: SVGCircleElement;
   anchor: ScreenPoint | null;
+  hang: ScreenPoint | null;
 }
 
-const GAP = 6;
-// The indicator column runs down the left beside the labels, so they stop short of it.
+// Below this the car's view is too short to hang labels over it, as on a phone, so they
+// keep to their row.
+const MIN_STAGE_HEIGHT = 220;
+
+// The space between a line and its label's text.
+const GAP = 8;
+// The indicator column runs down the left, so a label never goes further left than this.
 const LEFT_GUTTER = 48;
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), Math.max(min, max));
 
-const hide = ({ label, line, dot }: Leader) => {
+// Until the car says where its parts are (or with no 3D car at all), a label stays where it
+// sits in the row, still a button, without its line.
+const hide = ({ label, line }: Leader) => {
   label.style.transform = '';
   line.style.visibility = 'hidden';
-  dot.style.visibility = 'hidden';
 };
 
-// Slides a label so its bar sits over its part of the car and runs a line down to it. The
-// label on the left keeps its bar on its right edge and the other the opposite, so the two
-// never cover each other or the lock; near the middle the line leans instead.
-function placeLeader(
-  { label, line, dot, anchor }: Leader & { anchor: ScreenPoint },
-  side: 'left' | 'right',
-  origin: DOMRect,
-  bounds: { min: number; max: number },
-) {
-  label.dataset.side = side;
-  const width = label.offsetWidth;
-  const anchorX = anchor.x - origin.left;
-  const edge =
-    side === 'left'
-      ? clamp(anchorX, width + LEFT_GUTTER, bounds.max)
-      : clamp(anchorX, bounds.min, origin.width - width - GAP);
-  const flowEdge = side === 'left' ? label.offsetLeft + width : label.offsetLeft;
-  label.style.transform = `translateX(${edge - flowEdge}px)`;
+// Moves an element from where it sits in the row to a point in the row's own space.
+const moveTo = (element: HTMLElement, left: number, top: number) => {
+  element.style.transform = `translate(${left - element.offsetLeft}px, ${top - element.offsetTop}px)`;
+};
 
-  const top = label.offsetTop + label.offsetHeight;
-  const x2 = anchorX;
-  const y2 = anchor.y - origin.top;
-  line.setAttribute('x1', `${edge}`);
+// Hangs a label beside a vertical line that drops from above its part of the car down to it,
+// as the car's own screen does: the text reads to the right of the line, unless that would
+// run off the edge, when it moves to the left.
+// The text never comes lower than the roofline, so it stays clear of the car wherever the
+// camera is.
+function placeLeader(
+  { label, line, anchor, hang }: Leader & { anchor: ScreenPoint; hang: ScreenPoint },
+  origin: DOMRect,
+  roofline: number | null,
+) {
+  const width = label.offsetWidth;
+  const x = hang.x - origin.left;
+  const highest = roofline === null ? Infinity : roofline - origin.top - label.offsetHeight;
+  const top = Math.max(Math.min(hang.y - origin.top, highest), -origin.top);
+  const fitsRight = x + GAP + width <= origin.width;
+  const side = fitsRight || x - GAP - width < LEFT_GUTTER ? 'right' : 'left';
+  label.dataset.side = side;
+  const left =
+    side === 'right'
+      ? clamp(x + GAP, LEFT_GUTTER, origin.width - width)
+      : clamp(x - GAP - width, LEFT_GUTTER, origin.width - width);
+  moveTo(label, left, top);
+
+  line.setAttribute('x1', `${x}`);
   line.setAttribute('y1', `${top}`);
-  line.setAttribute('x2', `${x2}`);
-  line.setAttribute('y2', `${y2}`);
-  dot.setAttribute('cx', `${x2}`);
-  dot.setAttribute('cy', `${y2}`);
+  line.setAttribute('x2', `${anchor.x - origin.left}`);
+  line.setAttribute('y2', `${anchor.y - origin.top}`);
   line.style.visibility = 'visible';
-  dot.style.visibility = 'visible';
 }
 
 // How far out from the charge port its button sits, as on the car: a short line, then the bolt.
@@ -100,8 +109,6 @@ export function CompartmentControls() {
   const trunkLabel = useRef<HTMLButtonElement>(null);
   const frunkLine = useRef<SVGLineElement>(null);
   const trunkLine = useRef<SVGLineElement>(null);
-  const frunkDot = useRef<SVGCircleElement>(null);
-  const trunkDot = useRef<SVGCircleElement>(null);
   const portButton = useRef<HTMLButtonElement>(null);
   const portLine = useRef<SVGLineElement>(null);
   const lockLine = useRef<SVGLineElement>(null);
@@ -111,75 +118,67 @@ export function CompartmentControls() {
     const draw = () => {
       const root = rootRef.current;
       const lock = lockRef.current;
-      if (
-        !root ||
-        !lock ||
-        !frunkLabel.current ||
-        !trunkLabel.current ||
-        !frunkLine.current ||
-        !trunkLine.current ||
-        !frunkDot.current ||
-        !trunkDot.current
-      ) {
-        return;
-      }
-      const { frunk, trunk, chargePort, roof } = getCompartmentAnchors();
+      if (!root || !lock || !frunkLabel.current || !trunkLabel.current) return;
+      if (!frunkLine.current || !trunkLine.current) return;
+      const stage = document.querySelector('.vehicleStage canvas');
+      const roomy = !stage || stage.getBoundingClientRect().height >= MIN_STAGE_HEIGHT;
+      const anchors = getCompartmentAnchors();
+      const origin = root.getBoundingClientRect();
       if (portButton.current && portLine.current) {
-        placePort(portButton.current, portLine.current, chargePort, root.getBoundingClientRect());
+        placePort(portButton.current, portLine.current, anchors.chargePort, origin);
       }
-      const frunkLeader: Leader = {
-        label: frunkLabel.current,
-        line: frunkLine.current,
-        dot: frunkDot.current,
-        anchor: frunk,
-      };
-      const trunkLeader: Leader = {
-        label: trunkLabel.current,
-        line: trunkLine.current,
-        dot: trunkDot.current,
-        anchor: trunk,
-      };
-      if (!frunk || !trunk) {
-        hide(frunkLeader);
-        hide(trunkLeader);
-        return;
+      const leaders: Leader[] = [
+        {
+          label: frunkLabel.current,
+          line: frunkLine.current,
+          anchor: anchors.frunk,
+          hang: anchors.frunkLabel ?? null,
+        },
+        {
+          label: trunkLabel.current,
+          line: trunkLine.current,
+          anchor: anchors.trunk,
+          hang: anchors.trunkLabel ?? null,
+        },
+      ];
+      for (const leader of leaders) {
+        if (roomy && leader.anchor && leader.hang) {
+          placeLeader(
+            { ...leader, anchor: leader.anchor, hang: leader.hang },
+            origin,
+            anchors.roof?.y ?? null,
+          );
+        } else {
+          hide(leader);
+        }
       }
 
-      const origin = root.getBoundingClientRect();
-      // The lock slides over the roof, as the labels do over their lids, keeping room for a
-      // label either side, and runs its own line down to the roof.
-      let lockShift = 0;
+      // The lock hangs above the roof, and its line stops short of it.
+      const { lockIcon, roofLine } = anchors;
       const lockShown = getComputedStyle(lock).display !== 'none';
-      if (roof && lockShown) {
-        const margin = Math.max(frunkLabel.current.offsetWidth, trunkLabel.current.offsetWidth);
+      if (roomy && lockIcon && lockShown) {
         const centre = clamp(
-          roof.x - origin.left,
-          LEFT_GUTTER + margin + GAP * 2 + lock.offsetWidth / 2,
-          origin.width - margin - GAP * 2 - lock.offsetWidth / 2,
+          lockIcon.x - origin.left,
+          LEFT_GUTTER + lock.offsetWidth / 2,
+          origin.width - lock.offsetWidth / 2,
         );
-        lockShift = centre - (lock.offsetLeft + lock.offsetWidth / 2);
-        lock.style.transform = `translateX(${lockShift}px)`;
-        if (lockLine.current) {
+        const top = Math.max(lockIcon.y - origin.top - lock.offsetHeight, -origin.top);
+        moveTo(lock, centre - lock.offsetWidth / 2, top);
+        const lineTop = top + lock.offsetHeight + GAP;
+        const lineEnd = roofLine ? roofLine.y - origin.top : lineTop;
+        if (lockLine.current && lineEnd > lineTop) {
           lockLine.current.setAttribute('x1', `${centre}`);
-          lockLine.current.setAttribute('y1', `${lock.offsetTop + lock.offsetHeight}`);
-          lockLine.current.setAttribute('x2', `${roof.x - origin.left}`);
-          lockLine.current.setAttribute('y2', `${roof.y - origin.top}`);
+          lockLine.current.setAttribute('y1', `${lineTop}`);
+          lockLine.current.setAttribute('x2', `${centre}`);
+          lockLine.current.setAttribute('y2', `${lineEnd}`);
           lockLine.current.style.visibility = 'visible';
+        } else if (lockLine.current) {
+          lockLine.current.style.visibility = 'hidden';
         }
       } else {
         lock.style.transform = '';
         if (lockLine.current) lockLine.current.style.visibility = 'hidden';
       }
-      // A hidden lock (phones on their side) leaves the middle of the row free.
-      const lockLeft = lock.offsetWidth ? lock.offsetLeft + lockShift : origin.width / 2;
-      const lockRight = lock.offsetWidth
-        ? lock.offsetLeft + lock.offsetWidth + lockShift
-        : origin.width / 2;
-      const frunkFirst = frunk.x <= trunk.x;
-      const [left, right] = frunkFirst ? [frunkLeader, trunkLeader] : [trunkLeader, frunkLeader];
-      const bounds = { min: lockRight + GAP, max: lockLeft - GAP };
-      placeLeader({ ...left, anchor: left.anchor! }, 'left', origin, bounds);
-      placeLeader({ ...right, anchor: right.anchor! }, 'right', origin, bounds);
     };
     draw();
     const unsubscribe = subscribeCompartmentAnchors(draw);
@@ -194,9 +193,7 @@ export function CompartmentControls() {
     <div ref={rootRef} className={`carModelStatus ${driving ? 'fade-out' : 'fade-in'}`}>
       <svg className="compartmentLeaders" aria-hidden="true">
         <line ref={frunkLine} />
-        <circle ref={frunkDot} r="2.5" />
         <line ref={trunkLine} />
-        <circle ref={trunkDot} r="2.5" />
         <line ref={portLine} />
         <line ref={lockLine} />
       </svg>
@@ -216,7 +213,7 @@ export function CompartmentControls() {
         ref={frunkLabel}
         type="button"
         className="toggleFrunk no-select"
-        data-side="left"
+        data-side="right"
         onClick={() => toggleCompartment('frunk')}
       >
         {openCompartment === 'frunk' ? 'Close' : 'Open'}

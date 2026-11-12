@@ -160,7 +160,12 @@ const pickPersisted = ({
   wifi: { ...wifi, attempt: null, error: null },
   bluetooth: { ...bluetooth, pairing: null, error: null },
   // A visit starts with the door shut, so only home itself matters.
-  homelink: { door: 'closed', doorPosition: 0, homeOdometerMiles: homelink.homeOdometerMiles },
+  homelink: {
+    door: 'closed',
+    doorPosition: 0,
+    homeOdometerMiles: homelink.homeOdometerMiles,
+    name: homelink.name,
+  },
   installedUpdate,
   schedule,
 });

@@ -25,7 +25,7 @@ export const PANEL_ELEVATION = degrees(15);
 export const PARK_VIEW_ELEVATION = degrees(5);
 // With the whole screen, the camera also comes further round the side, so more of the flank
 // and the rear corner show.
-export const PARK_VIEW_AZIMUTH = DEFAULT_AZIMUTH + degrees(10);
+export const PARK_VIEW_AZIMUTH = DEFAULT_AZIMUTH + degrees(4);
 export const DRIVE_ELEVATION = Math.PI / 5.14;
 // A vertical drag can raise or lower the camera this far, then it eases back with the spin.
 export const MIN_ELEVATION = degrees(1);

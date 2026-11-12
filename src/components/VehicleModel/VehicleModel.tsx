@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
   type ComponentRef,
   type PointerEvent,
+  type ReactNode,
   type RefObject,
 } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
@@ -56,8 +57,10 @@ interface VehicleModelProps {
   lights?: CarLightState;
   paint?: PaintColor;
   speed?: number;
-  // How much room the camera leaves around the car. Below 1 the car fills more of the view.
-  fitMargin?: number;
+  // How much room the camera leaves around the car; below 1 the car fills more of the view.
+  // A number, or one worked out from the canvas's width over its height, since the fit
+  // itself only looks at the height.
+  fitMargin?: number | ((aspect: number) => number);
   // How high the camera rests above the ground, in radians; see vehiclePose.
   elevation?: number;
   // Where around the car the camera rests, in radians; see vehiclePose.
@@ -94,6 +97,15 @@ const cameraPosition = (elevation: number, azimuth: number): [number, number, nu
 ];
 
 const CAMERA_FOV = 22;
+
+// How high above its part each label hangs, in car heights, as the car's own screen does:
+// the frunk's label low beside the bonnet, the trunk's higher up at the back, and the lock
+// above the roof with its line stopping just short of it.
+const FRUNK_LIFT = 0.38;
+// The trunk's point is low on the tail, so its label goes higher to clear the roofline.
+const TRUNK_LIFT = 0.8;
+const LOCK_LIFT = 0.36;
+const LOCK_LINE_GAP = 0.1;
 
 const ORBIT_TARGET: [number, number, number] = [0, -0.5, 0];
 // OrbitControls measures from straight overhead, so the highest camera is the smallest angle.
@@ -251,6 +263,8 @@ function Model({
     centre: Vector3;
     roof: Vector3;
     port: [Vector3, Vector3] | null;
+    // The car's height in the scene, which sets how far above it the labels hang.
+    height: number;
   } | null>(null);
 
   // The canvas only draws on request, so a change has to ask for the first frame. Coming
@@ -339,12 +353,16 @@ function Model({
           new Vector3(carCentre.x, new Box3().setFromObject(scene).max.y, carCentre.z),
         ),
         port,
+        height: new Box3().setFromObject(scene).getSize(new Vector3()).y,
       };
     }
     const rect = state.gl.domElement.getBoundingClientRect();
-    const toScreen = (local: Vector3 | null): ScreenPoint | null => {
+    // A lift raises the point straight up, in car heights, whichever way the car faces.
+    const toScreen = (local: Vector3 | null, lift = 0): ScreenPoint | null => {
       if (!local || rect.width === 0) return null;
-      const point = scene.localToWorld(local.clone()).project(state.camera);
+      const point = scene.localToWorld(local.clone());
+      point.y += lift * anchorsRef.current!.height;
+      point.project(state.camera);
       return {
         x: rect.left + ((point.x + 1) / 2) * rect.width,
         y: rect.top + ((1 - point.y) / 2) * rect.height,
@@ -360,11 +378,16 @@ function Model({
       const middle = toScreen(centre);
       if (point && middle) chargePort = { ...point, side: point.x >= middle.x ? 1 : -1 } as const;
     }
+    const { frunk, trunk, roof } = anchorsRef.current;
     setCompartmentAnchors({
-      frunk: toScreen(anchorsRef.current.frunk),
-      trunk: toScreen(anchorsRef.current.trunk),
+      frunk: toScreen(frunk),
+      trunk: toScreen(trunk),
       chargePort,
-      roof: toScreen(anchorsRef.current.roof),
+      roof: toScreen(roof),
+      frunkLabel: toScreen(frunk, FRUNK_LIFT),
+      trunkLabel: toScreen(trunk, TRUNK_LIFT),
+      lockIcon: toScreen(roof, LOCK_LIFT),
+      roofLine: toScreen(roof, LOCK_LINE_GAP),
     });
   };
 
@@ -487,6 +510,22 @@ function ControlledOrbitControls({ elevation, azimuth }: { elevation: number; az
   );
 }
 
+function FittedStage({
+  fitMargin,
+  children,
+}: {
+  fitMargin: NonNullable<VehicleModelProps['fitMargin']>;
+  children: ReactNode;
+}) {
+  const aspect = useThree((state) => state.size.width / Math.max(1, state.size.height));
+  const margin = typeof fitMargin === 'function' ? fitMargin(aspect) : fitMargin;
+  return (
+    <Stage environment={stageEnvironment} adjustCamera={margin}>
+      {children}
+    </Stage>
+  );
+}
+
 function subscribeToTabVisibility(onChange: () => void) {
   document.addEventListener('visibilitychange', onChange);
   return () => document.removeEventListener('visibilitychange', onChange);
@@ -543,7 +582,7 @@ export function VehicleModel({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
     >
-      <Stage environment={stageEnvironment} adjustCamera={fitMargin}>
+      <FittedStage fitMargin={fitMargin}>
         <Model
           scale={0.01}
           pose={pose}
@@ -555,7 +594,7 @@ export function VehicleModel({
           paint={paint}
           speed={speed}
         />
-      </Stage>
+      </FittedStage>
       <ControlledOrbitControls elevation={elevation} azimuth={azimuth} />
     </Canvas>
   );

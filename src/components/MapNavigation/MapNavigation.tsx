@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { useCar, useCarActions } from '../../state/CarStateContext';
 import { getImagePath } from '../../utils/assetPaths';
-import { StatusIndicators } from '../StatusIndicators/StatusIndicators';
+import { HomeLinkStatus, StatusIndicators } from '../StatusIndicators/StatusIndicators';
 import CarLock from '../CarLock/CarLock';
 import Clock from '../Clock/Clock';
 import OutsideTemp from '../OutsideTemp/OutsideTemp';
@@ -52,6 +52,7 @@ export function MapNavigation({ onWifiClick }: MapNavigationProps) {
           <CarLock />
         </div>
         <UserProfile />
+        <HomeLinkStatus />
         <div className={styles.wifiStatus}>
           <img src={getImagePath('icon-wifi.svg')} alt="Wifi Status" onClick={onWifiClick} />
         </div>

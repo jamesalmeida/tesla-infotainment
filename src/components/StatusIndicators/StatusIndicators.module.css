@@ -17,3 +17,68 @@
   width: max(14px, calc(20 * var(--u)));
   height: max(14px, calc(20 * var(--u)));
 }
+
+/* HomeLink sits before the Wi-Fi icon: a house, the remote's name and its button. */
+.homelink {
+  display: flex;
+  align-items: center;
+  gap: calc(6 * var(--u));
+  margin: 0 calc(10 * var(--u));
+  color: var(--color-text);
+  font-size: max(var(--text-min), calc(12 * var(--u)));
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.homelink svg {
+  width: max(16px, calc(22 * var(--u)));
+  height: max(16px, calc(22 * var(--u)));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.activate {
+  position: relative;
+  min-height: calc(28 * var(--u));
+  padding: 0 calc(10 * var(--u));
+  border: none;
+  border-radius: calc(4 * var(--u));
+  background-color: #c9c9c9;
+  color: #333333;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* The button stays small in the bar, but a finger gets a full-size target around it. */
+.activate::before {
+  content: '';
+  position: absolute;
+  inset: min(0px, calc((100% - var(--tap-target, 0px)) / 2)) 0;
+}
+
+.activate:active {
+  background-color: #b3b3b3;
+}
+
+.activate:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* A phone held upright has no room for the remote's name: the house and button stay. */
+:global(:root[data-layout='stacked']) .homelinkName {
+  display: none;
+}
+
+@media (max-width: 599px) {
+  :global(:root[data-layout='stacked']) .homelink svg {
+    display: none;
+  }
+
+  :global(:root[data-layout='stacked']) .homelink {
+    margin: 0 calc(4 * var(--u));
+  }
+}
