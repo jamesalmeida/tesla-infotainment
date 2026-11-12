@@ -371,10 +371,13 @@ body {
   top: calc(15 * var(--u));
 }
 
+/* The sign grows to fit its words: they never go below the minimum text size, which on a
+   touch screen is wider than the sign's design width. */
 .speedLimit {
   box-sizing: border-box;
-  width: calc(36 * var(--u));
-  padding: calc(3 * var(--u)) calc(3 * var(--u)) calc(2 * var(--u));
+  width: max-content;
+  min-width: calc(36 * var(--u));
+  padding: calc(3 * var(--u)) calc(4 * var(--u)) calc(2 * var(--u));
   border: 1px solid rgba(0, 0, 0, 0.18);
   border-radius: calc(4 * var(--u));
   background-color: #ffffff;

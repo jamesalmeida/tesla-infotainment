@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { CarStateProvider, useCar } from '../../state/CarStateContext';
 import { initialCarState, type CarState } from '../../state/carState';
 import { Notice } from '../Notice/Notice';
-import { SelfDrivingButton, SelfDrivingStatus } from './SelfDrivingButton';
+import { SelfDrivingButton, SelfDrivingMode } from './SelfDrivingButton';
 
 function Autopilot() {
   return <output aria-label="autopilot">{useCar((state: CarState) => state.autopilot)}</output>;
@@ -39,12 +39,13 @@ describe('in Drive', () => {
   const renderStatus = (state: CarState) =>
     render(
       <CarStateProvider initialState={state}>
-        <SelfDrivingStatus />
+        <SelfDrivingButton />
+        <SelfDrivingMode />
         <Autopilot />
       </CarStateProvider>,
     );
 
-  test('the name starts and stops it, and the menu picks the mode', () => {
+  test('the button starts it, and the menu beside the speed picks the mode', () => {
     renderStatus({ ...initialCarState, gear: 'D' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Start Self-Driving' }));
