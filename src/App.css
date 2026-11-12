@@ -287,8 +287,13 @@ body {
   max-width: 40%;
 }
 
+.horizontalPanelGroup.parkView {
+  /* About the share of the screen the car gives its media card in Park View. */
+  --park-media-width: calc(480 * var(--u));
+}
+
 .horizontalPanelGroup.parkView .carBottomRow [class*='deck'] {
-  flex: 0 1 calc(560 * var(--u));
+  flex: 0 1 var(--park-media-width);
   width: auto;
   margin: 0 0 calc(12 * var(--u));
 }
@@ -737,9 +742,9 @@ body {
 }
 
 /* The signal and pedal buttons line up with the right edge of the Navigate card below. The
-   row under the car is centred: the media card (up to 560u), the gap, then the 320u card. */
+   row under the car is centred: the media card, the gap, then the 320u card. */
 .horizontalPanelGroup.parkView .pedals {
-  right: max(3%, calc(50% - (560 * var(--u) + 12 * var(--u) + 320 * var(--u)) / 2));
+  right: max(3%, calc(50% - (var(--park-media-width) + 12 * var(--u) + 320 * var(--u)) / 2));
 }
 
 /*

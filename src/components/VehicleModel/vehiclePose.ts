@@ -15,6 +15,22 @@ export type CarPart = 'rotation' | 'frunk' | 'trunk' | DoorId;
 export const DEFAULT_AZIMUTH = 0.6;
 export const AZIMUTH_RETURN_DELAY_MS = 4000;
 
+const degrees = (value: number) => (value * Math.PI) / 180;
+
+// How high the camera sits, as an angle above the ground looking at the car. The car looks
+// at itself from low down: a little above the roof beside the map, nearly level with the
+// car when it has the whole screen. Following it in Drive, the camera is higher, so the
+// road ahead shows.
+export const PANEL_ELEVATION = degrees(15);
+export const PARK_VIEW_ELEVATION = degrees(5);
+// With the whole screen, the camera also comes further round the side, so more of the flank
+// and the rear corner show.
+export const PARK_VIEW_AZIMUTH = DEFAULT_AZIMUTH + degrees(10);
+export const DRIVE_ELEVATION = Math.PI / 5.14;
+// A vertical drag can raise or lower the camera this far, then it eases back with the spin.
+export const MIN_ELEVATION = degrees(1);
+export const MAX_ELEVATION = degrees(50);
+
 // How long a part takes to get most of the way to its target, in seconds.
 export const AZIMUTH_SMOOTH_TIME = 0.35;
 const SMOOTH_TIMES: Record<CarPart, number> = {

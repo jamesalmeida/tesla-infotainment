@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -27,7 +28,10 @@ import {
   findDoorId,
   getPartTargets,
   isClick,
+  MAX_ELEVATION,
+  MIN_ELEVATION,
   nearestAngle,
+  PANEL_ELEVATION,
   stepDamped,
   stepParts,
   type CarParts,
@@ -54,6 +58,10 @@ interface VehicleModelProps {
   speed?: number;
   // How much room the camera leaves around the car. Below 1 the car fills more of the view.
   fitMargin?: number;
+  // How high the camera rests above the ground, in radians; see vehiclePose.
+  elevation?: number;
+  // Where around the car the camera rests, in radians; see vehiclePose.
+  azimuth?: number;
 }
 
 interface ModelProps extends VehicleModelProps {
@@ -79,15 +87,15 @@ interface CarNodes {
 type OrbitControlsHandle = ComponentRef<typeof OrbitControls>;
 
 // Stage's Bounds refits the camera distance, but keeps this direction.
-const CAMERA_ELEVATION = Math.PI / 5.14;
-const CAMERA_POSITION: [number, number, number] = [
-  5 * Math.cos(CAMERA_ELEVATION) * Math.sin(DEFAULT_AZIMUTH),
-  5 * Math.sin(CAMERA_ELEVATION),
-  5 * Math.cos(CAMERA_ELEVATION) * Math.cos(DEFAULT_AZIMUTH),
+const cameraPosition = (elevation: number, azimuth: number): [number, number, number] => [
+  5 * Math.cos(elevation) * Math.sin(azimuth),
+  5 * Math.sin(elevation),
+  5 * Math.cos(elevation) * Math.cos(azimuth),
 ];
 
 const ORBIT_TARGET: [number, number, number] = [0, -0.5, 0];
-const ORBIT_POLAR_ANGLE = Math.PI / 2 - CAMERA_ELEVATION;
+// OrbitControls measures from straight overhead, so the highest camera is the smallest angle.
+const polarAngle = (elevation: number) => Math.PI / 2 - elevation;
 
 const modelPath = getCarModelPath('tesla-model-3-2018.glb');
 
@@ -394,41 +402,69 @@ function Model({
   );
 }
 
-function ControlledOrbitControls() {
+function ControlledOrbitControls({ elevation, azimuth }: { elevation: number; azimuth: number }) {
   const controlsRef = useRef<OrbitControlsHandle>(null);
   const azimuthRef = useRef<Damped | null>(null);
+  const polarRef = useRef<Damped | null>(null);
+  const draggingRef = useRef(false);
   const returnTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const invalidate = useThree((state) => state.invalidate);
+  const restingPolar = polarAngle(elevation);
+  const restingPolarRef = useRef(restingPolar);
+  const restingAzimuthRef = useRef(azimuth);
 
   useEffect(() => () => clearTimeout(returnTimer.current), []);
 
+  const easeToRest = useCallback(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+    azimuthRef.current = {
+      value: nearestAngle(controls.getAzimuthalAngle(), restingAzimuthRef.current),
+      velocity: 0,
+    };
+    polarRef.current = { value: controls.getPolarAngle(), velocity: 0 };
+    invalidate();
+  }, [invalidate]);
+
+  // A new resting view, such as opening Park View, glides there rather than jumping. A
+  // drag in progress keeps the camera where the finger has it until it lets go.
+  useEffect(() => {
+    restingPolarRef.current = restingPolar;
+    restingAzimuthRef.current = azimuth;
+    if (!draggingRef.current) easeToRest();
+  }, [restingPolar, azimuth, easeToRest]);
+
   const handleStart = () => {
     clearTimeout(returnTimer.current);
+    draggingRef.current = true;
     azimuthRef.current = null;
+    polarRef.current = null;
   };
 
   // The car stays where it was spun to, and only eases back once it has been left alone.
   const handleEnd = () => {
+    draggingRef.current = false;
     clearTimeout(returnTimer.current);
-    returnTimer.current = setTimeout(() => {
-      const controls = controlsRef.current;
-      if (!controls) return;
-      azimuthRef.current = {
-        value: nearestAngle(controls.getAzimuthalAngle(), DEFAULT_AZIMUTH),
-        velocity: 0,
-      };
-      invalidate();
-    }, AZIMUTH_RETURN_DELAY_MS);
+    returnTimer.current = setTimeout(easeToRest, AZIMUTH_RETURN_DELAY_MS);
   };
 
   useFrame((state, delta) => {
     const controls = controlsRef.current;
-    const azimuth = azimuthRef.current;
-    if (!controls || !azimuth) return;
-    const isMoving = stepDamped(azimuth, DEFAULT_AZIMUTH, AZIMUTH_SMOOTH_TIME, delta);
-    controls.setAzimuthalAngle(azimuth.value);
+    const spin = azimuthRef.current;
+    const polar = polarRef.current;
+    if (!controls || (!spin && !polar)) return;
+    let isMoving = false;
+    if (spin) {
+      if (stepDamped(spin, restingAzimuthRef.current, AZIMUTH_SMOOTH_TIME, delta)) isMoving = true;
+      else azimuthRef.current = null;
+      controls.setAzimuthalAngle(spin.value);
+    }
+    if (polar) {
+      if (stepDamped(polar, restingPolarRef.current, AZIMUTH_SMOOTH_TIME, delta)) isMoving = true;
+      else polarRef.current = null;
+      controls.setPolarAngle(polar.value);
+    }
     if (isMoving) state.invalidate();
-    else azimuthRef.current = null;
   });
 
   // With damping on, setAzimuthalAngle moves 5% of the way and carries the rest into later
@@ -441,8 +477,8 @@ function ControlledOrbitControls() {
       enableZoom={false}
       enablePan={false}
       enableRotate={true}
-      minPolarAngle={ORBIT_POLAR_ANGLE}
-      maxPolarAngle={ORBIT_POLAR_ANGLE}
+      minPolarAngle={Math.min(polarAngle(MAX_ELEVATION), restingPolar)}
+      maxPolarAngle={Math.max(polarAngle(MIN_ELEVATION), restingPolar)}
       onStart={handleStart}
       onEnd={handleEnd}
     />
@@ -465,8 +501,12 @@ export function VehicleModel({
   paint,
   speed = 0,
   fitMargin = 1,
+  elevation = PANEL_ELEVATION,
+  azimuth = DEFAULT_AZIMUTH,
 }: VehicleModelProps) {
   const tabHidden = useSyncExternalStore(subscribeToTabVisibility, isTabHidden);
+  // The canvas only reads its camera once; later heights are eased to by the controls.
+  const [initialPosition] = useState(() => cameraPosition(elevation, azimuth));
   const pressRef = useRef<PointerPress>({ x: 0, y: 0, travel: 0 });
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -485,7 +525,7 @@ export function VehicleModel({
       dpr={[1, 2]}
       camera={{
         fov: 40,
-        position: CAMERA_POSITION,
+        position: initialPosition,
         near: 0.1,
         far: 1000,
       }}
@@ -512,7 +552,7 @@ export function VehicleModel({
           speed={speed}
         />
       </Stage>
-      <ControlledOrbitControls />
+      <ControlledOrbitControls elevation={elevation} azimuth={azimuth} />
     </Canvas>
   );
 }

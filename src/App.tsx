@@ -17,6 +17,12 @@ import { useCarSounds } from './hooks/useCarSounds';
 import { useOnScreenKeyboard } from './hooks/useOnScreenKeyboard';
 import { OnScreenKeyboard } from './components/OnScreenKeyboard/OnScreenKeyboard';
 import { carLightState } from './components/VehicleModel/vehicleLights';
+import {
+  DRIVE_ELEVATION,
+  PANEL_ELEVATION,
+  PARK_VIEW_AZIMUTH,
+  PARK_VIEW_ELEVATION,
+} from './components/VehicleModel/vehiclePose';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useBoot } from './hooks/useBoot';
 import { useLayout } from './hooks/useLayout';
@@ -94,7 +100,7 @@ function App() {
 }
 
 // In Park View the car has the whole screen, so the camera comes in closer.
-const PARK_VIEW_FIT_MARGIN = 0.78;
+const PARK_VIEW_FIT_MARGIN = 0.64;
 
 function VehicleView({ onSettled, wide }: { onSettled: () => void; wide: boolean }) {
   const pose = useCar(vehiclePose);
@@ -129,6 +135,10 @@ function VehicleView({ onSettled, wide }: { onSettled: () => void; wide: boolean
             paint={paint}
             speed={speed}
             fitMargin={wide ? PARK_VIEW_FIT_MARGIN : 1}
+            azimuth={wide && pose !== 'drive' ? PARK_VIEW_AZIMUTH : undefined}
+            elevation={
+              pose === 'drive' ? DRIVE_ELEVATION : wide ? PARK_VIEW_ELEVATION : PANEL_ELEVATION
+            }
           />
         </Suspense>
       </ErrorBoundary>
