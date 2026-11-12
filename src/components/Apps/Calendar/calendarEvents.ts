@@ -113,6 +113,14 @@ export function nextUpcoming(events: CalendarEvent[], now: number): CalendarEven
   return soonest[0] ?? null;
 }
 
+// The next event worth driving to: the soonest upcoming one with a place.
+export function nextDestination(events: CalendarEvent[], now: number): CalendarEvent | null {
+  return nextUpcoming(
+    events.filter((event) => event.location?.trim()),
+    now,
+  );
+}
+
 // Groups events that overlap, then gives each the first free column in its group.
 export function layoutDay(events: CalendarEvent[]): PlacedEvent[] {
   const sorted = [...events].sort((a, b) => a.start - b.start || b.end - a.end);

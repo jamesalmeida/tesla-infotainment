@@ -7,6 +7,7 @@ import {
   type FocusEvent,
   type FormEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import { getImagePath } from '../../utils/assetPaths';
 import type { Place } from './place';
@@ -65,6 +66,8 @@ interface PlaceSearchProps {
   /** Offered while the box is empty. Leave out to offer nothing. */
   saved?: SavedPlaces;
   savedActions?: SavedPlacesActions;
+  /** A row joined under the box while it is idle, such as the next calendar destination. */
+  footer?: ReactNode;
 }
 
 // Search box with place suggestions from the Places API (New). Replaces the legacy
@@ -79,6 +82,7 @@ export function PlaceSearch({
   disabled = false,
   saved,
   savedActions,
+  footer,
 }: PlaceSearchProps) {
   const [{ status, requestId, sheetOpen }, dispatch] = useReducer<
     PlaceSearchState<PlaceSuggestion>,
@@ -206,10 +210,14 @@ export function PlaceSearch({
   const suggestions = listedSuggestions(status);
   const highlighted = status.kind === 'open' ? status.highlighted : -1;
   const message = statusMessage(status);
+  const showFooter = Boolean(footer) && !sheetOpen && !query.trim();
 
   return (
     <div className={styles.placeSearch} onBlur={handleBlur} onKeyDown={handleContainerKeyDown}>
-      <form className={`floatingBtn ${styles.navBtn}`} onSubmit={handleSubmit}>
+      <form
+        className={`floatingBtn ${styles.navBtn} ${showFooter ? styles.joined : ''}`}
+        onSubmit={handleSubmit}
+      >
         <img className={styles.searchIcon} src={getImagePath('icon-search.svg')} alt="Search Map" />
         <input
           id="navigateTo"
@@ -235,6 +243,7 @@ export function PlaceSearch({
           </button>
         )}
       </form>
+      {showFooter && <div className={`floatingBtn ${styles.searchFooter}`}>{footer}</div>}
       <div className={styles.searchPopover}>
         {sheetOpen && !query.trim() && saved && savedActions && (
           <SavedPlacesList

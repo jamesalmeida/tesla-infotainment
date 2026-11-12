@@ -8,7 +8,10 @@ import {
   useMap,
   useMapsLibrary,
 } from '@vis.gl/react-google-maps';
+import { navigateToPlace } from '../../apps/navigation';
+import { useCarActions } from '../../state/CarStateContext';
 import { getImagePath } from '../../utils/assetPaths';
+import { UpcomingDestination, useUpcomingDestination } from '../Apps/Calendar/UpcomingDestination';
 import { CarMarker } from './CarMarker';
 import { MapButtons } from './MapButtons';
 import { DEFAULT_CAR_POSITION, initialMapLayers, mapLayersReducer } from './mapLayers';
@@ -28,6 +31,7 @@ import { TrafficLayer } from './TrafficLayer';
 import { TripPanel } from './TripPanel';
 import { useCarTracking } from './useCarTracking';
 import { useFollowCamera } from './useFollowCamera';
+import { useParkMapFocus } from '../ParkView/parkMapFocus';
 import { useSavedPlaces } from './useSavedPlaces';
 import { useTripProgress } from './useTripProgress';
 import styles from './MapNavigation.module.css';
@@ -88,7 +92,8 @@ export function MapStage() {
     onLiveFix: () => dispatchLayers({ type: 'liveFixReceived' }),
     onLiveError: (code) => dispatchLayers({ type: 'liveLocationFailed', code }),
   });
-  useFollowCamera(map, tracker, layers.following);
+  const parkFocus = useParkMapFocus();
+  useFollowCamera(map, tracker, layers.following, parkFocus);
   useTripProgress(tracker, activeRoute, () => dispatchNav({ type: 'arrived' }));
   const livePosition = () => tracker.getLivePose().position;
 
@@ -203,6 +208,9 @@ export function MapStage() {
     dispatchLayers({ type: 'followResumed' });
   };
 
+  const upcoming = useUpcomingDestination();
+  const actions = useCarActions();
+
   const toggleChargers = () => dispatchLayers({ type: 'chargersToggled' });
   const searchedPlace = searchedPlaceOf(nav);
 
@@ -217,6 +225,14 @@ export function MapStage() {
           onClear={clearSearch}
           getLocationBias={viewportCenter}
           saved={saved}
+          footer={
+            upcoming && nav.kind === 'idle' ? (
+              <UpcomingDestination
+                event={upcoming}
+                onPick={(place) => navigateToPlace(place, actions)}
+              />
+            ) : undefined
+          }
           savedActions={{
             onToggleFavorite: (place) => dispatchSaved({ type: 'favoriteToggled', place }),
             onRemoveRecent: (place) => dispatchSaved({ type: 'recentRemoved', place }),

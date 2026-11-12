@@ -76,20 +76,25 @@
   stroke-linejoin: round;
 }
 
-.search {
-  color: var(--color-text-muted) !important;
-  border-bottom: 1px solid var(--color-border) !important;
-}
-
-.shortcuts {
+.header {
   display: flex;
+  align-items: center;
 }
 
-.shortcuts button {
+/* Navigate takes the row, with Home and Work as icons at its end, as on the car. A row with
+   the next calendar destination sits underneath when there is one. */
+.search {
   flex: 1;
-  justify-content: center;
+  min-width: 0;
+  color: var(--color-text-muted) !important;
 }
 
-.shortcuts button + button {
-  border-left: 1px solid var(--color-border);
+.shortcut {
+  justify-content: center;
+  min-width: max(calc(48 * var(--u)), var(--tap-target));
+  padding: 0 !important;
+}
+
+.header + * {
+  border-top: 1px solid var(--color-border) !important;
 }

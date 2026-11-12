@@ -40,8 +40,9 @@ const DOOR_OPEN_ANGLE = (65 * Math.PI) / 180;
 
 const POSE_TARGETS: Record<VehiclePose, { rotation: number; frunk: number; trunk: number }> = {
   park: { rotation: Math.PI, frunk: 0, trunk: 0 },
-  // Seen from behind, as if following the car.
-  drive: { rotation: Math.PI / 4.3, frunk: 0, trunk: 0 },
+  // Seen from straight behind, as if following the car: turned to match the camera, so it
+  // points up the screen rather than off to one side.
+  drive: { rotation: DEFAULT_AZIMUTH, frunk: 0, trunk: 0 },
   // The parked view already shows the frunk. It opens 30 degrees.
   frunk: { rotation: Math.PI, frunk: Math.PI / 6, trunk: 0 },
   // A quarter turn from parked brings the rear round. The lid opens about 51 degrees,
