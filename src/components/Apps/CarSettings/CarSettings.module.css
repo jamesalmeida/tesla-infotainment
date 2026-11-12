@@ -723,8 +723,9 @@
   display: none;
 }
 
-/* Too narrow for two columns: a list that drills into one panel, with a way back. */
-@container (max-width: 640px) {
+/* Too narrow for two columns: a list that drills into one panel, with a way back. A panel
+   about 600px wide, like the map's half of an unfolded iPhone Duo, still gets both columns. */
+@container (max-width: 520px) {
   .car-settings-panel {
     grid-template-columns: minmax(0, 1fr);
     padding-left: calc(12 * var(--u));
