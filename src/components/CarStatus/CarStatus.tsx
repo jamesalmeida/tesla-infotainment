@@ -100,7 +100,7 @@ function SpeedLimit() {
 }
 
 // Phones and tablets have no room under the screen, so their pedals sit on it.
-function Pedals() {
+export function Pedals() {
   return (
     <div className="pedals">
       <PedalButton className="pedalBtn" pedal="brake" label="Brake" hint="↓" />
@@ -136,7 +136,6 @@ export function CarStatus() {
       />
       {/* In Park the start button sits top right; in Drive it moves into the column. */}
       {!driving && <SelfDrivingButton />}
-      <Pedals />
     </div>
   );
 }

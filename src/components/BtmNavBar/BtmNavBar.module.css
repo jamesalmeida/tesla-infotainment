@@ -112,3 +112,9 @@
   border: none;
   border-radius: 0;
 }
+
+/* Stage touch: the icons sit at the bottom of a shorter dock, above the home-indicator
+   area, instead of floating in the middle of a tall black band. */
+:global(:root[data-touch='true'][data-layout='stage']) .btmNavItems {
+  align-items: end;
+}

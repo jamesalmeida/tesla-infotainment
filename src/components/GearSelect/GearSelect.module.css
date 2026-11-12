@@ -27,3 +27,13 @@
   font-weight: 800;
   transform: scale(0.95);
 }
+
+/* Touch keeps the full-size targets, but overlaps them so the letters sit closer, as in
+   the car. */
+:global(:root[data-touch='true']) .gearSelect {
+  gap: 0;
+}
+
+:global(:root[data-touch='true']) .gearSelectIcon + .gearSelectIcon {
+  margin-left: calc(-18 * var(--u));
+}

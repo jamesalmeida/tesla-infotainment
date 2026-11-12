@@ -39,6 +39,7 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 ### Fixed
 
+- Touch layout polish for the iPhone Duo: the app fills the screen, the dock is shorter with its icons lower, the media dots and PRND letters sit closer together, the calendar card clears the dock, the map controls reach the right edge below the island, the airbag label is two lines, and the pedals sit above the media card.
 - Self-Driving has a clear Start/Stop button in Drive, instead of a label that was easy to miss.
 - Calendar styles are scoped so they can't recentre headings elsewhere, and the outside temperature no longer shifts sideways once it loads.
 - The README and Software panel now match the app: Shift + Space plays and pauses, keys 1 to 4 select gears, and the 3D car is a Model 3. Typos in the Dynamics panel are corrected.

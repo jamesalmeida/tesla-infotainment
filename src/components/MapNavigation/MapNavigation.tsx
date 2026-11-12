@@ -63,7 +63,10 @@ export function MapNavigation({ onWifiClick }: MapNavigationProps) {
         <div className={`${styles.airbagStatus} no-select`}>
           <img src={getImagePath('icon-airbags.svg')} alt="Airbag Status" />
           <div className={styles.airbagStatusText}>
-            PASSENGER AIRBAG&nbsp;<span className={styles.airbagStatusOff}>OFF</span>
+            <span>PASSENGER</span>
+            <span>
+              AIRBAG <span className={styles.airbagStatusOff}>OFF</span>
+            </span>
           </div>
         </div>
         <VoiceControl />

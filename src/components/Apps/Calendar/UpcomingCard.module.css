@@ -70,3 +70,8 @@
   width: min(calc(100% - 16px), 520px);
   padding: 4px 10px;
 }
+
+/* The dock is taller on touch, so the card has to clear the home-indicator area too. */
+:global(:root[data-touch='true']) .card {
+  bottom: calc(var(--dock-height) + var(--safe-bottom) + calc(12 * var(--u)));
+}
