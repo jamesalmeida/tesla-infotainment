@@ -7,7 +7,7 @@ import BatteryStatus from '../BatteryStatus/BatteryStatus';
 import GearSelect from '../GearSelect/GearSelect';
 import { PedalButton } from '../PedalDeck/PedalDeck';
 import { Telltales } from './Telltales';
-import { SelfDrivingButton, SelfDrivingMode } from '../SelfDriving/SelfDrivingButton';
+import { SelfDrivingCorner } from '../SelfDriving/SelfDrivingButton';
 
 function TurnSignal({
   side,
@@ -144,20 +144,10 @@ export function CarStatus() {
         <Speedometer />
         <TurnSignals />
       </div>
-      {/* The column down the left: in Drive, the Self-Driving mode and the speed limit first. */}
-      <Telltales
-        leading={
-          driving ? (
-            <>
-              <SelfDrivingMode />
-              <SpeedLimit />
-            </>
-          ) : null
-        }
-        trailing={<HazardButton />}
-      />
-      {/* Start and stop stay in one place, top right, in Park and in Drive. */}
-      <SelfDrivingButton />
+      {/* The column down the left: in Drive, the speed limit first. */}
+      <Telltales leading={driving ? <SpeedLimit /> : null} trailing={<HazardButton />} />
+      {/* Start and stop stay in one place, top right, in Park and in Drive, with the mode under. */}
+      <SelfDrivingCorner driving={driving} />
     </div>
   );
 }

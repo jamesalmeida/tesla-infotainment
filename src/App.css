@@ -3,6 +3,16 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background-color: #4e4e4e;
+}
+
+/* An installed app on iPad can be laid out a little shorter than the screen, which leaves the
+   page showing under the dock. On touch screens the page is black, so that strip reads as
+   part of the dock. */
+:root[data-touch='true'],
+:root[data-touch='true'] body,
+:root[data-touch='true'] #root {
+  background-color: #000000;
 }
 
 #root {
@@ -730,4 +740,33 @@ body {
    row under the car is centred: the media card (up to 560u), the gap, then the 320u card. */
 .horizontalPanelGroup.parkView .pedals {
   right: max(3%, calc(50% - (560 * var(--u) + 12 * var(--u) + 320 * var(--u)) / 2));
+}
+
+/*
+ * Portrait: the map takes the top half and the car the bottom, so an app slides up from the
+ * dock over the car while the map stays in view. Portrait has no separator to drag, so the
+ * order only changes on screen. The app panel is positioned against the whole panel group
+ * rather than the map's half.
+ */
+:root[data-layout='stacked'] .horizontalPanelGroup {
+  flex-direction: column-reverse !important;
+  position: relative;
+  overflow: hidden;
+}
+
+:root[data-layout='stacked'] .rightPanel,
+:root[data-layout='stacked'] .horizontalPanelGroup > :has(> .rightPanel) {
+  position: static !important;
+}
+
+:root[data-layout='stacked'] .rightPanel [class*='MapNavigation'] {
+  position: relative;
+}
+
+/* In portrait the car has little height, so in Park the empty row kept for the speed gives
+   its space to the car. A turn signal blinking in Park still shows, over the row below. */
+:root[data-layout='stacked'] .carStatusIcons:not(.drivingIndicators) .drivingGearIcons {
+  height: 0;
+  margin-top: 0;
+  overflow: visible;
 }

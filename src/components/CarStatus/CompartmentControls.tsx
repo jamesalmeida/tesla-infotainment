@@ -104,6 +104,7 @@ export function CompartmentControls() {
   const trunkDot = useRef<SVGCircleElement>(null);
   const portButton = useRef<HTMLButtonElement>(null);
   const portLine = useRef<SVGLineElement>(null);
+  const lockLine = useRef<SVGLineElement>(null);
 
   // Drawn straight onto the elements rather than through state: the car can move every frame.
   useLayoutEffect(() => {
@@ -122,7 +123,7 @@ export function CompartmentControls() {
       ) {
         return;
       }
-      const { frunk, trunk, chargePort } = getCompartmentAnchors();
+      const { frunk, trunk, chargePort, roof } = getCompartmentAnchors();
       if (portButton.current && portLine.current) {
         placePort(portButton.current, portLine.current, chargePort, root.getBoundingClientRect());
       }
@@ -145,9 +146,35 @@ export function CompartmentControls() {
       }
 
       const origin = root.getBoundingClientRect();
+      // The lock slides over the roof, as the labels do over their lids, keeping room for a
+      // label either side, and runs its own line down to the roof.
+      let lockShift = 0;
+      const lockShown = getComputedStyle(lock).display !== 'none';
+      if (roof && lockShown) {
+        const margin = Math.max(frunkLabel.current.offsetWidth, trunkLabel.current.offsetWidth);
+        const centre = clamp(
+          roof.x - origin.left,
+          LEFT_GUTTER + margin + GAP * 2 + lock.offsetWidth / 2,
+          origin.width - margin - GAP * 2 - lock.offsetWidth / 2,
+        );
+        lockShift = centre - (lock.offsetLeft + lock.offsetWidth / 2);
+        lock.style.transform = `translateX(${lockShift}px)`;
+        if (lockLine.current) {
+          lockLine.current.setAttribute('x1', `${centre}`);
+          lockLine.current.setAttribute('y1', `${lock.offsetTop + lock.offsetHeight}`);
+          lockLine.current.setAttribute('x2', `${roof.x - origin.left}`);
+          lockLine.current.setAttribute('y2', `${roof.y - origin.top}`);
+          lockLine.current.style.visibility = 'visible';
+        }
+      } else {
+        lock.style.transform = '';
+        if (lockLine.current) lockLine.current.style.visibility = 'hidden';
+      }
       // A hidden lock (phones on their side) leaves the middle of the row free.
-      const lockLeft = lock.offsetWidth ? lock.offsetLeft : origin.width / 2;
-      const lockRight = lock.offsetWidth ? lock.offsetLeft + lock.offsetWidth : origin.width / 2;
+      const lockLeft = lock.offsetWidth ? lock.offsetLeft + lockShift : origin.width / 2;
+      const lockRight = lock.offsetWidth
+        ? lock.offsetLeft + lock.offsetWidth + lockShift
+        : origin.width / 2;
       const frunkFirst = frunk.x <= trunk.x;
       const [left, right] = frunkFirst ? [frunkLeader, trunkLeader] : [trunkLeader, frunkLeader];
       const bounds = { min: lockRight + GAP, max: lockLeft - GAP };
@@ -171,6 +198,7 @@ export function CompartmentControls() {
         <line ref={trunkLine} />
         <circle ref={trunkDot} r="2.5" />
         <line ref={portLine} />
+        <line ref={lockLine} />
       </svg>
       <button
         ref={portButton}

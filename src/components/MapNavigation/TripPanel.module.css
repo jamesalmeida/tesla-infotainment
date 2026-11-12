@@ -1,41 +1,44 @@
+/* Fills the navigation column: the turn card at its top, the trip card at its bottom. */
 .tripPanel {
+  flex: 1 0 auto !important;
   display: flex;
   flex-direction: column;
-  gap: calc(6 * var(--u));
+  gap: calc(8 * var(--u));
+  min-height: 100%;
   color: var(--color-text);
 }
 
-.card,
 .turnCard,
-.tripSummary {
+.tripCard,
+.directions {
   box-sizing: border-box;
   border-radius: calc(8 * var(--u));
+  background-color: var(--color-card);
   box-shadow:
     rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
 }
 
-.card {
-  padding: calc(10 * var(--u)) calc(12 * var(--u));
-  font-size: max(var(--text-min), calc(14 * var(--u)));
-  background-color: var(--color-card);
-}
-
+/* The next turn, big, and the one after it, small, as the car shows them. */
 .turnCard {
   display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.turnMain {
+  display: flex;
   align-items: center;
-  gap: calc(10 * var(--u));
-  padding: calc(10 * var(--u)) calc(12 * var(--u));
-  color: var(--color-on-accent);
-  background-color: var(--color-accent);
+  gap: calc(14 * var(--u));
+  padding: calc(14 * var(--u)) calc(16 * var(--u));
 }
 
 .arrow {
   flex: none;
-  width: max(20px, calc(32 * var(--u)));
-  height: max(20px, calc(32 * var(--u)));
+  width: max(20px, calc(34 * var(--u)));
+  height: max(20px, calc(34 * var(--u)));
   fill: none;
-  stroke: currentColor;
+  stroke: var(--color-text-strong);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -45,67 +48,181 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  font-size: max(var(--text-min), calc(14 * var(--u)));
+  font-size: max(var(--text-min), calc(15 * var(--u)));
   line-height: 1.25;
+  color: var(--color-text);
 }
 
 .turnText strong {
-  font-size: max(var(--text-min), calc(20 * var(--u)));
+  font-size: max(var(--text-min), calc(26 * var(--u)));
+  font-weight: 600;
+  color: var(--color-text-strong);
+}
+
+.turnNext {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  padding: calc(10 * var(--u)) calc(16 * var(--u));
+  border-top: 1px solid var(--color-border);
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+}
+
+.turnNext .arrow {
+  width: max(16px, calc(20 * var(--u)));
+  height: max(16px, calc(20 * var(--u)));
+}
+
+/* The trip, pinned to the bottom of the map: when, how long and how far, where to, and the
+   battery on arrival, then a line for the way already driven and the trip's buttons. */
+.tripCard {
+  margin-top: auto;
+  overflow: hidden;
 }
 
 .tripSummary {
-  display: flex;
-  justify-content: space-between;
-  gap: calc(8 * var(--u));
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: calc(2 * var(--u)) calc(10 * var(--u));
   margin: 0;
-  padding: calc(8 * var(--u)) calc(12 * var(--u));
-  background-color: var(--color-card);
+  padding: calc(10 * var(--u)) calc(14 * var(--u)) calc(8 * var(--u));
 }
 
+/* The figures need no labels on screen, but keep them for screen readers. */
 .tripSummary dt {
-  font-size: max(var(--text-min), calc(11 * var(--u)));
-  color: var(--color-text-muted);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .tripSummary dd {
   margin: 0;
-  font-size: max(var(--text-min), calc(15 * var(--u)));
-  font-weight: 600;
-  color: var(--color-text-strong);
   white-space: nowrap;
 }
 
-.chargeHint {
-  margin: 0;
-  padding: calc(6 * var(--u)) calc(12 * var(--u));
-  background-color: color-mix(in srgb, var(--color-warning) 12%, var(--color-card));
-  color: var(--color-warning);
-  font-size: max(var(--text-min), calc(11 * var(--u)));
+.arrive dd {
+  font-size: max(var(--text-min), calc(17 * var(--u)));
   font-weight: 600;
+  color: var(--color-text-strong);
+}
+
+.legs {
+  display: flex;
+  gap: calc(12 * var(--u));
+  justify-self: end;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+}
+
+.destination {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: max(var(--text-min), calc(14 * var(--u)));
+  color: var(--color-text-muted);
+}
+
+.battery {
+  justify-self: end;
+  font-size: max(var(--text-min), calc(13 * var(--u)));
+}
+
+.battery dd {
+  display: flex;
+  align-items: center;
+  gap: calc(5 * var(--u));
+}
+
+.batteryIcon {
+  position: relative;
+  width: calc(20 * var(--u));
+  height: calc(10 * var(--u));
+  border: 1.5px solid currentColor;
+  border-radius: calc(2 * var(--u));
+}
+
+.batteryIcon::after {
+  content: '';
+  position: absolute;
+  inset: 1.5px 40% 1.5px 1.5px;
+  background: currentColor;
+}
+
+.progress {
+  height: 2px;
+  margin: 0 calc(14 * var(--u));
+  background: var(--color-border);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
 }
 
 .tripTools {
   display: flex;
-  gap: calc(6 * var(--u));
+  align-items: stretch;
+  margin-top: calc(4 * var(--u));
+  border-top: 1px solid var(--color-border);
 }
 
-.tripTool {
-  flex: 1;
-  min-height: var(--tap-target);
-  padding: calc(6 * var(--u)) calc(8 * var(--u));
-  border: 1px solid var(--color-border);
-  border-radius: calc(5 * var(--u));
-  font: inherit;
-  font-size: max(var(--text-min), calc(13 * var(--u)));
+.tripTools > button {
+  min-height: max(calc(44 * var(--u)), var(--tap-target));
+  border: none;
+  background: none;
   color: var(--color-text);
-  background-color: var(--color-card);
+  font: inherit;
   cursor: pointer;
 }
 
-.tripTool[aria-pressed='true'],
-.tripTool[aria-expanded='true'] {
-  border-color: var(--color-accent);
+.tripTools > button + button {
+  border-left: 1px solid var(--color-border);
+}
+
+.tripIcon {
+  display: grid;
+  place-items: center;
+  min-width: max(calc(52 * var(--u)), var(--tap-target));
+}
+
+.tripIcon svg {
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tripIcon circle {
+  fill: currentColor;
+  stroke: none;
+}
+
+.tripIcon[aria-pressed='true'],
+.tripIcon[aria-expanded='true'] {
   color: var(--color-accent);
+}
+
+.endTrip {
+  flex: 1;
+  font-size: max(var(--text-min), calc(15 * var(--u))) !important;
+  font-weight: 600 !important;
+}
+
+.chargeHint {
+  margin: 0;
+  padding: calc(6 * var(--u)) calc(14 * var(--u));
+  background-color: color-mix(in srgb, var(--color-warning) 12%, var(--color-card));
+  color: var(--color-warning);
+  font-size: max(var(--text-min), calc(11 * var(--u)));
+  font-weight: 600;
 }
 
 .directions {
@@ -114,8 +231,6 @@
   max-height: calc(260 * var(--u));
   overflow-y: auto;
   list-style: none;
-  border-radius: calc(8 * var(--u));
-  background-color: var(--color-card);
 }
 
 .direction {

@@ -77,7 +77,7 @@ const VehicleModel = lazy(() =>
 const LEFT_PANEL_ID = 'leftPanel';
 const DEFAULT_LEFT_PANEL_SIZE = 40;
 const RIGHT_PANEL_SIZE = 100 - DEFAULT_LEFT_PANEL_SIZE;
-const STACKED_LEFT_PANEL_SIZE = 45;
+const STACKED_LEFT_PANEL_SIZE = 50;
 // A drag has to go this far past the default before it counts as making room for the car.
 const CLOSE_APP_DRAG_MARGIN = 3;
 // Dragged this far across in Park, the car panel takes the whole screen.
@@ -298,7 +298,7 @@ function Panels({ onCarSettled }: { onCarSettled: () => void }) {
       >
         <Panel
           id={LEFT_PANEL_ID}
-          defaultSize={`${DEFAULT_LEFT_PANEL_SIZE}%`}
+          defaultSize={`${isStacked ? STACKED_LEFT_PANEL_SIZE : DEFAULT_LEFT_PANEL_SIZE}%`}
           minSize={isStacked ? '0%' : `${DEFAULT_LEFT_PANEL_SIZE}%`}
           maxSize="100%"
           className="leftPanel"

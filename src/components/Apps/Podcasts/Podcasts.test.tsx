@@ -6,9 +6,21 @@ import {
   seekPlayback,
   setMediaSource,
   stopPlayback,
+  useNowPlaying,
   type MediaSource,
 } from '../../../apps/mediaLibrary';
 import { Podcasts } from './Podcasts';
+
+// The app has no player of its own: what it plays shows on the media card, which reads this.
+function NowPlayingProbe() {
+  const now = useNowPlaying();
+  return (
+    <output aria-label="now playing">
+      {now.item?.title ?? ''} | {now.isPlaying ? 'playing' : 'paused'} |{' '}
+      {Math.round(now.positionSeconds)}
+    </output>
+  );
+}
 
 const openFirstShow = async () => {
   fireEvent.click(await screen.findByRole('button', { name: /The Long Way Home/ }));
@@ -40,13 +52,18 @@ test('an episode keeps its place after leaving and coming back', async () => {
   act(() => stopPlayback());
   unmount();
 
-  render(<Podcasts />);
+  render(
+    <>
+      <Podcasts />
+      <NowPlayingProbe />
+    </>,
+  );
   await openFirstShow();
 
   // 31:00 long, stopped at 10:00.
   expect(screen.getByRole('button', { name: /The Map That Lied/ })).toHaveTextContent('21:00 left');
   fireEvent.click(screen.getByRole('button', { name: /The Map That Lied/ }));
-  expect(screen.getByLabelText('Playback position')).toHaveValue('600');
+  expect(screen.getByLabelText('now playing')).toHaveTextContent(/The Map That Lied .* 600$/);
 });
 
 test('a catalogue that fails shows a message and can retry', async () => {

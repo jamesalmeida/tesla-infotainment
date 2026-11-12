@@ -32,10 +32,22 @@ export function SelfDrivingButton() {
       type="button"
       className={`${styles.selfDriving} ${styles[state]}`}
       aria-pressed={isEngaged}
+      aria-label={isEngaged ? 'Stop Self-Driving' : undefined}
       onClick={handlePress}
     >
-      {isEngaged ? 'Stop Self-Driving' : 'Start Self-Driving'}
+      {isEngaged ? 'Self-Driving' : 'Start Self-Driving'}
     </button>
+  );
+}
+
+// The corner holds the button, and in Drive the mode under it: under the blue "Self-Driving"
+// title while it drives, as in the car.
+export function SelfDrivingCorner({ driving }: { driving: boolean }) {
+  return (
+    <div className={styles.selfDrivingCorner}>
+      <SelfDrivingButton />
+      {driving && <SelfDrivingMode />}
+    </div>
   );
 }
 

@@ -1,8 +1,15 @@
-.selfDriving {
+/* Top right of the car panel: the start button, and in Drive the mode under it. */
+.selfDrivingCorner {
   position: absolute;
   top: calc(40 * var(--u));
   right: 3%;
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.selfDriving {
   min-height: max(calc(40 * var(--u)), var(--tap-target));
   padding: 0 calc(18 * var(--u));
   border: none;
@@ -17,7 +24,7 @@
 }
 
 /* On touch the battery row is taller and clears the top safe area, so the button starts under it. */
-:global(:root[data-touch='true']) .selfDriving {
+:global(:root[data-touch='true']) .selfDrivingCorner {
   top: calc(var(--safe-top) + var(--tap-target) + 4 * var(--u));
 }
 
@@ -32,10 +39,16 @@
   color: var(--color-on-toggle, #ffffff);
 }
 
+/* While it drives, it reads as the car's blue "Self-Driving" title rather than a button. */
 .engaged {
-  background: var(--color-card);
+  padding: 0;
+  background: none;
   color: var(--color-toggle-on, #3e6ae1);
-  box-shadow: inset 0 0 0 2px var(--color-toggle-on, #3e6ae1);
+  font-size: max(var(--text-min), calc(20 * var(--u)));
+}
+
+.selfDrivingCorner .status {
+  align-items: flex-end;
 }
 
 .status {

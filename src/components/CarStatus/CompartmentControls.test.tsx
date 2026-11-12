@@ -38,12 +38,17 @@ test('each label gets a line to its lid, with its bar facing that lid', () => {
       frunk: { x: 100, y: 300 },
       trunk: { x: 300, y: 280 },
       chargePort: null,
+      roof: { x: 200, y: 260 },
     }),
   );
   expect(leaderLines().map((line) => line.style.visibility)).toEqual(['visible', 'visible']);
   expect(leaderLines()[0].getAttribute('y2')).toBe('300');
   expect(frunk.dataset.side).toBe('left');
   expect(trunk.dataset.side).toBe('right');
+  // The lock has its own line, down to the roof.
+  const lockLine = document.querySelectorAll<SVGLineElement>('.compartmentLeaders line')[3];
+  expect(lockLine.style.visibility).toBe('visible');
+  expect(lockLine.getAttribute('y2')).toBe('260');
 
   // Turned around, the trunk is on the left, so the two labels swap sides.
   act(() =>
@@ -51,6 +56,7 @@ test('each label gets a line to its lid, with its bar facing that lid', () => {
       frunk: { x: 320, y: 300 },
       trunk: { x: 90, y: 280 },
       chargePort: null,
+      roof: null,
     }),
   );
   expect(frunk.dataset.side).toBe('right');
@@ -98,7 +104,12 @@ test('the charge port button follows the port and opens it', () => {
   expect(button.style.visibility).toBe('hidden');
 
   act(() =>
-    setCompartmentAnchors({ frunk: null, trunk: null, chargePort: { x: 200, y: 150, side: 1 } }),
+    setCompartmentAnchors({
+      frunk: null,
+      trunk: null,
+      chargePort: { x: 200, y: 150, side: 1 },
+      roof: null,
+    }),
   );
   expect(button.style.visibility).toBe('visible');
 

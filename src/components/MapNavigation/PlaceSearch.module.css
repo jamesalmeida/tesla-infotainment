@@ -212,9 +212,17 @@
 
 .searchFooter {
   position: relative;
-  padding: 0;
+  /* The same side padding as the box above, so the two are the same width. */
+  padding: 0 2%;
   border-top: 1px solid #e3e3e3;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
   overflow: hidden;
+}
+
+/* The field sits inside the box, which already reads as the thing in use: no focus ring. */
+.navBtn input:focus,
+.navBtn input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }

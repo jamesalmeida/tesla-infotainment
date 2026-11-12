@@ -44,10 +44,20 @@ function ManeuverArrow({ maneuver }: { maneuver: string | null }) {
 interface TripPanelProps {
   route: Route;
   tracker: CarTracker;
+  /** Where the trip ends, as the card names it. */
+  destination?: string;
+  /** Ends the trip. Left out, the card has no End Trip button. */
+  onEnd?: () => void;
 }
 
-/** Live guidance. Follows the car by itself, so the map doesn't re-render with it. */
-export function TripPanel({ route, tracker }: TripPanelProps) {
+const focusSearch = () => document.getElementById('navigateTo')?.focus();
+
+/**
+ * Live guidance, laid out as the car does it: the next turn in a card at the top, where the
+ * search box sits otherwise, and the trip at the bottom with End Trip. Follows the car by
+ * itself, so the map doesn't re-render with it.
+ */
+export function TripPanel({ route, tracker, destination, onEnd }: TripPanelProps) {
   const along = useCarPose(tracker).along ?? 0;
   const now = useNow();
   const [listOpen, setListOpen] = useState(false);
@@ -57,8 +67,10 @@ export function TripPanel({ route, tracker }: TripPanelProps) {
   const { steps } = route;
   const stepIndex = currentStepIndex(steps, along);
   const step = steps[stepIndex] ?? null;
+  const nextStep = steps[stepIndex + 1] ?? null;
   const left = remainingMs(route, along);
   const remaining = remainingMeters(route, along);
+  const progress = route.pathMeters > 0 ? Math.min(1, Math.max(0, along / route.pathMeters)) : 0;
   const arrivalBattery = Math.max(
     0,
     Math.round(batteryPercent - (remaining / 1609.344 / FULL_RANGE_MILES) * 100),
@@ -70,56 +82,24 @@ export function TripPanel({ route, tracker }: TripPanelProps) {
     <div className={styles.tripPanel}>
       {step && (
         <div className={styles.turnCard} data-testid="next-turn">
-          <ManeuverArrow maneuver={step.maneuver} />
-          <div className={styles.turnText}>
-            <strong>{formatDistance(Math.max(0, step.endAlong - along))}</strong>
-            <span>{step.instruction}</span>
+          <div className={styles.turnMain}>
+            <ManeuverArrow maneuver={step.maneuver} />
+            <div className={styles.turnText}>
+              <strong>{formatDistance(Math.max(0, step.endAlong - along))}</strong>
+              <span>{step.instruction}</span>
+            </div>
           </div>
+          {nextStep && (
+            <div className={styles.turnNext}>
+              <ManeuverArrow maneuver={nextStep.maneuver} />
+              <span>{nextStep.instruction}</span>
+              <span className={styles.directionDistance}>
+                {formatDistance(nextStep.distanceMeters)}
+              </span>
+            </div>
+          )}
         </div>
       )}
-      <dl className={styles.tripSummary}>
-        {left !== null && (
-          <>
-            <div>
-              <dt>Arrive</dt>
-              <dd>{formatClock(now + left)}</dd>
-            </div>
-            <div>
-              <dt>Time left</dt>
-              <dd>{formatDuration(left)}</dd>
-            </div>
-          </>
-        )}
-        <div>
-          <dt>Distance</dt>
-          <dd>{formatDistance(remaining)}</dd>
-        </div>
-        <div>
-          <dt>On arrival</dt>
-          <dd>{arrivalBattery}%</dd>
-        </div>
-      </dl>
-      {needsCharge && (
-        <p className={styles.chargeHint} role="status">
-          Charge stop suggested. Your target is {arrivalTarget}%.
-        </p>
-      )}
-      <div className={styles.tripTools}>
-        {steps.length > 0 && (
-          <button
-            className={styles.tripTool}
-            aria-expanded={listOpen}
-            onClick={() => setListOpen(!listOpen)}
-          >
-            Directions
-          </button>
-        )}
-        {voice.available && (
-          <button className={styles.tripTool} aria-pressed={voice.on} onClick={voice.toggle}>
-            Voice
-          </button>
-        )}
-      </div>
       {listOpen && (
         <ol className={styles.directions} aria-label="Directions">
           {steps.map((item, index) => (
@@ -137,6 +117,91 @@ export function TripPanel({ route, tracker }: TripPanelProps) {
           ))}
         </ol>
       )}
+      <div className={styles.tripCard}>
+        {needsCharge && (
+          <p className={styles.chargeHint} role="status">
+            Charge stop suggested. Your target is {arrivalTarget}%.
+          </p>
+        )}
+        <dl className={styles.tripSummary}>
+          {left !== null && (
+            <div className={styles.arrive}>
+              <dt>Arrive</dt>
+              <dd>{formatClock(now + left)}</dd>
+            </div>
+          )}
+          <div className={styles.legs}>
+            {left !== null && (
+              <div>
+                <dt>Time left</dt>
+                <dd>{formatDuration(left)}</dd>
+              </div>
+            )}
+            <div>
+              <dt>Distance</dt>
+              <dd>{formatDistance(remaining)}</dd>
+            </div>
+          </div>
+          {destination && <div className={styles.destination}>{destination}</div>}
+          <div className={styles.battery}>
+            <dt>On arrival</dt>
+            <dd>
+              <span className={styles.batteryIcon} aria-hidden="true" />
+              {arrivalBattery}%
+            </dd>
+          </div>
+        </dl>
+        <div className={styles.progress} aria-hidden="true">
+          <span style={{ width: `${progress * 100}%` }} />
+        </div>
+        <div className={styles.tripTools}>
+          <button
+            type="button"
+            className={styles.tripIcon}
+            aria-label="Search for a place"
+            onClick={focusSearch}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s-6-5.4-6-10a6 6 0 0 1 12 0c0 4.6-6 10-6 10Z" />
+              <path d="M19 15v6M16 18h6" />
+            </svg>
+          </button>
+          {onEnd && (
+            <button type="button" className={styles.endTrip} onClick={onEnd}>
+              End Trip
+            </button>
+          )}
+          {voice.available && (
+            <button
+              type="button"
+              className={styles.tripIcon}
+              aria-label="Voice"
+              aria-pressed={voice.on}
+              onClick={voice.toggle}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 10v4h4l5 4V6L8 10Z" />
+                {voice.on && <path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" />}
+              </svg>
+            </button>
+          )}
+          {steps.length > 0 && (
+            <button
+              type="button"
+              className={styles.tripIcon}
+              aria-label="Directions"
+              aria-expanded={listOpen}
+              onClick={() => setListOpen(!listOpen)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="6" cy="12" r="1.4" />
+                <circle cx="12" cy="12" r="1.4" />
+                <circle cx="18" cy="12" r="1.4" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
