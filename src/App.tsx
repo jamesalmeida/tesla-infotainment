@@ -94,7 +94,10 @@ function App() {
   );
 }
 
-function VehicleView({ onSettled }: { onSettled: () => void }) {
+// In Park View the car has the whole screen, so the camera comes in closer.
+const PARK_VIEW_FIT_MARGIN = 0.78;
+
+function VehicleView({ onSettled, wide }: { onSettled: () => void; wide: boolean }) {
   const pose = useCar(vehiclePose);
   const state = useCar((current) => current);
   const paint = useCar((current) => current.settings.paint);
@@ -126,6 +129,7 @@ function VehicleView({ onSettled }: { onSettled: () => void }) {
             lights={lights}
             paint={paint}
             speed={speed}
+            fitMargin={wide ? PARK_VIEW_FIT_MARGIN : 1}
           />
         </Suspense>
       </ErrorBoundary>
@@ -149,7 +153,7 @@ const LeftPanelContent = memo(function LeftPanelContent({
       <CompartmentControls />
       <ChargeStatus />
       <div className="vehicleArea">
-        <VehicleView onSettled={onCarSettled} />
+        <VehicleView onSettled={onCarSettled} wide={isParkView} />
         <Pedals />
       </div>
       <div className="carBottomRow">
