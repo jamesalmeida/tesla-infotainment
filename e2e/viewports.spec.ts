@@ -28,9 +28,10 @@ for (const { name, width, height, mode, touch } of VIEWPORTS) {
   test.describe(`${name} (${width}x${height})`, () => {
     test.use({ viewport: { width, height }, hasTouch: Boolean(touch) });
 
+    // With the real 3D car, since its canvas is what could push the layout out of shape.
     test('fits the window in the right mode', async ({ page, context }) => {
       await blockThirdParties(context);
-      await openApp(page);
+      await openApp(page, '', { car: true });
 
       expect(await page.evaluate(() => document.documentElement.dataset.layout)).toBe(mode);
 
