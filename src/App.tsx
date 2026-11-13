@@ -123,6 +123,7 @@ function VehicleView({ onSettled, wide }: { onSettled: () => void; wide: boolean
   const pose = useCar(vehiclePose);
   const state = useCar((current) => current);
   const paint = useCar((current) => current.settings.paint);
+  const carModel = useCar((current) => current.settings.carModel);
   const speed = useCar((current) => current.speed);
   const leftLit = useCar(leftSignalLit);
   const rightLit = useCar(rightSignalLit);
@@ -150,6 +151,7 @@ function VehicleView({ onSettled, wide }: { onSettled: () => void; wide: boolean
             onReady={onSettled}
             lights={lights}
             paint={paint}
+            model={carModel}
             speed={speed}
             fitMargin={wide ? parkViewFitMargin : 1}
             azimuth={wide && pose !== 'drive' ? PARK_VIEW_AZIMUTH : undefined}

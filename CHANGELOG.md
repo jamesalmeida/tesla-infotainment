@@ -6,6 +6,7 @@ User-facing changes to the Tesla Infotainment Simulator. Format: [Keep a Changel
 
 ### Added
 
+- A 2026 Model Y alongside the Model 3, picked in Toybox > Paint Shop. Its doors, frunk, trunk, wheels, lamps and paint work like the Model 3's.
 - Media, tire-pressure and trip cards under the car, a swipe-to-shift drive strip, and a full-width Park View with a park scene.
 - A full-screen media player with source tabs, queue, favourites and search, opened from the media card.
 - A stylised driving scene with lanes, traffic and a route line, animated car lamps and wheels, and a Paint Shop for paint, wheels and a plate.

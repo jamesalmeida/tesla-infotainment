@@ -77,6 +77,7 @@ import {
 import {
   DEMO_UPDATES,
   findBluetoothDevice,
+  CAR_MODELS,
   findWifiNetwork,
   PAINT_COLORS,
   WHEEL_OPTIONS,
@@ -417,6 +418,7 @@ const SETTING_RULES: { [K in keyof VehicleSettings]?: (value: unknown) => boolea
   speedLimitPin: isSavedPin,
   drivePin: isSavedPin,
   vehicleName: isName,
+  carModel: oneOf(...CAR_MODELS.map(({ value }) => value)),
   paint: oneOf(...PAINT_COLORS.map(({ value }) => value)),
   licensePlate: isPlate,
   updatePreference: oneOf(...Object.keys(DEMO_UPDATES)),

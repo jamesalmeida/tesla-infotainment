@@ -41,6 +41,7 @@ import {
   DEMO_UPDATES,
   findBluetoothDevice,
   findWifiNetwork,
+  type CarModel,
   type PaintColor,
   type WheelConfig,
 } from './sampleData';
@@ -400,6 +401,7 @@ export interface VehicleSettings {
   drivePin: string;
   easyEntry: boolean;
   vehicleName: string;
+  carModel: CarModel;
   paint: PaintColor;
   licensePlate: string;
   updatePreference: UpdatePreference;
@@ -817,6 +819,7 @@ export const initialCarState: CarState = {
     drivePin: '',
     easyEntry: false,
     vehicleName: 'Demo Car',
+    carModel: 'model-3',
     paint: 'pearl-white',
     licensePlate: 'DEMO CAR',
     updatePreference: 'standard',

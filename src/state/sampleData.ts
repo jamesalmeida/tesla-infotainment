@@ -73,6 +73,15 @@ export const WHEEL_OPTIONS = [
 
 export type WheelConfig = (typeof WHEEL_OPTIONS)[number]['value'];
 
+// The 3D cars the simulator can show. Each has its own model file and rig; see
+// VehicleModel/carModels.ts.
+export const CAR_MODELS = [
+  { value: 'model-3', label: 'Model 3' },
+  { value: 'model-y', label: 'Model Y' },
+] as const;
+
+export type CarModel = (typeof CAR_MODELS)[number]['value'];
+
 // Original paint choices for the simulator. The colours are deliberately close to a
 // familiar palette without copying any Tesla trade dress.
 export const PAINT_COLORS = [

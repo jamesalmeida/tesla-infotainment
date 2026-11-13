@@ -15,7 +15,8 @@ import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei
 import { Box3, Raycaster, Vector3 } from 'three';
 import type * as THREE from 'three';
 import { getCarModelPath } from '../../utils/assetPaths';
-import { paintHex, type PaintColor } from '../../state/sampleData';
+import { paintHex, type CarModel, type PaintColor } from '../../state/sampleData';
+import { CAR_MODEL_SPECS, type LightGroup } from './carModels';
 import type { CarLightState } from './vehicleLights';
 import { NO_ANCHORS, setCompartmentAnchors, type ScreenPoint } from './compartmentAnchors';
 import {
@@ -57,6 +58,8 @@ interface VehicleModelProps {
   lights?: CarLightState;
   paint?: PaintColor;
   speed?: number;
+  // Which car to show. Switching remounts the model, so its rig and labels start afresh.
+  model?: CarModel;
   // How much room the camera leaves around the car; below 1 the car fills more of the view.
   // A number, or one worked out from the canvas's width over its height, since the fit
   // itself only looks at the height.
@@ -68,6 +71,7 @@ interface VehicleModelProps {
 }
 
 interface ModelProps extends VehicleModelProps {
+  model: CarModel;
   scale?: number;
   pressRef: RefObject<PointerPress>;
 }
@@ -111,7 +115,7 @@ const ORBIT_TARGET: [number, number, number] = [0, -0.5, 0];
 // OrbitControls measures from straight overhead, so the highest camera is the smallest angle.
 const polarAngle = (elevation: number) => Math.PI / 2 - elevation;
 
-const modelPath = getCarModelPath('tesla-model-3-2018.glb');
+const carModelPath = (model: CarModel) => getCarModelPath(CAR_MODEL_SPECS[model].file);
 
 // Poly Haven's Empty Warehouse 01 (CC0), halved from the 1k file. It only lights the car,
 // so the extra resolution bought nothing. Stage's presets download from a third-party CDN.
@@ -119,8 +123,8 @@ const stageEnvironment = {
   files: `${import.meta.env.BASE_URL}environments/empty_warehouse_01_512.hdr`,
 };
 
-// Start downloading these while the loading screen is up, not when the canvas mounts.
-useGLTF.preload(modelPath);
+// Start downloading this while the loading screen is up, not when the canvas mounts. The
+// default car's file is already on its way: index.html preloads it.
 useEnvironment.preload(stageEnvironment);
 
 function applyParts(nodes: CarNodes, parts: CarParts) {
@@ -138,24 +142,8 @@ type EmissiveMaterial = THREE.MeshStandardMaterial & {
   emissiveIntensity: number;
 };
 
-// The GLB reuses a few light materials across unrelated lamps, so each group gets its own
-// copy. Without that, a left indicator would also light the right one.
-const LIGHT_NODE_GROUPS = {
-  headlights: [
-    'chrome_Lights_head_l',
-    'chrome_Lights_head_l_right front light',
-    'chrome_Lights_head_l_left front light',
-  ],
-  fog: ['foglights_l', 'foglights_r', 'chrome_foglight_l', 'chrome_foglight_r'],
-  leftSignal: ['turn_indicat_l', 'indicator_lights_l', 'light_turn_lr_boot'],
-  rightSignal: ['turn_indicat_r', 'indicator_lights_r', 'light_turn_rr_boot'],
-  brake: ['light_breake', 'breake_int'],
-  reverse: ['lightrevese_boot'],
-  rear: ['rear_lights', 'rear_lightsl', 'rear_lightsr', 'back_chrome_light', 'chrome_light'],
-} as const;
-
-type LightGroup = keyof typeof LIGHT_NODE_GROUPS;
-
+// The model files reuse a few light materials across unrelated lamps, so each group gets its
+// own copy. Without that, a left indicator would also light the right one.
 const collectMeshes = (root: THREE.Object3D, names: readonly string[]): THREE.Mesh[] => {
   const meshes: THREE.Mesh[] = [];
   names.forEach((name) => {
@@ -185,9 +173,10 @@ const setEmissive = (meshes: THREE.Mesh[], color: string, intensity: number) => 
   });
 };
 
-const PAINT_MATERIALS = new Set(['primary', 'primary.001', 'primary.002']);
-
-const collectPaintMaterials = (root: THREE.Object3D): EmissiveMaterial[] => {
+const collectPaintMaterials = (
+  root: THREE.Object3D,
+  names: readonly string[],
+): EmissiveMaterial[] => {
   const materials: EmissiveMaterial[] = [];
   root.traverse((child) => {
     const mesh = child as THREE.Mesh;
@@ -195,13 +184,14 @@ const collectPaintMaterials = (root: THREE.Object3D): EmissiveMaterial[] => {
     const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     list.forEach((material) => {
       const paint = material as EmissiveMaterial;
-      if (PAINT_MATERIALS.has(material.name) && !materials.includes(paint)) materials.push(paint);
+      if (names.includes(material.name) && !materials.includes(paint)) materials.push(paint);
     });
   });
   return materials;
 };
 
 function Model({
+  model,
   pose,
   doors,
   onDoorToggle,
@@ -212,7 +202,8 @@ function Model({
   speed = 0,
   ...props
 }: ModelProps) {
-  const { scene } = useGLTF(modelPath);
+  const spec = CAR_MODEL_SPECS[model];
+  const { scene } = useGLTF(carModelPath(model));
   const invalidate = useThree((state) => state.invalidate);
 
   useEffect(() => {
@@ -238,13 +229,16 @@ function Model({
   const lightGroups = useMemo(
     () =>
       Object.fromEntries(
-        Object.entries(LIGHT_NODE_GROUPS).map(([key, names]) => [key, collectMeshes(scene, names)]),
+        Object.entries(spec.lights).map(([key, names]) => [key, collectMeshes(scene, names)]),
       ) as Record<LightGroup, THREE.Mesh[]>,
-    [scene],
+    [scene, spec],
   );
-  const paintMaterials = useMemo(() => collectPaintMaterials(scene), [scene]);
-  // Each axle spins about its own centre. Their shared parent, wheel_rf_dummy, sits on the
-  // front axle with the rear axle as a child, so spinning it swings the rear wheels around
+  const paintMaterials = useMemo(
+    () => collectPaintMaterials(scene, spec.paintMaterials),
+    [scene, spec],
+  );
+  // Each axle spins about its own centre. In the Model 3 their shared parent, wheel_rf_dummy,
+  // sits on the front axle with the rear axle as a child, so spinning it swings the rear wheels around
   // the front ones and they come off the car.
   const wheels = useMemo(
     () =>
@@ -344,7 +338,7 @@ function Model({
         }
         return scene.worldToLocal(onSurface(centre));
       };
-      const portNode = scene.getObjectByName('rear_lightsl');
+      const portNode = scene.getObjectByName(spec.chargePortNode);
       const portBox = portNode ? new Box3().setFromObject(portNode) : null;
       let port: [Vector3, Vector3] | null = null;
       if (portBox && !portBox.isEmpty()) {
@@ -554,6 +548,7 @@ export function VehicleModel({
   lights,
   paint,
   speed = 0,
+  model = 'model-3',
   fitMargin = 1,
   elevation = PANEL_ELEVATION,
   azimuth = DEFAULT_AZIMUTH,
@@ -597,6 +592,8 @@ export function VehicleModel({
     >
       <FittedStage fitMargin={fitMargin}>
         <Model
+          key={model}
+          model={model}
           scale={0.01}
           pose={pose}
           doors={doors}

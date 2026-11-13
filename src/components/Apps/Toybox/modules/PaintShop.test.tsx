@@ -7,6 +7,7 @@ function State() {
   return (
     <output aria-label="state">
       {JSON.stringify({
+        model: useCar((state: CarState) => state.settings.carModel),
         paint: useCar((state: CarState) => state.settings.paint),
         wheels: useCar((state: CarState) => state.settings.wheelConfig),
         plate: useCar((state: CarState) => state.settings.licensePlate),
@@ -29,6 +30,14 @@ test('a paint choice updates the car', () => {
   renderShop();
   fireEvent.click(screen.getByRole('button', { name: 'Deep Blue' }));
   expect(read().paint).toBe('deep-blue');
+});
+
+test('a model choice swaps the 3D car', () => {
+  renderShop();
+  expect(screen.getByRole('button', { name: 'Model 3' })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: 'Model Y' }));
+  expect(read().model).toBe('model-y');
+  expect(screen.getByRole('button', { name: 'Model Y' })).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('wheels and the plate are real settings', () => {

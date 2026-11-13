@@ -190,6 +190,17 @@ const About = () => {
               3D model of the Tesla Model 3
             </a>
           </li>
+          <li>
+            BloxBloger for sharing the{' '}
+            <a
+              href="https://sketchfab.com/3d-models/2026-tesla-model-y-performance-8a0bc252f9da4015a02a7bd99efd4847"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              3D model of the 2026 Tesla Model Y Performance
+            </a>{' '}
+            (CC BY-NC 4.0; cut into doors, lids and wheels for this simulator)
+          </li>
         </ul>
       </div>
     </div>

@@ -262,6 +262,7 @@ describe('settings', () => {
     ['update preference', { updatePreference: 'nightly' }, 'updatePreference'],
     ['wheels', { wheelConfig: 'square' }, 'wheelConfig'],
     ['paint', { paint: 'chrome' }, 'paint'],
+    ['car model', { carModel: 'cybertruck' }, 'carModel'],
     ['plate', { licensePlate: 'TOO LONG PLATE' }, 'licensePlate'],
     ['vehicle name', { vehicleName: '   ' }, 'vehicleName'],
     ['filters', { superchargerFilters: { minPowerKw: 3 } }, 'superchargerFilters'],
@@ -274,7 +275,9 @@ describe('settings', () => {
       mapUnits: 'km',
       superchargerFilters: { minPowerKw: 250, food: true, restrooms: false, shopping: false },
       vehicleName: 'Rocket',
+      carModel: 'model-y',
     });
+    expect(restored.carModel).toBe('model-y');
     expect(restored.mapUnits).toBe('km');
     expect(restored.superchargerFilters.minPowerKw).toBe(250);
     expect(restored.vehicleName).toBe('Rocket');
