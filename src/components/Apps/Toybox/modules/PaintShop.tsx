@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Callout, ui } from '../../../../apps/ui/AppScreen';
 import { useCar, useCarActions } from '../../../../state/CarStateContext';
-import { PAINT_COLORS, WHEEL_OPTIONS } from '../../../../state/sampleData';
+import { CAR_MODELS, PAINT_COLORS, WHEEL_OPTIONS } from '../../../../state/sampleData';
 import styles from './PaintShop.module.css';
 
 export function PaintShop() {
+  const carModel = useCar((state) => state.settings.carModel);
   const paint = useCar((state) => state.settings.paint);
   const wheelConfig = useCar((state) => state.settings.wheelConfig);
   const savedPlate = useCar((state) => state.settings.licensePlate);
@@ -14,8 +15,23 @@ export function PaintShop() {
   return (
     <div className={ui.stack}>
       <Callout tone="info">
-        Demo only: these choices repaint the 3D car in this simulator. Nothing is sent to Tesla.
+        Demo only: these choices change the 3D car in this simulator. Nothing is sent to Tesla.
       </Callout>
+
+      <h2 className={styles.heading}>Model</h2>
+      <div className={styles.choices} role="group" aria-label="Car model">
+        {CAR_MODELS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            className={`${styles.choice} ${carModel === value ? styles.selectedChoice : ''}`}
+            aria-pressed={carModel === value}
+            onClick={() => setSettings({ carModel: value })}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
       <h2 className={styles.heading}>Paint</h2>
       <div className={styles.swatches} role="group" aria-label="Paint colour">
@@ -74,7 +90,8 @@ export function PaintShop() {
       </form>
 
       <p className={ui.muted}>
-        Current look: {PAINT_COLORS.find(({ value }) => value === paint)?.label} paint,{' '}
+        Current look: {CAR_MODELS.find(({ value }) => value === carModel)?.label} in{' '}
+        {PAINT_COLORS.find(({ value }) => value === paint)?.label} paint,{' '}
         {WHEEL_OPTIONS.find(({ value }) => value === wheelConfig)?.label} wheels, plate{' '}
         {savedPlate || 'blank'}.
       </p>
