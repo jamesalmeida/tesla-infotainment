@@ -113,11 +113,11 @@ function App() {
   );
 }
 
-// In Park View the car spans about half the screen's width, as on the car. The fit only
-// looks at the canvas's height, so the margin follows its shape: a wide desktop canvas needs
-// a closer camera than an iPad's.
+// In Park View the car spans about half the screen's width, as on the car. Its canvas covers
+// the whole panel, and the fit only looks at the canvas's height, so the margin follows the
+// panel's shape: a wide desktop panel needs a closer camera than an iPad's.
 const PARK_VIEW_CAR_WIDTH = 1.57;
-const parkViewFitMargin = (aspect: number) => Math.min(1, PARK_VIEW_CAR_WIDTH / aspect);
+const parkViewFitMargin = (aspect: number) => PARK_VIEW_CAR_WIDTH / aspect;
 
 function VehicleView({ onSettled, wide }: { onSettled: () => void; wide: boolean }) {
   const pose = useCar(vehiclePose);
@@ -179,11 +179,13 @@ const LeftPanelContent = memo(function LeftPanelContent({
       <ChargeStatus />
       <div className="vehicleArea">
         <VehicleView onSettled={onCarSettled} wide={isParkView} />
-        <Pedals />
+        {!isParkView && <Pedals />}
       </div>
+      {/* In Park View the car covers the whole panel, so the pedals sit on this row instead. */}
       <div className="carBottomRow">
         <CarCards />
         {isParkView && <ParkNavCard onExit={onLeaveParkView} />}
+        {isParkView && <Pedals />}
       </div>
       <DriveStrip />
       {isParkView && (

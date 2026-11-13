@@ -25,6 +25,15 @@ const GAP = 8;
 // The indicator column runs down the left, so a label never goes further left than this.
 const LEFT_GUTTER = 48;
 
+// The bottom of the status row across the top, which nothing hangs above. In Park View the
+// map's status items share the row and the panel is cut away around them.
+const statusRowBottom = () => {
+  const row =
+    document.querySelector('.horizontalPanelGroup.parkView [class*="topMenuBar"]') ??
+    document.querySelector('.topBarCarStatusIcons');
+  return row ? row.getBoundingClientRect().bottom : 0;
+};
+
 const clamp = (value: number, min: number, max: number) =>
   Math.min(Math.max(value, min), Math.max(min, max));
 
@@ -45,15 +54,17 @@ const moveTo = (element: HTMLElement, left: number, top: number) => {
 // run off the edge, when it moves to the left.
 // The text never comes lower than the roofline, so it stays clear of the car wherever the
 // camera is.
+// Nor does it go up into the status row.
 function placeLeader(
   { label, line, anchor, hang }: Leader & { anchor: ScreenPoint; hang: ScreenPoint },
   origin: DOMRect,
   roofline: number | null,
+  ceiling: number,
 ) {
   const width = label.offsetWidth;
   const x = hang.x - origin.left;
   const highest = roofline === null ? Infinity : roofline - origin.top - label.offsetHeight;
-  const top = Math.max(Math.min(hang.y - origin.top, highest), -origin.top);
+  const top = Math.max(Math.min(hang.y - origin.top, highest), ceiling - origin.top);
   const fitsRight = x + GAP + width <= origin.width;
   const side = fitsRight || x - GAP - width < LEFT_GUTTER ? 'right' : 'left';
   label.dataset.side = side;
@@ -124,6 +135,7 @@ export function CompartmentControls() {
       const roomy = !stage || stage.getBoundingClientRect().height >= MIN_STAGE_HEIGHT;
       const anchors = getCompartmentAnchors();
       const origin = root.getBoundingClientRect();
+      const ceiling = statusRowBottom();
       if (portButton.current && portLine.current) {
         placePort(portButton.current, portLine.current, anchors.chargePort, origin);
       }
@@ -147,6 +159,7 @@ export function CompartmentControls() {
             { ...leader, anchor: leader.anchor, hang: leader.hang },
             origin,
             anchors.roof?.y ?? null,
+            ceiling,
           );
         } else {
           hide(leader);
@@ -162,7 +175,7 @@ export function CompartmentControls() {
           LEFT_GUTTER + lock.offsetWidth / 2,
           origin.width - lock.offsetWidth / 2,
         );
-        const top = Math.max(lockIcon.y - origin.top - lock.offsetHeight, -origin.top);
+        const top = Math.max(lockIcon.y - origin.top - lock.offsetHeight, ceiling - origin.top);
         moveTo(lock, centre - lock.offsetWidth / 2, top);
         const lineTop = top + lock.offsetHeight + GAP;
         const lineEnd = roofLine ? roofLine.y - origin.top : lineTop;

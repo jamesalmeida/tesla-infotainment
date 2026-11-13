@@ -120,10 +120,12 @@ test('the handle dismisses an app with a drag', async ({ page }) => {
 
   // The panel slides up, and the handle has to be pressed where it ends up.
   await expect.poll(() => appPanel(page).evaluate((panel) => panel.getAnimations().length)).toBe(0);
+  // Pressed towards its right end: the first-visit tip can cover the middle of it.
   const handle = await page.locator('[class*="slider-handle-area"]').boundingBox();
-  await page.mouse.move(handle!.x + handle!.width / 2, handle!.y + 5);
+  const x = handle!.x + handle!.width - 30;
+  await page.mouse.move(x, handle!.y + 5);
   await page.mouse.down();
-  await page.mouse.move(handle!.x + handle!.width / 2, handle!.y + 150, { steps: 6 });
+  await page.mouse.move(x, handle!.y + 150, { steps: 6 });
   await page.mouse.up();
 
   await expectPanelOpen(page, false);

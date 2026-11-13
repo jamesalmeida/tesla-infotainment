@@ -39,17 +39,20 @@ body {
 /* Shared by the app and the loading screen, so one can't appear in a different place. */
 .displayBezel {
   --gutter: clamp(8px, 3vmin, 48px);
+  /* The bezel is 2% of the width on every side, so the screen inside it, not the bezel, has
+     the car's shape: the height is the screen's plus the bezel above and below. */
+  --bezel-height-share: calc((1 - 2 * 0.02) / var(--display-ratio) + 2 * 0.02);
   --bezel-width: min(
     100dvw - 2 * var(--gutter),
-    (100dvh - 2 * var(--gutter) - var(--pedal-deck-height) - var(--pedal-deck-gap)) *
-      var(--display-ratio)
+    (100dvh - 2 * var(--gutter) - var(--pedal-deck-height) - var(--pedal-deck-gap)) /
+      var(--bezel-height-share)
   );
 
   box-sizing: border-box;
   position: relative;
   container-type: size;
   width: var(--bezel-width);
-  height: calc(var(--bezel-width) / var(--display-ratio));
+  height: calc(var(--bezel-width) * var(--bezel-height-share));
   padding: calc(var(--bezel-width) * 0.02);
   background-color: #000000;
   border: 2px solid grey;
@@ -258,15 +261,84 @@ body {
     100% 100%,
     0 100%
   );
-  -webkit-mask-image: radial-gradient(ellipse 32% 40% at 100% 0%, transparent 45%, #000000 100%);
-  mask-image: radial-gradient(ellipse 32% 40% at 100% 0%, transparent 45%, #000000 100%);
 }
 
-/* The map fills the screen underneath, with its status items moved clear of the car's. */
+/* The map fills the screen underneath, with its status items moved clear of the car's. The
+   panel itself is see-through: its colour is painted by the car's scene, which covers it. */
 .horizontalPanelGroup.parkView .leftPanel {
   width: 100%;
   overflow: hidden;
   box-shadow: none;
+  background-color: transparent;
+}
+
+/*
+ * The car gets the whole panel, so it can turn and tilt without its edges showing, and it
+ * draws over the faded map corner as on the car. Only the scene behind it fades out there.
+ * Everything else in the panel sits in front of it, and lets drags through to it except on
+ * its own controls.
+ */
+.horizontalPanelGroup.parkView .vehicleArea {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.horizontalPanelGroup.parkView .vehicleStage {
+  background: none;
+}
+
+.horizontalPanelGroup.parkView .vehicleStage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 46% 11% at 50% 60%, var(--scene-light), transparent 72%),
+    linear-gradient(
+      180deg,
+      var(--color-bg) 0%,
+      var(--color-bg) 37%,
+      var(--scene-floor) 58%,
+      var(--scene-floor-deep) 67%,
+      var(--color-bg) 79%
+    );
+  -webkit-mask-image: radial-gradient(ellipse 32% 40% at 100% 0%, transparent 45%, #000000 100%);
+  mask-image: radial-gradient(ellipse 32% 40% at 100% 0%, transparent 45%, #000000 100%);
+}
+
+.horizontalPanelGroup.parkView .carStatusIcons {
+  position: relative;
+  z-index: 1;
+}
+
+/* The cards stay in front of the labels' lines too, which can reach down past them. */
+.horizontalPanelGroup.parkView .carBottomRow {
+  position: relative;
+  z-index: 9;
+}
+
+/* The labels also stay in front of the map corner's tap target, as they can swing over it. */
+.horizontalPanelGroup.parkView .carModelStatus {
+  z-index: 8;
+  pointer-events: none;
+}
+
+.horizontalPanelGroup.parkView .carModelStatus :is(button, .toggleLocks) {
+  pointer-events: auto;
+}
+
+.horizontalPanelGroup.parkView :is(.carStatusIcons, .drivingGearIcons, .carBottomRow) {
+  pointer-events: none;
+}
+
+.horizontalPanelGroup.parkView :is(.topBarCarStatusIcons, [class*='telltales'], .carBottomRow > *) {
+  pointer-events: auto;
+}
+
+/* The card row keeps its place at the foot of the panel with the car out of the flow. */
+.horizontalPanelGroup.parkView .carBottomRow {
+  margin-top: auto;
 }
 
 .horizontalPanelGroup.parkView > :has(> .rightPanel) {
@@ -742,6 +814,7 @@ body {
 /* The signal and pedal buttons line up with the right edge of the Navigate card below. The
    row under the car is centred: the media card, the gap, then the Navigate card. */
 .horizontalPanelGroup.parkView .pedals {
+  bottom: calc(100% + 8 * var(--u));
   right: max(3%, calc(50% - (var(--park-media-width) + 12 * var(--u) + var(--park-nav-width)) / 2));
 }
 
