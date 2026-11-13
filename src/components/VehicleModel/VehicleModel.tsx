@@ -15,7 +15,7 @@ import { Stage, useEnvironment, useGLTF, OrbitControls } from '@react-three/drei
 import { Box3, Raycaster, Vector3 } from 'three';
 import type * as THREE from 'three';
 import { getCarModelPath } from '../../utils/assetPaths';
-import { paintHex, type CarModel, type PaintColor } from '../../state/sampleData';
+import { paintFinish, type CarModel, type PaintColor } from '../../state/sampleData';
 import { CAR_MODEL_SPECS, type LightGroup } from './carModels';
 import type { CarLightState } from './vehicleLights';
 import { NO_ANCHORS, setCompartmentAnchors, type ScreenPoint } from './compartmentAnchors';
@@ -295,9 +295,11 @@ function Model({
 
   useEffect(() => {
     if (!paint) return;
-    const hex = paintHex(paint);
+    const { body, metalness, roughness } = paintFinish(paint);
     paintMaterials.forEach((material) => {
-      material.color.set(hex);
+      material.color.set(body);
+      material.metalness = metalness;
+      material.roughness = roughness;
       material.needsUpdate = true;
     });
     invalidate();

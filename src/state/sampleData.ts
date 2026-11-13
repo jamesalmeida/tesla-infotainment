@@ -82,20 +82,56 @@ export const CAR_MODELS = [
 
 export type CarModel = (typeof CAR_MODELS)[number]['value'];
 
-// Original paint choices for the simulator. The colours are deliberately close to a
-// familiar palette without copying any Tesla trade dress.
+// Original paint choices for the simulator. `hex` is the swatch; the 3D car takes `body`
+// with a finish, since a metallic paint under the scene's lights looks paler and flatter
+// than its swatch unless it reflects like metal.
 export const PAINT_COLORS = [
-  { value: 'pearl-white', label: 'Pearl White', hex: '#f2f2f2' },
-  { value: 'midnight-silver', label: 'Midnight Silver', hex: '#4a4f55' },
-  { value: 'deep-blue', label: 'Deep Blue', hex: '#1d3a6e' },
-  { value: 'red', label: 'Red Multi-Coat', hex: '#a51c30' },
-  { value: 'solid-black', label: 'Solid Black', hex: '#111111' },
+  {
+    value: 'pearl-white',
+    label: 'Pearl White',
+    hex: '#f2f2f2',
+    body: '#e9e9e7',
+    metalness: 0.05,
+    roughness: 0.28,
+  },
+  {
+    value: 'midnight-silver',
+    label: 'Midnight Silver',
+    hex: '#4a4f55',
+    body: '#5d636a',
+    metalness: 0.45,
+    roughness: 0.35,
+  },
+  {
+    value: 'deep-blue',
+    label: 'Deep Blue',
+    hex: '#1d3a6e',
+    body: '#173d86',
+    metalness: 0.45,
+    roughness: 0.3,
+  },
+  {
+    value: 'red',
+    label: 'Red Multi-Coat',
+    hex: '#a51c30',
+    body: '#8e0a14',
+    metalness: 0.4,
+    roughness: 0.25,
+  },
+  {
+    value: 'solid-black',
+    label: 'Solid Black',
+    hex: '#111111',
+    body: '#0a0a0a',
+    metalness: 0,
+    roughness: 0.2,
+  },
 ] as const;
 
 export type PaintColor = (typeof PAINT_COLORS)[number]['value'];
 
-export const paintHex = (paint: PaintColor): string =>
-  PAINT_COLORS.find(({ value }) => value === paint)?.hex ?? PAINT_COLORS[0].hex;
+export const paintFinish = (paint: PaintColor) =>
+  PAINT_COLORS.find(({ value }) => value === paint) ?? PAINT_COLORS[0];
 
 // Recommended cold pressure and a fixed sample reading for each corner. All four start
 // healthy: a warning lit on every visit only reads as a mystery symbol.
