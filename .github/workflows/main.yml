@@ -53,13 +53,72 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      # The browser suite is slow on a runner without a GPU. It runs on pull requests,
-      # where a change is checked before merge, not on every push to main.
+  # The browser suite only runs on pull requests, where a change is checked before merge, and
+  # only when the pull request touches something that can reach the browser: a change to
+  # docs alone skips it.
+  changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      app: ${{ steps.diff.outputs.app }}
+    steps:
+      # A pull request checks out its merge commit, whose first parent is the base branch.
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - name: List changed files
+        id: diff
+        run: |
+          changed=$(git diff --name-only HEAD^1 HEAD)
+          echo "$changed"
+          docs_only='(\.md$|^LICENSE$|^\.github/(ISSUE_TEMPLATE|PULL_REQUEST_TEMPLATE)|^\.github/dependabot\.yml$)'
+          if [ -n "$changed" ] && ! echo "$changed" | grep -Eqv "$docs_only"; then
+            echo "app=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "app=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Each slice of the browser suite runs on its own runner at the same time. Without a GPU the
+  # suite is slow, and one runner at a time took over ten minutes.
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
+    name: e2e (${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Create env file
+        run: |
+          echo "VITE_GOOGLE_MAPS_API_KEY=${{ secrets.REACT_APP_GOOGLE_MAPS_API_KEY }}" >> .env
+          echo "VITE_GOOGLE_MAPS_MAP_ID=${{ vars.VITE_GOOGLE_MAPS_MAP_ID }}" >> .env
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
       - name: Install browser
-        if: github.event_name == 'pull_request'
         run: pnpm exec playwright install --with-deps chromium
 
       # Maps and audio hosts are blocked in these tests, so no key is used or billed.
       - name: End-to-end tests
-        if: github.event_name == 'pull_request'
-        run: pnpm run test:e2e
+        run: pnpm run test:e2e --shard=${{ matrix.shard }}/4

@@ -9,7 +9,27 @@ export async function blockThirdParties(context: BrowserContext) {
   );
 }
 
-export async function openApp(page: Page, url = '') {
+// Drawing the 3D car without a GPU takes most of a test's time on CI, so a test only gets
+// it when it asks: otherwise WebGL is refused, and the display shows its plain stand-in car,
+// as it does on a browser without WebGL. Canvases drawn in 2D, such as the games, still work.
+export async function openApp(page: Page, url = '', { car = false }: { car?: boolean } = {}) {
+  if (!car) {
+    await page.addInitScript(() => {
+      const getContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (
+        this: HTMLCanvasElement,
+        type: string,
+        ...rest: unknown[]
+      ) {
+        if (type === 'webgl' || type === 'webgl2') return null;
+        return (getContext as (...args: unknown[]) => RenderingContext | null).call(
+          this,
+          type,
+          ...rest,
+        );
+      } as typeof getContext;
+    });
+  }
   await page.goto(url);
   // A CI runner can take much longer than a laptop to parse the bundle and start the car.
   const isCI = Boolean(

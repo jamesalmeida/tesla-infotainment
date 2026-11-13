@@ -96,8 +96,8 @@ test('a running game keeps the keyboard, and pauses on leaving Park', async ({ p
   await openApp(page);
   await dockIcon(page, 'arcade').click();
   await page.getByRole('button', { name: 'Play Game' }).click();
-  // The 3D car has a canvas too, so the second one is the game.
-  await expect(page.locator('canvas')).toHaveCount(2);
+  // The 3D car is left out here, so the only canvas is the game's.
+  await expect(page.locator('canvas')).toHaveCount(1);
 
   const gear = (name: string) => page.getByRole('button', { name, exact: true });
 
@@ -182,7 +182,7 @@ test.describe('failures stay contained', () => {
   test('a missing 3D model leaves the rest of the display working', async ({ page, context }) => {
     await context.route(/\.glb$/, (route) => route.abort());
     await page.setViewportSize({ width: 1440, height: 900 });
-    await openApp(page);
+    await openApp(page, '', { car: true });
 
     await expect(page.getByText('3D view unavailable')).toBeVisible();
     await dockIcon(page, 'bluetooth').click();
@@ -214,7 +214,7 @@ test.describe('failures stay contained', () => {
     const requests: string[] = [];
     page.on('request', (request) => requests.push(request.url()));
     await page.setViewportSize({ width: 1440, height: 900 });
-    await openApp(page);
+    await openApp(page, '', { car: true });
 
     expect(requests.filter((url) => url.includes('githack'))).toEqual([]);
   });
@@ -346,7 +346,7 @@ test('Park view: drag the car across, see the map in the corner, and bring it ba
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await openApp(page);
+  await openApp(page, '', { car: true });
   const group = page.locator('.horizontalPanelGroup');
 
   const separator = page.locator('.panelResizeHandle');
