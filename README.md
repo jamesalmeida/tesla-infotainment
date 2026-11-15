@@ -1,5 +1,5 @@
 # Tesla Infotainment Simulator (WIP)
-
+Note: This is an unofficial fan project, not affiliated with Tesla, Inc.
 Experience a simulated Tesla infotainment system in your browser!
 
 > Unofficial fan project, not affiliated with or endorsed by Tesla, Inc. Tesla and all related names, logos and trademarks belong to their respective owners.
